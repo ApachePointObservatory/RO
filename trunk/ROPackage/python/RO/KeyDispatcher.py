@@ -68,6 +68,7 @@ History:
                     Modified to log commands using the command target as the actor, not TUI.
 2008-04-29 ROwen    Fixed reporting of exceptions that contain unicode arguments.
 2009-01-06 ROwen    Improved some doc strings.
+2009-03-25 ROwen    Fixed a bug that made KeyVar refresh inefficient (also fixed in opscore).
 """
 import sys
 import time
@@ -584,6 +585,8 @@ class KeyDispatcher(object):
                             # continuing where I left off but with a new actor, keyword combo
                             # (since the current one has presumably now been handled)
                             self._refreshRemID = self.tkWdg.after(1, self._refreshRemVars, keyVarListIter, ignoreFailed)
+                            return
+                            
         except (SystemExit, KeyboardInterrupt):
             raise
         except:
