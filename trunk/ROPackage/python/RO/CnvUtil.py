@@ -13,6 +13,9 @@ History:
 2005-06-08 ROwen    Changed StrCnv and StrCnvNoCase to new style classes.
 2008-03-13 ROwen    asBool: Added on/off to allowed boolean values.
 2008-04-23 ROwen    Added BoolOrNoneFromStr class.
+2009-04-17 ROwen    Updated asIntOrNone and asFloatOrNone to return None for "?";
+                    Updated IntOrNoneFromStr and FloatOrNoneFromStr to use ("nan", "?") as a default invalid
+                    values, instead of just "nan".
 """
 import SeqUtil
 
@@ -148,13 +151,13 @@ def asFloat(val):
 
 def asFloatOrNone(val):
     """Converts floats, integers and string representations of either to floats.
-    If val is "NaN" (case irrelevant) returns None.
+    If val is "NaN" (case irrelevant) or "?" returns None.
 
     Raises ValueError or TypeError for all other values
     """
     # check for NaN first in case ieee floating point is in use
     # (in which case float(val) would return something instead of failing)
-    if hasattr(val, "lower") and val.lower() == "nan":
+    if hasattr(val, "lower") and val.lower() in ("nan", "?"):
         return None
     else:
         return float(val)
@@ -175,7 +178,7 @@ class FloatOrNoneFromStr(object):
     
     Raise TypeError if string is not in badStrs and is not a valid representation of a float.
     """
-    def __init__(self, badStrs="NaN"):
+    def __init__(self, badStrs=("NaN", "?")):
         if not SeqUtil.isCollection(badStrs):
             self.badStrs = set([badStrs.lower()])
         else:
@@ -211,7 +214,7 @@ def asIntOrNone(val):
     """
     if hasattr(val, "lower"):
         # string-like object; check for NaN and force base to 0
-        if val.lower() == "nan":
+        if val.lower() in ("nan", "?"):
             return None
         return int(val, 0)
     else:
@@ -233,7 +236,7 @@ class IntOrNoneFromStr(object):
 
     Raise TypeError if string is not in badStrs and is not a valid representation of an int.
     """
-    def __init__(self, badStrs="NaN"):
+    def __init__(self, badStrs=("NaN", "?")):
         if not SeqUtil.isCollection(badStrs):
             self.badStrs = set([badStrs.lower()])
         else:
