@@ -13,10 +13,11 @@
     <li>RO uses numpy instead of numarray and Numeric (as of version 2.1).
 </ul>
 
-<h3>prerelease 2009-04-17</h3>
+<h3>prerelease 2009-04-20</h3>
 <ul>
     <li>RO.KeyDispatcher: fixed a bug that made KeyVar refresh inefficient.
     <li>RO.CnvUtil: allow "?" to indicate unknown value for bool, int and float in the appropriate converters.
+    <li>RO.Wdg.Toplevel bug fix: tl_CloseDisabled toplevels could be iconified on MacOS X with cmd-W. As part of the fix, application Quit and toplevel Close are now handled by virtual events &lt;&lt;Quit&gt;&gt; and &lt;&lt;Close&gt;&gt;.
 </ul>
 
 <h3>2.2.10 2009-01-26</h3>

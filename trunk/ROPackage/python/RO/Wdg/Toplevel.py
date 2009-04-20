@@ -43,9 +43,9 @@ History:
                     __recordGeometry prints a warning and does not save geometry if y < 0.
 2007-09-05 ROwen    Added Toplevel.__str__ method and updated debug print statements to use it.
                     Added missing final \n to Toplevel.__recordGeometry's y < 0 warning.
+2009-04-20 ROwen    Bug fix: Toplevels with tl_CloseDisabled could be iconified using the standard keystroke.
 """
-__all__ = ['tl_CloseDestroys', 'tl_CloseWithdraws', 'tl_CloseDisabled',
-            'Toplevel', 'ToplevelSet']
+__all__ = ['tl_CloseDestroys', 'tl_CloseWithdraws', 'tl_CloseDisabled', 'Toplevel', 'ToplevelSet']
 
 import os.path
 import re
@@ -133,6 +133,9 @@ class Toplevel(Tkinter.Toplevel):
             def noop():
                 pass
             self.protocol("WM_DELETE_WINDOW", noop)
+            def stopEvent(evt=None):
+                return "break"
+            self.bind("<<Close>>", stopEvent)
         elif self.__closeMode == tl_CloseWithdraws:
             self.protocol("WM_DELETE_WINDOW", self.withdraw)
         
