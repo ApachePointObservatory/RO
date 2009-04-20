@@ -33,6 +33,8 @@ in a Mac-like way is difficult.
 2005-08-05 ROwen    Commented out a diagnostic print statement in stopEvent.
 2005-09-16 ROwen    Bug fix on Mac: Command-Q and Command-W were ignored.
                     Similar fixes may be needed on unix and/or windows.
+2009-04-20 ROwen    Quit, Close are now handled as virtual events; this rationalizes the code
+                    and improves support for toplevels that cannot be closed or iconified.
 """
 __all__ = ['makeReadOnly', 'stdBindings', 'stopEvent']
 
@@ -45,13 +47,19 @@ def doQuit(evt):
 def doWithdraw(evt):
     evt.widget.winfo_toplevel().wm_withdraw()
 
-# a dictionary of application events
-# so far I only know the entries for MacOS X
+# A dictionary of application-wide virtual event: key binding
+# for actions that are not already handled by default.
+# Note: this list is probably incomplete; Windows and unix
+# may want standard keys for close and quit.
 AppEventDict = {
     RO.TkUtil.WSysAqua: (
-        ("<Command-Key-q>", doQuit),
-        ("<Command-Key-w>", doWithdraw),
+        ("<<Quit>>", "<Command-Key-q>"),
+        ("<<Close>>", "<Command-Key-w>"),
+        ("<<Select-All>>", "<Command-Key-a>"),
     ),
+    RO.TkUtil.WSysWin: (
+        ("<<Select-All>>", "<Control-Key-a>"),
+    )
 }   
 
 def makeReadOnly(tkWdg):
@@ -82,16 +90,14 @@ def makeReadOnly(tkWdg):
     # restore copy and select all
     for evt in tkWdg.event_info("<<Copy>>"):
         tkWdg.bind(evt, doCopy)
-    for evt in tkWdg.event_info("<<Select-All>>"):
-        tkWdg.bind(evt, doSelectAll)
     
     # restore other behaviors
     # note: binding specific events avoids introducing
     # events that might cause editing (for example some control keys)
     winSys = RO.TkUtil.getWindowingSystem()
     appEvents = AppEventDict.get(winSys, ())
-    for eventName, func in appEvents:
-        tkWdg.bind(eventName, passEvent)
+    for virtualEvent, eventKey in appEvents:
+        tkWdg.bind(eventKey, passEvent)
 
 def stdBindings(root, debug=False):
     """Sets up standard key bindings for each platform"""
@@ -111,7 +117,6 @@ def stdBindings(root, debug=False):
         if winSys == RO.TkUtil.WSysAqua:
             if debug:
                 print "Mac Aqua key bindings"
-            root.event_add("<<Select-All>>", "<Command-Key-a>")
             root.bind_class("Entry", "<Key-Up>", _entryGoToLeftEdge)
             root.bind_class("Entry", "<Key-Down>", _entryGoToRightEdge)
             root.bind_class("Entry", "<Command-Key-Left>", _entryGoToLeftEdge)
@@ -119,7 +124,6 @@ def stdBindings(root, debug=False):
         else:
             if debug:
                 print "Windows key bindings"
-            root.event_add("<<Select-All>>", "<Control-Key-a>")
         
         """Disable <<Paste-Selection>>
         
@@ -153,11 +157,13 @@ def stdBindings(root, debug=False):
     # beyond the default <<Cut>>, <<Copy>> and <<Paste>>
     root.bind_class("Text", "<<Select-All>>", _textSelectAll)
     root.bind_class("Entry", "<<Select-All>>", _entrySelectAll)
+    root.bind_all("<<Close>>", doWithdraw)
+    root.bind_all("<<Quit>>", doQuit)
     
     # application events
     appEvents = AppEventDict.get(winSys, ())
-    for eventName, func in appEvents:
-        root.bind_all(eventName, func)
+    for virtualEvent, eventKey in appEvents:
+        root.event_add(virtualEvent, eventKey)
     
 def stopEvent(evt):
     """stop an event from propogating"""
