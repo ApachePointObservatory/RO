@@ -20,8 +20,8 @@ determine the current scroll position.
 
 History:
 2005-07-07 ROwen
-2006-04-05 ROwen    Bug fix: _updDetailStatus failed if state was
-                    aborting or aborted. 
+2006-04-05 ROwen    Bug fix: _updDetailStatus failed if state was aborting or aborted.
+2009-05-05 ROwen    Modified getFile to return an HTTPGet object.
 """
 __all__ = ['HTTPGetWdg']
 
@@ -178,6 +178,8 @@ class HTTPGetWdg(Tkinter.Frame):
         """Get a file
     
         Inputs: the same as for RO.Comm.HTTPGet
+            
+        Returns an RO.Comm.HTTPGet object
         """
         httpGet = HTTPGet.HTTPGet(*args, **kargs)
         stateLabel = RO.Wdg.StrLabel(self, anchor="w", width=httpGet.StateStrMaxLen)
@@ -234,7 +236,8 @@ class HTTPGetWdg(Tkinter.Frame):
         
         #print "dispList=", self.dispList
         #print "getQueue=", self.getQueue
-
+        
+        return httpGet
     
     def _abort(self):
         """Abort the currently selected transaction (if any).
