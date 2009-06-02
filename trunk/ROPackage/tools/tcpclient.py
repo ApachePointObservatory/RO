@@ -1,7 +1,8 @@
+#!/usr/bin/env python
 """Example trivial telnet client using TkSocket"""
 import sys
 import Tkinter
-import TCPConnection
+import RO.Comm.TCPConnection
 import RO.Wdg
 
 class TCPClient(Tkinter.Frame):
@@ -22,7 +23,7 @@ class TCPClient(Tkinter.Frame):
         self.cmdWdg.grid(row=1, column=0, sticky="ew")
 #        self.cmdWdg.pack(side="top", expand=True, fill="x")
         
-        self.conn = TCPConnection.TCPConnection(
+        self.conn = RO.Comm.TCPConnection.TCPConnection(
             host = addr,
             port = port,
             readLines = True,
