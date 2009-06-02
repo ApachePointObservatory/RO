@@ -106,6 +106,7 @@ History:
 2006-11-09 ROwen    Typo fix: self_keyVarID -> self._keyVarID.
 2007-07-02 ROwen    Added hasVel method to PVTKeyVar.
 2008-06-26 ROwen    Improved documentation for abortCmdStr and keyVars arguments to CmdVar constructor.
+2009-05-12 ROwen    TypeDict changes: added "d" (debug) and removed obsolete "s" (status).
 """
 import sys
 import time
@@ -129,7 +130,7 @@ TypeDict = {
     "f":("failed", RO.Constants.sevError), # command failed
     "w":("warning", RO.Constants.sevWarning),
     "i":("information", RO.Constants.sevNormal), # the initial state
-    "s":("status", RO.Constants.sevNormal),
+    "d":("debug", RO.Constants.sevDebug),
     ">":("queued", RO.Constants.sevNormal),
     ":":("finished", RO.Constants.sevNormal),
 }
