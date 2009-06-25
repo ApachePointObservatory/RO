@@ -107,6 +107,7 @@ History:
 2007-07-02 ROwen    Added hasVel method to PVTKeyVar.
 2008-06-26 ROwen    Improved documentation for abortCmdStr and keyVars arguments to CmdVar constructor.
 2009-05-12 ROwen    TypeDict changes: added "d" (debug) and removed obsolete "s" (status).
+2009-06-24 ROwen    Bug fix: an error message had values reversed.
 """
 import sys
 import time
@@ -218,8 +219,8 @@ class KeyVar(RO.AddCallback.BaseMixin):
                 raise ValueError("invalid nval = %r for %s" % (nval, self))
                 
             if RO.SeqUtil.isSequence(converters) and self.maxNVal != None and len(converters) > self.maxNVal:
-                raise ValueError("Too many converters (%d > max=%d) for %s" %
-                    (self.maxNVal, len(converters), self))
+                raise ValueError("Too many converters (%d > %d=max) for %s" %
+                    (len(converters), self.maxNVal, self))
         
         #+
         # set self.cnvDescr (if necessary); this is used for __repr__ and error messages
