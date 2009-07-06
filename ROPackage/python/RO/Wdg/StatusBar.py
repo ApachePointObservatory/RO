@@ -50,6 +50,8 @@ History:
                     but dispatches ctxSetConfigFunc.
 2005-09-07 ROwen    Bug fix: if text=... found in a command reply, it was shown in parens.
 2009-02-23 ROwen    Show last warning if command fails with no explanatory text
+2009-07-06 ROwen    setMsg function: cast duration argument to int to avoid a traceback if float
+                    and document that it is definitely in ms (the original comment said "msec?").
 """
 __all__ = ['StatusBar']
 
@@ -241,7 +243,7 @@ class StatusBar(Tkinter.Frame):
         - severity  one of RO.Constants.sevNormal (default), sevWarning or sevError
         - isTemp    if true, message is temporary and can be cleared with clearTempMsg;
                     if false, any existing temp info is ditched
-        - duration  the amount of time (msec?) to leave a temporary message;
+        - duration  the amount of time (msec) to leave a temporary message;
                     if omitted, there is no time limit;
                     ignored if isTemp false
         
@@ -251,7 +253,7 @@ class StatusBar(Tkinter.Frame):
         if isTemp:
             self.currID = self.tempIDGen.next()
             if duration != None:
-                self.displayWdg.after(duration, self.clearTempMsg, self.currID)
+                self.displayWdg.after(int(duration), self.clearTempMsg, self.currID)
         else:
             self.permMsg = msgStr
             self.permSeverity = severity
