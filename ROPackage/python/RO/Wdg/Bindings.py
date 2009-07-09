@@ -35,6 +35,7 @@ in a Mac-like way is difficult.
                     Similar fixes may be needed on unix and/or windows.
 2009-04-20 ROwen    Quit, Close are now handled as virtual events; this rationalizes the code
                     and improves support for toplevels that cannot be closed or iconified.
+2009-07-09 ROwen    Removed unused internal function doSelectAll (found by pychecker).
 """
 __all__ = ['makeReadOnly', 'stdBindings', 'stopEvent']
 
@@ -73,9 +74,6 @@ def makeReadOnly(tkWdg):
     """
     def doCopy(evt):
         tkWdg.event_generate("<<Copy>>")
-
-    def doSelectAll(evt):
-        tkWdg.event_generate("<<Select-All>>")
 
     # kill all events that can change the text,
     # including all typing (even shortcuts for
