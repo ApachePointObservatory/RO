@@ -69,6 +69,7 @@ History:
 2008-04-29 ROwen    Fixed reporting of exceptions that contain unicode arguments.
 2009-01-06 ROwen    Improved some doc strings.
 2009-03-25 ROwen    Fixed a bug that made KeyVar refresh inefficient (also fixed in opscore).
+2009-07-09 ROwen    Modified to log to stderr if no log function supplied.
 """
 import sys
 import time
@@ -440,7 +441,9 @@ class KeyDispatcher(object):
         cmdr = None,
     ):
         """Writes a message to the log.
-        On error, prints message to stderr and returns normally.
+        
+        If no logFunc was supplied then the message is printed to stderr.
+        On error, prints a message to stderr and returns normally.
         
         Inputs:
         - msgStr: message to display; a final \n is appended
@@ -449,6 +452,7 @@ class KeyDispatcher(object):
         - cmdr: commander; defaults to self
         """
         if not self.logFunc:
+            sys.stderr.write(msgStr + "\n")
             return
 
         try:
