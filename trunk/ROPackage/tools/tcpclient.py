@@ -1,5 +1,9 @@
 #!/usr/bin/env python
-"""Example trivial telnet client using TkSocket"""
+"""Example trivial telnet client using TkSocket
+
+History:
+2009-07-10 ROwen    Removed an inline conditional statement to be Python 2.4 compatible.
+"""
 import sys
 import Tkinter
 import RO.Comm.TCPConnection
@@ -61,7 +65,10 @@ if __name__ == "__main__":
         sys.exit(1)
     
     addr = sys.argv[1]
-    port = sys.argv[2] if len(sys.argv) > 2 else 23
+    if len(sys.argv) > 2:
+        port = sys.argv[2]
+    else:
+        port = 23
     
     root = Tkinter.Tk()
     root.geometry("400x200")
