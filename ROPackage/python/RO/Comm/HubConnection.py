@@ -19,8 +19,14 @@ History:
 2005-01-12 ROwen    Modified for new RO.Wdg.ModalDialogBase.
 2006-04-29 ROwen    Added loginExtra arg.
 2008-04-29 ROwen    Fixed reporting of exceptions that contain unicode arguments.
+2009-07-17 ROwen    Eliminated deprecation warning in Python 2.6 by using hashlib if present.
 """
-import sha
+try:
+    import hashlib
+    shaClass = hashlib.sha1
+except ImportError:
+    import sha
+    shaClass = sha.sha
 import sys
 from TCPConnection import *
 import RO.ParseMsg
@@ -145,7 +151,7 @@ class HubConnection(TCPConnection):
                     raise RuntimeError, "nonce missing; got: %r" % (hubMsg,)
                 
                 # generate the combined password
-                combPassword = sha.sha(nonce+password).hexdigest()
+                combPassword = shaClass(nonce+password).hexdigest()
 
                 self._setState(Authorizing, "nonce received")
                 self._authState = 1
