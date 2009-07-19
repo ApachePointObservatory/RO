@@ -16,6 +16,7 @@ History:
 2009-04-17 ROwen    Updated asIntOrNone and asFloatOrNone to return None for "?";
                     Updated IntOrNoneFromStr and FloatOrNoneFromStr to use ("nan", "?") as a default invalid
                     values, instead of just "nan".
+2009-07-19 ROwen    Added posFromPVT.
 """
 import SeqUtil
 
@@ -294,6 +295,18 @@ class StrCnvNoCase(object):
     def __call__(self, key):
         strKey = str(key)
         return self.subsDict.get(strKey.lower(), strKey)
+
+def posFromPVT(pvt):
+    """Return the position of an PVT, or None pvt is None or the PVT has no valid position.
+    
+    Inputs:
+    - PVT: an RO.PVT.PVT position, velocity, time object.
+    
+    This is a convenience function to handle the case that the input is None
+    """
+    if pvt == None:
+        return None
+    return pvt.getPos()
 
 def nullCnv(val):
     """Null converter"""
