@@ -526,6 +526,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
                 maskWdg.pack(side="left")
 
         toolFrame.pack(side="top", anchor="nw")
+        self.toolFrame = toolFrame
     
         # add current position and current value widgets
         posFrame = Tkinter.Frame(self)
