@@ -108,6 +108,8 @@ History:
 2008-06-26 ROwen    Improved documentation for abortCmdStr and keyVars arguments to CmdVar constructor.
 2009-05-12 ROwen    TypeDict changes: added "d" (debug) and removed obsolete "s" (status).
 2009-06-24 ROwen    Bug fix: an error message had values reversed.
+2009-07-20 ROwen    Modified for tweaked KeyDispatcher API.
+                    Removed support for refreshTimeLim (it is now a constant in the KeyDispatcher).
 """
 import sys
 import time
@@ -157,7 +159,6 @@ class KeyVar(RO.AddCallback.BaseMixin):
     - actor: the name of the device which issued the keyword
     - description: a string describing the data, useful for help systems
     - refreshCmd: a command which can executed to refresh this item of data
-    - refreshTimeLim: time limit for refresh command (sec)
     - dispatcher: keyword dispatcher; if supplied, the keyword subscribes itself to the dispatcher.
         Note that no record of that dispatcher is kept in the keyword (to reduce
         circular references, which as of this writing may not be garbage collected);
@@ -190,7 +191,6 @@ class KeyVar(RO.AddCallback.BaseMixin):
         actor = "",
         description = "",
         refreshCmd = None,
-        refreshTimeLim  =  20,
         dispatcher = None,
         doPrint = False,
         defValues = None,
@@ -259,7 +259,6 @@ class KeyVar(RO.AddCallback.BaseMixin):
         # allows KeyVarFactory.setKeysRefreshCmd to set it to "keys"
         self.refreshActor = self.actor
         self.refreshCmd = refreshCmd
-        self.refreshTimeLim = refreshTimeLim
         
         self.doPrint = doPrint
         self._msgDict = None    # message dictionary used to set KeyVar; can be None
@@ -284,7 +283,7 @@ class KeyVar(RO.AddCallback.BaseMixin):
         
         # if a keyword dispatcher is specified, add the keyword to it
         if dispatcher:
-            dispatcher.add(self)
+            dispatcher.addKeyVar(self)
     
     def __repr__(self):
         return "%s(%r, %r, %s)" % \
@@ -413,9 +412,9 @@ class KeyVar(RO.AddCallback.BaseMixin):
         return self._msgDict or {}
 
     def getRefreshInfo(self):
-        """Return refresh actor, refresh command (None if no command) and refresh time limit.
+        """Return refresh actor, refresh command (None if no command).
         """
-        return (self.refreshActor, self.refreshCmd, self.refreshTimeLim)
+        return (self.refreshActor, self.refreshCmd)
 
     def getSeverity(self):
         """Return severity of most recent message,
@@ -1073,7 +1072,6 @@ class KeyVarFactory(object):
             for keyVar in keyVars:
                 keyVar.refreshActor = "keys"
                 keyVar.refreshCmd = refreshCmd
-                keyVar.refreshTimeLim = 20
         self._actorKeyVarsRefreshDict = RO.Alg.ListDict()
         self._actorOptKeywordsRefreshDict = RO.Alg.ListDict()
 

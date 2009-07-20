@@ -17,6 +17,13 @@
 
 <ul>
     <li>Added RO.CnvUtil.posFromPVT.
+    <li>RO.KeyVariable: Removed support for refreshTimeLim (it is now a constant in the KeyDispatcher).
+    <li>RO.KeyDispatcher:
+    <ul>
+        <li>Renamed add method to addKeyVar and remove to removeKeyVar.
+        <li>Overhauled keyVar refresh to be more efficient and to run each refresh command only once.
+        <li>Modified to not log if logFunc = None; tweaked convenience logging function.
+    </ul>
 </ul>
 
 <h3>2.2.14 2009-07-18</h3>
