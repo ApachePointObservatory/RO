@@ -13,6 +13,12 @@
     <li>RO uses numpy instead of numarray and Numeric (as of version 2.1).
 </ul>
 
+<h3>2.2.16-pre 2009-07-20</h3>
+
+<ul>
+    <li>Added radialLine to RO.CanvasUtil, primarily for use as an annotation on RO.Wdg.GrayImageDispWdg.
+</ul>
+
 <h3>2.2.15 2009-07-20</h3>
 
 <ul>
@@ -20,9 +26,9 @@
     <li>RO.KeyVariable: Removed support for refreshTimeLim (it is now a constant in the KeyDispatcher).
     <li>RO.KeyDispatcher:
     <ul>
-        <li>Renamed add method to addKeyVar and remove to removeKeyVar.
-        <li>Overhauled keyVar refresh to be more efficient and to run each refresh command only once.
-        <li>Modified to not log if logFunc = None; tweaked convenience logging function.
+        <li>Renamed method add to addKeyVar and remove to removeKeyVar.
+        <li>Overhauled keyVar refresh to be more efficient.
+        <li>Reverted logging behavior: do not log if logFunc=None. Renamed and simplified the convenience logging function that makes logging easy.
     </ul>
 </ul>
 
