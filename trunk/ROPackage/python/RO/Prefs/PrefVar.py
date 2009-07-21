@@ -1,18 +1,20 @@
 #!/usr/bin/env python
-"""Variables used for setting preferences.
+"""Support for reading and writing preferences and preference files.
 
-One can assign callback functions. PrefVars are similar to KeyVariables, but
-are optimized for preferences and are different in several important ways, including:
-- they have a default value, instead of the possibility of being invalid
-- they are set to a single value (or a list, but the input is treated atomically)
+Subclasses of PrefVar store preferences of various types and offer:
+- default values
+- validation
+- callback functions (to track changes)
+- help strings
+- Tkinter-based visual editing (this can be ignored if not using a GUI,
+    but one must be able to load the Tkinter library to use this module).
+
+PrefSet stores a collection of PrefVars and can read the values from a preference file
+(using a simple human-editable format) and write them back out again.
+See PrefSet.readFromFile for details on the file format.
 
 To Do:
-- Consider if SoundPrefVar should return an object for getValue,
-  in which case setValue and getValue and ??? need overhaul.
-- Consider using RO.Wdg.Entry widgets; they are so similar to prefVars
-  it's embarrassing, but they need a parent widget,
-  and generating an editor widget could be confusing (unless I implement
-  some way to copy an entry widget).
+- Consolidate PrefVar, RO.InputCont and RO.Wdg.Entry to use a common set of typed variable containers.
 
 History:
 2002-02-06 ROwen    Basics done, still need to finish color and implement fonts.
@@ -80,6 +82,7 @@ History:
 2007-09-10 ROwen    PrefVar: the default family is now "MS Sans Serif" for Windows.
                     Stopped using RO.OS.openUniv, since RO package is no longer compatible with Python 2.3.
 2008-04-29 ROwen    Fixed reporting of exceptions that contain unicode arguments.
+2009-07-20 ROwen    Updated the documentation strings.
 """
 import os.path
 import re
@@ -94,13 +97,36 @@ import RO.StringUtil
 import RO.Wdg
 
 class PrefVar(object):
-    """Base class for preference variables.
-    
-    Subclasses should override:
-    - checkValue
-    - and draw methods.
-    """
+    """Base class for preference variables. Intended to be subclassed, not used directly.
 
+    Inputs:
+    - name: name of preference variable. The name is stored in its original case,
+        but access in a PrefSet and a preferences file is NOT case sensitive.
+        The name may contain spaces.
+    - category: category name. This is purely a convenience for display;
+        all PrefVars in a PrefSet must have a unique name, even if they are in different categories.
+    - defValue: default value.
+    - validValues: an optional list of valid values, in internal representation.
+    - suggValues: an optional list of suggested values, in internal representation.
+    - units: the unit of measure.
+    - helpText: a short descriptive string.
+    - helpURL: url pointing to html help.
+    - callFunc: callback function; see addCallback for details.
+    - callNow: execute callFunc immediately? see addCallback for details.
+    - formatStr: format string used to display the value (but NOT to save the value to a preference file).
+        Users rarely need to specify this, as subclasses choose a suitable default.
+    - editWidth: default width for GUI edit widget.
+    - doPrint: if True then data is printed to stdout when it is set, for debugging.
+    - cnvFunc: a conversion function for text values to internal values;
+        it should also return values in the final format unchanged.
+        Users almost never need to specify this, as subclasses chose a suitable default.
+        
+    Subclasses should provide useful defaults for the formatStr and cnvFunc arguments,
+    and should override these methods:
+    - checkValue
+    - draw
+    - getEditWdg
+    """
     def __init__(self,
         name,
         category = "",
@@ -117,27 +143,6 @@ class PrefVar(object):
         doPrint = 0,
         cnvFunc = None,
     ):
-        """
-        Inputs:
-        - name: the name of this variable (a string)
-        - category: category of preference
-        - defValue: default value
-        - validValues: an optional list of valid values, in internal representation
-        - suggValues: an optional list of suggested values, in internal representation
-        - units: the unit of measure
-        - helpText: a short descriptive string
-        - helpURL: url pointing to html help
-        - callFunc: callback function; see addCallback for details
-        - callNow: execute callFunc immediately? see addCallback for details
-        - formatStr: format string used to display value
-        - editWidth: default width for GUI edit widget
-        - doPrint: a boolean flag controlling whether data is printed
-            to stdout when it is set; simply for debugging.
-        - cnvFunc: a conversion function for text values to internal values;
-            it should also return values in the final format unchanged.
-            Generally set by subclasses and so best left unspecified by users;
-            no conversion if omitted.
-        """
         self.name = name
         self.category = category
         self.defValue = None
@@ -304,17 +309,11 @@ class PrefVar(object):
 class StrPrefVar(PrefVar):
     """String preference variable with optional pattern matching.
 
-    Inputs:
-    - name: the name of this variable (a string)
-    - category: category of preference
-    - defValue: default value
-    - partialPattern    a regular expression string which partial values must match
-    - finalPattern  a regular expression string that the final value must match;
+    Inputs: same as PrefVar, plus:
+    - partialPattern: a regular expression string which partial values must match
+    - finalPattern: a regular expression string that the final value must match;
         if omitted, defaults to partialPattern
     - **kargs: keyword arguments for PrefVar
-     
-    Note: formatStr and cnvFunc get sensible defaults and are best left unspecified
-    unless you are sure what you are doing.
     """
     def __init__(self,
         name,
@@ -392,9 +391,6 @@ class DirectoryPrefVar(StrPrefVar):
     - defValue: default value
     - editWidth: width of text entry field (does not include the choose button)
     - **kargs: keyword arguments for StrPrefVar
-     
-    Note: formatStr and cnvFunc get sensible defaults and are best left unspecified
-    unless you are sure what you are doing.
     """
     def __init__(self,
         name,
@@ -433,9 +429,6 @@ class FilePrefVar(StrPrefVar):
         omit altogether to allow all files
     - fileDescr: very brief description; used for helpText
     - **kargs: keyword arguments for StrPrefVar
-     
-    Note: formatStr and cnvFunc get sensible defaults and are best left unspecified
-    unless you are sure what you are doing.
     """
     def __init__(self,
         name,
@@ -482,9 +475,6 @@ class SoundPrefVar(FilePrefVar):
     - bellNum   number of times to ring the bell
     - bellDelay delay (ms) between each ring
     - **kargs: keyword arguments for StrPrefVar
-     
-    Note: formatStr and cnvFunc get sensible defaults and are best left unspecified
-    unless you are sure what you are doing.
     """
     def __init__(self,
         name,
@@ -524,8 +514,9 @@ class SoundPrefVar(FilePrefVar):
 
 
 class BoolPrefVar(PrefVar):
-    """A boolean-valued PrefVar. Initialization arguments are the same as for PrefVar,
-    except that suggestedValues and validValues are ignored.
+    """A boolean-valued PrefVar.
+
+    Inputs: same as PrefVar, but validValues and suggValues are ignored.
     """
     def __init__(self,
         name,
@@ -533,14 +524,6 @@ class BoolPrefVar(PrefVar):
         defValue = None,
         **kargs
     ):
-        """
-        Inputs: same as PrefVar.
-        
-        Notes:
-        - validValues and suggValues are ignored.
-        - formatStr and cnvFunc get sensible defaults and are best left unspecified
-        unless you are sure what you are doing.
-        """
         kargs = kargs.copy()    # prevent modifying a passed-in dictionary
 
         kargs.setdefault("formatStr", "%s")
@@ -556,8 +539,7 @@ class BoolPrefVar(PrefVar):
         )
 
     def getEditWdg(self, master, var=None, ctxConfigFunc=None):
-        """Return a Tkinter widget that allows the user to edit the
-        value of the preference variable.
+        """Return a Tkinter widget that allows the user to edit the value of the preference variable.
         
         Inputs:
         - master: master for returned widget
@@ -590,8 +572,11 @@ class BoolPrefVar(PrefVar):
     
 
 class IntPrefVar(PrefVar):
-    """An integer-valued PrefVar. Initialization arguments
-    are the same as for PrefVar.
+    """An integer-valued PrefVar.
+
+    Inputs: same as PrefVar plus:
+    - minValue: minimum allowed value (None if no limit)
+    - maxValue: maximum allowed value (None if no limit)
     """
     def __init__(self,
         name,
@@ -602,14 +587,6 @@ class IntPrefVar(PrefVar):
         formatStr = "%d",
         **kargs
     ):
-        """
-        Inputs other than those for PrefVar:
-        - minValue: minimum allowed value (None if no limit)
-        - maxValue: maximum allowed value (None if no limit)
-        
-        Note: formatStr gets a sensible default and is best left unspecified
-        unless you are sure what you are doing.
-        """
         kargs = kargs.copy()    # prevent modifying a passed-in dictionary
 
         self.minValue = minValue
@@ -668,6 +645,11 @@ class IntPrefVar(PrefVar):
 
 class FloatPrefVar(PrefVar):
     """A float-valued PrefVar. 
+
+    Inputs: same as PrefVar plus:
+    - minValue: minimum allowed value (None if no limit)
+    - maxValue: maximum allowed value (None if no limit)
+    - allowExp: allow exponential notation?
     """
     def __init__(self,
         name,
@@ -679,15 +661,6 @@ class FloatPrefVar(PrefVar):
         formatStr = "%.2f",
         **kargs
     ):
-        """
-        Inputs other than those for PrefVar:
-        - minValue: minimum allowed value (None if no limit)
-        - maxValue: maximum allowed value (None if no limit)
-        - allowExp: allow exponential notation?
-
-        Note: formatStr gets a sensible default and is best left unspecified
-        unless you are sure what you are doing.
-        """
         kargs = kargs.copy()    # prevent modifying a passed-in dictionary
 
         self.minValue = minValue
@@ -776,8 +749,10 @@ theColorUpdater = ColorUpdate()
 
 class ColorPrefVar(PrefVar):
     """Tk color preference variable.
-    """
 
+    Inputs: same as PrefVar, plus:
+    - wdgOption: a widget option, such as "background", to automatically update.
+    """
     def __init__(self,
         name,
         category = "",
@@ -785,12 +760,6 @@ class ColorPrefVar(PrefVar):
         wdgOption = None,
         **kargs
     ):
-        """
-        Inputs: same as PrefVar except:
-        wdgOption: a widget option, such as "background", to automatically update.
-         
-        Note: formatStr and cnvFunc are set internally; your values will be ignored.
-        """
         kargs = kargs.copy()    # prevent modifying a passed-in dictionary
 
         # create an arbitrary Tk widget we can query to convert colors
@@ -820,6 +789,36 @@ class ColorPrefVar(PrefVar):
 
 class FontPrefVar(PrefVar):
     """Tk Font preference variable.
+
+    Inputs: same as PrefVar, plus:
+    - font: a tkFont.Font object.
+    - defWdg: a widget whose font is used for the default value.
+    - defValue: defaults for one or more widget characteristics; see note on value below.
+    - optionPatterns: entries to add to the option database.
+    
+    The default value is obtained by starting with a set of internal defaults
+    and then applying inputs in the following order: font, defValue, defWdg
+    
+    The value of a prefFont is a dictionary containing one or more of the following keys:
+        "family", "overstrike", "size", "slant", "underline", "weight"
+    Warning: unlike many PrefVars, a string representation of a dictionary is NOT acceptable.
+    It must actually be a dictionary.
+    
+    Option patterns:
+    - Each listed entry is added to the option database using option_add(ptn, font).
+    - The FontPref then controls all widgets matching any of these patterns, so long as the widgets
+      were created after the entry was added, and without specifying a font.
+    - Example patterns:
+        - fonts for all widgets: ("*font",)
+        - fonts for menu widgets: ("*Menu.font", "*Menubutton.font", "*OptionMenu.font")
+    - Always put the more general patterns into the database first. This applies both to
+      the order of creation of WdgFontPrefVars and to the order of entries in optionPatterns.
+    
+    Notes:
+    - Allowing the data to be expressed in modern Tk form (name, size, style-tuple)
+        would be nice, but is too much trouble. One can create a Font objects using this notation,
+        but one cannot retrieve data in this form nor update a Font in this form.
+    - the formatStr and cnvFunc arguments are set internally; your values will be ignored.
     """
     def __init__(self,
         name,
@@ -830,42 +829,6 @@ class FontPrefVar(PrefVar):
         optionPatterns = (),
         **kargs
     ):
-        """
-        Inputs: same as PrefVar, plus:
-        - font: a tkFont.Font object.
-        - defWdg: a widget whose font is used for the default value.
-        - defValue: defaults for one or more widget characteristics; see note on value below.
-        - optionPatterns: entries to add to the option database.
-        
-        The default value is obtained by starting with a set of internal defaults
-        and then applying inputs in the following order: font, defValue, defWdg
-        
-        The value of a prefFont is a dictionary containing one or more of the following keys:
-            "family", "overstrike", "size", "slant", "underline", "weight"
-        Warning: unlike many PrefVars, a string representation of a dictionary is NOT acceptable.
-        It must actually be a dictionary.
-        
-        Option patterns:
-        - Each listed entry is added to the option database using option_add(ptn, font).
-        - This causes any widgets matching any of these patterns, so long as the widgets
-          are created after the entry is added and without specifying a font.
-        - Example patterns:
-            - fonts for all widgets: ("*font",)
-            - fonts for menu widgets: ("*Menu.font", "*Menubutton.font", "*OptionMenu.font")
-        - Always put the more general patterns into the database first. This applies both to
-          the order of creation of WdgFontPrefVars and to the order of entries in optionPatterns.
-        
-        Notes:
-        - Allowing a string representation of a dictionary for setValue could be done
-        by using r_eval from RExec. However, I see no point. r_eval is already used
-        by PrefSet when reading from a file (i.e. the data is already converted),
-        and a graphical preferences editor can easily supply the data in dictionary form.
-        - Allowing the data to be expressed in modern Tkform (name, size, style-tuple)
-        would be nice, but is too much of a pain. One can create a Font objects using this notation,
-        but one cannot retrieve data in this form nor update a Font in this form.
-        
-        formatStr and cnvFunc are set internally; your values will be ignored.
-        """
         kargs = kargs.copy()    # prevent modifying a passed-in dictionary
 
         self.font = font or tkFont.Font()
@@ -966,26 +929,27 @@ class FontPrefVar(PrefVar):
         return " ".join(charList)
 
 class PrefSet(object):
-    """A set of PrefVars with methods to retrieve individual preference values
-    and an ordered list of preferences by category"""
+    """A set of PrefVars that supports easy retrieval and file I/O.
+    
+    Note that PrefVars stored in a PrefSet must each have unique names, ignoring case.
+    In particular, PrefVars in separate categories must still have globally unique names.
+
+    Inputs:
+    - prefList: a sequence of prefVars.
+    - defFileName: the default file path for preference file reading and writing.
+    - header: a default header string for writing the data to a file.
+        The header may contain \n to produce multiple lines.
+        If any non-blank line is missing a starting "#", one will be added for you.
+    - oldPrefInfo: a dict of oldPrefName: newPrefName. This allows you to change a preference name
+        and still read older preferences files. Set newPrefName to None if there is no match,
+        i.e. if the old preference is not used anymore.
+    """
     def __init__(self,
         prefList = None,
         defFileName = None,
         defHeader = None,
         oldPrefInfo = None,
     ):
-        """Inputs:
-        - prefList: a list or tuple of prefVars or an iterator that returns prefVars
-        - defFileName: the default file name for pref I/O
-            The header may contain \n to produce multiple lines.
-            If any line is missing a starting "#", it is preceded by "# ".
-        - header: a default header string for writing the data to a file.
-            The header may contain \n to produce multiple lines.
-            If any non-blank line is missing a starting "#", one will be added for you.
-        - oldPrefInfo: a dict of oldPrefName: newPrefName
-            where newPrefName can be None if there is no match
-            i.e. if the old preference is simply not used anymore
-        """
         self.defHeader = defHeader
         self.defFileName = defFileName
         self.prefDict = RO.Alg.OrderedDict()

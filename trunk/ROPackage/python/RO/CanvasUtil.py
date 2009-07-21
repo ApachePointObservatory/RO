@@ -24,12 +24,12 @@ def ctrCircle(cnv, xpos, ypos, rad, width = 1, **kargs):
     """Draws a centered circle on the specified canvas.
     
     Inputs:
-    cnv: canvas on which to draw
-    xpos: x position
-    ypos: y position
-    rad: outer radius of circle
-    width: thickness of line (inward from radius)
-    kargs are arguments for create_oval
+    - cnv: canvas on which to draw
+    - xpos: x position
+    - ypos: y position
+    - rad: outer radius of circle
+    - width: thickness of line (inward from radius)
+    - kargs are arguments for create_oval
     """
     cnv.create_oval(
         xpos - rad,
@@ -44,13 +44,13 @@ def ctrPlus(cnv, xpos, ypos, rad, holeRad = 0, width=1, **kargs):
     """Draws a centered + on the specified canvas.
     
     Inputs:
-    cnv: canvas on which to draw
-    xpos: x position
-    ypos: y position
-    rad: radius of symbol
-    holeRad: radius of hole in center of symbol (0 for none)
-    width: thickness of line
-    kargs are arguments for create_line
+    - cnv: canvas on which to draw
+    - xpos: x position
+    - ypos: y position
+    - rad: radius of symbol
+    - holeRad: radius of hole in center of symbol (0 for none)
+    - width: thickness of line
+    - kargs are arguments for create_line
     """
     cnv.create_line(
         xpos, ypos + holeRad,
@@ -69,17 +69,46 @@ def ctrPlus(cnv, xpos, ypos, rad, holeRad = 0, width=1, **kargs):
         xpos + rad,     ypos,
         width=width, **kargs)
 
+def radialLine(cnv, xpos, ypos, rad, angle, width=1, **kargs):
+    """Draws a line of specified length and direction
+    
+    Inputs:
+    - cnv: canvas on which to draw
+    - xpos: x starting position
+    - ypos: y starting position
+    - rad: radius of symbol
+    - angle: angle (deg; 0 = x axis, 90 = y axis)
+    - holeRad: radius of hole in center of symbol (0 for none)
+    - width: thickness of line
+    - kargs are arguments for create_line
+    
+    Useful keyword arguments include:
+    - arrow = "last" for arrow at end, "first" for arrow at start
+    - arrowshape = (d1, d2, d3):
+        d1: distance along the line from the neck of the arrowhead to its tip
+        d2: distance along the line from the trailing points of the arrowhead to the tip
+        d3: distance from the outside edge of the line to the trailing points
+        defaults to something reasonable, which may be (8, 10, 3)
+    """
+    angleRadians = angle * RO.MathUtil.RadPerDeg
+    dx = rad * math.cos(angleRadians)
+    dy = rad * math.sin(angleRadians)
+    cnv.create_line(
+        xpos, ypos,
+        xpos + dx, ypos + dy,
+        width=width, **kargs)
+
 def ctrX(cnv, xpos, ypos, rad, holeRad = 0, width=1, **kargs):
     """Draws a centered X on the specified canvas.
     
     Inputs:
-    cnv: canvas on which to draw
-    xpos: x position
-    ypos: y position
-    rad: radius of symbol
-    holeRad: radius of hole in center of symbol (0 for none)
-    width: thickness of line
-    kargs are arguments for create_line
+    - cnv: canvas on which to draw
+    - xpos: x position
+    - ypos: y position
+    - rad: radius of symbol
+    - holeRad: radius of hole in center of symbol (0 for none)
+    - width: thickness of line
+    - kargs are arguments for create_line
     """
     dxy = (rad / math.sqrt(2))
     holedxy = (holeRad / math.sqrt(2))
@@ -238,6 +267,11 @@ if __name__ == '__main__':
     ctrCircle(cnv, 120, 100, 10, width = 5)
     ctrPlus  (cnv, 120, 100, 10, holeRad = 5, width = 5)
     ctrX     (cnv, 120, 100, 10, holeRad = 5, width = 5)
+    
+    radialLine(cnv, 130, 130, 20, 30)
+    radialLine(cnv, 130, 130, 20, -30, arrow="last")
+    radialLine(cnv, 130, 130, 20, 75, width=3, arrow="last")
+    
     aSpiral = Spiral(
         cnv = cnv,
         xctr = 100, yctr = 100,
