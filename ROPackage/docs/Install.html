@@ -1,0 +1,44 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/1999/REC-html401-19991224/strict.dtd">
+<html>
+<head>
+	<title>Installing the RO Python Package</title>
+</head>
+
+<h1>Installing the RO Python Package</h1>
+
+See the <a href="Overview.html">Overview</a> for a summary of the RO package.
+
+<h2>Prerequisites</h2>
+
+<ul>
+    <li>Python 2.3 or later (with Tkinter if using timers or widgets)
+    <li>numpy
+    <li>pyfits 1.1 or later (used only by RO.DS9)
+    <li>pip or easy_install (optional, but makes installation easier)
+</ul>
+
+<h2>Installation</h2>
+
+<p>If you have pip or easy_install (you may have to use sudo or run as root):
+<blockquote>
+% pip install RO
+</blockquote>
+<p>or
+<blockquote>
+% easy_install RO
+</blockquote>
+<p>If you prefer, you may manually download it from <a href="http://pypi.python.org/pypi?:action=display&name=RO">PyPI</a> and run:
+<blockquote>
+% python setup.py install
+</blockquote>
+
+<p>or, since RO is pure python, simply copy the RO directory to site-packages.
+
+<h2>Notes</h2>
+
+<ul>
+    <li>The code is presently pure python, though that may not always be so.
+    <li>This code is provided "as is". Much of the code is quite well tested and is used daily, but some is not.
+    <li>I cannot provide much technical support but am always happy to receive bug reports and patches.
+    <li>The ups directory is for use with a package manager called eups; non-eups users can safely ignore it.
+</ul>
