@@ -81,6 +81,7 @@ History:
 2007-09-10 ROwen    Added checkCurrent to setItems method. Modified __init__ to use it
                     so that the initial value of the var is shown, even if not in the list.
                     Bug fix: defValue not shown as initial value.
+2009-07-23 ROwen    Save the label argument as an attribute.
 """
 __all__ = ['OptionMenu']
 
@@ -195,6 +196,7 @@ class OptionMenu (Tkinter.Menubutton, RO.AddCallback.TkVarMixin,
             wdgKArgs["text"] = label
         else:
             wdgKArgs["textvariable"] = var
+        self.label = label
         Tkinter.Menubutton.__init__(self, master, **wdgKArgs)
         self._menu = Tkinter.Menu(self, tearoff=False) # name="menu", tearoff=False)
         self["menu"] = self._menu
