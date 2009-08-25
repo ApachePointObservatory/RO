@@ -57,6 +57,7 @@ History:
 2007-09-19 ROwen    Fixed setEnable method and stopped importing three unused modules. Thanks, pychecker!
 2007-12-22 ROwen    Fixed incompatiblity with Tcl/Tk 8.5: text.index returns an object, not a string.
 2008-04-22 ROwen    Added addMsg method.
+2009-08-25 ROwen    Added doAutoScroll option.
 """
 __all__ = ['LogWdg']
 
@@ -81,6 +82,7 @@ class LogWdg(Tkinter.Frame):
         helpURL = None,
         width = 80,
         height = 20,
+        doAutoScroll = True,
     **kargs):
         """
         Inputs:
@@ -90,11 +92,14 @@ class LogWdg(Tkinter.Frame):
         - helpURL: the URL of a help page
         - height: height of text area, in lines
         - width: width of text area, in characters
+        - doAutoScroll: auto-scroll to end of text when new messages are added
+            (if already at end of text) by default.
         - **kargs: additional keyword arguments for Frame
         """
         Tkinter.Frame.__init__(self, master=master, **kargs)
         
         self.maxLineIndex = maxLines + 1
+        self.doAutoScroll = bool(doAutoScroll)
         
         self.yscroll = Tkinter.Scrollbar (
             master = self,
@@ -156,7 +161,7 @@ class LogWdg(Tkinter.Frame):
         # scrollPos[1] = 1.0: scrolled to end
         # scrollPos[1] = scrollPos[0]: window has not yet been painted
         scrollPos = self.yscroll.get()
-        doAutoScroll = scrollPos[1] == 1.0 or scrollPos[0] == scrollPos[1]
+        doAutoScroll = self.doAutoScroll and (scrollPos[1] == 1.0 or scrollPos[0] == scrollPos[1])
         
         # insert tagged text at end
         tags = (AllTextTag,) + tuple(tags)
