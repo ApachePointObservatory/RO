@@ -36,6 +36,9 @@ in a Mac-like way is difficult.
 2009-04-20 ROwen    Quit, Close are now handled as virtual events; this rationalizes the code
                     and improves support for toplevels that cannot be closed or iconified.
 2009-07-09 ROwen    Removed unused internal function doSelectAll (found by pychecker).
+2009-08-25 ROwen    Control-Button-1/2/3 events on X11 are no longer blocked.
+                    These events were blocked for the sake of Macs with 1-button mice running X11 Tcl/Tk,
+                    but that is now too obscure a case to justify blocking control-click events. 
 """
 __all__ = ['makeReadOnly', 'stdBindings', 'stopEvent']
 
@@ -108,9 +111,9 @@ def stdBindings(root, debug=False):
         # unix
         if debug:
             print "Unix/x11 key bindings"
-        root.event_add("<<CtxMenu>>", "<Control-Button-1>")
-        root.event_add("<<CtxMenu>>", "<Control-Button-2>")
-        root.event_add("<<CtxMenu>>", "<Control-Button-3>")
+#         root.event_add("<<CtxMenu>>", "<Control-Button-1>")
+#         root.event_add("<<CtxMenu>>", "<Control-Button-2>")
+#         root.event_add("<<CtxMenu>>", "<Control-Button-3>")
     else:
         if winSys == RO.TkUtil.WSysAqua:
             if debug:
