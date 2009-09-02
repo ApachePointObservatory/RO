@@ -15,6 +15,7 @@ History:
 2005-06-16 ROwen    Bug fix: was using == instead of = for an assigment. Found by PyChecker.
 2006-10-24 ROwen    Added RO.Constants.sevDebug support including Debug Color preference.
                     Moved scaleColor to RO.TkUtil and improved it and rename it to addColors.
+2009-09-02 ROwen    Added Critical Color.
 """
 __all__ = []
 
@@ -81,8 +82,10 @@ class WdgPrefs(object):
     Uses the following preferences from prefSet, if supplied,
     else creates them with reasonable default values:
     - Bad Background,
+    - Debug Color (used as a foreground color)
     - Warning Color (used as a foreground color)
     - Error Color (used as a foreground color)
+    - Critical Color (used as a foreground color)
     - Background Color
     - Foreground Color
     
@@ -128,12 +131,13 @@ class WdgPrefs(object):
         backColor = self._tkWdg.cget("background")
         foreColor = self._tkWdg.cget("foreground")
         setupList = (
-            ("Debug Color", "dark gray"),
             ("Background Color", backColor),
             ("Bad Background", "pink"),
             ("Foreground Color", foreColor),
+            ("Debug Color", "dark gray"),
             ("Warning Color", "blue2"),
             ("Error Color", "red"),
+            ("Critical Color", "orange"),
         )
     
         for prefName, defColor in setupList:
@@ -146,6 +150,7 @@ class WdgPrefs(object):
             RO.Constants.sevNormal:  self.prefDict["Foreground Color"],
             RO.Constants.sevWarning: self.prefDict["Warning Color"],
             RO.Constants.sevError:   self.prefDict["Error Color"],
+            RO.Constants.sevCritical:   self.prefDict["Critical Color"],
         }
 
         # add activebackground color (could do the same for activeforeground,
