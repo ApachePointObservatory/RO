@@ -20,8 +20,9 @@ History:
 2004-09-02 ROwen    Moved to RO.Constants to solve circular import problems.
 2005-01-05 ROwen    Changed st_Normal, to sevNormal, etc.
 2006-10-24 ROwen    Added sevDebug.
+2009-09-02 ROwen    Added sevCritical.
 """
-__all__ = ['sevDebug', 'sevNormal', 'sevWarning', 'sevError']
+__all__ = ['sevDebug', 'sevNormal', 'sevWarning', 'sevError', 'sevCritical']
 
 import urlparse
 
@@ -30,6 +31,7 @@ sevDebug = -1
 sevNormal = 0
 sevWarning = 1
 sevError = 2
+sevCritical = 3
 
 # Call setHelpURLBase if you want to specify URLs relative to a base
 _HelpURLBase = ""
