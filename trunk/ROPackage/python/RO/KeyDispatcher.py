@@ -73,6 +73,7 @@ History:
 2009-07-20 ROwen    Renamed add method to addKeyVar and remove to removeKeyVar.
                     Overhauled keyVar refresh to be more efficient and to run each refresh command only once.
                     Modified to not log if logFunc = None; tweaked convenience logging function.
+2009-09-10 ROwen    Bug fix: check self._refreshAllID before using it with after_cancel.
 """
 import sys
 import time
@@ -238,7 +239,8 @@ class KeyDispatcher(object):
             else:
                 self.refreshCmdDict[refreshInfo] = set((keyVar,))
             if self._isConnected:
-                self.tkWdg.after_cancel(self._refreshAllID)
+                if self._refreshAllID != None:
+                    self.tkWdg.after_cancel(self._refreshAllID)
                 self._refreshAllID = self.tkWdg.after(_ShortIntervalMS, self.refreshAllVar)
 
     def checkCmdTimeouts(self):
