@@ -2,30 +2,33 @@
 """Simple sound players.
 
 All sound players are based on Tkinter and some will use
-the "snack" sound package if it is available.
+the "pygame" sound package if it is available.
 
 History:
 2003-11-17 ROwen
 2004-08-11 ROwen    Define __all__ to restrict import.
 2005-06-08 ROwen    Changed BellPlay, SoundPlayer, NoPLay to new-style classes.
+2009-10-22 ROwen    Modified to use pygame instead of snack to play sound files.
 """
 __all__ = ['bell', 'BellPlay', 'SoundPlayer', 'NoPlay']
 
 import sys
 import Tkinter
+import RO.StringUtil
 try:
-    import tkSnack
-    _SnackAvail = True
+    import pygame.mixer
+    _PyGameAvail = True
 except ImportError:
-    _SnackAvail = False
-# wait to initialize snack until the first SoundPlayer is created
+    _PyGameAvail = False
+# wait to initialize pygame.mixer until the first SoundPlayer is created
 # to avoid creating a Tk root window before it's wanted
-_SnackReady = False
+# (in case we use Tk to play the bell sound directly)
+_PyGameReady = False
 
 _TkWdg = None
 
 def bell(num=1, delay=100):
-    """Rings the bell num times
+    """Rings the bell num times using tk's bell command.
     
     Inputs:
     - num   number of times to ring the bell
@@ -72,15 +75,14 @@ class BellPlay(object):
         bell(self._num, self._delay)
 
 class SoundPlayer(object):
-    """An object that plays a sound file (if requested and possible),
-    else rings the bell.
+    """An object that plays a sound file using pygame (if available), else rings the bell.
     
     Inputs:
     - fileName  name of sound file
     - bellNum   number of times to ring the bell (<1 is treated as 1)
     - bellDelay delay (ms) between each ring
     
-    The bell data is used if snack is not available or the file
+    The bell data is used if pygame is not available or the file
     is not a valid sound file.
     """
     def __init__(self,
@@ -88,27 +90,26 @@ class SoundPlayer(object):
         bellNum = 1,
         bellDelay = 100,
     ):
-        global _SnackAvail, _SnackReady
-        if _SnackAvail and not _SnackReady:
+        global _PyGameAvail, _PyGameReady
+        if _PyGameAvail and not _PyGameReady:
             try:
-                # tkSnack may not need the actual Tk root
-                # but I'm just following the example to be safe
-                tkRoot = Tkinter.Frame().winfo_toplevel()
-                tkSnack.initializeSnack(tkRoot)
-                _SnackReady = True
-            except (Exception, Tkinter.TclError), e:
-                sys.stderr.write("Could not initialize snack: %s\n" % (e,))
-                _SnackAvail = False
+                pygame.mixer.init()
+                _PyGameReady = True
+            except Exception, e:
+                sys.stderr.write("Could not initialize pygame for sound: %s\n" % \
+                    (RO.StringUtil.strFromException(e),))
+                _PyGameAvail = False
             
         self._snd = None
         self._bell = BellPlay(bellNum, bellDelay)
         self._fileName = fileName
 
-        if _SnackReady and fileName:
+        if _PyGameReady and fileName:
             try:
-                self._snd = tkSnack.Sound(load = fileName)
+                self._snd = pygame.mixer.Sound(fileName)
             except Exception, e:
-                sys.stderr.write("Could not load sound file %r; using beep instead: %s\n" % (fileName, e,))
+                sys.stderr.write("Could not load sound file %r; using beep instead: %s\n" % \
+                    (fileName, RO.StringUtil.strFromException(e),))
         
         if not self._snd:
             self._snd = BellPlay(num=bellNum, delay=bellDelay)
@@ -128,7 +129,7 @@ class SoundPlayer(object):
         
         "File loaded" is True if the file was successfully loaded.
         This does not quite guarantee that the file can be played;
-        if snack is mis-installed then it is possible to laod sounds
+        if pygame is mis-installed then it is possible to laod sounds
         but not play them.
         """
         fileLoaded = (self._snd != None)
