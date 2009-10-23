@@ -83,6 +83,7 @@ History:
                     Stopped using RO.OS.openUniv, since RO package is no longer compatible with Python 2.3.
 2008-04-29 ROwen    Fixed reporting of exceptions that contain unicode arguments.
 2009-07-20 ROwen    Updated the documentation strings.
+2009-09-23 ROwen    Updated SoundPrefVar documentation to remove explicit mention of snack.
 """
 import os.path
 import re
@@ -459,22 +460,25 @@ class FilePrefVar(StrPrefVar):
     
 
 class SoundPrefVar(FilePrefVar):
-    """Contains an RO.Wdg.SoundPlayer object, which plays a sound file.
+    """Contains an RO.Wdg.SoundPlayer object, which plays a sound file or a series of beeps.
     
-    If sound file playing is not supported (snack not available),
-    or no file is selected, plays a default bell sequence.
+    If the sound file is not specified or cannot be played*
+    then RO.Wdg.SoundPlayer will play a default bell sequence instead.
 
     Inputs:
     - name: the name of this variable (a string)
     - category: category of preference
     - defValue: default value
     - editWidth: width of text entry field (does not include the choose button)
-    # these "bell" data are only used if the sound file
-    # cannot be played for some reason, e.g. invalid file, no file
-    # or the snack sound package not installed:
-    - bellNum   number of times to ring the bell
-    - bellDelay delay (ms) between each ring
+    - bellNum   number of times to ring the bell; ignored if RO.Wdg.SoundPlayer can play the sound file*
+    - bellDelay delay (ms) between each ring; ignored if RO.Wdg.SoundPlayer can play the sound file*
     - **kargs: keyword arguments for StrPrefVar
+
+    *The bell arguments are only used if RO.Wdg.SoundPlayer cannot play the sound file, e.g.:
+    - no sound file is specified
+    - the user is running over X11 (which has no sound support)
+    - the file is corrupt
+    - the sound library used by RO.Wdg.SoundPlayer is not installed correctly
     """
     def __init__(self,
         name,
