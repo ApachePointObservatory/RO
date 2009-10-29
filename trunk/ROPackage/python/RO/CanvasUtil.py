@@ -15,6 +15,7 @@ History:
                     - Keep track of geom ID for more reliable clear during redraw.
                     - Use list comprehension to speed computation of coords.
 2005-06-08 ROwen    Changed Spiral to a new style class.
+2009-08-04 ROwen    Added radialLine.
 """
 import math
 import Tkinter
