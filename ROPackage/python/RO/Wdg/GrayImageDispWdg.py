@@ -6,7 +6,7 @@ while minimizing controls and the space used by controls and status displays.
 
 Required packages:
 - numpy
-- PIM
+- PIL
 
 Mouse Gestures
     Zoom (Z mode or use button 3):
@@ -29,10 +29,11 @@ imPos   image position; 0,0 at lower left corner of image,
         I'm not sure if it's the convention used by ds9 or iraf.
 cnvPos  tk canvas x,y; 0,0 at upper left corner
         +x to the right, +y down
+ijIndex Numpy array index; cnvPos with the axes swapped and rounded to the nearest int
+
 note that imPos is independent of zoom, whereas cnvPos varies with zoom.
 
 To Do:
-- Highlight saturated pixels, e.g. in red (see PyImage and mixing)
 - Use a histogram instead of a copy of the data to for median, etc. (to save memory)
 
 Maybe Do:
@@ -147,6 +148,8 @@ History:
                     The default is False, to match pre-2008-05-02 behavior.
 2008-07-16 ROwen    Modified numpy.ma import to support both older versions of numpy (some of which
                     require numpy.core.ma) and 1.1 (which requires numpy.ma).
+2009-11-04 ROwen    Added ann_Line and ann_Text annotations.
+                    Added cnvOffset argument to Annotation and GrayImageWdg.addAnnotation.
 """
 import weakref
 import Tkinter
@@ -184,6 +187,21 @@ _DebugMem = False # print messages when memory recovered?
 ann_Circle = RO.CanvasUtil.ctrCircle
 ann_Plus = RO.CanvasUtil.ctrPlus
 ann_X = RO.CanvasUtil.ctrX
+ann_Line = RO.CanvasUtil.radialLine
+
+def ann_Text(cnv, xpos, ypos, rad, text, anchor="c", **kargs):
+    """Draws a centered circle on the specified canvas.
+    
+    Inputs:
+    - cnv: canvas on which to draw
+    - xpos: x position
+    - ypos: y position
+    - rad: ignored for (text annotations cannot be resized during zoom)
+    - anchor: point on text to display at xpos, ypos; one of c, n, ne, e, se, s, sw, w or nw
+    - text: the text to display
+    **kargs are keyword arguments for create_text
+    """
+    cnv.create_text(xpos, ypos, text=text, anchor=anchor, **kargs)
 
 def getBitmapDict():
     bitmapDir = RO.OS.getResourceDir(RO, "Bitmaps")
@@ -289,15 +307,20 @@ class Annotation(object):
                 and by name:
                 - tags  see below
                 - any additional keyword supplied when creating this Annotation
-    - cnv   canvas on which to draw the annotation
-    - imPos image position of center
+    - imPos image position of annotation (see Coordinate Systems above)
     - rad   overall radius of annotation, in zoomed pixels.
             The visible portion of the annotation should be contained
             within this radius.
-    - tags  0 or more tags for annotation; _AnnTag
-            and a unique id tag will also be used as tags.
     - isImSize  is size (e.g. rad) in image pixels? else cnv pixels.
                 If true, annotation is resized as zoom changes.
+    - cnvOffset    offset of center of annotation from imPos, in canvals coordinates;
+            this is intended to allow constructing complex annotations that should not resize during zoom
+            (such as labelled axes) by centering multiple annotations at one point
+            and using offsets to align the components with each other.
+            (If you want an offset that is zoomed with the image then you can just
+            adjust the imPos by the desired amount).
+    - tags  0 or more tags for annotation; _AnnTag
+            and a unique id tag will also be used as tags.
     **kargs     arguments for annType
     """
     def __init__(self,
@@ -305,14 +328,16 @@ class Annotation(object):
         annType,
         imPos,
         rad,
+        cnvOffset = (0, 0),
         isImSize = True,
         tags = None,
     **kargs):
         self.gim = gim
         self.annType = annType
 
-        self.imPos = imPos
-        self.isImSize = isImSize
+        self.imPos = numpy.array(imPos, dtype=float)
+        self.cnvOffset = numpy.array(cnvOffset, dtype=int)
+        self.isImSize = bool(isImSize)
         self.holeRad = kargs.get("holeRad")
         if self.isImSize:
             # radius is in image units; put it in floating point now
@@ -354,10 +379,11 @@ class Annotation(object):
             # radius is already in canvas units; leave it alone
             rad = self.rad
 
+#        print "cnvPos=%s; draw at=%s" % (cnvPos, (cnvPos[0] + self.cnvOffset[0], cnvPos[1] + self.cnvOffset[1]))
         return self.annType(
             self.gim.cnv,
-            cnvPos[0],
-            cnvPos[1],
+            cnvPos[0] + self.cnvOffset[0],
+            cnvPos[1] + self.cnvOffset[1],
             rad,
         **self.kargs)
     
@@ -365,7 +391,6 @@ class Annotation(object):
         """Delete the annotation from the canvas.
         """
         self.gim.cnv.delete(self.idTag)
-            
             
 class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
     """Display a grayscale image.
@@ -713,21 +738,26 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
         elif self.mode == _ModeLevels:
             self.dragLevelReset(isTemp = False)         
 
-    def addAnnotation(self, annType, imPos, rad, tags=None, isImSize=True, **kargs):
+    def addAnnotation(self, annType, imPos, rad, cnvOffset=(0, 0), tags=None, isImSize=True, **kargs):
         """Add an annotation.
 
         Inputs:
-        - annType   One of the ann_ constants.
-        - cnv   canvas on which to draw the annotation
-        - imPos image position of center
+        - annType   One of the ann_ constants (see Annotation class for more options).
+        - imPos image position of annotation (see Coordinate Systems above)
         - rad   overall radius of annotation, in zoomed pixels.
                 The visible portion of the annotation should be contained
                 within this radius.
+        - isImSize  is size (e.g. rad) in image pixels? else cnv pixels.
+                    If true, annotation is resized as zoom changes.
+        - cnvOffset    offset of center of annotation from imPos, in canvals coordinates;
+                this is intended to allow constructing complex annotations that should not resize during zoom
+                (such as labelled axes) by centering multiple annotations at one point
+                and using offsets to align the components with each other.
+                (If you want an offset that is zoomed with the image then you can just
+                adjust the imPos by the desired amount).
         - tags  0 or more tags for annotation; _AnnTag
                 and a unique id tag will also be used as tags.
-        - isImSize  is radius in image pixels? else cnv pixels.
-                    If true, annotation is resized as zoom changes.
-        **kargs: Additional arguments:
+        **kargs: Additional arguments. These depend on the annotation, but may include:
             - width: width of line
             - fill: color of line for ann_X and ann_Plus;
                     color of middle of circle for ann_Circle
@@ -744,6 +774,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
             annType = annType,
             imPos = imPos,
             rad = rad,
+            cnvOffset = cnvOffset,
             tags = tags,
             isImSize = isImSize,
         **kargs)
@@ -1403,7 +1434,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
         return arrIJ
     
     def imPosFromArrIJ(self, arrIJ):
-        """Convert an array index to the corresponding image position.
+        """Convert a numpy array index to the corresponding image position.
         """
         return [float(arrIJ[ii]) for ii in (1, 0)]
     
