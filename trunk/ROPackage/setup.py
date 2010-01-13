@@ -58,4 +58,5 @@ setup(
     packages = find_packages(PkgRoot),
     include_package_data = True,
     scripts = [],
+    zip_safe = False, # icons (e.g. as used by RO.Wdg.GrayImageDispWdg) are not retrieved in a zip-safe way
 )

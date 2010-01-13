@@ -13,6 +13,17 @@
     <li>RO uses numpy instead of numarray and Numeric (as of version 2.1).
 </ul>
 
+<h3>2.3.1b1 2010-01-12</h3>
+<ul>
+    <li>RO.Astro.Tm:
+    <ul>
+        <li>Added iso[Date/DateTime/Time]FromPySec functions.
+        <li>Added getUTCMinusTAI and pySecFromTAI functions.
+        <li>Changed default UTC-TAI from -33 to -34 seconds.
+    </ul>
+    <li>Bug fix: setup.py did not specify zipsafe=False so an easy-installed package would not work.
+</ul>
+
 <h3>2.3.0 2009-10-23</h3>
 <ul>
     <li>RO.Wdg.Sound: modified to use pygame instead of snack to play sound files.
