@@ -48,7 +48,7 @@ setup(
     description = "Collection of utilities including general algorithms, astronomical transformations and Tkinter widgets",
     long_description = long_description,
     author = "Russell Owen",
-    author_email = "rowen@u.washington.edu",
+    author_email = "rowen@uw.edu",
     url = "http://www.astro.washington.edu/rowen/",
     license = "GPL except RO.Astro which has more restrictions for commercial use",
     classifiers = filter(None, classifiers.split("\n")),
