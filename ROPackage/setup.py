@@ -56,9 +56,7 @@ setup(
     install_requires = ['numpy'],
     package_dir = {PkgName: PkgDir},
     packages = find_packages(PkgRoot),
-    package_data = {
-        PkgName: ['Bitmaps/*.xbm'], # include bitmap files
-    },
+    include_package_data = True,
     scripts = [],
     zip_safe = False, # icons (e.g. as used by RO.Wdg.GrayImageDispWdg) are not retrieved in a zip-safe way
 )
