@@ -61,7 +61,7 @@ if status != 0:
     sys.exit(0)
 
 print "Building, uploading and registering"
-status = subprocess.call(["python", "setup.py", "sdist", "upload", "register"], cwd=exportPath)
+status = subprocess.call(["python", "setup.py", "sdist", "upload", "--show-response"], cwd=exportPath)
 if status != 0:
     print "Build and upload failed!"
 
