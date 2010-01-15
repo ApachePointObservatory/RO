@@ -57,7 +57,7 @@ setup(
     package_dir = {PkgName: PkgDir},
     packages = find_packages(PkgRoot),
     package_data = {
-        '': ['*.xbm'], # include bitmap files
+        PkgName: ['Bitmaps/*.xbm'], # include bitmap files
     },
     scripts = [],
     zip_safe = False, # icons (e.g. as used by RO.Wdg.GrayImageDispWdg) are not retrieved in a zip-safe way
