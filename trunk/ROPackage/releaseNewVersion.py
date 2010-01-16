@@ -44,30 +44,21 @@ if not versOK.lower() == "y":
 
 print "Subversion repository OK"
 
-exportPath = os.path.abspath(os.path.join(os.environ["HOME"], "%s_%s_Source" % (PkgName, Version.__version__)))
-if os.path.exists(exportPath):
-    print "Export directory %r already exists" % (exportPath)
-    versOK = raw_input("Should I delete the old %r? (yes/[n]) " % (exportPath,))
-    if not versOK.lower() == "yes":
-        sys.exit(0)
-    print "Deleting %r" % (exportPath,)
-    shutil.rmtree(exportPath)
-
-print "Exporting subversion repository to %r" % (exportPath,)
-
-status = subprocess.call(["svn", "export", ".", exportPath])
-if status != 0:
-    print "Svn export failed!"
-    sys.exit(0)
-
+# warning: do not build from export because the svn info is required to get the data files included
 print "Building, uploading and registering"
-status = subprocess.call(["python", "setup.py", "sdist", "upload", "--show-response"], cwd=exportPath)
+status = subprocess.call(["python", "setup.py", "sdist", "upload", "--show-response"])
 if status != 0:
     print "Build and upload failed!"
 
-delOK = raw_input("OK to delete %r? (y/[n]) " % (exportPath,))
+distDir = os.path.abspath("dist")
+eggDir = os.path.abspath("RO.egg-info")
+delOK = raw_input("OK to delete %r and %r? (y/[n]) " % (distDir, eggDir))
 if not delOK.lower() == "y":
     sys.exit(0)
 
-print "Deleting %r" % (exportPath,)
-shutil.rmtree(exportPath)
+print "Deleting %r" % (distDir,)
+shutil.rmtree(distDir)
+
+print "Deleting %r" % (eggDir,)
+shutil.rmtree(eggDir)
+
