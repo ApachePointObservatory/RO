@@ -53,7 +53,6 @@ setup(
     license = "GPL except RO.Astro which has more restrictions for commercial use",
     classifiers = filter(None, classifiers.split("\n")),
     platforms = ["MacOS X", "unix", "Windows"],
-    install_requires = ['numpy'],
     package_dir = {PkgName: PkgDir},
     packages = find_packages(PkgRoot),
     include_package_data = True,
