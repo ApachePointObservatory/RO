@@ -68,7 +68,10 @@ History:
                     Added debugPrint method to simplify handling unicode errors.
 2008-04-24 ROwen    Bug fix: waitKeyVar referenced a nonexistent variable in non-debug mode.
 2008-04-29 ROwen    Fixed reporting of exceptions that contain unicode arguments.
-2008-06-26 ROwen    Improved documentation for abortCmdStr and keyVars arguments to waitCmd
+2008-06-26 ROwen    Renamed isAborting method to didFail (to be more consistent with isDone).
+                    Added isPaused method.
+                    Improved documentation for didFail and isDone methods.
+                    Improved documentation for abortCmdStr and keyVars arguments to waitCmd.
 """
 import sys
 import threading
@@ -303,18 +306,28 @@ class ScriptRunner(RO.AddCallback.BaseMixin):
         self._userWaitID = None
         self.value = None
         
-    def isAborting(self):
-        """Return True if script is aborting or cancelling"""
+    def didFail(self):
+        """Return True if script aborted or failed.
+        
+        Note: may not be fully ended (there may be cleanup to do and callbacks to call).
+        """
         return self._endingState in (Cancelled, Failed)
     
     def isDone(self):
         """Return True if script is finished, successfully or otherwise.
+
+        Note: may not be fully ended (there may be cleanup to do and callbacks to call).
         """
         return self._state <= Done
     
     def isExecuting(self):
         """Returns True if script is running or paused."""
         return self._state in (Running, Paused)
+
+    def isPaused(self):
+        """Return True if script is paused
+        """
+        return self._state == Paused
     
     def pause(self):
         """Pause execution.
