@@ -23,6 +23,8 @@ History:
 2007-07-25 ROwen    Bug fix: script reloading was broken by the helpURL overhaul.
 2008-05-02 ROwen    Add __file__ local variable to each loaded script file;
                     this makes it easier to find help files.
+2010-02-17 ROwen    Improved the way the Pause/Resume button name is managed.
+                    Removed several unused imports.
 """
 __all__ = ['BasicScriptWdg', 'ScriptModuleWdg', 'ScriptFileWdg']
 
@@ -30,11 +32,8 @@ import os.path
 import Tkinter
 import RO.Constants
 import RO.AddCallback
-import RO.OS
 import RO.ScriptRunner
-import RO.SeqUtil
 import Button
-import CtxMenu
 import StatusBar
 
 # compute _StateSevDict which contains
@@ -120,7 +119,6 @@ class BasicScriptWdg(RO.AddCallback.BaseMixin):
         
         self.startButton["command"] = self._doStart
         self.pauseButton["command"] = self._doPause
-        self._setPauseText("Pause")
         self.cancelButton["command"] = self._doCancel
     
         self._makeScriptRunner(master,
@@ -175,15 +173,19 @@ class BasicScriptWdg(RO.AddCallback.BaseMixin):
     def _setButtonState(self):
         """Set the state of the various buttons.
         """
-        if not self.scriptRunner.isExecuting():
-            self.startButton["state"] = "normal"
-            self.pauseButton["state"] = "disabled"
-            self._setPauseText("Pause")
-            self.cancelButton["state"] = "disabled"
-        else:
+        if self.scriptRunner.isExecuting():
             self.startButton["state"] = "disabled"
             self.pauseButton["state"] = "normal"
             self.cancelButton["state"] = "normal"
+        else:
+            self.startButton["state"] = "normal"
+            self.pauseButton["state"] = "disabled"
+            self.cancelButton["state"] = "disabled"
+
+        if self.scriptRunner.isPaused():
+            self._setPauseText("Resume")
+        else:
+            self._setPauseText("Pause")
     
     def _setPauseText(self, text):
         """Set the text and help text of the pause button.

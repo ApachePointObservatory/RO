@@ -204,7 +204,7 @@ class NullConnection(HubConnection):
         self.cmdr = "TU01.me"
         self._state = Connected
 
-    def connect(self):
+    def connect(self, *args, **kargs):
         raise RuntimeError("NullConnection is always connected")
     
     def disconnect(self):
