@@ -145,6 +145,8 @@ History:
 2008-03-14 ROwen    Added method getDefaultWidth.
                     Added adjustWidth argument to setRange.
 2008-04-29 ROwen    Fixed reporting of exceptions that contain unicode arguments.
+2010-03-03 ROwen    Added autoSetDefault option.
+                    Modified to call doneFunc when the value is changed via set.
 """
 __all__ = ['StrEntry', 'ASCIIEntry', 'FloatEntry', 'IntEntry', 'DMSEntry']
 
@@ -173,24 +175,22 @@ class _BaseEntry (Tkinter.Entry, RO.AddCallback.BaseMixin,
 
     Inputs:
     - master    master Tk widget -- typically a frame or window
-    - defValue  default value;
-                "" or None mean a blank field
+    - defValue  default value; "" or None mean a blank field
     - var       a StringVar to use as the widget's Tk variable
     - label     a very short description; used for error messages
     - helpText  a string that describes the widget
     - helpURL   URL for on-line help
-    - readOnly  set True if you want to prevent the user from changing the text
-                the user will still be able to copy the text
-                and the widget can still be updated via set, etc.
-                note that readOnly prevents any clear/default/etc menu items.
+    - readOnly  set True if you want to prevent the user from changing the text.
+        The user will still be able to copy the text and the widget can still be updated via set, etc.
+        Read-only entry fields do not display contextual menu items that change values (Clear, Default,...).
     - callFunc  callback function; the function receives one argument: self.
-                It is called whenever the value changes (manually or via
-                the associated variable being set) and when setDefault is called.
+        It is called whenever the value changes (manually or via
+        the associated variable being set) and when setDefault is called.
     - doneFunc  callback function; the function receives one argument: self.
-                It is called whenever the the user types <return>
-                or the widget loses focus.
-                Warning: doneFunc may be called while the widget has an invalid value
-                so getString, etc. may raise valueError.
+        It is called whenever the user finishes entering a valid value,
+        e.g. by typing <return>, <keypad enter> or the widget loses focus,
+        or when a new value is entered using the set command.
+        Typically used with autoSetDefault.
     - clearMenu name of "clear" contextual menu item, or None for none
     - defMenu   name of "restore default" contextual menu item, or None for none
     - autoIsCurrent controls automatic isCurrent mode
@@ -200,26 +200,39 @@ class _BaseEntry (Tkinter.Entry, RO.AddCallback.BaseMixin,
             - set or setIsCurrent is called with isCurrent true
             - setDefValue is called with isCurrent true
             - current value == default value
+    - autoSetDefault controls whether the default is set to the most recent valid "done" value
+        ("done" in that user has typed <return> or focus is lost).
+        Intended for an entry box from which one can obtain a valid value even while a new value is being entered.
+        set autoSetDefault True and read the default to get the most recent valid "done" value.
+        This flag is commonly used with autoIsCurrent to give visual feedback that a value is "done".
     - trackDefault controls whether setDefault can modify the current value:
         - if True and isDefault() true then setDefault also changes the current value
         - if False then setDefault never changes the current value
-        - if None then trackDefault = autoIsCurrent (because these normally go together)
+        - if None then trackDefault = autoIsCurrent and not autoSetDefault (a common configuration)
+        Intended for an entry box that is used both to display the actual value of some other object
+        and also to allow the user to enter a new desired value for that object.
+        Whenever the actual value changes, your code should set the default accordingly.
+        The entry's displayed value will continue to track the actual value unless the user
+        enters some new value (at which point it is assumed they will soon issue a command
+        to change the value of the object).
+        
+        trackDefault and autoSetDefault cannot both be true.
+        
     - defIfBlank    setDefault also sets the current value if the current value is blank.
+        Forbidden if autoSetDefault is True.
     - isCurrent: is the default value (used as the initial value) current?
     - severity: one of: RO.Constants.sevNormal (the default), sevWarning or sevError
-    - any additional keyword arguments are used to configure the widget;
-                the default width is 8
-                text and textvariable are silently ignored (use var instead of textvariable)
+    - any additional keyword arguments are used to configure the widget; note:
+        - the default width is 8
+        - text and textvariable are silently ignored (use var instead of textvariable)
     
-    If readOnly is true then the following defaults are used
-    (you may override these if you insist, but they are appropriate
-    for a read-only widget):
+    If readOnly is true then the following defaults are used (you may override these if you insist,
+    but they are appropriate for a read-only widget):
     - highlightthickness = 0
     - insertontime = 0
     - take_focus = False
-    Also note that state="readonly" is NOT used at this time
-    because it is new as of Tk 8.4. Using it would remove the need
-    for changing insertontime and take_focus.
+    Also note that state="readonly" is NOT used at this time because it is new as of Tk 8.4.
+    Using it would remove the need for changing insertontime and take_focus.
     """
     def __init__ (self,
         master,
@@ -233,9 +246,10 @@ class _BaseEntry (Tkinter.Entry, RO.AddCallback.BaseMixin,
         doneFunc = None,
         clearMenu = "Clear",
         defMenu = None,
-        defIfBlank = True,
         autoIsCurrent = False,
+        autoSetDefault = False,
         trackDefault = None,
+        defIfBlank = True,
         isCurrent = True,
         severity = RO.Constants.sevNormal,
     **kargs):
@@ -246,13 +260,18 @@ class _BaseEntry (Tkinter.Entry, RO.AddCallback.BaseMixin,
         self.label = label
         self.helpText = helpText
         self._readOnly = readOnly
-        self.clearMenu = clearMenu
-        self.defMenu = defMenu
-        self._defIfBlank = defIfBlank
+        self._clearMenuName = clearMenu
+        self._defMenuName = defMenu
+        self._autoSetDefault = bool(autoSetDefault)
         if trackDefault == None:
-            trackDefault = bool(autoIsCurrent)
-        self.trackDefault = trackDefault
-        self.doneFunc = doneFunc
+            trackDefault = bool(autoIsCurrent) and not autoSetDefault
+        if (trackDefault and autoSetDefault):
+            raise RuntimeError("Cannot set both trackDefault and autoSetDefault True")
+        self._trackDefault = trackDefault
+        self._defIfBlank = defIfBlank
+        self._settingVal = False # prevent circular processing
+        self._doneFunc = None # set it to doneFunc after setting the default and initial value
+            # to avoid calling doneFunc during construction
         
         if readOnly:
             # adjust default Tkinter.Entry args 
@@ -297,12 +316,16 @@ class _BaseEntry (Tkinter.Entry, RO.AddCallback.BaseMixin,
 
         self.bind("<FocusOut>", self._entryDone)
         self.bind("<Return>", self._entryDone)
+        self.bind("<KP_Enter>", self._entryDone)
         # The following prevents a new widget from getting focus
         # until the current value is tested, but only if using Tab to navigate.
         self.bind("<Tab>", self._entryDone)
         
         if readOnly:
             Bindings.makeReadOnly(self)
+
+        # now that the value has been set, admit the possible existence of doneFunc
+        self._doneFunc = doneFunc
 
         # add callback function after setting default
         # to avoid having the callback called right away
@@ -364,9 +387,9 @@ class _BaseEntry (Tkinter.Entry, RO.AddCallback.BaseMixin,
         except Tkinter.TclError:
             clipPresent = False
 
-        if self.clearMenu:
+        if self._clearMenuName:
             menu.add_command(
-                label = self.clearMenu,
+                label = self._clearMenuName,
                 command = self.clear,
                 state = stateDict[dataPresent],
             )
@@ -392,7 +415,7 @@ class _BaseEntry (Tkinter.Entry, RO.AddCallback.BaseMixin,
             state = stateDict[dataPresent],
         )
                 
-        self._ctxAddSetItem(menu, self.defMenu, self.defValueStr)
+        self._ctxAddSetItem(menu, self._defMenuName, self.defValueStr)
         return True
     
     def cut(self):
@@ -527,7 +550,15 @@ class _BaseEntry (Tkinter.Entry, RO.AddCallback.BaseMixin,
         self.setIsCurrent(isCurrent)
         if severity != None:
             self.setSeverity(severity)
-        self.var.set(self.asStr(newVal))
+        
+        if self._settingVal:
+            return
+        self._settingVal = True
+        try:
+            self.var.set(self.asStr(newVal))
+            self._entryDone(doCheck=False)
+        finally:
+            self._settingVal = False
 
     def setDefault(self,
         newDefValue,
@@ -550,7 +581,7 @@ class _BaseEntry (Tkinter.Entry, RO.AddCallback.BaseMixin,
           if the default value is invalid.
         """
         self.checkValue(newDefValue, self._getErrorPrefix() + "default")
-        restoreDef = (self.trackDefault and self.isDefault()) \
+        restoreDef = (self._trackDefault and self.isDefault()) \
             or (self._defIfBlank and self.var.get() == "")
         self.defValueStr = self.asStr(newDefValue)
         if isCurrent != None:
@@ -635,23 +666,29 @@ class _BaseEntry (Tkinter.Entry, RO.AddCallback.BaseMixin,
         if self._callbacks:
             self._doCallbacks()
 
-    def _entryDone(self, evt=None):
-        """Checks the final value and neatens the display.
+    def _entryDone(self, evt=None, doCheck=True):
+        """Copies the value to the default if autoSetDefault and calls the done function.
+        
+        By default also checks the final value and neatens the display.
         """
+#        print "_entryDone(evt=%s)" % (evt,)
         currVal = self.var.get()
-        try:
-            self.checkValue(currVal)
-            self.neatenDisplay()
-        except (ValueError, TypeError), e:
-            self.setEntryError(RO.StringUtil.strFromException(e))
-            self.focus_set()
-            return "break"
+        if doCheck:
+            try:
+                self.checkValue(currVal)
+                self.neatenDisplay()
+            except (ValueError, TypeError), e:
+                self.setEntryError(RO.StringUtil.strFromException(e))
+                self.focus_set()
+                return "break"
 
         if self._entryError:
             self.setEntryError(None)
         self.icursor("end")
-        if self.doneFunc:
-            self.doneFunc(self)
+        if self._autoSetDefault:
+            self.setDefault(currVal)
+        if self._doneFunc:
+            self._doneFunc(self)
         return None # make pychecker happy
     
     def _getErrorPrefix(self, descr=None):

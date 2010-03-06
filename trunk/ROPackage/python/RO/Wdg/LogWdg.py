@@ -58,6 +58,7 @@ History:
 2007-12-22 ROwen    Fixed incompatiblity with Tcl/Tk 8.5: text.index returns an object, not a string.
 2008-04-22 ROwen    Added addMsg method.
 2009-08-25 ROwen    Added doAutoScroll option.
+2010-03-05 ROwen    Added tabs option.
 """
 __all__ = ['LogWdg']
 
@@ -83,6 +84,7 @@ class LogWdg(Tkinter.Frame):
         width = 80,
         height = 20,
         doAutoScroll = True,
+        tabs = "",
     **kargs):
         """
         Inputs:
@@ -92,6 +94,7 @@ class LogWdg(Tkinter.Frame):
         - helpURL: the URL of a help page
         - height: height of text area, in lines
         - width: width of text area, in characters
+        - tabs: set tab stops for Text widget (see Tk documentation for Text)
         - doAutoScroll: auto-scroll to end of text when new messages are added
             (if already at end of text) by default.
         - **kargs: additional keyword arguments for Frame
@@ -111,6 +114,7 @@ class LogWdg(Tkinter.Frame):
             wrap = "word",
             width = width,
             height = height,
+            tabs = tabs,
             readOnly = True,
             helpText = helpText,
             helpURL = helpURL,
