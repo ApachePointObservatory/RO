@@ -52,6 +52,7 @@ History:
 2009-02-23 ROwen    Show last warning if command fails with no explanatory text
 2009-07-06 ROwen    setMsg function: cast duration argument to int to avoid a traceback if float
                     and document that it is definitely in ms (the original comment said "msec?").
+2010-03-05 ROwen    Fixed an error in the tracking of command reply severity.
 """
 __all__ = ['StatusBar']
 
@@ -139,12 +140,9 @@ class StatusBar(Tkinter.Frame):
         self.displayWdg.set("", severity=RO.Constants.sevNormal)
         self.permSeverity = RO.Constants.sevNormal
         self.permMsg = None
-        self.lastWarning = None
         self.currID = None # None if perm msg, tempID if temporary msg
         self.entryErrorID = None
         self.helpID = None
-        self.cmdVar = None
-        self.cmdSummary = ""
     
     def clearTempMsg(self, msgID=0):
         """Clear a temporary message, if any.
@@ -175,6 +173,8 @@ class StatusBar(Tkinter.Frame):
         self.clear()
 
         self.cmdVar = cmdVar
+        self.cmdMaxSeverity = RO.Constants.sevNormal
+        self.cmdLastWarning = None
         if cmdSummary == None:
             if len(self.cmdVar.cmdStr) > self.summaryLen + 3:
                 cmdSummary = self.cmdVar.cmdStr[0:self.summaryLen] + "..."
@@ -263,13 +263,13 @@ class StatusBar(Tkinter.Frame):
     def _cmdCallback(self, msgType, msgDict, cmdVar=None):
         # print "StatusBar _cmdCallback(%r, %r, %r)" % (msgType, msgDict, cmdVar)
         msgDescr, newSeverity = RO.KeyVariable.TypeDict[msgType]
-        msgSeverity = max(newSeverity, self.permSeverity)
+        self.cmdMaxSeverity = max(newSeverity, self.cmdMaxSeverity)
         if msgType == ":":
             # command finished; omit associated text,
             # but append warning info if there were warnings.
-            if msgSeverity == RO.Constants.sevWarning:
-                if self.lastWarning:
-                    msgDescr += "; warning: " + self.lastWarning
+            if self.cmdMaxSeverity == RO.Constants.sevWarning:
+                if self.cmdLastWarning:
+                    msgDescr += "; warning: " + self.cmdLastWarning
                 else:
                     msgDescr += " with warnings"
             infoText = "%s %s" % (
@@ -277,7 +277,7 @@ class StatusBar(Tkinter.Frame):
                 msgDescr,
             )
             self.playCmdDone()
-            self.setMsg(infoText, msgSeverity)
+            self.setMsg(infoText, self.cmdMaxSeverity)
             return
         
         try:
@@ -289,11 +289,11 @@ class StatusBar(Tkinter.Frame):
             dataStr = msgDict.get("msgStr", "")[msgDict.get("dataStart", 0):]
         if msgType == "w" and dataStr:
             # save last warning in case command fails with no text
-            self.lastWarning = dataStr
+            self.cmdLastWarning = dataStr
         elif msgType in RO.KeyVariable.DoneTypes and not dataStr:
             # message failed without an explanation; use last warning
-            dataStr = self.lastWarning
+            dataStr = self.cmdLastWarning
         infoText = "%s %s: %s" % (self.cmdSummary, msgDescr, dataStr)
-        self.setMsg(infoText, msgSeverity)
+        self.setMsg(infoText, self.cmdLastWarning)
         if msgType in RO.KeyVariable.DoneTypes:
             self.playCmdFailed()

@@ -13,14 +13,24 @@
     <li>RO uses numpy instead of numarray and Numeric (as of version 2.1).
 </ul>
 
-<h3>Post-2.3.1 2010-02-19</h3>
+<h3>2.3.2 2010-03-05</h3>
 
 <ul>
     <li>RO.ScriptRunner
     <ul>
         <li>Added isPaused method.
         <li>Changed isAborting to didFail for consistency with isDone and improved the documentation of both methods.
-   </ul>
+    </ul>
+    <li>RO.Wdg
+    <ul>
+        <li>RO.Wdg.<i>x</i>Entry
+        <ul>
+            <li>Added autoSetDefault option.
+            <li>Modified to call doneFunc when the value is changed via set.
+        </ul>
+        <li>RO.Wdg.LogWdg: added tabs option.
+        <li>RO.Wdg.StatusBar: fixed an error in tracking command severity.
+    </ul>
 </ul>
     
 <h3>2.3.1 2010-01-15</h3>
