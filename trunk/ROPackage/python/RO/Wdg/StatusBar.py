@@ -53,6 +53,7 @@ History:
 2009-07-06 ROwen    setMsg function: cast duration argument to int to avoid a traceback if float
                     and document that it is definitely in ms (the original comment said "msec?").
 2010-03-05 ROwen    Fixed an error in the tracking of command reply severity.
+2010-03-08 ROwen    Bug fix: command replies were sometimes displayed with the wrong color.
 """
 __all__ = ['StatusBar']
 
@@ -277,7 +278,7 @@ class StatusBar(Tkinter.Frame):
                 msgDescr,
             )
             self.playCmdDone()
-            self.setMsg(infoText, self.cmdMaxSeverity)
+            self.setMsg(infoText, severity=self.cmdMaxSeverity)
             return
         
         try:
@@ -294,6 +295,6 @@ class StatusBar(Tkinter.Frame):
             # message failed without an explanation; use last warning
             dataStr = self.cmdLastWarning
         infoText = "%s %s: %s" % (self.cmdSummary, msgDescr, dataStr)
-        self.setMsg(infoText, self.cmdLastWarning)
+        self.setMsg(infoText, severity=newSeverity)
         if msgType in RO.KeyVariable.DoneTypes:
             self.playCmdFailed()
