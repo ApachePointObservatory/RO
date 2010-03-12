@@ -16,6 +16,8 @@ History:
 2006-10-24 ROwen    Added RO.Constants.sevDebug support including Debug Color preference.
                     Moved scaleColor to RO.TkUtil and improved it and rename it to addColors.
 2009-09-02 ROwen    Added Critical Color.
+2010-03-11 ROwen    Modified to use RO.Constants.SevNameDict. As a result: if a severity is added,
+                    this module will raise an error if the color preference is missing.
 """
 __all__ = []
 
@@ -144,14 +146,11 @@ class WdgPrefs(object):
             # record old prefVar, in case we want to transfer callbacks
             self.prefDict[prefName] = getColorPref (prefName, defColor)
         
-        # set state pref dict
-        self.sevPrefDict = {
-            RO.Constants.sevDebug:   self.prefDict["Debug Color"],
-            RO.Constants.sevNormal:  self.prefDict["Foreground Color"],
-            RO.Constants.sevWarning: self.prefDict["Warning Color"],
-            RO.Constants.sevError:   self.prefDict["Error Color"],
-            RO.Constants.sevCritical:   self.prefDict["Critical Color"],
-        }
+        # set severity: color preference dictionary
+        sevNamePrefNameDict = {"normal": "foreground"}
+        self.sevPrefDict = RO.Alg.OrderedDict(
+            (sev, self.prefDict["%s Color" % sevNamePrefNameDict.get(sevName, sevName).title()])
+            for sev, sevName in RO.Constants.SevNameDict.iteritems())
 
         # add activebackground color (could do the same for activeforeground,
         # but it doesn't seem to be used).  

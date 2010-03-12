@@ -59,23 +59,27 @@ History:
 2008-04-22 ROwen    Added addMsg method.
 2009-08-25 ROwen    Added doAutoScroll option.
 2010-03-05 ROwen    Added tabs option.
+2010-11-11 ROwen    Added support for severity.
 """
 __all__ = ['LogWdg']
 
 import Tkinter
-try:
-    set
-except NameError:
-    from sets import Set as set
+import RO.Alg
 import Button
 import Entry
 import Label
 import OptionMenu
 import Text
 
-AllTextTag = "alltext"
+_AllTextTag = "__alltext"
+
+_SevTagDict = RO.Alg.OrderedDict(
+    (sev, "__sev_%s" % (name,)) for sev, name in RO.Constants.SevNameDict.iteritems())
+_SevTagListDict = RO.Alg.OrderedDict(
+    (sev, _SevTagDict.values()[ind:]) for ind, sev in enumerate(_SevTagDict.iterkeys()))
 
 class LogWdg(Tkinter.Frame):
+
     def __init__(self,
         master,
         maxLines = 1000,
@@ -123,7 +127,18 @@ class LogWdg(Tkinter.Frame):
         self.text.grid(row=1, column=0, sticky="nsew")
         self.yscroll.grid(row=1, column=1, sticky="ns")
         
-        self.text.tag_configure(AllTextTag)
+        self.text.tag_configure(_AllTextTag)
+
+        # set up severity tags and tie them to color preferences
+        self._severityPrefDict = RO.Wdg.WdgPrefs.getSevPrefDict()
+        for sev, sevTag in _SevTagDict.iteritems():
+            pref = self._severityPrefDict[sev]
+            if sev == RO.Constants.sevNormal:
+                # normal color is already automatically updated
+                # but do make tag known to text widget
+                self.text.tag_configure(sevTag)
+                continue
+            pref.addCallback(RO.Alg.GenericCallback(self._updSevTagColor, sevTag), callNow=True)
         
         self.findCountVar = Tkinter.IntVar()
 
@@ -139,24 +154,25 @@ class LogWdg(Tkinter.Frame):
         self.text.bind("<<Clear>>", killEvent)
         self.text.bind("<Key>", killEvent)
     
-    def addMsg(self, astr, tags=()):
+    def addMsg(self, astr, tags=(), severity=RO.Constants.sevNormal):
         """Append a line of data to the log, adding a trailing \n
         
         If you do not want a trailing \n added for you then call addOutput instead.
         
         Inputs:
         - astr: data to append (a trailing \n IS added for you)
-        - tags: tags for the text
+        - tags: tags for the text. Warning: tags whose names begin with __ (two underscores)
+            are reserved for internal use.
         """
-        self.addOutput(astr + "\n", tags=tags)
+        self.addOutput(astr + "\n", tags=tags, severity=severity)
     
-    def addOutput(self, astr, tags=()):
+    def addOutput(self, astr, tags=(), severity=RO.Constants.sevNormal):
         """Append data to the log without a trailing \n.
         
         If you want a trailing \n added for you then call addMsg instead.
         
         Inputs:
-        - astr: data to append (a traling \n is NOT added for you)
+        - astr: data to append (a trailing \n is NOT added for you)
         - tags: tags for the text
         """
         #print "addOutput(astr=%r; tags=%r)" % (astr, tags)
@@ -168,7 +184,7 @@ class LogWdg(Tkinter.Frame):
         doAutoScroll = self.doAutoScroll and (scrollPos[1] == 1.0 or scrollPos[0] == scrollPos[1])
         
         # insert tagged text at end
-        tags = (AllTextTag,) + tuple(tags)
+        tags = (_AllTextTag, _SevTagDict[severity]) + tuple(tags)
         tagStr = " ".join(tags)
         self.text.insert("end", astr, tagStr)
         
@@ -232,7 +248,15 @@ class LogWdg(Tkinter.Frame):
         # text found; change selection to it
         self.text.tag_remove("sel", "1.0", "end")
         self.text.tag_add("sel", foundStart, foundEnd)
-        self.text.see(foundStart)       
+        self.text.see(foundStart)
+
+    def getSeverityTags(self, minSeverity):
+        """Return all severity tags that have severity >= minSeverity
+        
+        Inputs:
+        - minSeverity: minimum severity for returned tags; an RO.Constants.sev constant
+        """
+        return _SevTagListDict[minSeverity]
     
     def search(self, searchStr, backwards=False, doWrap=False, elide=True, noCase=False, regExp=False):
         """Find and select the next instance of a specified string.
@@ -389,10 +413,10 @@ class LogWdg(Tkinter.Frame):
     def showAllText(self):
         """Shows all text, undoing the effect of showTags"""
         for tag in self.text.tag_names():
-            if tag == AllTextTag:
+            if tag == _AllTextTag:
                 self.text.tag_configure(tag, elide=False)
             else:
-                self.text.tag_configure(AllTextTag, elide="")
+                self.text.tag_configure(_AllTextTag, elide="")
     
     def showTagsOr(self, tags):
         """Only show text that is tagged with one or more of the specified tags.
@@ -400,7 +424,7 @@ class LogWdg(Tkinter.Frame):
         #print "showTagsOr(%r)" % (tags,)
         tags = set(tags)
         for tag in self.text.tag_names():
-            if tag == AllTextTag:
+            if tag == _AllTextTag:
                 self.text.tag_configure(tag, elide=True)
             elif tag in tags:
                 self.text.tag_configure(tag, elide=False)
@@ -413,12 +437,20 @@ class LogWdg(Tkinter.Frame):
         #print "showTagsAnd(%r)" % (tags,)
         tags = set(tags)
         for tag in self.text.tag_names():
-            if tag == AllTextTag:
-                self.text.tag_configure(AllTextTag, elide=False)
+            if tag == _AllTextTag:
+                self.text.tag_configure(_AllTextTag, elide=False)
             elif tag in tags:
                 self.text.tag_configure(tag, elide="")
             else:
                 self.text.tag_configure(tag, elide=True)
+
+    def _updSevTagColor(self, sevTag, color, colorPref):
+        """Apply the current color appropriate for the current severity.
+        
+        Called automatically. Do NOT call manually.
+        """
+        #print "_updSevTagColor(sevTag=%r, color=%r, colorPref=%r)" % (sevTag, color, colorPref)
+        self.text.tag_configure(sevTag, foreground=color)
 
 
 if __name__ == '__main__':
@@ -432,20 +464,22 @@ if __name__ == '__main__':
         maxLines=50,
     )
     testFrame.grid(row=0, column=0, sticky="nsew")
-    
-    tagList = ("red", "blue", "black")
-    
-    for tag in tagList:
-        testFrame.text.tag_configure(tag, foreground=tag)
+
+    severityList = RO.Constants.SevNameDict.keys()
     
     entry = Tkinter.Entry(root)
     entry.grid(row=1, column=0, sticky="nsew")
-    def addTolog (evt):
+    
+    def addMsg(msgStr):
+        """Add a message with random severity"""
+        testFrame.addMsg(msgStr, severity=random.choice(severityList))
+        
+    def addTolog(evt=None):
         try:
-            astr = entry.get()
+            msgStr = entry.get()
             entry.delete(0,"end")
             
-            testFrame.addOutput(astr + "\n", [random.choice(tagList)])
+            addMsg(msgStr)
         except StandardError, e:
             sys.stderr.write ("Could not extract or send: %s\n" % (astr))
             sys.stderr.write ("Error: %s\n" % (e))
@@ -454,7 +488,7 @@ if __name__ == '__main__':
 
     # supply some fake data
     for ii in range(10):
-        testFrame.addOutput("sample entry %s\n" % ii, [random.choice(tagList)])
+        addMsg("sample entry %s" % ii)
 
     root.rowconfigure(0, weight=1)
     root.columnconfigure(0, weight=1)

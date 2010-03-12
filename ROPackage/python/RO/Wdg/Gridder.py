@@ -28,6 +28,10 @@ History:
 2006-10-31 ROwen    Added support adding help text and URL to created widgets.
                     Renamed _BaseGridSet._setHelpFromDataWdg to _setHelpFromDataWdg.
 2007-09-19 ROwen    gridWdg was ignoring the helpText and helpURL arguments (thanks, pychecker!).
+2010-03-11 ROwen    Changed the default for gridWdg to copy helpText and helpURL from the first data widget.
+                    Bug fix: gridWdg would fail if helpText or helpURL was True and the first data widget
+                    was missing the associated attribute.
+                
 """
 __all__ = ['Gridder']
 
@@ -133,8 +137,8 @@ class Gridder(object):
         dataWdg = None,
         units = None,
         cat = None,
-        helpText = None,
-        helpURL = None,
+        helpText = True,
+        helpURL = True,
     **kargs):
         """Grid a set of objects in a row, adding label, enable and units widgets as desired.
         
@@ -392,7 +396,7 @@ class _BaseGridSet:
         return wdg
 
     def _setHelpFromDataWdg(self, dataWdg):
-        """Sets self.helpText and self.helpURL from first dataWdg, if requested
+        """Sets self.helpText and self.helpURL from first dataWdg, if requested and available
         (if helpText or helpURL == True)
         """
         if True not in (self.helpText, self.helpURL):
@@ -400,9 +404,9 @@ class _BaseGridSet:
 
         firstWdg = RO.SeqUtil.asSequence(dataWdg)[0]
         if self.helpText == True:
-            self.helpText = getattr(firstWdg.helpText, "helpText", None)
+            self.helpText = getattr(firstWdg, "helpText", None)
         if self.helpURL == True:
-            self.helpURL = getattr(firstWdg.helpURL, "helpURL", None)
+            self.helpURL = getattr(firstWdg, "helpURL", None)
 
 
 class _GridSet (_BaseGridSet):
