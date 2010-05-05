@@ -44,6 +44,10 @@ History:
 2007-09-05 ROwen    Added Toplevel.__str__ method and updated debug print statements to use it.
                     Added missing final \n to Toplevel.__recordGeometry's y < 0 warning.
 2009-04-20 ROwen    Bug fix: Toplevels with tl_CloseDisabled could be iconified using the standard keystroke.
+2010-05-05 ROwen    Modified to display Toplevels within the visible screen area, even if the requested
+                    geometry is not (as can easily happen if you sometimes connect a laptop to an external
+                    monitor). The code assumes your visible screen is a rectangle, so it can be fooled
+                    by strange screen arrangements.
 """
 __all__ = ['tl_CloseDestroys', 'tl_CloseWithdraws', 'tl_CloseDisabled', 'Toplevel', 'ToplevelSet']
 
@@ -55,23 +59,12 @@ import Tkinter
 import RO.CnvUtil
 import RO.OS
 import RO.SeqUtil
+import RO.TkUtil
 
 # constants for the closeMode argument
 tl_CloseDestroys = 0
 tl_CloseWithdraws = 1
 tl_CloseDisabled = 2
-
-# regular expressions for matching geometry strings
-_GeomREStr = r"^=?(\d+x\d+)?([+-][+-]?\d+[+-][+-]?\d+)?$"
-_GeomRE = re.compile(_GeomREStr, re.IGNORECASE)
-
-# pack arguments as a function of (resazable in x, resizable in y)
-#_PackArgsDict = {
-#   (False, False): {"fill":"none", "expand":"no"},
-#   (False, True):  {"fill":"y",    "expand":"yes"},
-#   (True,  False): {"fill":"x",    "expand":"yes"},
-#   (True,  True):  {"fill":"both", "expand":"yes"},
-#}
 
 class Toplevel(Tkinter.Toplevel):
     def __init__(self,
@@ -143,8 +136,6 @@ class Toplevel(Tkinter.Toplevel):
         if wdgFunc:
             try:
                 self.__wdg = wdgFunc(self)
-                #packArgs = _PackArgsDict.get(resizable, {})
-                #self.__wdg.pack(**packArgs)            
                 self.__wdg.pack(expand="yes", fill="both")
             except (SystemExit, KeyboardInterrupt):
                 raise
@@ -174,36 +165,33 @@ class Toplevel(Tkinter.Toplevel):
             # update_idletasks works around a bug in Tcl/Tk 8.4.13 that consistently caused
             # the Offset and Permissions windows to be drawn in the wrong place
             self.update_idletasks()
-            self.__setGeometry(geometry)
+            self.setGeometry(geometry)
             self.makeVisible()
         else:
-            self.__setGeometry(geometry)
+            self.setGeometry(geometry)
     
-    def __sizePosFromGeom(self, geomStr):
-        """Convenience function; splits a geometry string into its position
-        and size components. Uses no knowledge of the state of the window.
-        """
-        match = _GeomRE.match(geomStr)
-        if match == None:
-            raise ValueError, "invalid geometry string %r" % (geomStr)
-        return match.groups("")
-    
-    def __setGeometry(self, geomStr):
+    def setGeometry(self, geomStr):
         """Set the geometry of the window based on a Tk geometry string.
 
-        Similar to the standard geometry method, but records the new geometry
-        and does not set the size if the window is not resizable.
+        Similar to the standard geometry method, but:
+        - constrains the entire toplevel to be on screen
+          (if size information is missing, then makes sure some of the toplevel is on screen)
+        - sets only position information if window is self-sizing
+        - records the new geometry (including size information, even if window is self-sizing)
         """
-        #print "%s.__setGeometry(%s)" % (self, geomStr,)
-        sizeStr, posStr = self.__sizePosFromGeom(geomStr)
+        #print "%s.setGeometry(%s)" % (self, geomStr,)
+        if not geomStr:
+            return
+        geom = RO.TkUtil.Geometry.fromTkStr(geomStr).constrained()
         if self.__canResize:
-            #print "%s: can resize: set geometry to %r" % (self, geomStr,)
-            self.geometry(geomStr)
+            includeExtent = None # supply if available, else omit
         else:
-            #print "%s: cannot resize: set geometry to %r" % (self, posStr,)
-            self.geometry(posStr)
+            includeExtent = False
+        constrainedGeomStr = geom.toTkStr(includeExtent=includeExtent)
+        #print "%s.setGeometry: constrained geometry = %s" % (self, constrainedGeomStr)
+        self.geometry(constrainedGeomStr)
         if not self.getVisible():
-            self.__geometry = geomStr
+            self.__geometry = geom.toTkStr(includeExtent=None)
     
     def __recordGeometry(self, evt=None):
         """Record the current geometry of the window.
@@ -274,7 +262,7 @@ class Toplevel(Tkinter.Toplevel):
             # window is withdrawn or iconified
             # At one time I set the geometry first "to avoid displaying and then moving it"
             # but I can't remember why this was useful; meanwhile I've commented it out
-#           self.__setGeometry(self.__geometry)
+#           self.setGeometry(self.__geometry)
             self.wm_deiconify()
             self.lift()
     
@@ -396,10 +384,20 @@ class ToplevelSet(object):
     ):
         """Returns the desired geometry for the named toplevel, or "" if none.
         
+        Inputs:
+        - name: name of toplevel
+        
+        Returns geometry in standard Tk format: <width>x<height>[+/-<x0>+/-<x0>]
+        where +/- means + or - and the extent information in [] may be missing.
+        
         The desired geometry is the entry in the geometry file (if any),
         else the entry in the default geometry dictionary.
+        
+        Warning: the desired geometry may be entirely off screen.
+        Eventually I hope to constrain it.
         """
-        return self.fileGeomDict.get(name, self.defGeomDict.get(name, ""))
+        desGeom = self.fileGeomDict.get(name, self.defGeomDict.get(name, ""))
+        return desGeom
     
     def getDesVisible(self,
         name,
@@ -543,7 +541,7 @@ class ToplevelSet(object):
                 
                 tl = self.getToplevel(name)
                 if tl:
-                    currGeom = tl.getGeometry() or defGeom # since getGeometry returns "" if window never displayed
+                    currGeom = tl.getGeometry() or defGeom # getGeometry may return "" if window never displayed
                     currVis = tl.getVisible()
                 else:
                     currGeom = defGeom

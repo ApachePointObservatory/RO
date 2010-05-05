@@ -11,9 +11,12 @@ History:
 2005-09-12 ROwen    Added EvtNoProp.
 2006-10-25 ROwen    Added addColors (based on scaleColor from RO.Wdg.WdgPrefs).
                     Modified colorOK to use winfo_rgb.
+2010-05-04 ROwen    Added Geometry, including the ability to constrain a window's geometry to fit on screen.
 """
-__all__ = ['addColors', 'colorOK', 'EvtNoProp', 'getWindowingSystem', 'TclFunc', 'WSysAqua', 'WSysX11', 'WSysWin']
+__all__ = ['addColors', 'colorOK', 'EvtNoProp', 'getWindowingSystem', 'TclFunc', 'Geometry',
+    'WSysAqua', 'WSysX11', 'WSysWin']
 
+import re
 import sys
 import traceback
 import Tkinter
@@ -202,9 +205,222 @@ class TclFunc:
     def __str__(self):
         return self.tclFuncName
 
+class Geometry(object):
+    """A class representing a tk geometry
+    
+    Fields include the following two-element tuples:
+    - offset: x,y offset of window relative to screen; see also offsetFlipped
+    - offsetFlipped: is the meaning of x,y offset flipped?
+        if False (unflipped) then offset is the distance from screen top/left to window top/left
+        if True (flipped) offset is the distance from window bottom/right to screen bottom/right
+    - extent: x,y extent; always positive or (None, None) if extent is unknown
+
+    System constants:
+    - minCorner: minimum visible offset position (platform-dependent)
+    - screenExtent: x,y extent of all screens put together
+        (if the screens are not the same size and arranged side by side
+        then the area will include pixels that are not visible)
+    
+    WARNING: on some platforms offsetFlipped < 0 is not handled properly.
+    In particular on Mac OS X with Tk 8.4:
+    - the offset is actually relative to the top or right offset of the window,
+        which is dead wrong
+    - setting the geometry for a window with ngeative offset offset may simply not work,
+        resulting in a geometry that is not what you asked for
+        (I have particularly seen this for windows nearly as large as the screen)
+    That is why the constrainToGeomStr method always returns a tk geometry string with positive corners.
+    """
+    if RO.OS.PlatformName == "mac":
+        minCorner = (0, 22)
+    else:
+        minCorner = (0, 0)
+    _root = None
+    _geomRE = re.compile(
+        r"((?P<width>\d+)x(?P<height>\d+))?(?P<xsign>[+-])(?P<x>[-]?\d+)(?P<ysign>[+-])(?P<y>[-]?\d+)$",
+        re.IGNORECASE)
+        
+    def __init__(self, offset, offsetFlipped, extent):
+        """Create a new Geometry
+        
+        Inputs (each is a sequence of two values):
+        - offset: x,y offset of window relative to screen; see also offsetFlipped
+        - offsetFlipped: is the meaning of x,y offset flipped?
+            if False (unflipped) then offset is the distance from screen top/left to window top/left
+            if True (flipped) offset is the distance from window bottom/right to screen bottom/right
+        - extent: x,y extent; you may specify None or (None, None) if the extent is unknown;
+            however, you may not specify an integer for one axis and None for the other
+
+        raise RuntimeError if any input does not have two elements (except that extent may be None)
+        """
+        if len(offset) != 2:
+            raise RuntimeError("offset=%r does not have two values" % (offset,))
+        self.offset = tuple(int(val) for val in offset)
+
+        if len(offsetFlipped) != 2:
+            raise RuntimeError("offsetFlipped=%r does not have two values" % (offsetFlipped,))
+        self.offsetFlipped = tuple(bool(val) for val in offsetFlipped)
+
+        if extent == None:
+            self.extent = (None, None)
+        else:
+            if len(extent) != 2:
+                raise RuntimeError("extent=%r does not have two values" % (extent,))
+            if None in extent:
+                self.extent = (None, None)
+            else:
+                self.extent = tuple(int(val) for val in extent)
+
+    @classmethod
+    def fromTkStr(cls, geomStr):
+        """Create a Geometry from a tk geometry string
+        
+        Inputs:
+        - geomStr: tk geometry string
+        """
+        match = cls._geomRE.match(geomStr)
+        if not match:
+            raise RuntimeError("Could not parse geomStr string %r" % (geomStr,))
+
+        groupDict = match.groupdict()
+
+        return cls(
+            offset = tuple(groupDict[name] for name in ("x", "y")),
+            offsetFlipped = tuple(cls._flippedFromChar(groupDict[name]) for name in ("xsign", "ysign")),
+            extent = tuple(groupDict[name] for name in ("width", "height")),
+        )
+
+    def constrained(self, constrainExtent=True, defExtent=50):
+        """Return a geometry that is constrain to lie entirely within the screen(s)
+
+        Inputs:
+        - constrainExtent: if True then the extent and offset position are both constrained
+            else only the offset position is constrained
+        - defExtent: the extent to assume if the extent is not known; ignored if the extent is known
+        
+        Returns:
+        - a geometry string (not a Geometry, but you can trivially convert it to one)
+        
+        Warnings:
+        - If the user has multiple screens and they are not the same size or lined up side by side
+          then the resulting geometry may not be entirely visible, or even partially visiable.
+        """
+        constrainedOffset = []
+        constrainedExtent = []
+        for ii in range(2):
+            extent_ii = self.extent[ii]
+            if extent_ii == None:
+                extent_ii = defExtent
+            corner_ii = self.offset[ii]
+            minCorner_ii = self.minCorner[ii]
+            usableScreenExtent_ii = self.screenExtent[ii] - minCorner_ii
+            
+            tooLarge_ii = extent_ii > usableScreenExtent_ii
+            
+            if tooLarge_ii and constrainExtent:
+                extent_ii = usableScreenExtent_ii
+            
+            if self.offsetFlipped[ii]:
+                # offset is distance from bottom/right of window to bottom/right of screen
+                # to avoid tk bugs, the constrained result will NOT use this convention
+                corner_ii = usableScreenExtent_ii - (corner_ii + extent_ii)
+    
+            if tooLarge_ii:
+                corner_ii = minCorner_ii
+            elif corner_ii < minCorner_ii:
+                corner_ii = minCorner_ii
+            elif extent_ii + corner_ii > usableScreenExtent_ii:
+                # off lower or right edge
+                corner_ii = usableScreenExtent_ii - extent_ii
+            constrainedOffset.append(corner_ii)
+            constrainedExtent.append(extent_ii)
+
+        if not self.hasExtent:
+            constrainedExtent = (None, None)
+        return type(self)(offset=constrainedOffset, offsetFlipped=(False, False), extent=constrainedExtent)
+
+    @property
+    def hasExtent(self):
+        return None not in self.extent
+        
+    @property
+    def screenExtent(self):
+        if not self._root:
+            self._root = _getTkWdg().winfo_toplevel()
+        return self._root.wm_maxsize()
+
+    def toTkStr(self, includeExtent=None):
+        """Return the geometry as a tk geometry string
+        
+        Inputs:
+        - includeExtent: include extent information? One of:
+            - None: include if available, else omit
+            - True: must include it; raise RuntimeError if extent information unavailable
+            - False: exclude extent information
+        """
+        posStr = "%s%d%s%d" % (
+            self._signStrFromValue(self.offsetFlipped[0]), self.offset[0],
+            self._signStrFromValue(self.offsetFlipped[1]), self.offset[1])
+        if not self.hasExtent:
+            if includeExtent == True:
+                raise RuntimeError("includeExent=True but extent information unavailable")
+            return posStr
+        return "%dx%d%s" % (self.extent[0], self.extent[1], posStr)
+
+    def __str__(self):
+        return self.toTkStr()
+
+    def __repr__(self):
+        return "%s(\"%s\")" % (type(self).__name__, self.toTkStr())
+
+    @staticmethod
+    def _intFromStr(val):
+        if val == None:
+            return val
+        return int(val)
+
+    @staticmethod
+    def _flippedFromChar(valStr):
+        if valStr == "-":
+            return True
+        elif valStr == "+":
+            return False
+        else:
+            raise RuntimeError("Invalid valStr=%r must be \"+\" or \"-\"" % (valStr,))
+
+    @staticmethod
+    def _signStrFromValue(val):
+        if val < 0:
+            return "-"
+        else:
+            return "+"
+
 def _getTkWdg():
     """Return a Tk widget"""
     global g_tkWdg
     if not g_tkWdg:
         g_tkWdg = Tkinter.Frame()
     return g_tkWdg
+
+if __name__ == "__main__":
+    import Tkinter
+    root = Tkinter.Tk()
+
+    def setGeometry(geomStrList):
+        if not geomStrList:
+            root.quit()
+            return
+        geomStr = geomStrList.pop()
+        geomObj = Geometry.fromTkStr(geomStr)
+        constrainedGeom = geomObj.constrained()
+        print "geomStr=%s; constrainedGeomStr=%s" % (geomStr, constrainedGeom)
+        root.geometry(constrainedGeom.toTkStr())
+        root.after(2000, setGeometry, geomStrList)
+        
+    setGeometry([
+        "20000x200+0+0",
+        "200x20000-0-0",
+        "20000x20000-50+50",
+        "-50+50",
+        "+50+50",
+    ])
+    root.mainloop()
