@@ -147,6 +147,7 @@ History:
 2008-04-29 ROwen    Fixed reporting of exceptions that contain unicode arguments.
 2010-03-03 ROwen    Added autoSetDefault option.
                     Modified to call doneFunc when the value is changed via set.
+2010-05-26 ROwen    Modified to use AddCallback 2010-05-26.
 """
 __all__ = ['StrEntry', 'ASCIIEntry', 'FloatEntry', 'IntEntry', 'DMSEntry']
 
@@ -663,8 +664,7 @@ class _BaseEntry (Tkinter.Entry, RO.AddCallback.BaseMixin,
             except (ValueError, TypeError), e:
                 self.var.set("")
     
-        if self._callbacks:
-            self._doCallbacks()
+        self._doCallbacks()
 
     def _entryDone(self, evt=None, doCheck=True):
         """Copies the value to the default if autoSetDefault and calls the done function.

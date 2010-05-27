@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import with_statement
 """Containers (wrappers) for RO.Wdg input widgets, including Entry,
 Checkbutton and OptionMenu.
 
@@ -88,7 +89,9 @@ History:
 2005-08-12 ROwen    Removed unused import of string module.
 2007-08-09 ROwen    Added allDefault method.
 2008-04-28 ROwen    Added stripPlusses argument to VMSQualFmt.
+2010-05-26 ROwen    Modified to use AddCallback 2010-05-26.
 """
+import itertools
 import types
 import RO.AddCallback
 import RO.SeqUtil
@@ -421,13 +424,11 @@ class WdgCont(RO.AddCallback.BaseMixin):
     def restoreDefault(self):
         """Restore all contained widgets to their default value.
         """
-        tempCallbacks, self._callbacks = self._callbacks, ()
-        try:
+        # we want just one callback instead of one per container, so disable callbacks until finished
+        with self._disableCallbacksContext():
             for wdg in self._wdgList:
                 wdg.restoreDefault()
-        finally:
-            self._callbacks = tempCallbacks
-            self._doCallbacks()
+        self._doCallbacks()
     
     def setValueDict(self, valDict):
         """Set the widget from a dictionary: {name1:value1, ...}.
@@ -452,13 +453,11 @@ class WdgCont(RO.AddCallback.BaseMixin):
         if len(valList) != len(self._wdgList):
             raise ValueError, 'valList has %d elements; %d needed' % (len(valList), len(self._wdgList))
         
-        tempCallbacks, self._callbacks = self._callbacks, ()
-        try:
-            for ind in range(len(valList)):
-                self._wdgList[ind].set(valList[ind])
-        finally:
-            self._callbacks = tempCallbacks
-            self._doCallbacks()
+        # we want just one callback instead of one per container, so disable callbacks until finished
+        with self._disableCallbacksContext():
+            for wdg, val in itertools.izip(self._wdgList, valList):
+                wdg.set(val)
+        self._doCallbacks()
 
     def _asOneOrList(self, alist):
         """Return alist[0] if the original wdgs was a single widget,
@@ -862,16 +861,11 @@ class ContList(WdgCont):
         else:
             myDict = valDict
 
-        # set my widgets from my dictionary
-        # want one callback instead of one per container,
-        # so disable callbacks until finished
-        tempCallbacks, self._callbacks = self._callbacks, ()
-        try:
+        # we want just one callback instead of one per container, so disable callbacks until finished
+        with self._disableCallbacksContext():
             for cont in self._wdgList:
                 cont.setValueDict(myDict)
-        finally:
-            self._callbacks = tempCallbacks
-            self._doCallbacks()
+        self._doCallbacks()
 
     def setValueList(self, valList):
         """Not implemented."""

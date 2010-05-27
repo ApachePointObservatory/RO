@@ -17,6 +17,7 @@ History:
 2006-03-23 ROwen    Added _setIsCurrentPrefDict method.
 2007-01-11 ROwen    Changed AutoIsCurrentMixin to use isDefault method
                     instead of getString and getDefault.
+2010-05-27 ROwen    Corrected a few document strings.
 """
 import WdgPrefs
 
@@ -166,19 +167,15 @@ class IsCurrentCheckbuttonMixin(IsCurrentActiveMixin):
 class AutoIsCurrentMixin(object):
     """Add optional automatic control of isCurrent to input widgets.
     
-    The widget must support:
-    - a value obtained via getstring
-    - a default value obtained via getDefault
-    - addCallback (specifies a function to call
-      whenever the state changes)
-    and it must be an IsCurrent...Mixin object
+    The widget must be an IsCurrent...Mixin object and must support:
+    - isDefault(): return True if widget has default value, False otherwise
+    - addCallback(callFunc): call a function whenever the state changes
 
     autoIsCurrent sets the isCurrent mode to manual or automatic.
     - If false (manual mode), then the normal isCurrent behavior applies:
       the widget is current if and only if self._isCurrent true.
     - If true (automatic mode), then the widget is current
-      only if the self._isCurrent flag is true and 
-      self.getString() = self.getDefault().
+      only if the self._isCurrent flag is true and isDefault() is true.
         
     To use this class:
     - Inherit from this class AND THEN from one of the IsCurrent...Mixin classes.

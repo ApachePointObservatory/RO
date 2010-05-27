@@ -5,15 +5,12 @@ Note: one could subclass dict but this requires writing
 explicit methods for setdefault, copy, and possibly others.
 Only do this if extra performance is required.
 
-Warning: I intend to rewrite SetDict to use the new set class
-in Python 2.3 at some point. Don't use SetDict unless you are
-prepared to upgrade to Python 2.3.
-
 History
 1-1 Russell Owen 8/8/00
 1-2 corrected an indentation error
 2003-05-06 ROwen    Test copy and setdefault; renamed to ListDict
                     and added SetDict.
+2010-05-18 ROwen    Modified SetDict to use sets
 """
 import UserDict
 
@@ -21,8 +18,8 @@ class ListDict(UserDict.UserDict):
     """A dictionary whose values are a list of items.
     """
     def __setitem__(self, key, val):
-        """Adds a value to the list of values for a given key,
-        creating a new entry if necessary.
+        """Add a value to the list of values for a given key, creating a new entry if necessary.
+
         Supports the notation: aListDict[key] = val
         """
         if self.data.has_key(key):
@@ -31,8 +28,10 @@ class ListDict(UserDict.UserDict):
             self.data[key] = [val]
     
     def addList(self, key, valList):
-        """Appends a list of values to the list of values for a given key,
-        creating a new entry if necessary.
+        """Append values to the list of values for a given key, creating a new entry if necessary.
+        
+        Inputs:
+        - valList: an iterable collection (preferably ordered) of values
         """
         valList = list(valList)
         if self.data.has_key(key):
@@ -42,8 +41,10 @@ class ListDict(UserDict.UserDict):
 
     def remove(self, key, val):
         """removes the specified value from the list of values for the specified key;
-        raises KeyError if key not found,
-        raises ValueError if val not found"""
+
+        raise KeyError if key not found
+        raise ValueError if val not found
+        """
         self.data.get(key).remove(val)
 
 class SetDict(ListDict):
@@ -52,22 +53,32 @@ class SetDict(ListDict):
     """
     
     def __setitem__(self, key, val):
-        """Adds a value to the set of values for a given key,
-        creating a new entry if necessary.
+        """Add a value to the set of values for a given key, creating a new entry if necessary.
+        
+        Duplicate values are silently ignored.
+        
         Supports the notation: aListDict[key] = val
         """
         valSet = self.data.get(key)
         if valSet == None:
-            self.data[key] = [val]
-        elif val not in valSet:
-            valSet.append(val)
+            self.data[key] = set([val])
+        else:
+            valSet.add(val)
     
     def addList(self, key, valList):
-        """Appends a list of values to the set of values for a given key,
-        creating a new entry if necessary. Duplicate values are elided.
+        """Add values to the set of values for a given key, creating a new entry if necessary.
+        
+        Duplicate values are silently ignored.
+        
+        Inputs:
+        - valList: an iterable collection of values
         """
-        for val in valList:
-            self[key] = val
+        valSet = self.data.get(key)
+        if valSet == None:
+            self.data[key] = set(valList)
+        else:
+            valSet.update(valList)
+
 
 if __name__ == "__main__":
     import RO.StringUtil
