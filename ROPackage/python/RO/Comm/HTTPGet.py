@@ -24,6 +24,7 @@ History:
 2005-07-11 ROwen    Modified to call stateFunc less often during download.
 2005-09-15 ROwen    Documented the arguments for callback functions.
 2008-04-29 ROwen    Fixed reporting of exceptions that contain unicode arguments.
+2010-05-26 ROwen    Tweaked to use _removeAllCallbacks() instead of nulling _callbacks.
 """
 __all__ = ['HTTPGet']
 
@@ -366,7 +367,7 @@ class HTTPGet(RO.AddCallback.BaseMixin):
                     traceback.print_exc(file=sys.stderr)
         
             # remove all callbacks
-            self._callbacks = []
+            self._removeAllCallbacks()
             self._doneCallbacks = []
 
     def _cleanup(self):

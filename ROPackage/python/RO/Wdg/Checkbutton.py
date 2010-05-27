@@ -55,6 +55,8 @@ History:
 2005-09-15 ROwen    If var supplied and defValue left None
                     then the default value is the current value of var.
 2007-01-11 ROwen    Added isDefault method.
+2010-05-21 ROwen    Added trackDefault parameter. By default this is set to autoIsCurrent,
+                    so this may alter existing code.
 """
 __all__ = ['Checkbutton']
 
@@ -93,6 +95,16 @@ class Checkbutton (Tkinter.Checkbutton, RO.AddCallback.TkVarMixin,
             - set, setBool or setIsCurrent is called with isCurrent true
             - setDefValue is called with isCurrent true
             - current value == default value
+    - trackDefault controls whether setDefault can modify the current value:
+        - if True and isDefault() true then setDefault also changes the current value
+        - if False then setDefault never changes the current value
+        - if None then trackDefault = autoIsCurrent (a common configuration)
+        Intended for an entry box that is used both to display the actual value of some other object
+        and also to allow the user to enter a new desired value for that object.
+        Whenever the actual value changes, your code should set the default accordingly.
+        The entry's displayed value will continue to track the actual value unless the user
+        enters some new value (at which point it is assumed they will soon issue a command
+        to change the value of the object).
     - isCurrent: is the default value (used as the initial value) current?
     - severity  initial severity; one of RO.Constants.sevNormal, sevWarning or sevError
     - all remaining keyword arguments are used to configure the Tkinter Checkbutton;
@@ -117,6 +129,7 @@ class Checkbutton (Tkinter.Checkbutton, RO.AddCallback.TkVarMixin,
         defIfDisabled = False,
         showValue = False,
         autoIsCurrent = False,
+        trackDefault = None,
         isCurrent = True,
         severity = RO.Constants.sevNormal,
     **kargs):
@@ -127,6 +140,9 @@ class Checkbutton (Tkinter.Checkbutton, RO.AddCallback.TkVarMixin,
             defValue = var.get()
         self._var = var
         self._defIfDisabled = bool(defIfDisabled)
+        if trackDefault == None:
+            trackDefault = bool(autoIsCurrent)
+        self._trackDefault = trackDefault
         self.helpText = helpText
         
         # if a command is supplied in kargs, remove it now and set it later
@@ -306,6 +322,7 @@ class Checkbutton (Tkinter.Checkbutton, RO.AddCallback.TkVarMixin,
             Typically this is only useful in autoIsCurrent mode.
         kargs is ignored; it is only present for compatibility with KeyVariable callbacks.
         """
+        restoreDef = self._trackDefault and self.isDefault()
         self._defBool = self.asBool(newDefValue)
         if isCurrent != None:
             self._isCurrent = isCurrent
@@ -313,7 +330,7 @@ class Checkbutton (Tkinter.Checkbutton, RO.AddCallback.TkVarMixin,
         # if disabled and defIfDisabled, update display
         # (which also triggers a callback)
         # otherwise leave the display alone and explicitly trigger a callback
-        if self._defIfDisabled and self["state"] == "disabled":
+        if restoreDef or (self._defIfDisabled and self["state"] == "disabled"):
             self.restoreDefault()
         else:
             self._doCallbacks()

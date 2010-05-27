@@ -13,6 +13,21 @@
     <li>RO uses numpy instead of numarray and Numeric (as of version 2.1).
 </ul>
 
+<h3>2.4.0 2010-05-27</h3>
+<ul>
+    <li>RO.AddCallback
+    <ul>
+        <li>Added method _disableCallbacksContext; to temporarily disabling callbacks use:<br>
+            <code>with self._disableCallbacksContext():</code>
+        <li>Added new boolean member variable _enableCallbacks.
+        <li>Added a guard to prevent infinite recursion while running callbacks (using _enableCallbacks).
+    </ul>
+    <li>RO.Alg.SetDict: modified to use sets.
+    <li>RO.TkUtil.Geometry: fixed a bug whereby toTkStr might return extent information even when it shouldn't.
+    <li>RO.Wdg.Checkbutton: added trackDefault argument to constructor. <b>Warning:</b> the default value is None, which tracks autoIsCurrent. Thus the behavior of some controls may change. I don't expect this to be a significant change, and it matches the behavior of RO.Wdg.Entry widgets.
+    <li>RO.Wdg.IsCurrentMixin: corrected some doc strings for which methods the supporting object must support.
+</ul>
+
 <h3>2.3.5 2010-05-05</h3>
 <ul>
     <li>RO.TkUtil: added the Geometry class, a representation of tk geometry strings. Geometry includes the ability to constrain geometry to the visible area of the user's displays.

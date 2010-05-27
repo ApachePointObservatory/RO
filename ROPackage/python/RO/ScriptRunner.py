@@ -72,6 +72,7 @@ History:
                     Added isPaused method.
                     Improved documentation for didFail and isDone methods.
                     Improved documentation for abortCmdStr and keyVars arguments to waitCmd.
+2010-05-26 ROwen    Tweaked to use _removeAllCallbacks() instead of nulling _callbacks.
 """
 import sys
 import threading
@@ -809,7 +810,7 @@ class ScriptRunner(RO.AddCallback.BaseMixin):
         The evt argument is ignored, but allows __del__ to be
         called from a Tk event binding.
         """
-        self._callbacks = []
+        self._removeAllCallbacks()
         self.cancel()
     
     def _end(self):

@@ -12,6 +12,7 @@ History:
 2006-10-25 ROwen    Added addColors (based on scaleColor from RO.Wdg.WdgPrefs).
                     Modified colorOK to use winfo_rgb.
 2010-05-04 ROwen    Added Geometry, including the ability to constrain a window's geometry to fit on screen.
+2010-05-21 ROwen    Bug fix: Geometry.toTkStr could include extent when it shouldn't.
 """
 __all__ = ['addColors', 'colorOK', 'EvtNoProp', 'getWindowingSystem', 'TclFunc', 'Geometry',
     'WSysAqua', 'WSysX11', 'WSysWin']
@@ -360,11 +361,16 @@ class Geometry(object):
         posStr = "%s%d%s%d" % (
             self._signStrFromValue(self.offsetFlipped[0]), self.offset[0],
             self._signStrFromValue(self.offsetFlipped[1]), self.offset[1])
-        if not self.hasExtent:
-            if includeExtent == True:
+
+        if includeExtent == None:
+            includeExtent = self.hasExtent
+
+        if includeExtent:
+            if not self.hasExtent:
                 raise RuntimeError("includeExent=True but extent information unavailable")
-            return posStr
-        return "%dx%d%s" % (self.extent[0], self.extent[1], posStr)
+            return "%dx%d%s" % (self.extent[0], self.extent[1], posStr)
+
+        return posStr
 
     def __str__(self):
         return self.toTkStr()
