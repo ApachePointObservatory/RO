@@ -148,6 +148,7 @@ History:
 2010-03-03 ROwen    Added autoSetDefault option.
                     Modified to call doneFunc when the value is changed via set.
 2010-05-26 ROwen    Modified to use AddCallback 2010-05-26.
+2010-06-07 ROwen    Modified so that doneFunc is not called if _enableCallbacks false.
 """
 __all__ = ['StrEntry', 'ASCIIEntry', 'FloatEntry', 'IntEntry', 'DMSEntry']
 
@@ -544,7 +545,7 @@ class _BaseEntry (Tkinter.Entry, RO.AddCallback.BaseMixin,
 
         Error conditions:
         - Raises ValueError and leaves the widget unchanged
-          if newVal is is invalid (including out of range for numeric entry widgets).
+          if newVal is invalid (including out of range for numeric entry widgets).
         """
         if newVal != None:
             self.checkValue(newVal)
@@ -688,7 +689,8 @@ class _BaseEntry (Tkinter.Entry, RO.AddCallback.BaseMixin,
         if self._autoSetDefault:
             self.setDefault(currVal)
         if self._doneFunc:
-            self._doneFunc(self)
+            if self._enableCallbacks:
+                self._doneFunc(self)
         return None # make pychecker happy
     
     def _getErrorPrefix(self, descr=None):
