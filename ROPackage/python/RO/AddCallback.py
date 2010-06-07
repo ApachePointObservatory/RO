@@ -27,6 +27,7 @@ History:
 2010-05-26 ROwen    Added method _disableCallbacksContext.
                     Added boolean member variable _enableCallbacks.
                     Added a guard to prevent infinite recursion while running callbacks.
+2010-06-07 ROwen    Added a few commented-out print statements.
 """
 import re
 import sys
@@ -41,11 +42,15 @@ class _DisableCallbacksContext(object):
         self.callbackObj = callbackObj
     
     def __enter__(self):
+        temp = self.callbackObj._enableCallbacks
         self.initialCallbacksEnabled = self.callbackObj._enableCallbacks
         self.callbackObj._enableCallbacks = False
+#        print "%s.__enter__; _enableCallbacks was %s; is %s" % (self.callbackObj, temp, self.callbackObj._enableCallbacks)
     
     def __exit__(self, type, value, traceback):
+        temp = self.callbackObj._enableCallbacks
         self.callbackObj._enableCallbacks = self.initialCallbacksEnabled
+#        print "%s.__exit__; _enableCallbacks was %s; is %s" % (self.callbackObj, temp, self.callbackObj._enableCallbacks)
 
 
 class BaseMixin(object):
@@ -137,6 +142,7 @@ class BaseMixin(object):
 
         If callbacks are already being executed then this function is a no-op
         """
+#        print "%s._basicDoCallbacks; _enableCallbacks=%s" % (self, self._enableCallbacks)
         if not self._enableCallbacks:
             return
 
