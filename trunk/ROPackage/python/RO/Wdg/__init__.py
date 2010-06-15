@@ -6,6 +6,7 @@ from ChangedIndicator import *
 from Checkbutton import *
 from CmdWdg import *
 from CtxMenu import *
+from DropletRunner import *
 from Entry import *
 from Gridder import *
 from HistoryMenu import *
