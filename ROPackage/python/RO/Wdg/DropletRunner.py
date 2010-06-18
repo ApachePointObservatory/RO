@@ -80,7 +80,7 @@ class DropletRunner():
         
         if title == None:
             title = os.path.splitext(os.path.basename(scriptPath))[0]
-        self.root.title(title)
+        self.tkRoot.title(title)
 
         if RO.OS.PlatformName == "mac":
             self.tkRoot.createcommand('::tk::mac::OpenDocument', self._macOpenDocument)
