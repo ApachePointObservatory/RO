@@ -38,9 +38,13 @@ To build a Mac droplet using py2app, assuming the code that does the work is in 
         "mainScript.py",
         os.path.join("dist", appName, "Contents", "Resources"),
     )
+
+History:
+2010-06-16 ROwen
+2010-06-17 ROwen    Added title and initialText arguments to constructor.
 """
 import sys
-import os
+import os.path
 import subprocess
 import Tkinter
 import RO.OS
@@ -58,11 +62,13 @@ class DropletRunner():
     On Mac OS X additional files may be dropped on the application icon once the first batch is processed.
     I don't know how to support this on other platforms.
     """
-    def __init__(self, scriptPath, **keyArgs):
+    def __init__(self, scriptPath, title=None, initialText=None, **keyArgs):
         """Construct and run a DropletRunner
         
         Inputs:
         - scriptPath: path to script to run when files are dropped on the application
+        - title: title for log window; if None then generated from scriptPath
+        - initialText: initial text to display in log window
         **keyArgs: all other keyword arguments are sent to the RO.Wdg.LogWdg constructor
         """
         self.isRunning = False
@@ -71,6 +77,10 @@ class DropletRunner():
             raise RuntimeError("Cannot find script %r" % (self.scriptPath,))
 
         self.tkRoot = Tkinter.Tk()
+        
+        if title == None:
+            title = os.path.splitext(os.path.basename(scriptPath))[0]
+        self.root.title(title)
 
         if RO.OS.PlatformName == "mac":
             self.tkRoot.createcommand('::tk::mac::OpenDocument', self._macOpenDocument)
@@ -88,6 +98,9 @@ class DropletRunner():
         self.tkRoot.grid_rowconfigure(0, weight=1)
         self.tkRoot.grid_columnconfigure(0, weight=1)
         
+        if initialText:
+            self.logWdg.addOutput(initialText)
+
         if filePathList:
             self.runFiles(filePathList)
 
