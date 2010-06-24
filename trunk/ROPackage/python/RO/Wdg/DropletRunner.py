@@ -42,6 +42,8 @@ To build a Mac droplet using py2app, assuming the code that does the work is in 
 History:
 2010-06-16 ROwen
 2010-06-17 ROwen    Added title and initialText arguments to constructor.
+2010-06-24 ROwen    Bug fix: use sys.executable to run the droplet script, thus giving the droplet script
+                    access to the bundled application's python and python libraries.
 """
 import sys
 import os.path
@@ -111,7 +113,7 @@ class DropletRunner():
         """
 #        print "runFiles(filePathList=%s)" % (filePathList,)
         self.isRunning = True
-        argList = ["python", self.scriptPath] + list(filePathList)
+        argList = [sys.executable, self.scriptPath] + list(filePathList)
         self.subProc = subprocess.Popen(argList, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         self.tkRoot.tk.createfilehandler(self.subProc.stderr, Tkinter.READABLE, self._readStdErr)
         self.tkRoot.tk.createfilehandler(self.subProc.stdout, Tkinter.READABLE, self._readStdOut)
