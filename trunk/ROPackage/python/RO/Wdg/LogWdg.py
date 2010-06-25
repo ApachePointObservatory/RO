@@ -60,6 +60,10 @@ History:
 2009-08-25 ROwen    Added doAutoScroll option.
 2010-03-05 ROwen    Added tabs option.
 2010-11-11 ROwen    Added support for severity.
+2010-06-25 ROwen    Added addOutputList and isScrolledToEnd methods.
+                    Changed findTag to search from the insertion cursor if there is no selection,
+                    rather than the beginning or end. This offers the user a natural way to specify
+                    the start of the search.
 """
 __all__ = ['LogWdg']
 
@@ -163,25 +167,24 @@ class LogWdg(Tkinter.Frame):
         - astr: data to append (a trailing \n IS added for you)
         - tags: tags for the text. Warning: tags whose names begin with __ (two underscores)
             are reserved for internal use.
+        - severity: one of the RO.Constants.sevX constants
         """
         self.addOutput(astr + "\n", tags=tags, severity=severity)
     
     def addOutput(self, astr, tags=(), severity=RO.Constants.sevNormal):
-        """Append data to the log without a trailing \n.
+        """Append data to the log without adding a trailing \n.
         
-        If you want a trailing \n added for you then call addMsg instead.
+        If you want a trailing \n then you must supply it or call addMsg instead.
         
         Inputs:
-        - astr: data to append (a trailing \n is NOT added for you)
+        - astr: text to append (a trailing \n is NOT added for you)
         - tags: tags for the text
+        - severity: one of the RO.Constants.sevX constants
         """
         #print "addOutput(astr=%r; tags=%r)" % (astr, tags)
         # set auto-scroll flag true if scrollbar is at end
-        # there are two cases that indicate auto-scrolling is wanted:
-        # scrollPos[1] = 1.0: scrolled to end
-        # scrollPos[1] = scrollPos[0]: window has not yet been painted
         scrollPos = self.yscroll.get()
-        doAutoScroll = self.doAutoScroll and (scrollPos[1] == 1.0 or scrollPos[0] == scrollPos[1])
+        doScrollToEnd = self.doAutoScroll and self.isScrolledToEnd()
         
         # insert tagged text at end
         tags = (_AllTextTag, _SevTagDict[severity]) + tuple(tags)
@@ -193,16 +196,58 @@ class LogWdg(Tkinter.Frame):
         if extraLines > 0:
             self.text.delete("1.0", str(extraLines) + ".0")
         
-        if doAutoScroll:
+        if doScrollToEnd:
             self.text.see("end")
     
+    def addOutputList(self, strTagSevList):
+        """Append a list of (text, tags, severity) data to the log.
+        
+        You are responsible for supplying \n at the end of each line.
+        
+        Each element of the list must contain exactly three entries:
+        - astr: the text to append; you must supply \n for the end of each line
+        - tags: a collection of tags
+        - severity: one of the RO.Constants.sevX constants
+        """
+        if not strTagSevList:
+            return
+
+        # create strTagList, adding the severity tag and _AllTextTag tag;
+        # this also verifies the format of strTagSevList before using it for anything
+        try:
+            strTagList = [(astr, (_AllTextTag, _SevTagDict[severity]) + tuple(tags))
+                for astr, tags, severity in strTagSevList]
+        except Exception, e:
+            raise RuntimeError("Could not parse strTagSevList: %s" % (RO.StringUtil.strFromException(e),))
+
+        scrollPos = self.yscroll.get()
+        doScrollToEnd = self.doAutoScroll and self.isScrolledToEnd()
+
+        maxLines = self.maxLineIndex - 1
+        if maxLines < len(strTagList):
+            # new text is so long it overfills the buffer
+            self.clearOutput()
+            doScrollToEnd = True
+            strTagList = strTagList[-maxLines:]
+        else:
+            extraLines = len(strTagList) + int(float(str(self.text.index("end"))) - self.maxLineIndex)
+            if extraLines > 0:
+                self.text.delete("1.0", str(extraLines) + ".0")
+
+        # flatten strTagList to str0, tag0, str1, tag1,...
+        flatStrTagList = [item for strOrTag in strTagList for item in strOrTag]
+        self.text.insert("end", *flatStrTagList)
+        
+        if doScrollToEnd:
+            self.text.see("end")
+        
     def clearOutput(self):
         self.text.delete("1.0", "end")
 
     def findTag(self, tag, backwards=False, doWrap=False):
         """Find and select the next instance of a specified tag.
         The search starts from the current selection, if any,
-        else from the beginning/end if forwards/backwards.
+        else from the insertion cursor.
 
         Warning: due to a bug in tk or Tkinter, you must not call this directly
         from a callback function that modifies the text being searched for
@@ -224,14 +269,14 @@ class LogWdg(Tkinter.Frame):
             if selRange:
                 startIndex = selRange[0]
             else:
-                startIndex = "end"
+                startIndex = self.text.index("insert")
             stopIndex = "1.0"
             findFunc = self.text.tag_prevrange
         else:
             if selRange:
                 startIndex = selRange[1]
             else:
-                startIndex = "1.0"
+                startIndex = self.text.index("insert")
             stopIndex = "end"
             findFunc = self.text.tag_nextrange
 
@@ -257,6 +302,15 @@ class LogWdg(Tkinter.Frame):
         - minSeverity: minimum severity for returned tags; an RO.Constants.sev constant
         """
         return _SevTagListDict[minSeverity]
+    
+    def isScrolledToEnd(self):
+        """Return True if scrollbar is at the end or if not sure (window not yet painted)
+        """
+        # test two cases:
+        # scrollPos[1] = 1.0: scrolled to end
+        # scrollPos[1] = scrollPos[0]: window has not yet been painted
+        scrollPos = self.yscroll.get()
+        return scrollPos[1] == 1.0 or scrollPos[0] == scrollPos[1]
     
     def search(self, searchStr, backwards=False, doWrap=False, elide=True, noCase=False, regExp=False):
         """Find and select the next instance of a specified string.
