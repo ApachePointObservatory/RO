@@ -1,4 +1,7 @@
 """Routines to format date and time as ISO date
+
+History:
+2010-06-28 ROwen    Bug fix: isoDateFromPySec was broken.
 """
 import math
 import time
@@ -57,9 +60,9 @@ def isoDateFromPySec(pySec=None, useGMT=True):
     Returns a string in this format: YYYY-MM-DD
     """
     if useGMT:
-        timeTuple = time.gmtime(roundedSec)
+        timeTuple = time.gmtime(pySec)
     else:
-        timeTuple = time.localtime(roundedSec)
+        timeTuple = time.localtime(pySec)
 
     return time.strftime("%Y-%m-%d", timeTuple)
 
