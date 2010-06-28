@@ -52,9 +52,6 @@ if status != 0:
 
 distDir = os.path.abspath("dist")
 eggDir = os.path.abspath("RO.egg-info")
-delOK = raw_input("OK to delete %r and %r? (y/[n]) " % (distDir, eggDir))
-if not delOK.lower() == "y":
-    sys.exit(0)
 
 print "Deleting %r" % (distDir,)
 shutil.rmtree(distDir)
