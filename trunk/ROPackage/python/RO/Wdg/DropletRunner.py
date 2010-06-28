@@ -44,6 +44,7 @@ History:
 2010-06-17 ROwen    Added title and initialText arguments to constructor.
 2010-06-24 ROwen    Bug fix: use sys.executable to run the droplet script, thus giving the droplet script
                     access to the bundled application's python and python libraries.
+2010-06-28 ROwen    Tweaked _readStdOut and _readStdErr to make it clearer they ignore their arguments.
 """
 import sys
 import os.path
@@ -134,14 +135,14 @@ class DropletRunner():
         else:
             self.tkRoot.after(100, self._poll)
     
-    def _readStdOut(self, file, dumMask=None):
+    def _readStdOut(self, *dumArgs):
         """Read and log data from script's stdout
         """
         self.logWdg.addOutput(self.subProc.stdout.read())
         if self.subProc.poll() != None:
             self._cleanup()
 
-    def _readStdErr(self, file, dumMask=None):
+    def _readStdErr(self, *dumArgs):
         """Read and log data from script's stderr
         """
         self.logWdg.addOutput(self.subProc.stderr.read(), severity=RO.Constants.sevError)

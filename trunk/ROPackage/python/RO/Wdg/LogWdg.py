@@ -64,6 +64,7 @@ History:
                     Changed findTag to search from the insertion cursor if there is no selection,
                     rather than the beginning or end. This offers the user a natural way to specify
                     the start of the search.
+2010-06-28 ROwen    Removed two statements that had no effect (thanks to pychecker).
 """
 __all__ = ['LogWdg']
 
@@ -183,7 +184,6 @@ class LogWdg(Tkinter.Frame):
         """
         #print "addOutput(astr=%r; tags=%r)" % (astr, tags)
         # set auto-scroll flag true if scrollbar is at end
-        scrollPos = self.yscroll.get()
         doScrollToEnd = self.doAutoScroll and self.isScrolledToEnd()
         
         # insert tagged text at end
@@ -220,7 +220,6 @@ class LogWdg(Tkinter.Frame):
         except Exception, e:
             raise RuntimeError("Could not parse strTagSevList: %s" % (RO.StringUtil.strFromException(e),))
 
-        scrollPos = self.yscroll.get()
         doScrollToEnd = self.doAutoScroll and self.isScrolledToEnd()
 
         maxLines = self.maxLineIndex - 1

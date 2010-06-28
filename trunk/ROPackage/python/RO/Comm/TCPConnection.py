@@ -43,9 +43,9 @@ History:
                     and then connected. That was two operations, which made it hard to track completion.
 2008-01-25 ROwen    Tweaked connect to raise RuntimeError if connecting or connected (not just connected).
 2008-02-13 ROwen    Added mayConnect method.
+2010-06-28 ROwen    Removed unused import (thanks to pychecker).
 """
 import sys
-import time
 from TkSocket import TkSocket, NullSocket
 
 # states

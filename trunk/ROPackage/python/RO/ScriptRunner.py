@@ -73,6 +73,8 @@ History:
                     Improved documentation for didFail and isDone methods.
                     Improved documentation for abortCmdStr and keyVars arguments to waitCmd.
 2010-05-26 ROwen    Tweaked to use _removeAllCallbacks() instead of nulling _callbacks.
+2010-06-28 ROwen    Made _WaitBase a modern class (thanks to pychecker).
+                    Removed unused and broken internal method _waitEndFunc (thanks to pychecker).
 """
 import sys
 import threading
@@ -708,13 +710,6 @@ class ScriptRunner(RO.AddCallback.BaseMixin):
                 reason = str(msgDict)
         self._setState(Failed, reason="%s failed: %s" % (cmdDescr, reason))
     
-    def _waitEndFunc(self, cancelFunc, cleanupFunc):
-        """Register the specified cancel function
-        and return a wait end function that should be called
-        when the wait ends successfully.
-        """
-        return _WaitEnd(self, cancelFunc, cleanupFunc)
-
     def _continue(self, iterID, val=None):
         """Continue executing the script.
         
@@ -898,7 +893,7 @@ class ScriptRunner(RO.AddCallback.BaseMixin):
             self._waiting = True
 
 
-class _WaitBase:
+class _WaitBase(object):
     """Base class for waiting.
     Handles verifying iterID, registering the termination function,
     registering and unregistering the cancel function, etc.

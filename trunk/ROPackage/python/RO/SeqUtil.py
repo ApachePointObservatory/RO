@@ -27,13 +27,10 @@ History:
                     (adopting a test suggested by Michael Spencer on comp.lang.python).
                     Collection and Sequence are now defined in the module's doc string.
 2007-04-24 ROwen    Changed Numeric to numpy in a doc string.
+2010-06-28 ROwen    Modified to require Python 2.4 by assuming set is a builtin type.
 """
 import UserString
 import RO.MathUtil
-try:
-    set
-except NameError:
-    from sets import Set as set
 
 def asCollection(item):
     """Convert one or more items to a Collection.

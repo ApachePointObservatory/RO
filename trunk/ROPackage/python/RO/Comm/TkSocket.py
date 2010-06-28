@@ -73,16 +73,13 @@ History:
                     Bug fix: invalid import in test code.
 2008-01-16 ROwen    TkSocket: added pre-test for socket existing to write and writeLine.
 2008-03-06 ROwen    Stopped setting instance variable _prevLine; it was not used anywhere.
+2010-06-28 ROwen    Modified to require Python 2.4 by assuming set is a builtin type.
 """
 __all__ = ["TkSocket", "TkServerSocket", "BaseServer", "NullSocket"]
 import sys
 import traceback
 import Tkinter
 import RO.TkUtil
-try:
-    set
-except NameError:
-    from sets import Set as set
 
 class TkBaseSocket(object):
     """A basic TCP/IP socket.

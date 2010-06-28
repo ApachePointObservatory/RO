@@ -48,11 +48,11 @@ History:
                     geometry is not (as can easily happen if you sometimes connect a laptop to an external
                     monitor). The code assumes your visible screen is a rectangle, so it can be fooled
                     by strange screen arrangements.
+2010-06-28 ROwen    Removed one unused import (thanks to pychecker).
 """
 __all__ = ['tl_CloseDestroys', 'tl_CloseWithdraws', 'tl_CloseDisabled', 'Toplevel', 'ToplevelSet']
 
 import os.path
-import re
 import sys
 import traceback
 import Tkinter
