@@ -45,6 +45,8 @@ History:
 2010-06-24 ROwen    Bug fix: use sys.executable to run the droplet script, thus giving the droplet script
                     access to the bundled application's python and python libraries.
 2010-06-28 ROwen    Tweaked _readStdOut and _readStdErr to make it clearer they ignore their arguments.
+2010-07-12 ROwen    Bug fix: had class DropletRunner(): which is not compatible with some versions of Python;
+                    Made DropletRunner a new-style class (as originally intended).
 """
 import sys
 import os.path
@@ -56,7 +58,7 @@ import LogWdg
 
 __all__ = ["DropletRunner"]
 
-class DropletRunner():
+class DropletRunner(object):
     """Run a script as a droplet (an application onto which you drop file) with a log window.
     
     Data the script writes to sys.stdout and sys.stderr is written to a log window;

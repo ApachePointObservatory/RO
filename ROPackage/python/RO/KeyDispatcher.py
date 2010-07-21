@@ -74,6 +74,9 @@ History:
                     Overhauled keyVar refresh to be more efficient and to run each refresh command only once.
                     Modified to not log if logFunc = None; tweaked convenience logging function.
 2009-09-10 ROwen    Bug fix: check self._refreshAllID before using it with after_cancel.
+2010-07-21 ROwen    Changed refreshAllVar to handle setting keyVars not current differently; instead of
+                    implicitly basing it on the connection state, it now is based on a new argument.
+                    Added readUnixTime field.
 """
 import sys
 import time
@@ -124,6 +127,9 @@ class KeyDispatcher(object):
     - logFunc: a function that logs a message. Argument list must be:
         (msgStr, severity, actor, cmdr)
         where the first argument is positional and the others are by name
+
+    Fields:
+    - readUnixTime: unix time at which last message received from connection; 0 if no message ever received.
     """
     def __init__(self,
         name="KeyDispatcher",
@@ -133,6 +139,7 @@ class KeyDispatcher(object):
     ):
         self.name = name
         self.tkWdg = tkWdg or _NullRoot()
+        self.readUnixTime = 0
 
         self._isConnected = False
 
@@ -241,7 +248,7 @@ class KeyDispatcher(object):
             if self._isConnected:
                 if self._refreshAllID != None:
                     self.tkWdg.after_cancel(self._refreshAllID)
-                self._refreshAllID = self.tkWdg.after(_ShortIntervalMS, self.refreshAllVar)
+                self._refreshAllID = self.tkWdg.after(_ShortIntervalMS, self.refreshAllVar, False)
 
     def checkCmdTimeouts(self):
         """Check all pending commands for timeouts"""
@@ -308,8 +315,12 @@ class KeyDispatcher(object):
                 self._replyCmdVar(cmdVar, msgDict, doLog=False)
                     
     def doRead(self, sock, msgStr):
-        """Reads, parses and dispatches a message from the hub"""
+        """Reads, parses and dispatches a message from the hub
+        
+        Sets self.readUnixTime to time.time()
+        """
         # parse message; if it fails, log it as an error
+        self.readUnixTime = time.time()
         try:
             msgDict = RO.ParseMsg.parseHubMsg(msgStr)
         except (SystemExit, KeyboardInterrupt):
@@ -470,13 +481,12 @@ class KeyDispatcher(object):
             msgDict["data"] = {}
             return msgDict
     
-    def refreshAllVar(self):
+    def refreshAllVar(self, resetAll=True):
         """Examines all keywords, looking for ones that need updating
         and issues the appropriate refresh commands.
-
+        
         Inputs:
-        - ignoreFailed: refresh even if an earlier attempt failed
-        - startOver: list all vars as bad and then reload
+        - resetAll: reset all keyword variables to notCurrent
         """
 #         print "refreshAllVar()"
 
@@ -486,16 +496,14 @@ class KeyDispatcher(object):
         if self._refreshNextID:
             self.tkWdg.after_cancel(self._refreshNextID)
     
-        if not self._isConnected:
+        if resetAll:
             # clear the refresh command dict
             # and invalidate all keyVars
             # (leave pending refresh commands alone; they will time out)
             for keyVarList in self.keyVarListDict.values():
                 for keyVar in keyVarList:
                     keyVar.setNotCurrent()
-            return
         
-        self._updateRefreshCmds()
         self._sendNextRefreshCmd()
 
     def removeKeyVar(self, keyVar):
@@ -668,11 +676,10 @@ class KeyDispatcher(object):
         """
 #         print "_sendNextRefreshCmd(%s)" % (refreshCmdItemIter,)
         if not self._isConnected:
-            # schedule parent function asap and bail out
-            self._refreshAllID = self.tkWdg.after(_ShortIntervalMS, self.refreshAllVar)
             return
 
         if refreshCmdItemIter == None:
+            self._updateRefreshCmds()
             refreshCmdItemIter = self.refreshCmdDict.iteritems()
 
         try:
