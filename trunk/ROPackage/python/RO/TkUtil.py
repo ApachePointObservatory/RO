@@ -13,6 +13,7 @@ History:
                     Modified colorOK to use winfo_rgb.
 2010-05-04 ROwen    Added Geometry, including the ability to constrain a window's geometry to fit on screen.
 2010-05-21 ROwen    Bug fix: Geometry.toTkStr could include extent when it shouldn't.
+2010-07-20 ROwen    Added Timer class.
 """
 __all__ = ['addColors', 'colorOK', 'EvtNoProp', 'getWindowingSystem', 'TclFunc', 'Geometry',
     'WSysAqua', 'WSysX11', 'WSysWin']
@@ -399,6 +400,40 @@ class Geometry(object):
             return "-"
         else:
             return "+"
+
+
+class Timer(object):
+    """A restartable one-shot timer
+    """
+    def __init__(self, sec=None, callFunc=None, *args):
+        """Start or set up a one-shot timer
+
+        Inputs:
+        - sec: interval, in seconds (float); if omitted then the timer is not started
+        - callFunc: function to call when timer fires
+        *args: arguments for callFunc
+        """
+        self._tkWdg = _getTkWdg()
+        self._timerID = None
+        if sec != None:
+            self.startTimer(sec, callFunc, *args)
+    
+    def start(self, sec, callFunc, *args):
+        """Start or restart the timer, cancelling a pending timer if present
+        
+        Inputs:
+        - sec: interval, in seconds (float)
+        - callFunc: function to call when timer fires
+        *args: arguments for callFunc
+        """
+        self.cancel()
+        self._timerID = self._tkWdg.after(int(0.5 + (1000.0 * sec)), callFunc, *args)
+
+    def cancel(self):
+        """Cancel the timer; a no-op if the timer is not active"""
+        if self._timerID:
+            self._tkWdg.after_cancel(self._timerID)
+
 
 def _getTkWdg():
     """Return a Tk widget"""
