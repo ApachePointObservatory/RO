@@ -13,8 +13,16 @@
     <li>RO uses numpy instead of numarray and Numeric (as of version 2.1).
 </ul>
 
-<h3>2.5.3-post 2010-07-20</h3>
+<h3>2.5.4 2010-07-30</h3>
 <ul>
+    <li>RO.Astro.Sph.angSideAng:
+    <ul>
+        <li>Changed output flag from zero_bb to unknownAng. In some cases this is set when side_bb = 180.
+        <li>Bug fix: in some cases side_bb should have been 180 when ang_A and ang_C unknown.
+        <li>Improved the accuracy for some edge cases (all unit tests now pass).
+        <li>Greatly expanded the unit tests.
+    </ul>
+    <li>RO.MathUtils.wrapPos: bug fix: could return 360.0 in special cases.
     <li>RO.TkUtil: added Timer class
     <li>RO.KeyDispatcher
     <ul>
