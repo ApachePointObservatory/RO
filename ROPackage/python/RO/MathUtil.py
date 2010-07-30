@@ -18,6 +18,7 @@ History:
 2003-11-18 ROwen    Moved asList, asSequence, flattenLists, isSequence,
                     removeDups and matchLists to SeqUtil.
 2007-04-24 ROwen    Changed Numeric to numpy in a doc string.
+2010-07-30 ROwen    Bug fix: wrapPos returned 360 if input was a very small negative value.
 """
 import math
 from RO.PhysConst import RadPerDeg
@@ -208,11 +209,16 @@ def vecMag(a):
 
 def wrapCtr(angDeg):
     """Returns the angle (in degrees) wrapped into the range (-180, 180]"""
-    ctrAng = angDeg % 360.0 # puts the angle into the range [0, 360)
+    # First wrap into [0, 360]; result is 360 if ctrAng < 0 but so near 0 that adding 360 rounds it
+    ctrAng = angDeg % 360.0
     if ctrAng > 180.0:
         ctrAng -= 360.0
     return ctrAng
 
 def wrapPos(angDeg):
     """Returns the angle (in degrees) wrapped into the range [0, 360)"""
-    return angDeg % 360.0
+    res = angDeg % 360.0
+    # First wrap into [0, 360]; result is 360 if ctrAng < 0 but so near 0 that adding 360 rounds it
+    if res == 360.0:
+        return 0.0
+    return res
