@@ -10,6 +10,7 @@ import re
 import shutil
 import sys
 import subprocess
+import tarfile
 
 PkgRoot = "python"
 PkgName = "RO"
@@ -46,11 +47,27 @@ print "Subversion repository OK"
 
 # warning: do not build from export because the svn info is required to get the data files included
 print "Building, uploading and registering"
-status = subprocess.call(["python", "setup.py", "sdist", "upload", "--show-response"])
+status = subprocess.call(["python", "setup.py", "sdist"])
+if status != 0:
+    print "Build failed!"
+
+# make sure the bitmap files got into the distribution
+# (sometimes they fail to, and it's a silent error unless I check)
+distDir = os.path.abspath("dist")
+distBaseName = "RO-%s" % (Version.__version__,)
+distPath = os.path.join(distDir, distBaseName + ".tar.gz")
+tarObj = tarfile.open(distPath)
+bitmapToFind = "%s/python/RO/Bitmaps/crosshair.xbm" % (distBaseName,)
+try:
+    tarObj.getmember(bitmapToFind)
+except Exception:
+    print "Error: distribution is missing its bitmap files!"
+    sys.exit(1)
+
+status = subprocess.call(["python", "setup.py", "upload", "--show-response"])
 if status != 0:
     print "Build and upload failed!"
 
-distDir = os.path.abspath("dist")
 eggDir = os.path.abspath("RO.egg-info")
 
 print "Deleting %r" % (distDir,)
@@ -58,4 +75,3 @@ shutil.rmtree(distDir)
 
 print "Deleting %r" % (eggDir,)
 shutil.rmtree(eggDir)
-
