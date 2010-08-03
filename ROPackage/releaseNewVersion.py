@@ -46,10 +46,10 @@ if not versOK.lower() == "y":
 print "Subversion repository OK"
 
 # warning: do not build from export because the svn info is required to get the data files included
-print "Building, uploading and registering"
+print "Building test build"
 status = subprocess.call(["python", "setup.py", "sdist"])
 if status != 0:
-    print "Build failed!"
+    print "Test build failed!"
 
 # make sure the bitmap files got into the distribution
 # (sometimes they fail to, and it's a silent error unless I check)
@@ -64,14 +64,19 @@ except Exception:
     print "Error: distribution is missing its bitmap files!"
     sys.exit(1)
 
-status = subprocess.call(["python", "setup.py", "upload", "--show-response"])
+
+print "Deleting test build %r" % (distDir,)
+shutil.rmtree(distDir)
+
+print "Building final build and uploading"
+status = subprocess.call(["python", "setup.py", "sdist", "upload", "--show-response"])
 if status != 0:
     print "Build and upload failed!"
 
 eggDir = os.path.abspath("RO.egg-info")
 
-print "Deleting %r" % (distDir,)
+print "Deleting final build %r" % (distDir,)
 shutil.rmtree(distDir)
 
-print "Deleting %r" % (eggDir,)
+print "Deleting egg info %r" % (eggDir,)
 shutil.rmtree(eggDir)
