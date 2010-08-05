@@ -37,7 +37,7 @@ def angSideAng (side_aa, ang_B, side_cc):
     any         eps         >side_aa    0           side_cc-aa  180
     any         eps         ~=side_aa   unknown     0           unknown
 
-    eps         any          >>pole     180-ang_B   side_cc     0
+    eps         any          >>pole     0           side_cc     180-ang_B
     180-eps     any          >>pole     180         180-side_cc ang_B
     >>pole      any         eps         180-ang_B   side_aa     0
     >>pole      any         180-eps     ang_B       180-side_aa 180
@@ -55,6 +55,9 @@ def angSideAng (side_aa, ang_B, side_cc):
                         Bug fix: in some cases side_bb may be 180 and ang_A and ang_C unknown.
                         Improved accuracy in some corner cases; all unit tests now pass.
                         Greatly expanded the unit tests.
+    2010-08-04 ROwen    Bug fix: mis-handled two cases:
+                        - side_aa tiny + side_cc normal: special case table, code and unit test were incorrect
+                        - side_aa normal + side_cc tiny: table was right but code and unit test had errors
     """
     sin_h_B = RO.MathUtil.sind (ang_B * 0.5)
     sin_aa = RO.MathUtil.sind(side_aa)
@@ -89,9 +92,9 @@ def angSideAng (side_aa, ang_B, side_cc):
             return (90.0, side_bb, 90.0, True)
         if side_aa < 90:
             # side_aa is nearly zero and side_cc is well away from 0 or 180
-            ang_A = 180.0 - ang_B
+            ang_A = 0.0
             side_bb = side_cc
-            ang_C = 0.0
+            ang_C = 180.0 - ang_B
         else:
             # side_aa is nearly 180 and side_cc is well away from 0 or 180
             ang_A = 180.0
@@ -100,9 +103,9 @@ def angSideAng (side_aa, ang_B, side_cc):
     elif abs(sin_cc) < RO.SysConst.FAccuracy:
         if side_cc < 90:
             # side_cc is nearly 0 and side_aa is well away from 0 or 180
-            ang_A = 0.0
+            ang_A = 180.0 - ang_B
             side_bb = side_aa
-            ang_C = 180.0 - ang_B
+            ang_C = 0.0
         else:
             # side_cc is nearly 180 and side_aa is well away from 0 or 180
             ang_A = ang_B
@@ -216,7 +219,7 @@ if __name__ == "__main__":
     # a ~ 0, B = various not nearly 0 or 360, c various:
     # if c nearly 0: expect C = 90, b = 0, A = 90, unknownAng
     # if c nearly 180: expect C = 90, b = 180, A = 90, unknownAng
-    # if 0 << c << 180: expect A = 180 - B, b = a - c, C = 0
+    # if 0 << c << 180: expect A = 0, b = a - c, C = 180 - B
     for side_aa in (0.0, Eps):
         for ang_B in (1.0, 32.0, 97.0, 179.0, 180.0 - Eps, 180.0, 180.0 + Eps, 210.0, 359.0):
             for side_cc in (180.0, 180.0 - Eps, 179.0, 47.0, Eps, 0.0):
@@ -225,7 +228,7 @@ if __name__ == "__main__":
                 elif 180.0 - side_cc < EpsTest:
                     expRes = (90.0, 180.0, 90.0, True)
                 else:
-                    expRes = (180.0 - ang_B, side_cc - side_aa, 0.0)
+                    expRes = (0.0, side_cc - side_aa, 180.0 - ang_B)
                 testData.append(((side_aa, ang_B, side_cc), expRes))
 
     # a ~ 180, B = various not nearly 0 or 360, c various:
@@ -256,7 +259,7 @@ if __name__ == "__main__":
                     expRes = (90.0, 180.0, 90.0, True)
                 else:
                     expRes = (180.0 - ang_B, side_aa, 0.0)
-                testData.append(((side_cc, ang_B, side_aa), expRes))
+                testData.append(((side_aa, ang_B, side_cc), expRes))
     
     # c ~ 180, B = various not nearly 0 or 360, a various:
     # if a nearly 0: expect C = 90, b = 180, A = 90, unknownAng
