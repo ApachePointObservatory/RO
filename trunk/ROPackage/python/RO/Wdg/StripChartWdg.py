@@ -7,7 +7,7 @@ Warnings:
 
 Known issues:
 - How to support Y auto scale???
-- The x label is often truncated. This is due to poor auto-layout on matplotlib's part.
+- The x label is truncated if the window is short. This is due to poor auto-layout on matplotlib's part.
   I am not yet sure whether to wait for a fix to matplotlib or hack around the problem.
 - User may wish to choose flat step style with lines drawn to the right edge,
   instead of connect-the-dot style with no line after the last seen datapoint
@@ -17,6 +17,8 @@ Known issues:
 History:
 2010-09-22  First experimental version.
 2010-09-23  Added subplots
+2010-09-24  Tied x axes together so the user only has to manipulate stripChartWdg.axes.xaxis
+            Working on autoscale, but so far no luck.
 """
 import bisect
 import datetime
@@ -25,6 +27,9 @@ import numpy
 import Tkinter
 import matplotlib
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
+# to set background color of axes region:
+# matplotlib.rc('figure', facecolor='w') 
 
 __all__ = ["StripChartWdg"]
 
@@ -45,13 +50,13 @@ class StripChartWdg(Tkinter.Frame):
     To refine the display manipulate the axes attribute (a matplotlib.Axes).
     For instance (useful if your time range is < 300 seconds or so):
     # show a major tick every 10 seconds on even 10 seconds
-    for subplot in stripChart.subplotArr:
-        subplot.xaxis.set_major_locator(matplotlib.dates.SecondLocator(bysecond=range(0,61,10)))
+    stripChart.axes.xaxis.set_major_locator(matplotlib.dates.SecondLocator(bysecond=range(0,61,10)))
         
     Potentially useful attributes:
+    - axes: the last subplot (all subplots share the same x axis, so to manipulate
+        properties of the x axis you only have manipulate them for axes)
     - subplotArr: list of subplots, from top to bottom; each is a matplotlib Subplot object,
         which is basically an Axes object but specialized to live in a rectangular grid
-    - axes: the last subplot (the one that has a visible X axis)
     - canvas: the FigureCanvas
     """
     def __init__(self,
@@ -113,20 +118,31 @@ class StripChartWdg(Tkinter.Frame):
             self.canvas.mpl_connect('draw_event', self._updateBackground)
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
-        self.subplotArr = [figure.add_subplot(numSubplots, 1, n+1) for n in range(numSubplots)]
+        bottomSubplot = figure.add_subplot(numSubplots, 1, numSubplots)
+        self.subplotArr = [figure.add_subplot(numSubplots, 1, n+1, sharex=bottomSubplot) \
+            for n in range(numSubplots-1)] + [bottomSubplot]
         self.axes = self.subplotArr[-1]
         if grid:
             for subplot in self.subplotArr:
                 subplot.grid(True)
+
+# alternate means of hiding x labels on all subplots but the last
+# however calling subplot.label_outer() is easier and seems to work fine
+#         for subplot in self.subplotArr[0:-1]:
+#             for ticklabel in subplot.get_xticklabels():
+#                 ticklabel.set_visible(False)
+
+        self.axes.xaxis.set_major_formatter(matplotlib.dates.DateFormatter(dateFormat))
+        self.axes.xaxis_date()
+
         if autoScale:
             for subplot in self.subplotArr:
                 subplot.autoscale(enable=True, axis="y")
-
-        for subplot in self.subplotArr[0:-1]:
-            subplot.xaxis.set_major_formatter(matplotlib.dates.DateFormatter(""))
-            subplot.xaxis_date()
-        self.axes.xaxis.set_major_formatter(matplotlib.dates.DateFormatter(dateFormat))
-        self.axes.xaxis_date()
+        
+        for subplot in self.subplotArr:
+            subplot.label_outer() # disable axis labels on all but the bottom subplot
+#            subplot.yaxis.get_major_locator().set_params(prune = "upper")
+#        figure.subplots_adjust(hspace=0.1)
         
         self._lineDict = dict()
         self._constLineDict = dict()
@@ -233,7 +249,6 @@ class Line(object):
         - subplotInd: index of subplot
         - **kargs: keyword arguments for matplotlib Line2D, such as color
         """
-        print "add line %s with useAnimation=%s" % (name, stripChartWdg._useAnimation)
         self.name = name
         self._tyData = []
         self._cnvTimeFunc = stripChartWdg._cnvTimeFunc
@@ -363,13 +378,12 @@ if __name__ == "__main__":
     stripChart.addConstantLine("max", 0.90, color="red")
 #    stripChart.setYLimits(0, 0.0, 1.0)
     # the default ticks for time spans <= 300 is not nice, so be explicit
-    for subplot in stripChart.subplotArr:
-        subplot.xaxis.set_major_locator(matplotlib.dates.SecondLocator(bysecond=range(0,61,10)))
+    stripChart.axes.xaxis.set_major_locator(matplotlib.dates.SecondLocator(bysecond=range(0,61,10)))
     
     stripChart.addLine("foo", subplotInd=1, color="green")
 
     def addRandomValues(name, interval=100):
-        val = numpy.random.rand(1)[0]
+        val = numpy.random.rand(1)[0] * 3
         stripChart.addPoint(name, val)
         root.after(interval, addRandomValues, name, interval)
 
