@@ -146,51 +146,60 @@ class StripChartWdg(Tkinter.Frame):
         self._timeAxisTimer = None
         self._updateTimeAxis()
 
-    def addConstantLine(self, label, y, subplotInd=0, includeInLegend=False, **kargs):
+    def addConstantLine(self, name, y, subplotInd=0, doLabel=False, **kargs):
         """Add a new constant to plot
         
         Inputs:
-        - label: label for constant line
+        - name: name for constant line
         - y: value of constant line
-        - includeInLegend: if True then the line is labelled; otherwise it is not
+        - doLabel: if True then the Line's label is set to name.
+            Set True if you want the line to show up in the legend using name.
+            Set False if you want no label (the line will not show in the legend)
+            or if you prefer to specify a legend that is different than name
         - subplotInd: index of subplot
         - **kargs: keyword arguments for matplotlib Line2D, such as color
         """
         subplot = self.subplotArr[subplotInd]
-        self._constLineDict[label] = subplot.axhline(y, **kargs)
-        if includeInLegend:
-            self._constLineDict[label].set_label(label)
+        if doLabel:
+            kargs["label"] = name
+        self._constLineDict[name] = subplot.axhline(y, **kargs)
         yMin, yMax = self.axes.get_ylim()
         if self._doAutoscaleArr[subplotInd] and numpy.isfinite(y) and not (yMin <= y <= yMax):
             self.axes.relim()
             self.axes.autoscale_view(scalex=False, scaley=True)
 
-    def addLine(self, label, subplotInd=0, **kargs):
+    def addLine(self, name, subplotInd=0, doLabel=True, **kargs):
         """Add a new quantity to plot
         
         Inputs:
-        - label: label for line
+        - name: name for line
         - subplotInd: index of subplot
+        - doLabel: if True then the Line's label is set to name.
+            Set True if you want the line to show up in the legend using name.
+            Set False if you want no label (the line will not show in the legend)
+            or if you prefer to specify a legend that is different than name
         all other keyword arguments are sent to the _Line constructor
         """
-        if label in self._lineDict:
-            raise RuntimeError("Line %s already exists" % (label,))
+        if name in self._lineDict:
+            raise RuntimeError("Line %s already exists" % (name,))
         axes = self.subplotArr[subplotInd]
         doAutoscale = self._doAutoscaleArr[subplotInd]
-        self._lineDict[label] = _Line(label, axes=axes, doAutoscale=doAutoscale, **kargs)
+        if doLabel:
+            kargs["label"] = name
+        self._lineDict[name] = _Line(name, axes=axes, doAutoscale=doAutoscale, **kargs)
     
-    def addPoint(self, label, y, t=None):
+    def addPoint(self, name, y, t=None):
         """Add a data point to a specified line
         
         Inputs:
-        - label: label of Line
+        - name: name of Line
         - y: y value
         - t: time as a POSIX timestamp (e.g. time.time()); if None then "now"
         """
         if t == None:
             t = time.time()
         mplDays = self._cnvTimeFunc(t)
-        self._lineDict[label].addPoint(y, mplDays)
+        self._lineDict[name].addPoint(y, mplDays)
         if _UseAnimation:
             self._drawPoints()
     
@@ -248,22 +257,22 @@ class _Line(object):
     """A line (trace) on a strip chart representing some varying quantity
     
     Attributes that might be useful:
-    - label: the label of this line
+    - name: the name of this line
     - axes: the matplotlib Axes or Subplot instance displaying this line
     - line: the matplotlib.lines.Line2D associated with this line
     """
-    def __init__(self, label, axes, doAutoscale, **kargs):
+    def __init__(self, name, axes, doAutoscale, **kargs):
         """Create a line
         
         Inputs:
-        - label: label of line
+        - name: name of line
         - axes: the matplotlib Axes or Subplot instance displaying this line
         - doAutoscale: if True then autoscale the y axis
         - **kargs: keyword arguments for matplotlib Line2D, such as color
         """
-        self.label = label
+        self.name = name
         self.axes = axes
-        self.line = matplotlib.lines.Line2D([], [], animated=_UseAnimation, label=label, **kargs)
+        self.line = matplotlib.lines.Line2D([], [], animated=_UseAnimation, **kargs)
         self.axes.add_line(self.line)
         self._doAutoscale = doAutoscale
         
@@ -299,7 +308,7 @@ class _Line(object):
             self.line.set_data(tListp[numToDitch:], yList[numToDitch:])
 
     def __str__(self):
-        return "%s(%r)" % (type(self).__name__, self.label)
+        return "%s(%r)" % (type(self).__name__, self.name)
 
 
 class TimeConverter(object):
@@ -341,7 +350,7 @@ if __name__ == "__main__":
     stripChart.pack(expand=True, fill="both")
     stripChart.addLine("test", subplotInd=0)
     stripChart.subplotArr[0].yaxis.set_label_text("Test (ADU)")
-    stripChart.addConstantLine("max", 20.90, color="red", includeInLegend=False)
+    stripChart.addConstantLine("max", 20.90, color="red", doLabel=False)
     stripChart.subplotArr[0].legend(loc=3)
 #    stripChart.setYLimits(0, 0.0, 1.0)
     # the default ticks for time spans <= 300 is not nice, so be explicit
@@ -349,10 +358,10 @@ if __name__ == "__main__":
     
     stripChart.addLine("foo", subplotInd=1, color="green")
 
-    def addRandomValues(label, interval=100):
+    def addRandomValues(name, interval=100):
         val = numpy.random.rand(1)[0] * 3
-        stripChart.addPoint(label, val)
-        root.after(interval, addRandomValues, label, interval)
+        stripChart.addPoint(name, val)
+        root.after(interval, addRandomValues, name, interval)
 
     addRandomValues("test", interval=500)
     addRandomValues("foo", 3000)
