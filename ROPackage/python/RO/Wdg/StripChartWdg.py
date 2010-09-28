@@ -13,6 +13,8 @@ matplotlib.rc("legend", fontsize="medium")
 Known issues:
 - The x label is truncated if the window is short. This is due to poor auto-layout on matplotlib's part.
   I am not yet sure whether to wait for a fix to matplotlib or hack around the problem.
+- By default time ticks jump around. I'd like to prevent this automatically but don't know how
+  without a lot of strange code. A manual technique is documented.
 - Spacing between subplots is rather large (but given the way matplotlib labels ticks
   I'm not sure it could be compressed much more without conflicts between Y axis labels).
 
