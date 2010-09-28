@@ -13,16 +13,11 @@ matplotlib.rc("legend", fontsize="medium")
 Known issues:
 - The x label is truncated if the window is short. This is due to poor auto-layout on matplotlib's part.
   I am not yet sure whether to wait for a fix to matplotlib or hack around the problem.
-- Is there a clean way to specify a minimum range for an axis? Adding constant lines is clumsy!
 - Spacing between subplots is rather large (but given the way matplotlib labels ticks
   I'm not sure it could be compressed much more without conflicts between Y axis labels).
 
 History:
-2010-09-27  ROwen
-2010-09-18  ROwen   Modified to always use animation.
-                    Added showY and get/setDoAutoscale methods.
-                    Reduced CPU load when adding a point by only redrawing the one subplot.
-                    Bug fix: a typo caused purgeOldData to raise an exception.
+2010-09-28  ROwen
 """
 import bisect
 import datetime
@@ -190,10 +185,10 @@ class StripChartWdg(Tkinter.Frame):
             kargs["label"] = name
         self._lineDict[name] = _Line(self, subplotInd, **kargs)
 
-    def getDoAutoscale(self, subplotInd):
+    def getDoAutoscale(self, subplotInd=0):
         return self._doAutoscaleArr[subplotInd]
 
-    def getSubplot(self, subplotInd):
+    def getSubplot(self, subplotInd=0):
         return self.subplotArr[subplotInd]
     
     def addPoint(self, name, y, t=None):
@@ -216,7 +211,7 @@ class StripChartWdg(Tkinter.Frame):
         line.subplot.draw_artist(line.line)
         self.canvas.blit(line.subplot.bbox)
 
-    def setDoAutoscale(self, subplotInd, doAutoscale):
+    def setDoAutoscale(self, doAutoscale, subplotInd=0):
         """Turn on autoscaling for the specified subplot
         
         To turn it back off call setYLimits
@@ -229,7 +224,7 @@ class StripChartWdg(Tkinter.Frame):
             subplot.autoscale_view(scalex=False, scaley=True)
         subplot.set_ylim(auto=doAutoscale)
     
-    def setYLimits(self, subplotInd, minY, maxY):
+    def setYLimits(self, minY, maxY, subplotInd=0):
         """Set y limits for the specified subplot.
         
         Warning: disables autoscaling. If you want to autoscale with a minimum range, use showY.
@@ -237,7 +232,7 @@ class StripChartWdg(Tkinter.Frame):
         self._doAutoscaleArr[subplotInd] = False
         self.subplotArr[subplotInd].set_ylim(minY, maxY, auto=False)
     
-    def showY(self, subplotInd, y0, y1=None):
+    def showY(self, y0, y1=None, subplotInd=0):
         """Specify one or two values to always show in the y range.
         
         Inputs:
@@ -394,7 +389,7 @@ if __name__ == "__main__":
     stripChart.subplotArr[0].yaxis.set_label_text("Counts")
     stripChart.addConstantLine("Saturated", 2.5, subplotInd=0, color="red", doLabel=True)
     # make sure the Y axis of subplot 0 always includes 0 and 2.7
-    stripChart.showY(0, 0.0, 2.7)
+    stripChart.showY(0.0, 2.7, subplotInd=0)
     stripChart.subplotArr[0].legend(loc=3)
     # the default ticks for time spans <= 300 is not nice, so be explicit
     stripChart.axes.xaxis.set_major_locator(matplotlib.dates.SecondLocator(bysecond=range(0,61,10)))
