@@ -47,14 +47,15 @@ class StripChartWdg(Tkinter.Frame):
     You may choose the kind of time displayed on the time axis (e.g. UTC or local time) using cnvTimeFunc
     and the format of that time using dateFormat.
     
-    To refine the display manipulate the axes attribute (a matplotlib.Axes).
-    For instance (useful if your time range is < 300 seconds or so):
+    By default the major time ticks and grid jump to new values as time advances. I haven't found an
+    automatic way to keep them steady, but you can do it manually by following these examples:
     # show a major tick every 10 seconds on even 10 seconds
-    stripChart.axes.xaxis.set_major_locator(matplotlib.dates.SecondLocator(bysecond=range(0,61,10)))
+    stripChart.xaxis.set_major_locator(matplotlib.dates.SecondLocator(bysecond=range(0, 60, 10)))
+    # show a major tick every 5 seconds on even 5 minutes
+    stripChart.xaxis.set_major_locator(matplotlib.dates.MinuteLocator(byminute=range(0, 60, 5)))
         
     Potentially useful attributes:
-    - axes: the last subplot (all subplots share the same x axis, so to manipulate
-        properties of the x axis you only have manipulate them for axes)
+    - xaxis: the x axis shared by all subplots
     - subplotArr: list of subplots, from top to bottom; each is a matplotlib Subplot object,
         which is basically an Axes object but specialized to live in a rectangular grid
     - canvas: the FigureCanvas
@@ -117,10 +118,13 @@ class StripChartWdg(Tkinter.Frame):
         bottomSubplot = figure.add_subplot(numSubplots, 1, numSubplots)
         self.subplotArr = [figure.add_subplot(numSubplots, 1, n+1, sharex=bottomSubplot) \
             for n in range(numSubplots-1)] + [bottomSubplot]
-        self.axes = self.subplotArr[-1]
         if showGrid:
             for subplot in self.subplotArr:
                 subplot.grid(True)
+
+        self.xaxis = bottomSubplot.xaxis
+        bottomSubplot.xaxis_date()
+        self.xaxis.set_major_formatter(matplotlib.dates.DateFormatter(dateFormat))
 
 # alternate means of hiding x labels on all subplots but the last
 # however calling subplot.label_outer() is easier and seems to work fine
@@ -128,8 +132,6 @@ class StripChartWdg(Tkinter.Frame):
 #             for ticklabel in subplot.get_xticklabels():
 #                 ticklabel.set_visible(False)
 
-        self.axes.xaxis.set_major_formatter(matplotlib.dates.DateFormatter(dateFormat))
-        self.axes.xaxis_date()
 
         for subplot in self.subplotArr:
             subplot.label_outer() # disable axis labels on all but the bottom subplot
@@ -391,8 +393,8 @@ if __name__ == "__main__":
     # make sure the Y axis of subplot 0 always includes 0 and 2.7
     stripChart.showY(0.0, 2.7, subplotInd=0)
     stripChart.subplotArr[0].legend(loc=3)
-    # the default ticks for time spans <= 300 is not nice, so be explicit
-    stripChart.axes.xaxis.set_major_locator(matplotlib.dates.SecondLocator(bysecond=range(0,61,10)))
+    # stop major time ticks from jumping around as time advances:
+    stripChart.xaxis.set_major_locator(matplotlib.dates.SecondLocator(bysecond=range(0,60,10)))
     
     stripChart.addLine("foo", subplotInd=1, color="green")
 
