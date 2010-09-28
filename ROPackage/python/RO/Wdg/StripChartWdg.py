@@ -13,13 +13,16 @@ matplotlib.rc("legend", fontsize="medium")
 Known issues:
 - The x label is truncated if the window is short. This is due to poor auto-layout on matplotlib's part.
   I am not yet sure whether to wait for a fix to matplotlib or hack around the problem.
-- User may wish to choose flat step style with lines drawn to the right edge,
-  instead of connect-the-dot style with no line after the last seen datapoint
+- Is there a clean way to specify a minimum range for an axis? Adding constant lines is clumsy!
 - Spacing between subplots is rather large (but given the way matplotlib labels ticks
   I'm not sure it could be compressed much more without conflicts between Y axis labels).
 
 History:
 2010-09-27  ROwen
+2010-09-18  ROwen   Modified to always use animation.
+                    Added showY and get/setDoAutoscale methods.
+                    Reduced CPU load when adding a point by only redrawing the one subplot.
+                    Bug fix: a typo caused purgeOldData to raise an exception.
 """
 import bisect
 import datetime
@@ -34,8 +37,6 @@ import RO.SeqUtil
 # matplotlib.rc('figure', facecolor='w') 
 
 __all__ = ["StripChartWdg"]
-
-_UseAnimation = True
 
 class StripChartWdg(Tkinter.Frame):
     """A widget to changing values in real time as a strip chart
@@ -105,7 +106,7 @@ class StripChartWdg(Tkinter.Frame):
         self.updateInterval = float(updateInterval)
         self._purgeCounter = 0
         self._maxPurgeCounter = max(1, int(0.5 + (5.0 / self.updateInterval)))
-        self._background = None
+        self._backgroundList = []
 
         if cnvTimeFunc == None:
             cnvTimeFunc = TimeConverter(useUTC=False)
@@ -115,8 +116,7 @@ class StripChartWdg(Tkinter.Frame):
         figure = matplotlib.figure.Figure(figsize=(width, height), frameon=True)
         self.canvas = FigureCanvasTkAgg(figure, self)
         self.canvas.get_tk_widget().grid(row=0, column=0, sticky="news")
-        if _UseAnimation:
-            self.canvas.mpl_connect('draw_event', self._handleDrawEvent)
+        self.canvas.mpl_connect('draw_event', self._handleDrawEvent)
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
         bottomSubplot = figure.add_subplot(numSubplots, 1, numSubplots)
@@ -159,14 +159,16 @@ class StripChartWdg(Tkinter.Frame):
         - subplotInd: index of subplot
         - **kargs: keyword arguments for matplotlib Line2D, such as color
         """
+        if name in self._constLineDict:
+            raise RuntimeError("Constant Line %s already exists" % (name,))
         subplot = self.subplotArr[subplotInd]
         if doLabel:
             kargs["label"] = name
         self._constLineDict[name] = subplot.axhline(y, **kargs)
-        yMin, yMax = self.axes.get_ylim()
+        yMin, yMax = subplot.get_ylim()
         if self._doAutoscaleArr[subplotInd] and numpy.isfinite(y) and not (yMin <= y <= yMax):
-            self.axes.relim()
-            self.axes.autoscale_view(scalex=False, scaley=True)
+            subplot.relim()
+            subplot.autoscale_view(scalex=False, scaley=True)
 
     def addLine(self, name, subplotInd=0, doLabel=True, **kargs):
         """Add a new quantity to plot
@@ -186,7 +188,13 @@ class StripChartWdg(Tkinter.Frame):
         doAutoscale = self._doAutoscaleArr[subplotInd]
         if doLabel:
             kargs["label"] = name
-        self._lineDict[name] = _Line(name, axes=axes, doAutoscale=doAutoscale, **kargs)
+        self._lineDict[name] = _Line(self, subplotInd, **kargs)
+
+    def getDoAutoscale(self, subplotInd):
+        return self._doAutoscaleArr[subplotInd]
+
+    def getSubplot(self, subplotInd):
+        return self.subplotArr[subplotInd]
     
     def addPoint(self, name, y, t=None):
         """Add a data point to a specified line
@@ -199,32 +207,72 @@ class StripChartWdg(Tkinter.Frame):
         if t == None:
             t = time.time()
         mplDays = self._cnvTimeFunc(t)
-        self._lineDict[name].addPoint(y, mplDays)
-        if _UseAnimation:
-            self._drawPoints()
+        line = self._lineDict[name]
+
+        line.addPoint(y, mplDays, self._doAutoscaleArr[line.subplotInd])
+
+        if self._backgroundList:
+            self.canvas.restore_region(self._backgroundList[line.subplotInd])
+        line.subplot.draw_artist(line.line)
+        self.canvas.blit(line.subplot.bbox)
+
+    def setDoAutoscale(self, subplotInd, doAutoscale):
+        """Turn on autoscaling for the specified subplot
+        
+        To turn it back off call setYLimits
+        """
+        doAutoscale = bool(doAutoscale)
+        self._doAutoscaleArr[subplotInd] = doAutoscale
+        subplot = self.subplotArr[subplotInd]
+        if doAutoscale:
+            subplot.relim()
+            subplot.autoscale_view(scalex=False, scaley=True)
+        subplot.set_ylim(auto=doAutoscale)
     
     def setYLimits(self, subplotInd, minY, maxY):
-        """Set y limits for the specified subplot
-        """
-        self.subplotArr[subplotInd].set_ylim(minY, maxY)
-    
-    def _drawPoints(self):
-        """Redraw the lines
+        """Set y limits for the specified subplot.
         
-        Only used if _UseAnimation True, since then adding points to lines does not update the display.
+        Warning: disables autoscaling. If you want to autoscale with a minimum range, use showY.
         """
-        if not self._background:
-            return
-#        self.canvas.restore_region(self._background)
-        for line in self._lineDict.itervalues():
-            line.axes.draw_artist(line.line)
-        self.canvas.blit(self.axes.bbox)
+        self._doAutoscaleArr[subplotInd] = False
+        self.subplotArr[subplotInd].set_ylim(minY, maxY, auto=False)
+    
+    def showY(self, subplotInd, y0, y1=None):
+        """Specify one or two values to always show in the y range.
+        
+        Inputs:
+        - subplotInd: index of subplot
+        - y0: first y value to show
+        - y1: second y value to show; None to omit
+
+        Warning: setYLimits overrides this method (but the values are remembered in case you turn
+        autoscaling back on).
+        """
+        subplot = self.subplotArr[subplotInd]
+        yMin, yMax = subplot.get_ylim()
+        
+        if y1 != None:
+            yList = [y0, y1]
+        else:
+            yList = [y0]
+        doAutoscale = self._doAutoscaleArr[subplotInd]
+        doRescale = False
+        for y in yList:
+            subplot.axhline(y, linestyle=" ")
+            if doAutoscale and numpy.isfinite(y) and not (yMin <= y <= yMax):
+                doRescale = True
+        if doRescale:
+            subplot.relim()
+            subplot.autoscale_view(scalex=False, scaley=True)
     
     def _handleDrawEvent(self, event):
         """Handle draw event
         """
-        self._background = self.canvas.copy_from_bbox(self.axes.bbox)
-        self._drawPoints()
+        self._backgroundList = [self.canvas.copy_from_bbox(sp.bbox) for sp in self.subplotArr]
+        for line in self._lineDict.itervalues():
+            line.subplot.draw_artist(line.line)
+        for subplot in self.subplotArr:
+            self.canvas.blit(subplot.bbox)
     
     def _updateTimeAxis(self):
         """Update the time axis; calls itself
@@ -257,26 +305,25 @@ class _Line(object):
     """A line (trace) on a strip chart representing some varying quantity
     
     Attributes that might be useful:
-    - name: the name of this line
-    - axes: the matplotlib Axes or Subplot instance displaying this line
     - line: the matplotlib.lines.Line2D associated with this line
+    - subplot: the matplotlib Subplot instance displaying this line
+    - subplotInd: the index of the subplot
     """
-    def __init__(self, name, axes, doAutoscale, **kargs):
+    def __init__(self, stripChartWdg, subplotInd, **kargs):
         """Create a line
         
         Inputs:
-        - name: name of line
-        - axes: the matplotlib Axes or Subplot instance displaying this line
+        - stripChartWdg: the StripChartWdg to which this _Line belongs
+        - subplotInd: the index of the subplot to which this _Line belongs
         - doAutoscale: if True then autoscale the y axis
         - **kargs: keyword arguments for matplotlib Line2D, such as color
         """
-        self.name = name
-        self.axes = axes
-        self.line = matplotlib.lines.Line2D([], [], animated=_UseAnimation, **kargs)
-        self.axes.add_line(self.line)
-        self._doAutoscale = doAutoscale
+        self.subplotInd = subplotInd
+        self.subplot = stripChartWdg.getSubplot(subplotInd)
+        self.line = matplotlib.lines.Line2D([], [], animated=True, **kargs)
+        self.subplot.add_line(self.line)
         
-    def addPoint(self, y, mplDays):
+    def addPoint(self, y, mplDays, doAutoscale):
         """Append a new data point
         
         Inputs:
@@ -286,11 +333,11 @@ class _Line(object):
         tList, yList = self.line.get_data(True)
         tList.append(mplDays)
         yList.append(y)
-        yMin, yMax = self.axes.get_ylim()
+        yMin, yMax = self.subplot.get_ylim()
         self.line.set_data(tList, yList)
-        if self._doAutoscale and numpy.isfinite(y) and not (yMin <= y <= yMax):
-            self.axes.relim()
-            self.axes.autoscale_view(scalex=False, scaley=True)
+        if doAutoscale and numpy.isfinite(y) and not (yMin <= y <= yMax):
+            self.subplot.relim()
+            self.subplot.autoscale_view(scalex=False, scaley=True)
     
     def purgeOldData(self, minMplDays):
         """Purge data with t < minMplDays
@@ -305,10 +352,7 @@ class _Line(object):
             return
         numToDitch = bisect.bisect_left(tList, minMplDays)
         if numToDitch > 0:
-            self.line.set_data(tListp[numToDitch:], yList[numToDitch:])
-
-    def __str__(self):
-        return "%s(%r)" % (type(self).__name__, self.name)
+            self.line.set_data(tList[numToDitch:], yList[numToDitch:])
 
 
 class TimeConverter(object):
@@ -344,15 +388,14 @@ if __name__ == "__main__":
         master = root,
         timeRange = 60,
         numSubplots = 2,
-        doAutoscale = True,
-        cnvTimeFunc = TimeConverter(useUTC=True),
     )
     stripChart.pack(expand=True, fill="both")
-    stripChart.addLine("test", subplotInd=0)
-    stripChart.subplotArr[0].yaxis.set_label_text("Test (ADU)")
-    stripChart.addConstantLine("max", 20.90, color="red", doLabel=False)
+    stripChart.addLine("Counts", subplotInd=0)
+    stripChart.subplotArr[0].yaxis.set_label_text("Counts")
+    stripChart.addConstantLine("Saturated", 2.5, subplotInd=0, color="red", doLabel=True)
+    # make sure the Y axis of subplot 0 always includes 0 and 2.7
+    stripChart.showY(0, 0.0, 2.7)
     stripChart.subplotArr[0].legend(loc=3)
-#    stripChart.setYLimits(0, 0.0, 1.0)
     # the default ticks for time spans <= 300 is not nice, so be explicit
     stripChart.axes.xaxis.set_major_locator(matplotlib.dates.SecondLocator(bysecond=range(0,61,10)))
     
@@ -363,6 +406,6 @@ if __name__ == "__main__":
         stripChart.addPoint(name, val)
         root.after(interval, addRandomValues, name, interval)
 
-    addRandomValues("test", interval=500)
+    addRandomValues("Counts", interval=500)
     addRandomValues("foo", 3000)
     root.mainloop()
