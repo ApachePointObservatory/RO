@@ -38,13 +38,6 @@ Here are manual workarounds for some common problems:
     # by default legends have large text; set using legend.fontsize:
     matplotlib.rc("legend", fontsize="medium") 
 
-Design Notes:
-- I considered using animation support but found it unsuitable for several reasons:
--- The whole plot needs to be redrawn fairly often because the time axis moves,
-   so it is not clear it would save any time
--- I could not figure out how to apply it efficiently to a graph with multiple subplots
-   and multiple lines on each subplot
-
 Requirements:
 - Requires matplotlib built with TkAgg support
 - This widget is somewhat experimental and the API may change.
@@ -142,6 +135,7 @@ class StripChartWdg(Tkinter.Frame):
         self.figure = matplotlib.figure.Figure(figsize=(width, height), frameon=True)
         self.canvas = FigureCanvasTkAgg(self.figure, self)
         self.canvas.get_tk_widget().grid(row=0, column=0, sticky="news")
+        self.canvas.mpl_connect('draw_event', self._handleDrawEvent)
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
         bottomSubplot = self.figure.add_subplot(numSubplots, 1, numSubplots)
@@ -155,12 +149,18 @@ class StripChartWdg(Tkinter.Frame):
         bottomSubplot.xaxis_date()
         self.xaxis.set_major_formatter(matplotlib.dates.DateFormatter(dateFormat))
 
+        # dictionary of line name: _Line object
+        self._lineDict = dict()
+        # dictionary of constant line name: matplotlib Line2D
+        self._constLine2DDict = dict()
+        # dictionary of matplotlib Subplot: _SubplotInfo
+        self._subplotInfoDict = dict()
+
         for subplot in self.subplotArr:
             subplot.label_outer() # disable axis labels on all but the bottom subplot
             subplot.set_ylim(auto=True) # set auto scaling for the y axis
+            self._subplotInfoDict[subplot] = _SubplotInfo()
         
-        self._lineDict = dict()
-        self._constLineDict = dict()
         self._timeAxisTimer = None
         self._updateTimeAxis()
 
@@ -177,12 +177,12 @@ class StripChartWdg(Tkinter.Frame):
         - subplotInd: index of subplot
         - **kargs: keyword arguments for matplotlib Line2D, such as color
         """
-        if name in self._constLineDict:
+        if name in self._constLine2DDict:
             raise RuntimeError("Constant Line %s already exists" % (name,))
         subplot = self.subplotArr[subplotInd]
         if doLabel:
             kargs["label"] = name
-        self._constLineDict[name] = subplot.axhline(y, **kargs)
+        self._constLine2DDict[name] = subplot.axhline(y, **kargs)
         yMin, yMax = subplot.get_ylim()
         if subplot.get_autoscaley_on() and numpy.isfinite(y) and not (yMin <= y <= yMax):
             subplot.relim()
@@ -205,7 +205,10 @@ class StripChartWdg(Tkinter.Frame):
         subplot = self.subplotArr[subplotInd]
         if doLabel:
             kargs["label"] = name
-        self._lineDict[name] = _Line(subplot, **kargs)
+        line = _Line(subplot, **kargs)
+        self._lineDict[name] = line
+
+        self._subplotInfoDict[subplot].animatedLineList.append(line)
 
     def addPoint(self, name, y, t=None):
         """Add a data point to a specified line
@@ -220,8 +223,16 @@ class StripChartWdg(Tkinter.Frame):
         mplDays = self._cnvTimeFunc(t)
         line = self._lineDict[name]
 
-        line.addPoint(y, mplDays)
-        self.canvas.draw()
+        didRescale = line.addPoint(y, mplDays)
+
+        if not didRescale:
+            # did not rescale, so no draw event triggered, so update just this subplot's display
+            subplotInfo = self._subplotInfoDict[line.subplot]
+            if subplotInfo.background:
+                self.canvas.restore_region(subplotInfo.background)
+                for line in subplotInfo.animatedLineList:
+                    line.subplot.draw_artist(line.line)
+                self.canvas.blit(line.subplot.bbox)
 
     def getDoAutoscale(self, subplotInd=0):
         return self.subplotArr[subplotInd].get_autoscaley_on()
@@ -271,6 +282,15 @@ class StripChartWdg(Tkinter.Frame):
         if doRescale:
             subplot.relim()
             subplot.autoscale_view(scalex=False, scaley=True)
+
+    def _handleDrawEvent(self, event):
+        """Handle draw event
+        """
+        for subplot, subplotInfo in self._subplotInfoDict.iteritems():
+            subplotInfo.background = self.canvas.copy_from_bbox(subplot.bbox)
+            for line in subplotInfo.animatedLineList:
+                subplot.draw_artist(line.line)
+            self.canvas.blit(subplot.bbox)
     
     def _updateTimeAxis(self):
         """Update the time axis; calls itself
@@ -298,6 +318,10 @@ class StripChartWdg(Tkinter.Frame):
         self.canvas.draw()
         self._timeAxisTimer = self.after(int(self.updateInterval * 1000), self._updateTimeAxis)
 
+class _SubplotInfo(object):
+    def __init__(self):
+        self.background = None
+        self.animatedLineList = []
 
 class _Line(object):
     """A line (trace) on a strip chart representing some varying quantity
@@ -319,7 +343,7 @@ class _Line(object):
         # line.get_data returns numpy arrays, whihc cannot be appended to
         self._tList = []
         self._yList = []
-        self.line = matplotlib.lines.Line2D([], [], animated=False, **kargs)
+        self.line = matplotlib.lines.Line2D([], [], animated=True, **kargs)
         self.subplot.add_line(self.line)
         
     def addPoint(self, y, mplDays):
