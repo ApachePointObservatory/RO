@@ -56,7 +56,6 @@ import numpy
 import Tkinter
 import matplotlib
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-import RO.SeqUtil
 
 # to set background color of axes region:
 # matplotlib.rc('figure', facecolor='w') 
