@@ -319,6 +319,8 @@ class StripChartWdg(Tkinter.Frame):
         self._timeAxisTimer = self.after(int(self.updateInterval * 1000), self._updateTimeAxis)
 
 class _SubplotInfo(object):
+    """Information needed to animate a Subplot
+    """
     def __init__(self):
         self.background = None
         self.animatedLineList = []
