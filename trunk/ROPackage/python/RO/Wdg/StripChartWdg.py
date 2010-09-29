@@ -57,9 +57,6 @@ import Tkinter
 import matplotlib
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
-# to set background color of axes region:
-# matplotlib.rc('figure', facecolor='w') 
-
 __all__ = ["StripChartWdg"]
 
 class StripChartWdg(Tkinter.Frame):
