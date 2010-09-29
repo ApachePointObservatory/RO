@@ -11,12 +11,11 @@ matplotlib.rc("figure", facecolor="white")
 matplotlib.rc("legend", fontsize="medium") 
 
 Known issues:
-- The x label is truncated if the window is short. This is due to poor auto-layout on matplotlib's part.
-  I am not yet sure whether to wait for a fix to matplotlib or hack around the problem.
-- By default time ticks jump around. I'd like to prevent this automatically but don't know how
-  without a lot of strange code. A manual technique is documented.
-- Spacing between subplots is rather large (but given the way matplotlib labels ticks
-  I'm not sure it could be compressed much more without conflicts between Y axis labels).
+See Fixing Display Problems in the doc string for StripChartWdg.
+
+Acknowledgements:
+I am grateful to Benjamin Root, Tony S Yu and others on matplotlib-users
+for advice on tying the x axes together and improving the layout.
 
 History:
 2010-09-28  ROwen
@@ -45,22 +44,44 @@ class StripChartWdg(Tkinter.Frame):
     For each constant line (e.g. limit) to display:
     - Call addConstantLine.
     
+    To make sure a plot includes one or two y values (e.g. 0 or a range of values):
+    - Call showY
+    
     All supplied times are POSIX timestamps (e.g. as supplied by time.time()).
     You may choose the kind of time displayed on the time axis (e.g. UTC or local time) using cnvTimeFunc
     and the format of that time using dateFormat.
     
-    By default the major time ticks and grid jump to new values as time advances. I haven't found an
-    automatic way to keep them steady, but you can do it manually by following these examples:
-    # show a major tick every 10 seconds on even 10 seconds
-    stripChart.xaxis.set_major_locator(matplotlib.dates.SecondLocator(bysecond=range(0, 60, 10)))
-    # show a major tick every 5 seconds on even 5 minutes
-    stripChart.xaxis.set_major_locator(matplotlib.dates.MinuteLocator(byminute=range(0, 60, 5)))
+    Display Problems:
+    
+    - Jumping Ticks:
+        By default the major time ticks and grid jump to new values as time advances. I haven't found an
+        automatic way to keep them steady, but you can do it manually by following these examples:
+        # show a major tick every 10 seconds on even 10 seconds
+        stripChart.xaxis.set_major_locator(matplotlib.dates.SecondLocator(bysecond=range(0, 60, 10)))
+        # show a major tick every 5 seconds on even 5 minutes
+        stripChart.xaxis.set_major_locator(matplotlib.dates.MinuteLocator(byminute=range(0, 60, 5)))
+
+    - Reducing The Spacing Between Subplots:
+        Adjacent subplots are rather widely spaced. You can manually shrink the spacing but then
+        the major Y labels will overlap. Here is a technique that includes "pruning" the top major tick label
+        from each subplot and then shrinking the subplot horizontal spacing:
+            for subplot in stripChartWdg.subplotArr:
+                subplot.yaxis.get_major_locator().set_params(prune = "upper")
+            stripChartWdg.figure.subplots_adjust(hspace=0.1)
+    - Truncated X Axis Labels:
+      The x label is truncated if the window is short, due to poor auto-layout on matplotlib's part.
+      Also the top and sides may have too large a margin. Tony S Yu provided code that should solve the
+      issue automatically, but I have not yet incorporated it. You can try the following manual tweak:
+      (values are fraction of total window height or width, so they must be in the range 0-1):
+          stripChartWdg.figure.subplots_adjust(bottom=0.15) # top=..., left=..., right=...
+      Unfortunately, values that look good at one window size may not be suitable at another.
         
-    Potentially useful attributes:
-    - xaxis: the x axis shared by all subplots
+    Potentially Useful Attributes:
+    - canvas: the matplotlib FigureCanvas
+    - figure: the matplotlib Figure
     - subplotArr: list of subplots, from top to bottom; each is a matplotlib Subplot object,
         which is basically an Axes object but specialized to live in a rectangular grid
-    - canvas: the FigureCanvas
+    - xaxis: the x axis shared by all subplots
     """
     def __init__(self,
         master,
@@ -109,16 +130,15 @@ class StripChartWdg(Tkinter.Frame):
         if cnvTimeFunc == None:
             cnvTimeFunc = TimeConverter(useUTC=False)
         self._cnvTimeFunc = cnvTimeFunc
-        self._doAutoscaleArr = RO.SeqUtil.oneOrNAsList(doAutoscale, numSubplots, "doAutoscale")
 
-        figure = matplotlib.figure.Figure(figsize=(width, height), frameon=True)
-        self.canvas = FigureCanvasTkAgg(figure, self)
+        self.figure = matplotlib.figure.Figure(figsize=(width, height), frameon=True)
+        self.canvas = FigureCanvasTkAgg(self.figure, self)
         self.canvas.get_tk_widget().grid(row=0, column=0, sticky="news")
         self.canvas.mpl_connect('draw_event', self._handleDrawEvent)
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
-        bottomSubplot = figure.add_subplot(numSubplots, 1, numSubplots)
-        self.subplotArr = [figure.add_subplot(numSubplots, 1, n+1, sharex=bottomSubplot) \
+        bottomSubplot = self.figure.add_subplot(numSubplots, 1, numSubplots)
+        self.subplotArr = [self.figure.add_subplot(numSubplots, 1, n+1, sharex=bottomSubplot) \
             for n in range(numSubplots-1)] + [bottomSubplot]
         if showGrid:
             for subplot in self.subplotArr:
@@ -134,11 +154,12 @@ class StripChartWdg(Tkinter.Frame):
 #             for ticklabel in subplot.get_xticklabels():
 #                 ticklabel.set_visible(False)
 
-
-        for subplot in self.subplotArr:
+        doAutoscaleArr = RO.SeqUtil.oneOrNAsList(doAutoscale, numSubplots, "doAutoscale")
+        for subplotInd, subplot in enumerate(self.subplotArr):
             subplot.label_outer() # disable axis labels on all but the bottom subplot
 #            subplot.yaxis.get_major_locator().set_params(prune = "upper")
-#        figure.subplots_adjust(hspace=0.1)
+#        self.figure.subplots_adjust(hspace=0.1)
+            subplot.set_ylim(auto=doAutoscaleArr[subplotInd])
         
         self._lineDict = dict()
         self._constLineDict = dict()
@@ -165,7 +186,7 @@ class StripChartWdg(Tkinter.Frame):
             kargs["label"] = name
         self._constLineDict[name] = subplot.axhline(y, **kargs)
         yMin, yMax = subplot.get_ylim()
-        if self._doAutoscaleArr[subplotInd] and numpy.isfinite(y) and not (yMin <= y <= yMax):
+        if self.getDoAutoscale(subplotInd) and numpy.isfinite(y) and not (yMin <= y <= yMax):
             subplot.relim()
             subplot.autoscale_view(scalex=False, scaley=True)
 
@@ -184,17 +205,14 @@ class StripChartWdg(Tkinter.Frame):
         if name in self._lineDict:
             raise RuntimeError("Line %s already exists" % (name,))
         axes = self.subplotArr[subplotInd]
-        doAutoscale = self._doAutoscaleArr[subplotInd]
+        doAutoscale = self.getDoAutoscale(subplotInd)
         if doLabel:
             kargs["label"] = name
         self._lineDict[name] = _Line(self, subplotInd, **kargs)
 
     def getDoAutoscale(self, subplotInd=0):
-        return self._doAutoscaleArr[subplotInd]
+        return self.subplotArr[subplotInd].get_autoscaley_on()
 
-    def getSubplot(self, subplotInd=0):
-        return self.subplotArr[subplotInd]
-    
     def addPoint(self, name, y, t=None):
         """Add a data point to a specified line
         
@@ -208,7 +226,7 @@ class StripChartWdg(Tkinter.Frame):
         mplDays = self._cnvTimeFunc(t)
         line = self._lineDict[name]
 
-        line.addPoint(y, mplDays, self._doAutoscaleArr[line.subplotInd])
+        line.addPoint(y, mplDays, self.getDoAutoscale(line.subplotInd))
 
         if self._backgroundList:
             self.canvas.restore_region(self._backgroundList[line.subplotInd])
@@ -216,24 +234,22 @@ class StripChartWdg(Tkinter.Frame):
         self.canvas.blit(line.subplot.bbox)
 
     def setDoAutoscale(self, doAutoscale, subplotInd=0):
-        """Turn on autoscaling for the specified subplot
+        """Turn autoscaling on or off for the specified subplot
         
-        To turn it back off call setYLimits
+        You can also turn off autoscaling by calling setYLimits.
         """
         doAutoscale = bool(doAutoscale)
-        self._doAutoscaleArr[subplotInd] = doAutoscale
         subplot = self.subplotArr[subplotInd]
+        subplot.set_ylim(auto=doAutoscale)
         if doAutoscale:
             subplot.relim()
             subplot.autoscale_view(scalex=False, scaley=True)
-        subplot.set_ylim(auto=doAutoscale)
     
     def setYLimits(self, minY, maxY, subplotInd=0):
-        """Set y limits for the specified subplot.
+        """Set y limits for the specified subplot and disable autoscaling.
         
-        Warning: disables autoscaling. If you want to autoscale with a minimum range, use showY.
+        Note: if you want to autoscale with a minimum range, use showY.
         """
-        self._doAutoscaleArr[subplotInd] = False
         self.subplotArr[subplotInd].set_ylim(minY, maxY, auto=False)
     
     def showY(self, y0, y1=None, subplotInd=0):
@@ -254,7 +270,7 @@ class StripChartWdg(Tkinter.Frame):
             yList = [y0, y1]
         else:
             yList = [y0]
-        doAutoscale = self._doAutoscaleArr[subplotInd]
+        doAutoscale = self.getDoAutoscale(subplotInd)
         doRescale = False
         for y in yList:
             subplot.axhline(y, linestyle=" ")
@@ -287,12 +303,13 @@ class StripChartWdg(Tkinter.Frame):
         self._purgeCounter = (self._purgeCounter + 1) % self._maxPurgeCounter
         doPurge = self._purgeCounter == 0
         if doPurge:
+            print "do purge"
             for line in self._lineDict.itervalues():
                 line.purgeOldData(minMplDays)
         
         for subplotInd, subplot in enumerate(self.subplotArr):
             subplot.set_xlim(minMplDays, maxMplDays)
-            if self._doAutoscaleArr[subplotInd] and doPurge:
+            if self.getDoAutoscale(subplotInd) and doPurge:
                 # since data is being purged the y limits may have changed
                 subplot.relim()
                 subplot.autoscale_view(scalex=False, scaley=True)
@@ -318,7 +335,7 @@ class _Line(object):
         - **kargs: keyword arguments for matplotlib Line2D, such as color
         """
         self.subplotInd = subplotInd
-        self.subplot = stripChartWdg.getSubplot(subplotInd)
+        self.subplot = stripChartWdg.subplotArr[subplotInd]
         self.line = matplotlib.lines.Line2D([], [], animated=True, **kargs)
         self.subplot.add_line(self.line)
         
@@ -407,4 +424,4 @@ if __name__ == "__main__":
 
     addRandomValues("Counts", interval=500)
     addRandomValues("foo", 3000)
-    root.mainloop()
+    # root.mainloop()
