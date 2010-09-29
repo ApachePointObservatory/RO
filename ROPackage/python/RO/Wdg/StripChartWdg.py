@@ -1,24 +1,60 @@
 #!/usr/bin/env python
 """A widget to changing values in real time as a strip chart
 
-Warnings:
+Known issues:
+Matplotlib's defaults present a number of challenges for making a nice strip chart display.
+Here are manual workarounds for some common problems:
+
+- Jumping Ticks:
+    By default the major time ticks and grid jump to new values as time advances. I haven't found an
+    automatic way to keep them steady, but you can do it manually by following these examples:
+    # show a major tick every 10 seconds on even 10 seconds
+    stripChart.xaxis.set_major_locator(matplotlib.dates.SecondLocator(bysecond=range(0, 60, 10)))
+    # show a major tick every 5 seconds on even 5 minutes
+    stripChart.xaxis.set_major_locator(matplotlib.dates.MinuteLocator(byminute=range(0, 60, 5)))
+
+- Reducing The Spacing Between Subplots:
+    Adjacent subplots are rather widely spaced. You can manually shrink the spacing but then
+    the major Y labels will overlap. Here is a technique that includes "pruning" the top major tick label
+    from each subplot and then shrinking the subplot horizontal spacing:
+        for subplot in stripChartWdg.subplotArr:
+            subplot.yaxis.get_major_locator().set_params(prune = "upper")
+        stripChartWdg.figure.subplots_adjust(hspace=0.1)
+- Truncated X Axis Labels:
+    The x label is truncated if the window is short, due to poor auto-layout on matplotlib's part.
+    Also the top and sides may have too large a margin. Tony S Yu provided code that should solve the
+    issue automatically, but I have not yet incorporated it. You can try the following manual tweak:
+    (values are fraction of total window height or width, so they must be in the range 0-1):
+      stripChartWdg.figure.subplots_adjust(bottom=0.15) # top=..., left=..., right=...
+    Unfortunately, values that look good at one window size may not be suitable at another.
+
+- Undesirable colors and font sizes:
+    If you are unhappy with the default choices of font size and background color
+    you can edit the .matplotlibrc file or make settings programmatically.
+    Some useful programmatic settings:
+
+    # by default the background color of the outside of the plot is gray; set using figure.facecolor:
+    matplotlib.rc("figure", facecolor="white") 
+    # by default legends have large text; set using legend.fontsize:
+    matplotlib.rc("legend", fontsize="medium") 
+
+Design Notes:
+- I considered using animation support but found it unsuitable for several reasons:
+-- The whole plot needs to be redrawn fairly often because the time axis moves,
+   so it is not clear it would save any time
+-- I could not figure out how to apply it efficiently to a graph with multiple subplots
+   and multiple lines on each subplot
+
+Requirements:
 - Requires matplotlib built with TkAgg support
 - This widget is somewhat experimental and the API may change.
-
-Useful resource settings:
-# set background color of axes region to white
-matplotlib.rc("figure", facecolor="white") 
-matplotlib.rc("legend", fontsize="medium") 
-
-Known issues:
-See Fixing Display Problems in the doc string for StripChartWdg.
 
 Acknowledgements:
 I am grateful to Benjamin Root, Tony S Yu and others on matplotlib-users
 for advice on tying the x axes together and improving the layout.
 
 History:
-2010-09-28  ROwen
+2010-09-29  ROwen
 """
 import bisect
 import datetime
@@ -37,44 +73,24 @@ __all__ = ["StripChartWdg"]
 class StripChartWdg(Tkinter.Frame):
     """A widget to changing values in real time as a strip chart
     
-    For each variable quantity to display:
-    - Call addLine once to specify the quantity
-    - Call addPoint for each new data point you wish to display
+    Usage Hints:
+    - For each variable quantity to display:
+      - Call addLine once to specify the quantity
+      - Call addPoint for each new data point you wish to display
 
-    For each constant line (e.g. limit) to display:
-    - Call addConstantLine.
+    - For each constant line (e.g. limit) to display call addConstantLine
     
-    To make sure a plot includes one or two y values (e.g. 0 or a range of values):
-    - Call showY
-    
-    All supplied times are POSIX timestamps (e.g. as supplied by time.time()).
-    You may choose the kind of time displayed on the time axis (e.g. UTC or local time) using cnvTimeFunc
-    and the format of that time using dateFormat.
-    
-    Display Problems:
-    
-    - Jumping Ticks:
-        By default the major time ticks and grid jump to new values as time advances. I haven't found an
-        automatic way to keep them steady, but you can do it manually by following these examples:
-        # show a major tick every 10 seconds on even 10 seconds
-        stripChart.xaxis.set_major_locator(matplotlib.dates.SecondLocator(bysecond=range(0, 60, 10)))
-        # show a major tick every 5 seconds on even 5 minutes
-        stripChart.xaxis.set_major_locator(matplotlib.dates.MinuteLocator(byminute=range(0, 60, 5)))
+    - To make sure a plot includes one or two y values (e.g. 0 or a range of values) call showY
 
-    - Reducing The Spacing Between Subplots:
-        Adjacent subplots are rather widely spaced. You can manually shrink the spacing but then
-        the major Y labels will overlap. Here is a technique that includes "pruning" the top major tick label
-        from each subplot and then shrinking the subplot horizontal spacing:
-            for subplot in stripChartWdg.subplotArr:
-                subplot.yaxis.get_major_locator().set_params(prune = "upper")
-            stripChartWdg.figure.subplots_adjust(hspace=0.1)
-    - Truncated X Axis Labels:
-      The x label is truncated if the window is short, due to poor auto-layout on matplotlib's part.
-      Also the top and sides may have too large a margin. Tony S Yu provided code that should solve the
-      issue automatically, but I have not yet incorporated it. You can try the following manual tweak:
-      (values are fraction of total window height or width, so they must be in the range 0-1):
-          stripChartWdg.figure.subplots_adjust(bottom=0.15) # top=..., left=..., right=...
-      Unfortunately, values that look good at one window size may not be suitable at another.
+    - To manually scale a Y axis call setYLimits (by default all y axes are autoscaled).
+    
+    - All supplied times are POSIX timestamps (e.g. as supplied by time.time()).
+        You may choose the kind of time displayed on the time axis (e.g. UTC or local time) using cnvTimeFunc
+        and the format of that time using dateFormat.
+    
+    Known Issues:
+    matplotlib's defaults present a number of challenges for making a nice strip chart display.
+    Some issues and manual solutions are discussed in the main file's document string.
         
     Potentially Useful Attributes:
     - canvas: the matplotlib FigureCanvas
@@ -86,25 +102,19 @@ class StripChartWdg(Tkinter.Frame):
     def __init__(self,
         master,
         timeRange = 3600,
+        numSubplots = 1,
         width = 8,
         height = 2,
-        numSubplots = 1,
         showGrid = True,
         dateFormat = "%H:%M:%S",
         updateInterval = None,
         cnvTimeFunc = None,
-        doAutoscale = True,
     ):
         """Construct a StripChartWdg with the specified time range
-        
-        Eventually we should support multiple axes and multiple values/axis
-        but let's start simple with one axis.
         
         Inputs:
         - master: Tk parent widget
         - timeRange: range of time displayed (seconds)
-        - minY: minimum Y value
-        - maxY: maximum Y value
         - width: width of graph in inches
         - height: height of graph in inches
         - numSubplots: the number of subplots
@@ -113,9 +123,6 @@ class StripChartWdg(Tkinter.Frame):
         - updateInterval: now often the time axis is updated (seconds); if None a value is calculated
         - cnvTimeFunc: a function that takes a POSIX timestamp (e.g. time.time()) and returns matplotlib days;
             typically an instance of TimeConverter; defaults to TimeConverter(useUTC=False)
-        - doAutoscale: if True then autoscale the y axis of the associated subplot,
-            else you should call setYLimit for the subplot.
-            May be a single value (which is applied to all subplots) or a sequence of numSubplot values.
         """
         Tkinter.Frame.__init__(self, master)
         
@@ -123,18 +130,18 @@ class StripChartWdg(Tkinter.Frame):
         if updateInterval == None:
             updateInterval = max(0.1, min(5.0, timeRange / 2000.0))
         self.updateInterval = float(updateInterval)
-        self._purgeCounter = 0
-        self._maxPurgeCounter = max(1, int(0.5 + (5.0 / self.updateInterval)))
-        self._backgroundList = []
 
         if cnvTimeFunc == None:
             cnvTimeFunc = TimeConverter(useUTC=False)
         self._cnvTimeFunc = cnvTimeFunc
 
+        # how many time axis updates occur before purging old data
+        self._maxPurgeCounter = max(1, int(0.5 + (5.0 / self.updateInterval)))
+        self._purgeCounter = 0
+
         self.figure = matplotlib.figure.Figure(figsize=(width, height), frameon=True)
         self.canvas = FigureCanvasTkAgg(self.figure, self)
         self.canvas.get_tk_widget().grid(row=0, column=0, sticky="news")
-        self.canvas.mpl_connect('draw_event', self._handleDrawEvent)
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
         bottomSubplot = self.figure.add_subplot(numSubplots, 1, numSubplots)
@@ -148,18 +155,9 @@ class StripChartWdg(Tkinter.Frame):
         bottomSubplot.xaxis_date()
         self.xaxis.set_major_formatter(matplotlib.dates.DateFormatter(dateFormat))
 
-# alternate means of hiding x labels on all subplots but the last
-# however calling subplot.label_outer() is easier and seems to work fine
-#         for subplot in self.subplotArr[0:-1]:
-#             for ticklabel in subplot.get_xticklabels():
-#                 ticklabel.set_visible(False)
-
-        doAutoscaleArr = RO.SeqUtil.oneOrNAsList(doAutoscale, numSubplots, "doAutoscale")
-        for subplotInd, subplot in enumerate(self.subplotArr):
+        for subplot in self.subplotArr:
             subplot.label_outer() # disable axis labels on all but the bottom subplot
-#            subplot.yaxis.get_major_locator().set_params(prune = "upper")
-#        self.figure.subplots_adjust(hspace=0.1)
-            subplot.set_ylim(auto=doAutoscaleArr[subplotInd])
+            subplot.set_ylim(auto=True) # set auto scaling for the y axis
         
         self._lineDict = dict()
         self._constLineDict = dict()
@@ -186,7 +184,7 @@ class StripChartWdg(Tkinter.Frame):
             kargs["label"] = name
         self._constLineDict[name] = subplot.axhline(y, **kargs)
         yMin, yMax = subplot.get_ylim()
-        if self.getDoAutoscale(subplotInd) and numpy.isfinite(y) and not (yMin <= y <= yMax):
+        if subplot.get_autoscaley_on() and numpy.isfinite(y) and not (yMin <= y <= yMax):
             subplot.relim()
             subplot.autoscale_view(scalex=False, scaley=True)
 
@@ -204,14 +202,10 @@ class StripChartWdg(Tkinter.Frame):
         """
         if name in self._lineDict:
             raise RuntimeError("Line %s already exists" % (name,))
-        axes = self.subplotArr[subplotInd]
-        doAutoscale = self.getDoAutoscale(subplotInd)
+        subplot = self.subplotArr[subplotInd]
         if doLabel:
             kargs["label"] = name
-        self._lineDict[name] = _Line(self, subplotInd, **kargs)
-
-    def getDoAutoscale(self, subplotInd=0):
-        return self.subplotArr[subplotInd].get_autoscaley_on()
+        self._lineDict[name] = _Line(subplot, **kargs)
 
     def addPoint(self, name, y, t=None):
         """Add a data point to a specified line
@@ -226,12 +220,11 @@ class StripChartWdg(Tkinter.Frame):
         mplDays = self._cnvTimeFunc(t)
         line = self._lineDict[name]
 
-        line.addPoint(y, mplDays, self.getDoAutoscale(line.subplotInd))
+        line.addPoint(y, mplDays)
+        self.canvas.draw()
 
-        if self._backgroundList:
-            self.canvas.restore_region(self._backgroundList[line.subplotInd])
-        line.subplot.draw_artist(line.line)
-        self.canvas.blit(line.subplot.bbox)
+    def getDoAutoscale(self, subplotInd=0):
+        return self.subplotArr[subplotInd].get_autoscaley_on()
 
     def setDoAutoscale(self, doAutoscale, subplotInd=0):
         """Turn autoscaling on or off for the specified subplot
@@ -270,24 +263,14 @@ class StripChartWdg(Tkinter.Frame):
             yList = [y0, y1]
         else:
             yList = [y0]
-        doAutoscale = self.getDoAutoscale(subplotInd)
         doRescale = False
         for y in yList:
             subplot.axhline(y, linestyle=" ")
-            if doAutoscale and numpy.isfinite(y) and not (yMin <= y <= yMax):
+            if subplot.get_autoscaley_on() and numpy.isfinite(y) and not (yMin <= y <= yMax):
                 doRescale = True
         if doRescale:
             subplot.relim()
             subplot.autoscale_view(scalex=False, scaley=True)
-    
-    def _handleDrawEvent(self, event):
-        """Handle draw event
-        """
-        self._backgroundList = [self.canvas.copy_from_bbox(sp.bbox) for sp in self.subplotArr]
-        for line in self._lineDict.itervalues():
-            line.subplot.draw_artist(line.line)
-        for subplot in self.subplotArr:
-            self.canvas.blit(subplot.bbox)
     
     def _updateTimeAxis(self):
         """Update the time axis; calls itself
@@ -303,13 +286,12 @@ class StripChartWdg(Tkinter.Frame):
         self._purgeCounter = (self._purgeCounter + 1) % self._maxPurgeCounter
         doPurge = self._purgeCounter == 0
         if doPurge:
-            print "do purge"
             for line in self._lineDict.itervalues():
                 line.purgeOldData(minMplDays)
         
-        for subplotInd, subplot in enumerate(self.subplotArr):
+        for subplot in self.subplotArr:
             subplot.set_xlim(minMplDays, maxMplDays)
-            if self.getDoAutoscale(subplotInd) and doPurge:
+            if subplot.get_autoscaley_on() and doPurge:
                 # since data is being purged the y limits may have changed
                 subplot.relim()
                 subplot.autoscale_view(scalex=False, scaley=True)
@@ -325,36 +307,44 @@ class _Line(object):
     - subplot: the matplotlib Subplot instance displaying this line
     - subplotInd: the index of the subplot
     """
-    def __init__(self, stripChartWdg, subplotInd, **kargs):
+    def __init__(self, subplot, **kargs):
         """Create a line
         
         Inputs:
-        - stripChartWdg: the StripChartWdg to which this _Line belongs
-        - subplotInd: the index of the subplot to which this _Line belongs
-        - doAutoscale: if True then autoscale the y axis
+        - subplot: the matplotlib Subplot instance displaying this line
         - **kargs: keyword arguments for matplotlib Line2D, such as color
         """
-        self.subplotInd = subplotInd
-        self.subplot = stripChartWdg.subplotArr[subplotInd]
-        self.line = matplotlib.lines.Line2D([], [], animated=True, **kargs)
+        self.subplot = subplot
+        # do not use the data in the Line2D because in some versions of matplotlib
+        # line.get_data returns numpy arrays, whihc cannot be appended to
+        self._tList = []
+        self._yList = []
+        self.line = matplotlib.lines.Line2D([], [], animated=False, **kargs)
         self.subplot.add_line(self.line)
         
-    def addPoint(self, y, mplDays, doAutoscale):
+    def addPoint(self, y, mplDays):
         """Append a new data point
         
         Inputs:
         - y: y value
         - mplDays: time as matplotlib days
+        
+        Return:
+        - True if view should be relimited, False otherwise
         """
-        tList, yList = self.line.get_data(True)
-        tList.append(mplDays)
-        yList.append(y)
-        yMin, yMax = self.subplot.get_ylim()
-        self.line.set_data(tList, yList)
-        if doAutoscale and numpy.isfinite(y) and not (yMin <= y <= yMax):
-            self.subplot.relim()
-            self.subplot.autoscale_view(scalex=False, scaley=True)
-    
+        self._tList.append(mplDays)
+        self._yList.append(y)
+        if self.subplot.get_autoscaley_on() and numpy.isfinite(y):
+            yMin, yMax = self.subplot.get_ylim()
+            self.line.set_data(self._tList, self._yList)
+            if not (yMin <= y <= yMax):
+                self.subplot.relim()
+                self.subplot.autoscale_view(scalex=False, scaley=True)
+                return True
+        else:
+            self.line.set_data(self._tList, self._yList)
+        return False
+
     def purgeOldData(self, minMplDays):
         """Purge data with t < minMplDays
 
@@ -363,12 +353,11 @@ class _Line(object):
         
         Warning: does not update the display (the caller must do that)
         """
-        tList, yList = self.line.get_data(True)
-        if not tList:
+        if not self._tList:
             return
-        numToDitch = bisect.bisect_left(tList, minMplDays)
+        numToDitch = bisect.bisect_left(self._tList, minMplDays)
         if numToDitch > 0:
-            self.line.set_data(tList[numToDitch:], yList[numToDitch:])
+            self.line.set_data(self._tList[numToDitch:], self._yList[numToDitch:])
 
 
 class TimeConverter(object):
@@ -399,29 +388,43 @@ class TimeConverter(object):
 
 
 if __name__ == "__main__":   
+    import RO.Alg
     root = Tkinter.Tk()
     stripChart = StripChartWdg(
         master = root,
         timeRange = 60,
         numSubplots = 2,
+#        updateInterval = 5,
+        width = 9,
+        height = 3,
     )
     stripChart.pack(expand=True, fill="both")
-    stripChart.addLine("Counts", subplotInd=0)
-    stripChart.subplotArr[0].yaxis.set_label_text("Counts")
+    stripChart.addLine("Counts", subplotInd=0, color="blue")
     stripChart.addConstantLine("Saturated", 2.5, subplotInd=0, color="red", doLabel=True)
+    stripChart.subplotArr[0].yaxis.set_label_text("Counts")
     # make sure the Y axis of subplot 0 always includes 0 and 2.7
-    stripChart.showY(0.0, 2.7, subplotInd=0)
-    stripChart.subplotArr[0].legend(loc=3)
+    stripChart.showY(0.0, 2.8, subplotInd=0)
+
+    stripChart.addLine("Walk 1", subplotInd=1, color="blue")
+    stripChart.addLine("Walk 2", subplotInd=1, color="green")
+    stripChart.subplotArr[1].yaxis.set_label_text("Random Walk")
+    stripChart.showY(0.0, subplotInd=0)
+    stripChart.subplotArr[1].legend(loc=3)
+
     # stop major time ticks from jumping around as time advances:
     stripChart.xaxis.set_major_locator(matplotlib.dates.SecondLocator(bysecond=range(0,60,10)))
     
-    stripChart.addLine("foo", subplotInd=1, color="green")
-
+    varDict = {
+        "Counts": RO.Alg.ConstrainedGaussianRandomWalk(1, 0.2, 0, 2.8),
+        "Walk 1":  RO.Alg.RandomWalk.GaussianRandomWalk(0, 2),
+        "Walk 2": RO.Alg.RandomWalk.GaussianRandomWalk(0, 2),
+    }
     def addRandomValues(name, interval=100):
-        val = numpy.random.rand(1)[0] * 3
-        stripChart.addPoint(name, val)
+        var = varDict[name]
+        stripChart.addPoint(name, var.next())
         root.after(interval, addRandomValues, name, interval)
 
     addRandomValues("Counts", interval=500)
-    addRandomValues("foo", 3000)
-    # root.mainloop()
+    addRandomValues("Walk 1", 1600)
+    addRandomValues("Walk 2", 1900)
+    root.mainloop()

@@ -8,3 +8,4 @@ from MatchList import *
 from MultiDict import *
 from MultiListIter import *
 from OrderedDict import *
+from RandomWalk import *
