@@ -16,6 +16,8 @@ class ConstrainedGaussianRandomWalk(object):
         self.minValue = float(minValue)
         self.maxValue = float(maxValue)
         self.value = self.homeValue
+        if not self.minValue <= self.homeValue <= self.maxValue:
+            raise RuntimeError("Need min=%s <= home=%s <= max=%s" % (self.minValue, self.homeValue, self.maxValue))
     
     def next(self):
         """Randomly change the value and return the next value
