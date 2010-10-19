@@ -150,6 +150,7 @@ History:
                     require numpy.core.ma) and 1.1 (which requires numpy.ma).
 2009-11-04 ROwen    Added ann_Line and ann_Text annotations.
                     Added cnvOffset argument to Annotation and GrayImageWdg.addAnnotation.
+2010-10-19 ROwen    Made value a float instead of an int to handle float images better, including NaN.
 """
 import weakref
 import Tkinter
@@ -597,10 +598,11 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
             helpText = "Value at cursor (ADUs)",
             helpURL =  helpURL,
         ).pack(side="left")
-        self.currValWdg = Label.IntLabel(
+        self.currValWdg = Label.FloatLabel(
             posFrame,
             bd = 0,
             padx = 0,
+            precision = 1,
             helpText = "Value at cursor (ADUs)",
             helpURL =  helpURL,
         )
