@@ -75,6 +75,7 @@ History:
 2010-05-26 ROwen    Tweaked to use _removeAllCallbacks() instead of nulling _callbacks.
 2010-06-28 ROwen    Made _WaitBase a modern class (thanks to pychecker).
                     Removed unused and broken internal method _waitEndFunc (thanks to pychecker).
+2010-10-20 ROwen    Tweaked waitCmd doc string.
 """
 import sys
 import threading
@@ -467,13 +468,12 @@ class ScriptRunner(RO.AddCallback.BaseMixin):
         checkFail = True,
     ):
         """Start a command using the same arguments as waitCmd (which see).
+        
+        Inputs: same as waitCmd, which see.
+
         Returns a command variable that you can wait for using waitCmdVars.
 
         Do not use yield because it does not wait for anything.
-        
-        Inputs: same as waitCmd, which see.
-        
-        Returns a command variable which you can wait for using waitCmdVars.
         """
         cmdVar = RO.KeyVariable.CmdVar(
             actor=actor,
@@ -504,7 +504,7 @@ class ScriptRunner(RO.AddCallback.BaseMixin):
                 argList.append("abortCmdStr=%r" % (abortCmdStr,))
             if checkFail != True:
                 argList.append("checkFail=%r" % (checkFail,))
-            self.debugPrint("startCmd(%s)" % ", ".join(argList))
+            self.debugPrint("startCmd(%s)" % (", ".join(argList),))
 
             self._showCmdMsg("%s started" % cmdStr)
             
@@ -582,6 +582,8 @@ class ScriptRunner(RO.AddCallback.BaseMixin):
         Also the time limit is a lower limit. The command is guaranteed to
         expire no sooner than this but it may take a second longer.
         """
+        if isinstance(actor, RO.KeyVariable.CmdVar):
+            raise RuntimeError("waitCmd error: actor must be a string; did you mean to call waitCmdVars? actor=%s" % (actor,))
         self._waitCheck(setWait = False)
         
         self.debugPrint("waitCmd calling startCmd")
