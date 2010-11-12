@@ -61,6 +61,7 @@ if __name__ == '__main__':
         "strSet='quoted \"string\" 1', 'quoted \"string\" 2', unquotedstr3",
         "genSet=1, 2, 3.14159, 'str4', 'str5'",
         "noValKey1=",
+        "noValKey1",
         "noValKey1; intKey2=2; noValKey3=; noValKey4 = ; noValKey5",
     ]
     for astr in testList:

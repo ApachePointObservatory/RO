@@ -25,6 +25,7 @@ History:
 2005-09-15 ROwen    Documented the arguments for callback functions.
 2008-04-29 ROwen    Fixed reporting of exceptions that contain unicode arguments.
 2010-05-26 ROwen    Tweaked to use _removeAllCallbacks() instead of nulling _callbacks.
+2010-11-12 ROwen    Bug fix: timeLim was mishandled.
 """
 __all__ = ['HTTPGet']
 
@@ -124,7 +125,7 @@ class HTTPGet(RO.AddCallback.BaseMixin):
                 until start is called
     - dispStr   a string to display while downloading the file;
                 if omitted, fromURL is displayed
-    - timeLim   time limit (sec); if None then no limit
+    - timeLim   time limit (sec) for the total transfer; if None then no limit
     
     Callbacks receive one argument: this object.
     """
@@ -174,7 +175,7 @@ class HTTPGet(RO.AddCallback.BaseMixin):
         self.overwrite = bool(overwrite)
         self.createDir = createDir
         if timeLim != None:
-            self.timeLimMS = max(1, int(round(timeLim / 1000.0)))
+            self.timeLimMS = max(1, int(round(timeLim * 1000.0)))
         else:
             self.timeLimMS = 0
 
@@ -498,7 +499,7 @@ class HTTPGet(RO.AddCallback.BaseMixin):
 if __name__ == "__main__":
     root = Tkinter.Tk()
 
-    testURL = "http://www.washington.edu/"
+    testURL = "http://www.astro.washington.edu/"
     outFile = "httpget_test.html"
     
     _Debug = False
