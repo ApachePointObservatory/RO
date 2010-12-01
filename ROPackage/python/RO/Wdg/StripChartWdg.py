@@ -48,6 +48,7 @@ for advice on tying the x axes together and improving the layout.
 
 History:
 2010-09-29  ROwen
+2010-11-30  Fixed a memory leak (Line.purgeOldData wasn't working correctly).
 """
 import bisect
 import datetime
@@ -377,9 +378,11 @@ class _Line(object):
         """
         if not self._tList:
             return
-        numToDitch = bisect.bisect_left(self._tList, minMplDays)
+        numToDitch = bisect.bisect_left(self._tList, minMplDays) - 1 # -1 avoids a gap at the left
         if numToDitch > 0:
-            self.line.set_data(self._tList[numToDitch:], self._yList[numToDitch:])
+            self._tList = self._tList[numToDitch:]
+            self._yList = self._yList[numToDitch:]
+            self.line.set_data(self._tList, self._yList)
 
 
 class TimeConverter(object):
