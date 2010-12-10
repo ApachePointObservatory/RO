@@ -5,6 +5,13 @@ Known issues:
 Matplotlib's defaults present a number of challenges for making a nice strip chart display.
 Here are manual workarounds for some common problems:
 
+- Memory Leak:
+    Matplotlib 1.0.0 has a memory leak in canvas.draw(), at least when using TgAgg:
+    <https://sourceforge.net/tracker/?func=detail&atid=560720&aid=3124990&group_id=80706>
+    Unfortunately canvas.draw is only way to update the display after altering the x/time axis.
+    Thus every StripChartWdg will leak memory until the matplotlib bug is fixed;
+    the best you can do is reduce the leak rate by increasing updateInterval.
+
 - Jumping Ticks:
     By default the major time ticks and grid jump to new values as time advances. I haven't found an
     automatic way to keep them steady, but you can do it manually by following these examples:
@@ -49,6 +56,7 @@ for advice on tying the x axes together and improving the layout.
 History:
 2010-09-29  ROwen
 2010-11-30  Fixed a memory leak (Line.purgeOldData wasn't working correctly).
+2010-12-10  Document a memory leak caused by matplotlib's canvas.draw.
 """
 import bisect
 import datetime
@@ -120,6 +128,7 @@ class StripChartWdg(Tkinter.Frame):
         if updateInterval == None:
             updateInterval = max(0.1, min(5.0, timeRange / 2000.0))
         self.updateInterval = float(updateInterval)
+#         print "updateInterval=", self.updateInterval
 
         if cnvTimeFunc == None:
             cnvTimeFunc = TimeConverter(useUTC=False)
