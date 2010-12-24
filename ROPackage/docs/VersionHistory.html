@@ -7,6 +7,17 @@
 
 <h2>Version history for the <a href="Overview.html">RO Python Package</a></h2>
 
+<h3>2.7.0-pre 2010-12-23</h3>
+<ul>
+    <li>RO.Wdg.StripChartWdg
+    <ul>
+        <li>Backward-incompatible change: addLine now returns an object on which you call addPoint
+        <li>Lines no longer need unique names (or names at all)
+        <li>Added removeLine method
+        <li>addPoint now ignores the data if y is None
+    </ul>
+</ul>
+
 <h3>2.6.2 2010-12-07</h3>
 <ul>
     <li>Bug fix: HTTPGet timeLim was mishandled.
