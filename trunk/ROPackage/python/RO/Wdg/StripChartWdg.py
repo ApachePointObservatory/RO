@@ -55,12 +55,22 @@ for advice on tying the x axes together and improving the layout.
 
 History:
 2010-09-29  ROwen
-2010-11-30  Fixed a memory leak (Line.purgeOldData wasn't working correctly).
+2010-11-30  Fixed a memory leak (Line._purgeOldData wasn't working correctly).
 2010-12-10  Document a memory leak caused by matplotlib's canvas.draw.
+2010-12-23  Backward-incompatible changes:
+            - addPoint is now called on the object returned by addLine, not StripChartWdg.
+                This eliminate the need to give lines unique names.
+            - addPoint is silently ignored if y is None
+            - addLine and addConstantLine have changed:
+                - There is no "name" argument; use label if you want a name that shows up in legends.
+                - The label does not have to be unique.
+                - They return an object.
+            Added removeLine method.
 """
 import bisect
 import datetime
 import time
+
 import numpy
 import Tkinter
 import matplotlib
@@ -155,93 +165,74 @@ class StripChartWdg(Tkinter.Frame):
         bottomSubplot.xaxis_date()
         self.xaxis.set_major_formatter(matplotlib.dates.DateFormatter(dateFormat))
 
-        # dictionary of line name: _Line object
-        self._lineDict = dict()
-        # dictionary of constant line name: matplotlib Line2D
-        self._constLine2DDict = dict()
-        # dictionary of matplotlib Subplot: _SubplotInfo
-        self._subplotInfoDict = dict()
+        # dictionary of constant line name: (matplotlib Line2D, matplotlib Subplot)
+        self._constLineDict = dict()
 
         for subplot in self.subplotArr:
+            subplot._scwLines = [] # a list of contained _Line objects;
+                # different than the standard lines property in that:
+                # - lines contains Line2D objects
+                # - lines contains constant lines as well as data lines
+            subplot._scwBackground = None # background for animation
             subplot.label_outer() # disable axis labels on all but the bottom subplot
             subplot.set_ylim(auto=True) # set auto scaling for the y axis
-            self._subplotInfoDict[subplot] = _SubplotInfo()
         
         self._timeAxisTimer = None
         self._updateTimeAxis()
 
-    def addConstantLine(self, name, y, subplotInd=0, doLabel=False, **kargs):
+    def addConstantLine(self, y, subplotInd=0, **kargs):
         """Add a new constant to plot
         
         Inputs:
-        - name: name for constant line
         - y: value of constant line
-        - doLabel: if True then the Line's label is set to name.
-            Set True if you want the line to show up in the legend using name.
-            Set False if you want no label (the line will not show in the legend)
-            or if you prefer to specify a legend that is different than name
         - subplotInd: index of subplot
-        - **kargs: keyword arguments for matplotlib Line2D, such as color
+        - **kargs: keyword arguments for matplotlib Line2DUseful arguments include:
+        - label: name of line (displayed in a Legend)
+        - color: color of line
         """
-        if name in self._constLine2DDict:
-            raise RuntimeError("Constant Line %s already exists" % (name,))
         subplot = self.subplotArr[subplotInd]
-        if doLabel:
-            kargs["label"] = name
-        self._constLine2DDict[name] = subplot.axhline(y, **kargs)
+        line2d = subplot.axhline(y, **kargs)
         yMin, yMax = subplot.get_ylim()
         if subplot.get_autoscaley_on() and numpy.isfinite(y) and not (yMin <= y <= yMax):
             subplot.relim()
             subplot.autoscale_view(scalex=False, scaley=True)
+        return line2d
 
-    def addLine(self, name, subplotInd=0, doLabel=True, **kargs):
+    def addLine(self, subplotInd=0, **kargs):
         """Add a new quantity to plot
         
         Inputs:
-        - name: name for line
         - subplotInd: index of subplot
-        - doLabel: if True then the Line's label is set to name.
-            Set True if you want the line to show up in the legend using name.
-            Set False if you want no label (the line will not show in the legend)
-            or if you prefer to specify a legend that is different than name
-        all other keyword arguments are sent to the _Line constructor
+        all other keyword arguments are sent to the _Line constructor. Useful arguments include:
+        - label: name of line (displayed in a Legend)
+        - color: color of line
         """
-        if name in self._lineDict:
-            raise RuntimeError("Line %s already exists" % (name,))
         subplot = self.subplotArr[subplotInd]
-        if doLabel:
-            kargs["label"] = name
-        line = _Line(subplot, **kargs)
-        self._lineDict[name] = line
-
-        self._subplotInfoDict[subplot].animatedLineList.append(line)
-
-    def addPoint(self, name, y, t=None):
-        """Add a data point to a specified line
-        
-        Inputs:
-        - name: name of Line
-        - y: y value
-        - t: time as a POSIX timestamp (e.g. time.time()); if None then "now"
-        """
-        if t == None:
-            t = time.time()
-        mplDays = self._cnvTimeFunc(t)
-        line = self._lineDict[name]
-
-        didRescale = line.addPoint(y, mplDays)
-
-        if not didRescale:
-            # did not rescale, so no draw event triggered, so update just this subplot's display
-            subplotInfo = self._subplotInfoDict[line.subplot]
-            if subplotInfo.background:
-                self.canvas.restore_region(subplotInfo.background)
-                for line in subplotInfo.animatedLineList:
-                    line.subplot.draw_artist(line.line)
-                self.canvas.blit(line.subplot.bbox)
+        return _Line(subplot, self._cnvTimeFunc, **kargs)
 
     def getDoAutoscale(self, subplotInd=0):
         return self.subplotArr[subplotInd].get_autoscaley_on()
+    
+    def removeLine(self, line):
+        """Remove an existing line added by addLine or addConstantLine
+        
+        Raise an exception if the line is not found
+        """
+        if isinstance(line, _Line):
+            # a _Line object needs to be removed from _scwLines as well as the subplot
+            line2d = line.line2d
+            subplot = line.subplot
+            subplot._scwLines.remove(line)
+        else:
+            # a constant line is just a matplotlib Line2D instance
+            line2d = line
+            subplot = line.axes
+
+        subplot.lines.remove(line2d)
+        if subplot.get_autoscaley_on():
+            subplot.relim()
+            subplot.autoscale_view(scalex=False, scaley=True)
+        self.canvas.draw()
 
     def setDoAutoscale(self, doAutoscale, subplotInd=0):
         """Turn autoscaling on or off for the specified subplot
@@ -292,10 +283,11 @@ class StripChartWdg(Tkinter.Frame):
     def _handleDrawEvent(self, event):
         """Handle draw event
         """
-        for subplot, subplotInfo in self._subplotInfoDict.iteritems():
-            subplotInfo.background = self.canvas.copy_from_bbox(subplot.bbox)
-            for line in subplotInfo.animatedLineList:
-                subplot.draw_artist(line.line)
+#         print "handleDrawEvent"
+        for subplot in self.subplotArr:
+            subplot._scwBackground = self.canvas.copy_from_bbox(subplot.bbox)
+            for line in subplot._scwLines:
+                subplot.draw_artist(line.line2d)
             self.canvas.blit(subplot.bbox)
     
     def _updateTimeAxis(self):
@@ -311,73 +303,82 @@ class StripChartWdg(Tkinter.Frame):
         
         self._purgeCounter = (self._purgeCounter + 1) % self._maxPurgeCounter
         doPurge = self._purgeCounter == 0
-        if doPurge:
-            for line in self._lineDict.itervalues():
-                line.purgeOldData(minMplDays)
         
         for subplot in self.subplotArr:
             subplot.set_xlim(minMplDays, maxMplDays)
-            if subplot.get_autoscaley_on() and doPurge:
-                # since data is being purged the y limits may have changed
-                subplot.relim()
-                subplot.autoscale_view(scalex=False, scaley=True)
+            if doPurge:
+                for line in subplot._scwLines:
+                    line._purgeOldData(minMplDays)
+                if subplot.get_autoscaley_on():
+                    # since data is being purged the y limits may have changed
+                    subplot.relim()
+                    subplot.autoscale_view(scalex=False, scaley=True)
         self.canvas.draw()
         self._timeAxisTimer = self.after(int(self.updateInterval * 1000), self._updateTimeAxis)
 
-class _SubplotInfo(object):
-    """Information needed to animate a Subplot
-    """
-    def __init__(self):
-        self.background = None
-        self.animatedLineList = []
 
 class _Line(object):
     """A line (trace) on a strip chart representing some varying quantity
     
     Attributes that might be useful:
-    - line: the matplotlib.lines.Line2D associated with this line
+    - line2d: the matplotlib.lines.Line2D associated with this line
     - subplot: the matplotlib Subplot instance displaying this line
-    - subplotInd: the index of the subplot
+    - cnvTimeFunc: a function that takes a POSIX timestamp (e.g. time.time()) and returns matplotlib days;
+        typically an instance of TimeConverter; defaults to TimeConverter(useUTC=False)
     """
-    def __init__(self, subplot, **kargs):
+    def __init__(self, subplot, cnvTimeFunc, **kargs):
         """Create a line
         
         Inputs:
         - subplot: the matplotlib Subplot instance displaying this line
+        - cnvTimeFunc: a function that takes a POSIX timestamp (e.g. time.time()) and returns matplotlib days;
+            typically an instance of TimeConverter; defaults to TimeConverter(useUTC=False)
         - **kargs: keyword arguments for matplotlib Line2D, such as color
         """
         self.subplot = subplot
+        self._cnvTimeFunc = cnvTimeFunc
         # do not use the data in the Line2D because in some versions of matplotlib
-        # line.get_data returns numpy arrays, whihc cannot be appended to
+        # line.get_data returns numpy arrays, which cannot be appended to
         self._tList = []
         self._yList = []
-        self.line = matplotlib.lines.Line2D([], [], animated=True, **kargs)
-        self.subplot.add_line(self.line)
+        self.line2d = matplotlib.lines.Line2D([], [], animated=True, **kargs)
+        self.subplot.add_line(self.line2d)
+        self.subplot._scwLines.append(self)
         
-    def addPoint(self, y, mplDays):
+    def addPoint(self, y, t=None):
         """Append a new data point
         
         Inputs:
-        - y: y value
-        - mplDays: time as matplotlib days
-        
-        Return:
-        - True if view should be relimited, False otherwise
+        - y: y value; if None the point is silently ignored
+        - t: time as a POSIX timestamp (e.g. time.time()); if None then "now"
         """
+        if y == None:
+            return
+        if t == None:
+            t = time.time()
+        mplDays = self._cnvTimeFunc(t)
+
         self._tList.append(mplDays)
         self._yList.append(y)
         if self.subplot.get_autoscaley_on() and numpy.isfinite(y):
             yMin, yMax = self.subplot.get_ylim()
-            self.line.set_data(self._tList, self._yList)
+            self.line2d.set_data(self._tList, self._yList)
             if not (yMin <= y <= yMax):
                 self.subplot.relim()
                 self.subplot.autoscale_view(scalex=False, scaley=True)
-                return True
+                return # a draw event was triggered
         else:
-            self.line.set_data(self._tList, self._yList)
-        return False
+            self.line2d.set_data(self._tList, self._yList)
 
-    def purgeOldData(self, minMplDays):
+        # did not trigger redraw event so do it now
+        if self.subplot._scwBackground:
+            canvas = self.subplot.figure.canvas
+            canvas.restore_region(self.subplot._scwBackground)
+            for line in self.subplot._scwLines:
+                self.subplot.draw_artist(line.line2d)
+            canvas.blit(self.subplot.bbox)
+
+    def _purgeOldData(self, minMplDays):
         """Purge data with t < minMplDays
 
         Inputs:
@@ -391,7 +392,7 @@ class _Line(object):
         if numToDitch > 0:
             self._tList = self._tList[numToDitch:]
             self._yList = self._yList[numToDitch:]
-            self.line.set_data(self._tList, self._yList)
+            self.line2d.set_data(self._tList, self._yList)
 
 
 class TimeConverter(object):
@@ -428,37 +429,46 @@ if __name__ == "__main__":
         master = root,
         timeRange = 60,
         numSubplots = 2,
-#        updateInterval = 5,
+#         updateInterval = 5,
         width = 9,
         height = 3,
     )
     stripChart.pack(expand=True, fill="both")
-    stripChart.addLine("Counts", subplotInd=0, color="blue")
-    stripChart.addConstantLine("Saturated", 2.5, subplotInd=0, color="red", doLabel=True)
+    countsLine = stripChart.addLine(label="Counts", subplotInd=0, color="blue")
+    satConstLine = stripChart.addConstantLine(2.5, label="Saturated", subplotInd=0, color="red")
     stripChart.subplotArr[0].yaxis.set_label_text("Counts")
     # make sure the Y axis of subplot 0 always includes 0 and 2.7
-    stripChart.showY(0.0, 2.8, subplotInd=0)
+#    stripChart.showY(0.0, 2.8, subplotInd=0)
 
-    stripChart.addLine("Walk 1", subplotInd=1, color="blue")
-    stripChart.addLine("Walk 2", subplotInd=1, color="green")
+    walk1Line = stripChart.addLine(label="Walk 1", subplotInd=1, color="blue")
+    walk2Line = stripChart.addLine(label="Walk 2", subplotInd=1, color="green")
     stripChart.subplotArr[1].yaxis.set_label_text("Random Walk")
-    stripChart.showY(0.0, subplotInd=0)
+#    stripChart.showY(0.0, subplotInd=0)
     stripChart.subplotArr[1].legend(loc=3)
 
     # stop major time ticks from jumping around as time advances:
     stripChart.xaxis.set_major_locator(matplotlib.dates.SecondLocator(bysecond=range(0,60,10)))
     
     varDict = {
-        "Counts": RO.Alg.ConstrainedGaussianRandomWalk(1, 0.2, 0, 2.8),
-        "Walk 1":  RO.Alg.RandomWalk.GaussianRandomWalk(0, 2),
-        "Walk 2": RO.Alg.RandomWalk.GaussianRandomWalk(0, 2),
+        countsLine: RO.Alg.ConstrainedGaussianRandomWalk(1, 0.2, 0, 2.8),
+        walk1Line:  RO.Alg.RandomWalk.GaussianRandomWalk(0, 2),
+        walk2Line: RO.Alg.RandomWalk.GaussianRandomWalk(0, 2),
     }
-    def addRandomValues(name, interval=100):
-        var = varDict[name]
-        stripChart.addPoint(name, var.next())
-        root.after(interval, addRandomValues, name, interval)
+    def addRandomValues(line, interval=100):
+        var = varDict[line]
+        line.addPoint(var.next())
+        root.after(interval, addRandomValues, line, interval)
 
-    addRandomValues("Counts", interval=500)
-    addRandomValues("Walk 1", 1600)
-    addRandomValues("Walk 2", 1900)
+    addRandomValues(countsLine, interval=500)
+    addRandomValues(walk1Line, 1600)
+    addRandomValues(walk2Line, 1900)
+    
+    def deleteSatConstLine():
+        stripChart.removeLine(satConstLine)
+    Tkinter.Button(root, text="Delete Saturated Counts", command=deleteSatConstLine).pack()
+
+    def deleteWalk1():
+        stripChart.removeLine(walk1Line)
+    Tkinter.Button(root, text="Delete Walk 1", command=deleteWalk1).pack()
+
     root.mainloop()
