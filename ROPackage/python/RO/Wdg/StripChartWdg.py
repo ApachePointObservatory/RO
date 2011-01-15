@@ -66,6 +66,7 @@ History:
                 - The label does not have to be unique.
                 - They return an object.
             Added removeLine method.
+2010-12-29  Document useful arguments for addLine.
 """
 import bisect
 import datetime
@@ -186,9 +187,8 @@ class StripChartWdg(Tkinter.Frame):
         Inputs:
         - y: value of constant line
         - subplotInd: index of subplot
-        - **kargs: keyword arguments for matplotlib Line2DUseful arguments include:
-        - label: name of line (displayed in a Legend)
-        - color: color of line
+        - All other keyword arguments are sent to the matplotlib Line2D constructor
+          to control the appearance of the data. See addLine for more information.
         """
         subplot = self.subplotArr[subplotInd]
         line2d = subplot.axhline(y, **kargs)
@@ -203,9 +203,14 @@ class StripChartWdg(Tkinter.Frame):
         
         Inputs:
         - subplotInd: index of subplot
-        all other keyword arguments are sent to the _Line constructor. Useful arguments include:
-        - label: name of line (displayed in a Legend)
-        - color: color of line
+        - All other keyword arguments are sent to the matplotlib Line2D constructor
+          to control the appearance of the data. Useful arguments include:
+          - label: name of line (displayed in a Legend)
+          - color: color of line
+          - linestyle: style of line (defaults to a solid line); "" for no line, "- -" for dashed, etc.
+          - marker: marker shape, e.g. "+"
+          Please do not attempt to control other sorts of line properties, such as its data.
+          Arguments to avoid include: animated, data, xdata, ydata, zdata, figure.
         """
         subplot = self.subplotArr[subplotInd]
         return _Line(subplot, self._cnvTimeFunc, **kargs)
