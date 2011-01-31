@@ -20,28 +20,36 @@ def angSideAng (side_aa, ang_B, side_cc):
                     (and are both set to 90); bb will be 0 or 180
     
     Error Conditions:
-    If the inputs are too small to allow computation, raises ValueError
+    - If the inputs are too small to allow computation, raises ValueError
+    - If side bb is near 0 or 180 (see Special Cases below for when this occurs)
+      then angles a and c cannot be computed. In this case "unknownAng" = true,
+      ang_A = ang_C = 90.0. Also side_bb = 0.0, which is essentially correct.
+      Note that the sum ang_A + ang_C is 180, which is also essentially correct.
+    
+    Special Cases (in the order they are handled):
+    side_aa  ang_B   side_cc     ang_A       side_bb        ang_C
+    ----------------------------------------------------------------
+      ~0      any      ~0     unknown(90)       0        unknown(90)
+      ~0      any     ~180    unknown(90)      180       unknown(90)
+      ~0      any     !pole        0         side_cc      180-ang_B
 
-    If side bb is too small, angles a and c cannot be computed;
-    then "unknownAng" = true, side_bb = 0.0, ang_A = ang_C = 90.0.
-    
-    Special cases:
-    
-    "eps": a very small value, perhaps negative (epsilon)
-    "~pole": near a pole (eps or 180 - eps)
-    ">>pole": not near a pole (well away from 0 or 180)
-    
-    side_aa     ang_B       side_cc     ang_A       side_bb     ang_C
-    ------------------------------------------------------------------
-    any         eps         <side_aa    180         side_aa-cc  0
-    any         eps         >side_aa    0           side_cc-aa  180
-    any         eps         ~=side_aa   unknown     0           unknown
+     ~180     any     ~0      unknown(90)      180       unknown(90)
+     ~180     any    ~180     unknown(90)       0        unknown(90)
+     ~180     any    !pole        180      180-side_cc      ang_B
 
-    eps         any          >>pole     0           side_cc     180-ang_B
-    180-eps     any          >>pole     180         180-side_cc ang_B
-    >>pole      any         eps         180-ang_B   side_aa     0
-    >>pole      any         180-eps     ang_B       180-side_aa 180
-    eps/180-eps any         eps/180-eps unknown     0 or 180    unknown
+     !pole    any     ~0       180-ang_B     side_aa          0
+     !pole    any    ~180        ang_B     180-side_aa       180
+
+      any     ~0   ~=side_aa  unknown(90)       0        unknown(90)
+      any     ~0    <side_aa      180       side_aa-cc        0
+      any     ~0    >side_aa       0        side_cc-aa       180
+    
+    where:
+    - !pole means not nearly 0 and not nearly 180 (modulo 360)
+    - unknown(90) means unknownAng is set True and the angle is unknown and is
+      abitrarily set to 90 degrees. The sum of ang_A and ang_C is correct
+      and the value of side_bb is correct to within epsilon.
+    - all relations are modulo 360. For example ~0 means approximately zero, 360, etc.
     
     Warnings:
     Allowing angles in the 3rd and 4th quadrants is unusual.
@@ -58,18 +66,60 @@ def angSideAng (side_aa, ang_B, side_cc):
     2010-08-04 ROwen    Bug fix: mis-handled two cases:
                         - side_aa tiny + side_cc normal: special case table, code and unit test were incorrect
                         - side_aa normal + side_cc tiny: table was right but code and unit test had errors
+    2011-01-28 ROwen    Bug fix: unknownAng should always be true if side_aa and side_cc are nearly 0 or 180
+                        but that was not happening if ang_B was nearly 0. Fixed by evaluating ang_B
+                        special cases after side_aa and side_cc special cases.
+                        Tweaked the documentation to clarify the special cases.
     """
-    sin_h_B = RO.MathUtil.sind (ang_B * 0.5)
-    sin_aa = RO.MathUtil.sind(side_aa)
-    sin_cc = RO.MathUtil.sind(side_cc)
+    sin_h_aa = RO.MathUtil.sind(side_aa)
+    sin_h_cc = RO.MathUtil.sind(side_cc)
+    sin_h_B = RO.MathUtil.sind(ang_B * 0.5)
+    cos_h_B = RO.MathUtil.cosd(ang_B * 0.5)
+    sin_h_aa = RO.MathUtil.sind(side_aa * 0.5)
+    cos_h_aa = RO.MathUtil.cosd(side_aa * 0.5)
+    sin_h_cc = RO.MathUtil.sind(side_cc * 0.5)
+    cos_h_cc = RO.MathUtil.cosd(side_cc * 0.5)
     
-    #
-    # handle the special cases that side_aa and/or side_cc is nearly 0 or 180
-    #
-    if abs(sin_h_B) < RO.SysConst.FAccuracy:
-        # B is nearly 0 or 360
+    if abs(sin_h_aa) < RO.SysConst.FAccuracy:
+        # side_aa is nearly zero (modulo 360)
+        if abs(sin_h_cc) < RO.SysConst.FAccuracy:
+            # side_cc is nearly 0 (modulo 360)
+            return (90.0, 0.0, 90.0, True)
+        elif abs(cos_h_cc) < RO.SysConst.FAccuracy:
+            # side_cc is nearly 180 (modulo 360)
+            return (90.0, 180.0, 90.0, True)
+        else:
+            # side_cc is not nearly 0 or 180
+            ang_A = 0.0
+            side_bb = side_cc
+            ang_C = 180.0 - ang_B
+    elif abs(cos_h_aa) < RO.SysConst.FAccuracy:
+        # side_aa is nearly 180 (modulo 360)
+        if abs(cos_h_cc) < RO.SysConst.FAccuracy:
+            # side_cc is nearly 180 (modulo 360)
+            return (90.0, 0.0, 90.0, True)
+        elif abs(sin_h_cc) < RO.SysConst.FAccuracy:
+            # side_cc is nearly 0 (modulo 360)
+            return (90.0, 180.0, 90.0, True)
+        else:
+            # side_cc is not nearly 0 or 180 (modulo 360)
+            ang_A = 180.0
+            side_bb = 180.0 - side_cc
+            ang_C = ang_B
+    elif abs(sin_h_cc) < RO.SysConst.FAccuracy:
+        # side_cc is nearly zero (modulo 360) and side_aa is not
+        ang_A = 180.0 - ang_B
+        side_bb = side_aa
+        ang_C = 0.0
+    elif abs(cos_h_cc) < RO.SysConst.FAccuracy:
+        # side_cc is nearly 180 (modulo 360) and side_aa is not
+        ang_A = ang_B
+        side_bb = 180.0 - side_aa
+        ang_C = 180.0
+    elif abs(sin_h_B) < RO.SysConst.FAccuracy:
+        # B is nearly 0 (modulo 360)
         if abs(side_aa - side_cc) < RO.SysConst.FAccuracy:
-            # ang_B = eps and side_aa ~= side_cc; cannot compute ang_A or ang_C:
+            # ang_B ~= 0 (modulo 360) and side_aa ~= side_cc (modulo 360); cannot compute ang_A or ang_C:
             return (90.0, 0.0, 90.0, True)
         elif side_cc < side_aa:
             ang_A = 180.0
@@ -79,49 +129,10 @@ def angSideAng (side_aa, ang_B, side_cc):
             ang_A = 0.0
             side_bb = side_cc - side_aa
             ang_C = 180.0
-    elif abs(sin_aa) < RO.SysConst.FAccuracy:
-        if abs(sin_cc) < RO.SysConst.FAccuracy:
-            # side_aa and side_cc are both nearly 0 or 180
-            # there is no hope of computing ang_A or ang_C and side_bb is either 0 or 180
-            if abs(side_aa - side_cc) > 90:
-                # side_aa is at one pole, side_cc is at the other
-                side_bb = 180.0
-            else:
-                # side_aa and side_bb are at the same pole
-                side_bb = 0.0
-            return (90.0, side_bb, 90.0, True)
-        if side_aa < 90:
-            # side_aa is nearly zero and side_cc is well away from 0 or 180
-            ang_A = 0.0
-            side_bb = side_cc
-            ang_C = 180.0 - ang_B
-        else:
-            # side_aa is nearly 180 and side_cc is well away from 0 or 180
-            ang_A = 180.0
-            side_bb = 180.0 - side_cc
-            ang_C = ang_B
-    elif abs(sin_cc) < RO.SysConst.FAccuracy:
-        if side_cc < 90:
-            # side_cc is nearly 0 and side_aa is well away from 0 or 180
-            ang_A = 180.0 - ang_B
-            side_bb = side_aa
-            ang_C = 0.0
-        else:
-            # side_cc is nearly 180 and side_aa is well away from 0 or 180
-            ang_A = ang_B
-            side_bb = 180.0 - side_aa
-            ang_C = 180.0
     else:
         # +
         #  compute angles a and c using Napier's analogies
         # -
-        #  compute sine and cosine of b/2, aa/2, and cc/2
-        sin_h_B = RO.MathUtil.sind (ang_B * 0.5)
-        cos_h_B = RO.MathUtil.cosd (ang_B * 0.5)
-        sin_h_aa = RO.MathUtil.sind (side_aa * 0.5)
-        cos_h_aa = RO.MathUtil.cosd (side_aa * 0.5)
-        sin_h_cc = RO.MathUtil.sind (side_cc * 0.5)
-        cos_h_cc = RO.MathUtil.cosd (side_cc * 0.5)
         
         #  compute sin((aa +/- cc) / 2) and cos((aa +/- cc) / 2)
         sin_h_sum_aacc  = sin_h_aa * cos_h_cc + cos_h_aa * sin_h_cc
@@ -160,8 +171,8 @@ def angSideAng (side_aa, ang_B, side_cc):
         #  (one is for bb - aa, one for bb + aa)
         # -
         #  preliminaries
-        sin_h_A = RO.MathUtil.sind (ang_A * 0.5)
-        cos_h_A = RO.MathUtil.cosd (ang_A * 0.5)
+        sin_h_A = RO.MathUtil.sind(ang_A * 0.5)
+        cos_h_A = RO.MathUtil.cosd(ang_A * 0.5)
         sin_h_sum_BA  = sin_h_B * cos_h_A + cos_h_B * sin_h_A
         sin_h_diff_BA = sin_h_B * cos_h_A - cos_h_B * sin_h_A
         cos_h_sum_BA  = cos_h_B * cos_h_A - sin_h_B * sin_h_A
@@ -197,76 +208,59 @@ if __name__ == "__main__":
     # a list of entries, each consisting of:
     # - the input argument
     # - the expected result: ang_C, side_bb, ang_A, [unknownAng] (unknownAng defaults to False)
-    
-    # B small, a = any:
-    # if c != a: expect A = 90, b = 0, C = 90, unknown
-    # if c << a: expect A = 180,   b = c - a, C = 0
-    # if c >> a: expect A = 0, b = a - c, C = 180
-    for side_aa in (180.0, 180.0 - Eps, -27.0, 27.0, Eps, 0.0):
-        for side_cc in (0.0, Eps, side_aa - 45.0, side_aa - Eps, side_aa, side_aa + Eps, side_aa + 45.0, 180.0 - Eps, 180.0):
-            if side_cc < 0 or side_cc > 180.0:
-                continue
-            if abs(side_cc - side_aa) < EpsTest:
-                expRes = (90.0, 0.0, 90.0, True)
-            elif side_cc < side_aa:
-                expRes = (180.0, side_aa - side_cc, 0.0)
-            else:
-                expRes = (0.0, side_cc - side_aa, 180.0)
-            for ang_B in (-Eps, 0.0, Eps):
-                testData.append(((side_aa, ang_B, side_cc), expRes))
 
 
-    # a ~ 0, B = various not nearly 0 or 360, c various:
-    # if c nearly 0: expect C = 90, b = 0, A = 90, unknownAng
-    # if c nearly 180: expect C = 90, b = 180, A = 90, unknownAng
-    # if 0 << c << 180: expect A = 0, b = a - c, C = 180 - B
-    for side_aa in (0.0, Eps):
-        for ang_B in (1.0, 32.0, 97.0, 179.0, 180.0 - Eps, 180.0, 180.0 + Eps, 210.0, 359.0):
+    # a ~ 0, B = various, c various:
+    # if c nearly 0 (modulo 360): expect C = 90, b = 0, A = 90, unknownAng
+    # if c nearly 180 (modulo 360): expect C = 90, b = 180, A = 90, unknownAng
+    # else: expect A = 0, b = a - c, C = 180 - B
+    for side_aa in (-Eps, 0.0, Eps):
+        for ang_B in (0.0, Eps, 32.0, 97.0, 179.0, 180.0 - Eps, 180.0, 180.0 + Eps, 210.0, 360.0 - Eps, 360.0):
             for side_cc in (180.0, 180.0 - Eps, 179.0, 47.0, Eps, 0.0):
-                if side_cc < EpsTest:
+                if abs(side_cc % 360.0) < EpsTest:
                     expRes = (90.0, 0.0, 90.0, True)
-                elif 180.0 - side_cc < EpsTest:
+                elif abs((side_cc - 180) % 360.0) < EpsTest:
                     expRes = (90.0, 180.0, 90.0, True)
                 else:
                     expRes = (0.0, side_cc - side_aa, 180.0 - ang_B)
                 testData.append(((side_aa, ang_B, side_cc), expRes))
 
-    # a ~ 180, B = various not nearly 0 or 360, c various:
-    # if c nearly 0: expect C = 90, b = 180, A = 90, unknownAng
-    # if c nearly 180: expect C = 90, b = 0, A = 90, unknownAng
-    # if 0 << c << 180: expect A = 180, b = 180 - c, C = B
-    for side_aa in (180.0 - Eps, 180.0):
-        for ang_B in (1.0, 32.0, 97.0, 179.0, 180.0 - Eps, 180.0, 180.0 + Eps, 210.0, 359.0):
+    # a ~ 180, B = various, c various:
+    # if c nearly 180 (modulo 360): expect C = 90, b = 0, A = 90, unknownAng
+    # if c nearly 0 (modulo 360): expect C = 90, b = 180, A = 90, unknownAng
+    # else: expect A = 180, b = 180 - c, C = B
+    for side_aa in (180.0 - Eps, 180.0, 180.0 + Eps):
+        for ang_B in (0.0, Eps, 32.0, 97.0, 179.0, 180.0 - Eps, 180.0, 180.0 + Eps, 210.0, 360.0 - Eps, 360.0):
             for side_cc in (180.0, 180.0 - Eps, 179.0, 47.0, Eps, 0.0):
-                if side_cc < EpsTest:
-                    expRes = (90.0, 180.0, 90.0, True)
-                elif 180.0 - side_cc < EpsTest:
+                if abs((180.0 - side_cc) % 360.0) < EpsTest:
                     expRes = (90.0, 0.0, 90.0, True)
+                elif abs(side_cc % 360.0) < EpsTest:
+                    expRes = (90.0, 180.0, 90.0, True)
                 else:
                     expRes = (180.0, 180.0 - side_cc, ang_B)
                 testData.append(((side_aa, ang_B, side_cc), expRes))
 
-    # c ~ 0, B = various not nearly 0 or 360, a various:
+    # c ~ 0, B = various, a various:
     # if a nearly 0: expect C = 90, b = 0, A = 90, unknownAng
     # if a nearly 180: expect C = 90, b = 180, A = 90, unknownAng
-    # if 0 << a << 180: expect A = 180 - B, b = a, C = 0
+    # else: expect A = 180 - B, b = a, C = 0
     for side_cc in (0.0, Eps):
-        for ang_B in (1.0, 32.0, 97.0, 179.0, 180.0 - Eps, 180.0, 180.0 + Eps, 210.0, 359.0):
+        for ang_B in (0.0, Eps, 32.0, 97.0, 179.0, 180.0 - Eps, 180.0, 180.0 + Eps, 210.0, 360.0 - Eps, 360.0):
             for side_aa in (180.0, 180.0 - Eps, 179.0, 47.0, Eps, 0.0):
-                if side_aa < EpsTest:
+                if abs(side_aa % 360.0) < EpsTest:
                     expRes = (90.0, 0.0, 90.0, True)
-                elif 180.0 - side_aa < EpsTest:
+                elif abs((180.0 - side_aa) % 360.0) < EpsTest:
                     expRes = (90.0, 180.0, 90.0, True)
                 else:
                     expRes = (180.0 - ang_B, side_aa, 0.0)
                 testData.append(((side_aa, ang_B, side_cc), expRes))
     
-    # c ~ 180, B = various not nearly 0 or 360, a various:
-    # if a nearly 0: expect C = 90, b = 180, A = 90, unknownAng
-    # if a nearly 180: expect C = 90, b = 0, A = 90, unknownAng
-    # if 0 << a << 180: expect A = 180, b = 180 - c, C = B
+    # c ~ 180, B = various, a various:
+    # if a nearly 0 (modulo 360): expect C = 90, b = 180, A = 90, unknownAng
+    # if a nearly 180 (modulo 360): expect C = 90, b = 0, A = 90, unknownAng
+    # else: expect A = 180, b = 180 - c, C = B
     for side_cc in (180.0 - Eps, 180.0):
-        for ang_B in (1.0, 32.0, 97.0, 179.0, 180.0 - Eps, 180.0, 180.0 + Eps, 210.0, 359.0):
+        for ang_B in (0.0, Eps, 32.0, 97.0, 179.0, 180.0 - Eps, 180.0, 180.0 + Eps, 210.0, 360.0 - Eps, 360.0):
             for side_aa in (180.0, 180.0 - Eps, 179.0, 47.0, Eps, 0.0):
                 if side_aa < EpsTest:
                     expRes = (90.0, 180.0, 90.0, True)
@@ -291,6 +285,21 @@ if __name__ == "__main__":
         for ang_B in (23, 90, 180 - Eps, 180, 180 + Eps, 256, 359):
             expRes = (0.0, side_cc + (side_aa * RO.MathUtil.cosd(ang_B)), 180.0 - ang_B)
             testData.append(((side_aa, ang_B, side_cc), expRes))
+
+    # B small, a = any not small, c = any not small:
+    # if c != a: expect A = 90, b = 0, C = 90, unknown
+    # if c << a: expect A = 180,   b = c - a, C = 0
+    # if c >> a: expect A = 0, b = a - c, C = 180
+    for side_aa in (179.9, -27.0, 27.0, 0.1):
+        for side_cc in (side_aa - 45.0, side_aa - Eps, side_aa, side_aa + Eps, side_aa + 45.0):
+            if abs(side_cc - side_aa) < EpsTest:
+                expRes = (90.0, 0.0, 90.0, True)
+            elif side_cc < side_aa:
+                expRes = (180.0, side_aa - side_cc, 0.0)
+            else:
+                expRes = (0.0, side_cc - side_aa, 180.0)
+            for ang_B in (-Eps, 0.0, Eps):
+                testData.append(((side_aa, ang_B, side_cc), expRes))
     
     # right triangle: B = 90, a and c vary but avoid poles
     # tan C = tan c / sin a
