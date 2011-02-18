@@ -110,6 +110,7 @@ History:
 2009-06-24 ROwen    Bug fix: an error message had values reversed.
 2009-07-20 ROwen    Modified for tweaked KeyDispatcher API.
                     Removed support for refreshTimeLim (it is now a constant in the KeyDispatcher).
+2011-02-17 ROwen    Document that addROWdgSet can take fewer widgets than values, but not more.
 """
 import sys
 import time
@@ -360,8 +361,13 @@ class KeyVar(RO.AddCallback.BaseMixin):
             self.addIndexedCallback (wdg.set, ind)
     
     def addROWdgSet (self, wdgSet, setDefault=False):
-        """Adds a set of RO.Wdg wigets;
-        should be more efficient than adding them one at a time with addROWdg
+        """Adds a set of RO.Wdg wigets
+        
+        There may be fewer widgets than values, but not more widgets.
+
+        This should be more efficient than adding them one at a time with addROWdg.
+        
+        Raise IndexError if there are more widgets than values.
         """
         if self.maxNVal != None and len(wdgSet) > self.maxNVal:
             raise IndexError("too many widgets (%d > max=%d) for %s" % (len(wdgSet), self.maxNVal, self,))
@@ -615,8 +621,14 @@ class PVTKeyVar(KeyVar):
         self.addPosCallback (wdg.set, ind)
     
     def addROWdgSet (self, wdgSet):
-        """Adds a set of RO.Wdg wigets that are set to the current position;
-        should be more efficient than adding them one at a time with addROWdg"""
+        """Adds a set of RO.Wdg wigets that are set to the current position.
+        
+        There may be fewer widgets than values, but not more widgets.
+
+        This should be more efficient than adding them one at a time with addROWdg.
+        
+        Raise IndexError if there are more widgets than values.
+        """
         if self.maxNVal != None and len(wdgSet) > self.maxNVal:
             raise IndexError("too many widgets (%d > max=%d) for %s" % (len(wdgSet), self.maxNVal, self,))
         class callWdgSet(object):
