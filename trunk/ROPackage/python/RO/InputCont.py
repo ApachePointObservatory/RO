@@ -90,6 +90,7 @@ History:
 2007-08-09 ROwen    Added allDefault method.
 2008-04-28 ROwen    Added stripPlusses argument to VMSQualFmt.
 2010-05-26 ROwen    Modified to use AddCallback 2010-05-26.
+2011-02-18 ROwen    Added allCallbacksEnabled method.
 """
 import itertools
 import types
@@ -331,6 +332,16 @@ class WdgCont(RO.AddCallback.BaseMixin):
             self._didRegister = True
         
         RO.AddCallback.BaseMixin.addCallback(self, callFunc, callNow)
+    
+    def allCallbacksEnabled(self):
+        """Return True of all widget's callbacks are enabled
+        
+        This may be useful to prevent unwanted execution of callbacks while a widget is being updated.
+        """
+        for wdg in self._wdgList:
+            if not wdg.callbacksEnabled():
+                return False
+        return True
     
     def allDefault(self):
         """Return True if all widgets are set to their default value, False otherwise
