@@ -5,9 +5,9 @@ To build a Mac droplet using py2app, assuming the code that does the work is in 
 
 - Write a trivial script that constructs/runs DropletRunner; this is the script
   that you tell setup.py about; it might be called runMainScript.py:
-    import droplet
+    import RO.Wdg.DropletRunner
     import mainScript # so py2app finds it and its dependencies
-    droplet.DropletRunner("mainScript.py")
+    RO.Wdg.DropletRunner.DropletRunner("mainScript.py")
 
 - In the application PList specify the sorts of files that can be dropped, e.g.:
 
@@ -45,8 +45,9 @@ History:
 2010-06-24 ROwen    Bug fix: use sys.executable to run the droplet script, thus giving the droplet script
                     access to the bundled application's python and python libraries.
 2010-06-28 ROwen    Tweaked _readStdOut and _readStdErr to make it clearer they ignore their arguments.
-2010-07-12 ROwen    Bug fix: had class DropletRunner(): which is not compatible with some versions of Python;
-                    Made DropletRunner a new-style class (as originally intended).
+2010-07-12 ROwen    Bug fix: DropletRunner() was an old-style class which is not compatible with some
+                    versions of Python; made it a new-style class (as originally intended).
+2011-02-25 ROwen    Tweaked usage documentation.
 """
 import sys
 import os.path
