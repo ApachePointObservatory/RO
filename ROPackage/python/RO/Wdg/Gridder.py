@@ -30,8 +30,7 @@ History:
 2007-09-19 ROwen    gridWdg was ignoring the helpText and helpURL arguments (thanks, pychecker!).
 2010-03-11 ROwen    Changed the default for gridWdg to copy helpText and helpURL from the first data widget.
                     Bug fix: gridWdg would fail if helpText or helpURL was True and the first data widget
-                    was missing the associated attribute.
-                
+                    was missing the associated attribute.                
 """
 __all__ = ['Gridder']
 
@@ -214,7 +213,7 @@ class Gridder(object):
         """
         self._defCol = int(col)
         self._nextCol = max(self._defCol, self._nextCol)
-        self._maxNextCol = max(self._nextCol, self._maxNextCol) 
+        self._maxNextCol = max(self._nextCol, self._maxNextCol)
     
     def setNextRow(self, row):
         """Sets the next row, the default row for the next call to gridWdg.
@@ -362,7 +361,7 @@ class _BaseGridSet:
                     columnspan = colSpan,
                 )
                 self.wdgSet.append(wdg)
-            if wdg != False:        
+            if wdg != False:
                 self.nextCol += colSpan
 
     def _makeWdg(self, wdgInfo):

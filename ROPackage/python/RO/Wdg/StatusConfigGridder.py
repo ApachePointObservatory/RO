@@ -19,6 +19,7 @@ History:
 2007-12-19 ROwen    Added numStatusCols argument. This makes it easier to start all configuration widgets
                     in the same column.
 2008-03-14 ROwen    Bug fix: removed unused statusCols argument.
+2011-05-04 ROwen    Bug fix: was not setting _maxNextCol
 """
 __all__ = ['StatusConfigGridder']
 
@@ -108,6 +109,7 @@ class StatusConfigGridder(Gridder.Gridder):
         **basicArgs)
         self._nextRow = gs.row + 1
         self._nextCol = max(gs.nextCol, self._nextCol)
+        self._maxNextCol = max(self._maxNextCol, self._nextCol)
 
         if cat != None:
             self.addShowHideWdg(cat, gs.wdgSet)
