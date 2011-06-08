@@ -7,8 +7,15 @@
 
 <h2>Version history for the <a href="Overview.html">RO Python Package</a></h2>
 
-<h3>2.8.0+ 2011-05-04</h3>
+<h3>2.9.0-prerelease 2011-06-08</h3>
 <ul>
+    <li>Modified RO.Wdg.Entry:
+    <ul>
+        <li>doneFunc is no longer called in response to methods such as set, but only due to user interaction.
+        <li>doneFunc is much less likely to be called multiple times for the same value.
+        <li>The contextual menu returns focus to the widget. This makes doneFunc more predictable.
+        <li>Added a method inMethodCall which indicates whether callbacks are being called due to method calls (such as set) or user interaction.
+    </ul>
     <li>Bug fix: RO.Wdg.StatusConfigGridder.getMaxNextCol was not reliable.
 </ul>
 
