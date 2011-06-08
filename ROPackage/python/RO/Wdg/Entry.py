@@ -148,7 +148,13 @@ History:
 2010-03-03 ROwen    Added autoSetDefault option.
                     Modified to call doneFunc when the value is changed via set.
 2010-05-26 ROwen    Modified to use AddCallback 2010-05-26.
-2010-06-07 ROwen    Modified so that doneFunc is not called if _enableCallbacks false.
+2011-06-08 ROwen    Modified behavior of doneFunc:
+                    - It is only called for user interaction, not by set or similar methods.
+                    - It is less likely to be called multiple times for the same value.
+                    Contextual menus now return focus to the widget. This makes doneFunc more predictable:
+                    if the contextual menu changes the displayed value then doneFunc will be called
+                    with the new value once the field loses focus again.
+                    Added inMethodCall method.
 """
 __all__ = ['StrEntry', 'ASCIIEntry', 'FloatEntry', 'IntEntry', 'DMSEntry']
 
@@ -190,8 +196,9 @@ class _BaseEntry (Tkinter.Entry, RO.AddCallback.BaseMixin,
         the associated variable being set) and when setDefault is called.
     - doneFunc  callback function; the function receives one argument: self.
         It is called whenever the user finishes entering a valid value,
-        e.g. by typing <return>, <keypad enter> or the widget loses focus,
-        or when a new value is entered using the set command.
+        e.g. by typing <return>, <keypad enter> or the widget loses focus.
+        However it is only called once if the user performs more than one of these actions
+        for the current value.
         Typically used with autoSetDefault.
     - clearMenu name of "clear" contextual menu item, or None for none
     - defMenu   name of "restore default" contextual menu item, or None for none
@@ -271,9 +278,10 @@ class _BaseEntry (Tkinter.Entry, RO.AddCallback.BaseMixin,
             raise RuntimeError("Cannot set both trackDefault and autoSetDefault True")
         self._trackDefault = trackDefault
         self._defIfBlank = defIfBlank
-        self._settingVal = False # prevent circular processing
+        self._inMethodCall = False # prevent circular processing
         self._doneFunc = None # set it to doneFunc after setting the default and initial value
             # to avoid calling doneFunc during construction
+        self._doneVal = None # value doneFunc was called with; avoids repeats
         
         if readOnly:
             # adjust default Tkinter.Entry args 
@@ -364,6 +372,8 @@ class _BaseEntry (Tkinter.Entry, RO.AddCallback.BaseMixin,
         """
         if not self.getEnable():
             return True
+
+        self.focus_set()
 
         stateDict = {
             True:"normal",
@@ -486,6 +496,16 @@ class _BaseEntry (Tkinter.Entry, RO.AddCallback.BaseMixin,
     def getVar(self):
         return self.var
     
+    def inMethodCall(self):
+        """Return True if executing callback functions due to a method call such as set
+        
+        Return a boolean:
+        - True  if running callbacks due to calling a method, e.g. clear, set, setDefault or restoreDefault,
+        - False if running callbacks due to user interaction, e.g. typing or selecting a contextual menu item,
+          or if not executing callback functions
+        """
+        return self._inMethodCall
+    
     def isDefault(self):
         """Return True if current value matches default.
         
@@ -519,7 +539,8 @@ class _BaseEntry (Tkinter.Entry, RO.AddCallback.BaseMixin,
         pass
     
     def restoreDefault(self):
-        """Sets the default value, after checking it"""
+        """Set the current value to the default value, after checking it
+        """
         self.set(self.defValueStr)
     
     def selectAll(self):
@@ -540,7 +561,7 @@ class _BaseEntry (Tkinter.Entry, RO.AddCallback.BaseMixin,
             If None, sets the field blank.
         - isCurrent: is value current? (if not, display with bad background color)
         - severity: the new severity, one of: RO.Constants.sevNormal, sevWarning or sevError;
-          if omitted, the severity is left unchanged          
+          if omitted, the severity is left unchanged
         kargs is ignored; it is only present for compatibility with KeyVariable callbacks.
 
         Error conditions:
@@ -553,14 +574,13 @@ class _BaseEntry (Tkinter.Entry, RO.AddCallback.BaseMixin,
         if severity != None:
             self.setSeverity(severity)
         
-        if self._settingVal:
+        if self._inMethodCall:
             return
-        self._settingVal = True
+        self._inMethodCall = True
         try:
             self.var.set(self.asStr(newVal))
-            self._entryDone(doCheck=False)
         finally:
-            self._settingVal = False
+            self._inMethodCall = False
 
     def setDefault(self,
         newDefValue,
@@ -592,7 +612,11 @@ class _BaseEntry (Tkinter.Entry, RO.AddCallback.BaseMixin,
         if restoreDef:
             self.restoreDefault()
         else:
-            self._doCallbacks()
+            self._inMethodCall = True
+            try:
+                self._doCallbacks()
+            finally:
+                self._inMethodCall = False
         
     def setEnable(self, doEnable):
         """Changes the enable state.
@@ -649,6 +673,7 @@ class _BaseEntry (Tkinter.Entry, RO.AddCallback.BaseMixin,
         
         In any case it calls the callback functions.
         """
+        self._doneVal = None
         try:
             newStrVal = self.var.get()
             self.checkPartialValue(newStrVal)
@@ -668,9 +693,15 @@ class _BaseEntry (Tkinter.Entry, RO.AddCallback.BaseMixin,
         self._doCallbacks()
 
     def _entryDone(self, evt=None, doCheck=True):
-        """Copies the value to the default if autoSetDefault and calls the done function.
+        """User is finished entering data.
         
-        By default also checks the final value and neatens the display.
+        Perform the following tasks:
+        - Check the entry (if doCheck True)
+        - Copy the current value to the default (if widget parameter autoSetDefault is True)
+
+        Inputs:
+        - evt: ignored; allows registering as an event callback
+        - doCheck: check the final value and neaten the display?
         """
 #        print "_entryDone(evt=%s)" % (evt,)
         currVal = self.var.get()
@@ -688,9 +719,10 @@ class _BaseEntry (Tkinter.Entry, RO.AddCallback.BaseMixin,
         self.icursor("end")
         if self._autoSetDefault:
             self.setDefault(currVal)
-        if self._doneFunc:
+        if self._doneFunc and self._doneVal != currVal:
             if self._enableCallbacks:
                 self._doneFunc(self)
+        self._doneVal = currVal
         return None # make pychecker happy
     
     def _getErrorPrefix(self, descr=None):
@@ -1488,6 +1520,12 @@ if __name__ == "__main__":
     
     entryList = []
 
+    def fmtEntry(entry):
+        try:
+            return "%r" % (entry.getNum(),)
+        except AttributeError:
+            return "%r" % (entry.getString(),)
+    
     def addEntry(descr, entry, unitsLabel=None):
         newFrame = Tkinter.Frame(root)
         newFrame.lower()
@@ -1498,13 +1536,22 @@ if __name__ == "__main__":
             unitsLabel.pack(in_=newFrame, side="left")
         newFrame.pack(side="top", anchor="w")
         entryList.append((descr, entry))
+        
+        def callFunc(wdg, descr=descr):
+            print "%s callFunc; value=%s; inMethodCall=%s" % (descr, fmtEntry(entry), entry.inMethodCall())
+            
+        def doneFunc(wdg, descr=descr):
+            print "%s doneFunc; value=%s; inMethodCall=%s" % (descr, fmtEntry(entry), entry.inMethodCall())
+            
+        entry.addCallback(callFunc)
+        if not entry._doneFunc:
+            entry._doneFunc=doneFunc
+        
+        return entry
     
     def doPrint(*args):
         for (descr, entry) in entryList:
-            try:
-                print "%s = %r" % (descr, entry.getNum())
-            except AttributeError:
-                print "%s = %r" % (descr, entry.getString())
+            print "%s value=%s" % (descr, fmtEntry(entry))
     
     def doDefault(*args):
         for (descr, entry) in entryList:
