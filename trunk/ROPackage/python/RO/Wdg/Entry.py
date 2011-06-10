@@ -148,12 +148,9 @@ History:
 2010-03-03 ROwen    Added autoSetDefault option.
                     Modified to call doneFunc when the value is changed via set.
 2010-05-26 ROwen    Modified to use AddCallback 2010-05-26.
-2011-06-08 ROwen    Modified behavior of doneFunc:
+2011-06-10 ROwen    Modified behavior of doneFunc:
                     - It is only called for user interaction, not by set or similar methods.
                     - It is less likely to be called multiple times for the same value.
-                    Contextual menus now return focus to the widget. This makes doneFunc more predictable:
-                    if the contextual menu changes the displayed value then doneFunc will be called
-                    with the new value once the field loses focus again.
                     Added inMethodCall method.
 """
 __all__ = ['StrEntry', 'ASCIIEntry', 'FloatEntry', 'IntEntry', 'DMSEntry']
@@ -372,8 +369,6 @@ class _BaseEntry (Tkinter.Entry, RO.AddCallback.BaseMixin,
         """
         if not self.getEnable():
             return True
-
-        self.focus_set()
 
         stateDict = {
             True:"normal",

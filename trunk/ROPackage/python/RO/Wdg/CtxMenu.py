@@ -34,6 +34,11 @@ History:
 2004-10-13 ROwen    Removed unused import of urlparse and webbrowser.
 2005-06-03 ROwen    Fixed minor indentation oddity (one tab-space).
 2005-06-08 ROwen    Changed CtxMenu to a new style class.
+2011-06-10 ROwen    Modified to set focus to the widget when popping up a contextual menu.
+                    This give better visual feedback when using the menu to work with data,
+                    since the field containing the data is highlighted. It also helps Entry widgets
+                    handle doneFunc better when a contextual menu modifies data, since the new data
+                    will be accepted when the user chooses to leave the field.
 """
 __all__ = ['CtxMenu', 'CtxMenuMixin', 'addCtxMenu']
 
@@ -99,6 +104,8 @@ class CtxMenu(object):
         """Posts the contextual menu"""
         menu = self.ctxGetMenu()
         if menu.index("end") != None:
+            if evt.widget != None:
+                evt.widget.focus_set()
             menu.tk_popup(evt.x_root, evt.y_root)
     
     def ctxConfigMenu(self, menu):
