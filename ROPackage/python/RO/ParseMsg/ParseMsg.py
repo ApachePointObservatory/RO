@@ -6,6 +6,7 @@ returning a dictionary.
 2003-11-19 ROwen    Added "noValKey=" to test cases as it caused an infinite loop.
 2004-05-18 ROwen    Removed import GetHeader; from GetHeader import... was being used instead.
                     Modified test code to use astr instead of str.
+2011-06-17 ROwen    Changed "type" to "msgType" in parsed message dictionaries to avoid conflict with builtin.
 """
 from GetKeyword import getKeyword
 from GetValues import getValues
@@ -15,18 +16,18 @@ from RO.Alg.OrderedDict import OrderedDict
 
 def parseHubMsg(astr):
     """Parses one message of the form:
-        cmdr cmdID actor type keyword1=value11, value12,...; keyword2=value21, value22...
+        cmdr cmdID actor msgType keyword1=value11, value12,...; keyword2=value21, value22...
     returning a dictionary.
 
     Inputs:
     - astr: the string to parse, in the form:
-        cmdr cmdID actor type keyword1=value11, value12,...; keyword2=value21, value22...
+        cmdr cmdID actor msgType keyword1=value11, value12,...; keyword2=value21, value22...
 
     Returns a dictionary containing items:
         - "cmdr": commander (string)
         - "cmdID": command ID number (integer)
         - "actor": actor (string)
-        - "type": type of message (character)
+        - "msgType": type of message (character)
         - "dataStart": starting index of data in astr,
         - "data": dataDict, as returned by parseKeyValueData(astr[dataStart:]),
         - "msgStr": astr,
@@ -41,7 +42,7 @@ def parseHubMsg(astr):
     msgDict, dataStart = getHubHeader(astr)
 
     # coerce message type to lowercase
-    msgDict["type"] = msgDict["type"].lower()
+    msgDict["msgType"] = msgDict["msgType"].lower()
     
     # extract data
     msgDict['dataStart'] = dataStart

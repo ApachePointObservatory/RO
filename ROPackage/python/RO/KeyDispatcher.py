@@ -80,6 +80,7 @@ History:
 2011-06-16 ROwen    API change: log messages receive a new keyword argument: cmdID.
                     Added static method getMaxUserCmdID.
                     Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
+2011-06-17 ROwen    Changed "type" to "msgType" in parsed message dictionaries to avoid conflict with builtin.
 """
 import sys
 import time
@@ -277,7 +278,7 @@ class KeyDispatcher(object):
           - cmdr: name of commander that triggered the message (string)
           - cmdID: command ID that triggered the message (int)
           - actor: the actor that generated the message (string)
-          - type: message type (character)
+          - msgType: message type (character)
           - data: dict of keyword: data_tuple entries;
             data_tuple is always a tuple, even if it contains one or zero values
         """
@@ -287,7 +288,7 @@ class KeyDispatcher(object):
         cmdr  = msgDict["cmdr"]
         cmdID   = msgDict["cmdID"]
         actor = msgDict["actor"]
-        msgType  = msgDict["type"]
+        msgType  = msgDict["msgType"]
         dataDict = msgDict["data"]
 
         # handle keywords
@@ -438,8 +439,8 @@ class KeyDispatcher(object):
     
     def logMsgDict(self, msgDict):
         try:
-            typeChar = msgDict["type"].lower()
-            severity = RO.KeyVariable.TypeDict[typeChar][1]
+            msgType = msgDict["msgType"].lower()
+            severity = RO.KeyVariable.TypeDict[msgType][1]
             self.logMsg(
                 msgStr = msgDict["msgStr"],
                 severity = severity,
@@ -455,7 +456,7 @@ class KeyDispatcher(object):
         cmdr = None,
         cmdID = 0,
         actor = None,
-        type = "f",
+        msgType = "f",
         dataStr = "",
     ):
         """Generate a hub message based on the supplied data.
@@ -470,7 +471,7 @@ class KeyDispatcher(object):
             cmdr,
             cmdID,
             actor,
-            type,
+            msgType,
         )
         msgStr = " ".join((headerStr, dataStr))
         try:
@@ -788,7 +789,7 @@ if __name__ == "__main__":
         "cmdr":"me",
         "cmdID":cmdID-1,
         "actor":"wrongActor",
-        "type":":",
+        "msgType":":",
         "data":dataDict,
     }
     print "\nDispatching message with wrong actor; nothing should happen"
@@ -798,7 +799,7 @@ if __name__ == "__main__":
         "cmdr":"me",
         "cmdID":cmdID-1,
         "actor":"test",
-        "type":":",
+        "msgType":":",
         "data":{},
     }
     print "\nDispatching message with wrong cmdID and no data; command callback should not be called"
@@ -808,7 +809,7 @@ if __name__ == "__main__":
         "cmdr":"me",
         "cmdID":cmdID,
         "actor":"wrongActor",
-        "type":":",
+        "msgType":":",
         "data":{},
     }
     print "\nDispatching message with wrong actor and no data; command callback should not be called"
@@ -818,7 +819,7 @@ if __name__ == "__main__":
         "cmdr":"me",
         "cmdID":cmdID,
         "actor":"test",
-        "type":":",
+        "msgType":":",
         "data":dataDict,
     }
     print "\nDispatching message correctly; all should work:"

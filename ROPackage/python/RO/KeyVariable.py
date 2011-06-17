@@ -112,6 +112,7 @@ History:
                     Removed support for refreshTimeLim (it is now a constant in the KeyDispatcher).
 2011-02-17 ROwen    Document that addROWdgSet can take fewer widgets than values, but not more.
 2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
+2011-06-17 ROwen    Changed "type" to "msgType" in parsed message dictionaries to avoid conflict with builtin.
 """
 import sys
 import time
@@ -452,12 +453,12 @@ class KeyVar(RO.AddCallback.BaseMixin):
         Inputs:
         - valueList: a tuple of new values; if None then all values are reset to default
         - msgDict: the full keyword dictionary, see KeywordDispatcher for details
-          note: if supplied, msgDict must contain a field "type" with a valid type
+          note: if supplied, msgDict must contain a field "msgType" with a valid type character
 
         Errors:
         If valueList has the wrong number of elements then the data is rejected
         and an error message is printed to sys.stderr
-        If type in msgDict is missing or invalid, a warning message is printed
+        If msgType in msgDict is missing or invalid, a warning message is printed
         to sys.stderr and self.lastType is set to warning.
         """
         if valueList == None:
@@ -474,12 +475,12 @@ class KeyVar(RO.AddCallback.BaseMixin):
         self._msgDict = msgDict
         if msgDict:
             try:
-                self.lastType = msgDict["type"]
+                self.lastType = msgDict["msgType"]
             except KeyError:
-                sys.stderr.write("%s.set warning: 'type' missing in msgDict %r" % (self, msgDict))
+                sys.stderr.write("%s.set warning: 'msgType' missing in msgDict %r" % (self, msgDict))
                 self.lastType = "w"
             if not TypeDict.has_key(self.lastType):
-                sys.stderr.write("%s.set warning: invalid 'type'=%r in msgDict %r" % (self, self.lastType, msgDict))
+                sys.stderr.write("%s.set warning: invalid 'msgType'=%r in msgDict %r" % (self, self.lastType, msgDict))
                 self.lastType = "w"
 
         # print to stderr, if requested
@@ -895,7 +896,7 @@ class CmdVar(object):
             sys.stderr.write("Command %s already finished; no more replies allowed\n" % (self,))
             return
         self.lastReply = msgDict
-        msgType = msgDict["type"]
+        msgType = msgDict["msgType"]
         self.lastType = msgType
         for callTypes, callFunc in self.callTypesFuncList[:]:
             if msgType in callTypes:

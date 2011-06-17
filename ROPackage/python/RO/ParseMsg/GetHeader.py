@@ -10,15 +10,16 @@ History:
 2003-10-01 ROwen    Allow cmdr to have a leading period.
 2004-05-18 ROwen    Stopped importing string; it wasn't used.
                     Modified test code to use astr instead of str.
+2011-06-17 ROwen    Changed "type" to "msgType" in parsed message dictionaries to avoid conflict with builtin.
 """
 import re
 
-_HubPattern = re.compile(r'^\s*(?P<cmdr>[_.a-zA-Z][-_.a-zA-Z0-9]*)\s+(?P<cmdID>-?\d+)\s+(?P<actor>[_a-zA-Z][-_.a-zA-Z0-9]*)\s+(?P<type>\S)(?:\s*$|(?:\s+(\S)))')
-_MidRidPattern = re.compile(r'^\s*(?P<mid>-?\d+)\s+(?P<rid>-?\d+)\s+(?P<type>\S)(?:\s*$|(?:\s+(\S)))')
+_HubPattern = re.compile(r'^\s*(?P<cmdr>[_.a-zA-Z][-_.a-zA-Z0-9]*)\s+(?P<cmdID>-?\d+)\s+(?P<actor>[_a-zA-Z][-_.a-zA-Z0-9]*)\s+(?P<msgType>\S)(?:\s*$|(?:\s+(\S)))')
+_MidRidPattern = re.compile(r'^\s*(?P<mid>-?\d+)\s+(?P<rid>-?\d+)\s+(?P<msgType>\S)(?:\s*$|(?:\s+(\S)))')
 
 def getHubHeader(astr):
     """Extracts the commander, cmdID and actor from a string in the format:
-        cmdr cmdID actor type msg
+        cmdr cmdID actor msgType msg
 
     Inputs:
     - astr: the string to parse
@@ -28,7 +29,7 @@ def getHubHeader(astr):
       - "cmdr": commander (string)
       - "cmdID": command ID number (integer)
       - "actor": actor (string)
-      - "type": type of message (character)
+      - "msgType": type of message (character)
     - dataStart: the index of the first non-whitespace character following the header,
         or len(astr) if no data follows the header
     
@@ -53,7 +54,7 @@ def getHubHeader(astr):
 
 
 def getMidRidHeader(astr):
-    """Extracts the commander, cmdID and actor from a string in the format: mid rid type msg
+    """Extracts the commander, cmdID and actor from a string in the format: mid rid msgType msg
 
     Inputs:
     - astr: the string to parse
@@ -62,7 +63,7 @@ def getMidRidHeader(astr):
     - headerDict: a dictionary containing:
       - "mid": message ID (integer)
       - "rid": reply ID (integer)
-      - "type": type of message (character)
+      - "msgType": type of message (character)
     - dataStart: the index of the first non-whitespace character following the header,
         or len(astr) if no data follows the header
     
@@ -100,7 +101,7 @@ def getMidRidAsHubHeader(astr, cmdr="", actor=""):
       - "cmdr": commander (string)
       - "cmdID": command ID number (integer)
       - "actor": actor (string)
-      - "type": type of message (character)
+      - "msgType": type of message (character)
     - dataStart: the index of the first non-whitespace character following the header,
         or len(astr) if no data follows the header
     
