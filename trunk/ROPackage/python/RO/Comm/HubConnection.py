@@ -21,6 +21,7 @@ History:
 2008-04-29 ROwen    Fixed reporting of exceptions that contain unicode arguments.
 2009-07-17 ROwen    Eliminated deprecation warning in Python 2.6 by using hashlib if present.
 2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
+2011-06-17 ROwen    Changed "type" to "msgType" in parsed message dictionaries to avoid conflict with builtin.
 """
 try:
     import hashlib
@@ -142,7 +143,7 @@ class HubConnection(TCPConnection):
 
                 # expect the line ': nonce="..."'
                 msgDict = RO.ParseMsg.parseHubMsg(hubMsg)
-                msgType = msgDict["type"]
+                msgType = msgDict["msgType"]
                 dataDict = msgDict["data"]
                 nonce = dataDict.get("nonce", (None,))[0]
                 if (msgType != ":"):
@@ -167,7 +168,7 @@ class HubConnection(TCPConnection):
                 # expect the line ": loggedIn cmdrID=..."
                 # print "read %r in response to login" % (hubMsg,)
                 msgDict = RO.ParseMsg.parseHubMsg(hubMsg)
-                msgType = msgDict["type"]
+                msgType = msgDict["msgType"]
                 dataDict = msgDict["data"]
                 cmdr = dataDict.get("cmdrID", (None,))[0]
                 if (msgType != ":"):

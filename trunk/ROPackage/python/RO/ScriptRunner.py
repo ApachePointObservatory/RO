@@ -76,6 +76,7 @@ History:
 2010-06-28 ROwen    Made _WaitBase a modern class (thanks to pychecker).
                     Removed unused and broken internal method _waitEndFunc (thanks to pychecker).
 2010-10-20 ROwen    Tweaked waitCmd doc string.
+2011-06-17 ROwen    Changed "type" to "msgType" in parsed message dictionaries to avoid conflict with builtin.
 """
 import sys
 import threading
@@ -514,7 +515,7 @@ class ScriptRunner(RO.AddCallback.BaseMixin):
                 endMsgDict = self.dispatcher.makeMsgDict(
                     cmdr = None,
                     actor = cmdVar.actor,
-                    type = ":",
+                    msgType = ":",
                     
                 )
                 cmdVar.reply(endMsgDict)
@@ -1031,7 +1032,7 @@ class _WaitCmdVars(_WaitBase):
         """
 #       print "_WaitCmdVars.fail(%s)" % (cmdVar,)
         msgDict = cmdVar.lastReply
-        msgType = msgDict["type"]
+        msgType = msgDict["msgType"]
         self.scriptRunner._cmdFailCallback(msgType, msgDict, cmdVar)
 
 

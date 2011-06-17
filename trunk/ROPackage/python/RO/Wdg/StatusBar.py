@@ -54,6 +54,7 @@ History:
                     and document that it is definitely in ms (the original comment said "msec?").
 2010-03-05 ROwen    Fixed an error in the tracking of command reply severity.
 2010-03-08 ROwen    Bug fix: command replies were sometimes displayed with the wrong color.
+2011-06-17 ROwen    Changed "type" to "msgType" in parsed message dictionaries to avoid conflict with builtin.
 """
 __all__ = ['StatusBar']
 
@@ -189,7 +190,7 @@ class StatusBar(Tkinter.Frame):
             self.dispatcher.executeCmd(self.cmdVar)
         else:
             self._cmdCallback(msgType = "f", msgDict = {
-                "type":"f",
+                "msgType":"f",
                 "msgStr":"No dispatcher",
                 "dataStart":0,
             })
