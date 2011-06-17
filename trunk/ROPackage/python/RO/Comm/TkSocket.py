@@ -74,6 +74,7 @@ History:
 2008-01-16 ROwen    TkSocket: added pre-test for socket existing to write and writeLine.
 2008-03-06 ROwen    Stopped setting instance variable _prevLine; it was not used anywhere.
 2010-06-28 ROwen    Modified to require Python 2.4 by assuming set is a builtin type.
+2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
 """
 __all__ = ["TkSocket", "TkServerSocket", "BaseServer", "NullSocket"]
 import sys
@@ -159,8 +160,6 @@ class TkBaseSocket(object):
             try:
                 # close socket (this automatically deregisters any file events)
                 self._tk.call('close', self._sock)
-            except (SystemExit, KeyboardInterrupt):
-                raise
             except Exception:
                 pass
             self._sock = None
@@ -313,8 +312,6 @@ class TkBaseSocket(object):
         if stateCallback:
             try:
                 stateCallback(self)
-            except (SystemExit, KeyboardInterrupt):
-                raise
             except Exception, e:
                 sys.stderr.write("%s state callback %s failed: %s\n" % (self, self._stateCallback, e,))
                 traceback.print_exc(file=sys.stderr)
@@ -487,8 +484,6 @@ class TkSocket(TkBaseSocket):
         if self._readCallback:
             try:
                 self._readCallback(self)
-            except (SystemExit, KeyboardInterrupt):
-                raise
             except Exception, e:
                 sys.stderr.write("%s read callback %s failed: %s\n" % (self, self._readCallback, e,))
                 traceback.print_exc(file=sys.stderr)
@@ -561,8 +556,6 @@ class TkServerSocket(TkBaseSocket):
         
         try:
             self._connCallback(newSocket)
-        except (SystemExit, KeyboardInterrupt):
-            raise
         except Exception, e:
             errMsg = "%s connection callback %s failed: %s" % (self.__class__.__name__, self._connCallback, e)
             sys.stderr.write(errMsg + "\n")

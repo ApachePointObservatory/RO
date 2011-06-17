@@ -5,6 +5,7 @@ The URL is opened in a background thread.
 
 History:
 2004-10-05 ROwen
+2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
 """
 __all__ = ["browseURL"]
 
@@ -23,8 +24,6 @@ class _BrowseURLThread(threading.Thread):
         try:
             webbrowser.open(url)
             return
-        except (SystemExit, KeyboardInterrupt):
-            raise
         except Exception, e:
             pass
 
@@ -39,8 +38,6 @@ class _BrowseURLThread(threading.Thread):
             try:
                 webbrowser.open(url)
                 return
-            except (SystemExit, KeyboardInterrupt):
-                raise
             except Exception, e:
                 pass
 

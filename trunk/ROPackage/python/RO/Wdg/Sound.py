@@ -9,6 +9,7 @@ History:
 2004-08-11 ROwen    Define __all__ to restrict import.
 2005-06-08 ROwen    Changed BellPlay, SoundPlayer, NoPLay to new-style classes.
 2009-10-22 ROwen    Modified to use pygame instead of snack to play sound files.
+2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
 """
 __all__ = ['bell', 'BellPlay', 'SoundPlayer', 'NoPlay']
 
@@ -119,8 +120,6 @@ class SoundPlayer(object):
         """
         try:
             self._snd.play()
-        except (SystemExit, KeyboardInterrupt):
-            raise
         except Exception:
             self._bell.play()
 

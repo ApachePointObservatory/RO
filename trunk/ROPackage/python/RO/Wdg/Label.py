@@ -45,6 +45,7 @@ History:
                     Modified to allow setting initial state.
                     Changed _setIsCurrent method to setIsCurrent.
 2005-01-05 ROwen    Changed message state to severity, set/getState to set/getSeverity.
+2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
 """
 __all__ = ['Label', 'BoolLabel', 'StrLabel', 'IntLabel', 'FloatLabel', 'DMSLabel']
 
@@ -178,8 +179,6 @@ class Label(Tkinter.Label, CtxMenu.CtxMenuMixin, IsCurrentMixin, SeverityMixin):
         else:
             try:
                 self["text"] = self._formatFunc(self._value)
-            except (SystemExit, KeyboardInterrupt):
-                raise
             except Exception, e:
                 sys.stderr.write("format of value %r failed with error: %s\n" % (self._value, e))
                 self["text"] = "?%r?" % (self._value,)

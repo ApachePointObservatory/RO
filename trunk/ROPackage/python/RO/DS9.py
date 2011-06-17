@@ -145,6 +145,7 @@ History:
 2009-01-14 ROwen    Revert to Mac aqua using the contained ds9 command-line executable, which restores the
                     ability to set the window title. It turns the warning "The process has forked..." was
                     from running a Tiger (MacOS X 10.4) version of SAOImage DS9 on Leopard (MacOS X 10.5).
+2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
 """
 __all__ = ["setup", "xpaget", "xpaset", "DS9Win"]
 
@@ -340,8 +341,6 @@ def setup(doRaise=False):
         ds9Dir, xpaDir = _findDS9AndXPA()
         if _DebugSetup:
             print "ds9Dir=%r\nxpaDir=%r" % (ds9Dir, xpaDir)
-    except (SystemExit, KeyboardInterrupt):
-        raise
     except Exception, e:
         _SetupError = "RO.DS9 unusable: %s" % (e,)
         ds9Dir = xpaDir = None

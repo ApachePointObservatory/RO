@@ -14,6 +14,7 @@ History:
 2010-05-04 ROwen    Added Geometry, including the ability to constrain a window's geometry to fit on screen.
 2010-05-21 ROwen    Bug fix: Geometry.toTkStr could include extent when it shouldn't.
 2010-07-20 ROwen    Added Timer class.
+2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
 """
 __all__ = ['addColors', 'colorOK', 'EvtNoProp', 'getWindowingSystem', 'TclFunc', 'Geometry',
     'WSysAqua', 'WSysX11', 'WSysWin']
@@ -177,8 +178,6 @@ class TclFunc:
     def __call__(self, *args):
         try:
             self.func(*args)
-        except (SystemExit, KeyboardInterrupt):
-            raise
         except Exception, e:
             sys.stderr.write("tcl function %s failed: %s\n" % (self.tclFuncName, e))
             traceback.print_exc(file=sys.stderr)

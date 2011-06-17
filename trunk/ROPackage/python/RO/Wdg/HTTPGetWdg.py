@@ -22,6 +22,7 @@ History:
 2005-07-07 ROwen
 2006-04-05 ROwen    Bug fix: _updDetailStatus failed if state was aborting or aborted.
 2009-05-05 ROwen    Modified getFile to return an HTTPGet object.
+2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
 """
 __all__ = ['HTTPGetWdg']
 
@@ -55,8 +56,6 @@ class HTTPCallback(object):
         if self.callFunc:
             try:
                 self.callFunc(self.httpGet)
-            except (SystemExit, KeyboardInterrupt):
-                raise
             except Exception, e:
                 errMsg = "httpGet callback %r failed: %s" % (self.callFunc, e)
                 sys.stderr.write(errMsg + "\n")

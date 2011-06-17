@@ -20,6 +20,7 @@ History:
 2006-04-29 ROwen    Added loginExtra arg.
 2008-04-29 ROwen    Fixed reporting of exceptions that contain unicode arguments.
 2009-07-17 ROwen    Eliminated deprecation warning in Python 2.6 by using hashlib if present.
+2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
 """
 try:
     import hashlib
@@ -276,8 +277,6 @@ if __name__ == "__main__":
             astr = sendText.get()
             sendText.delete(0,Tkinter.END)
             myConn.writeLine(astr)
-        except (SystemExit, KeyboardInterrupt):
-            raise
         except Exception, e:
             sys.stderr.write ("Could not extract or send: %s\nError: %s\n" % (astr, e))
 

@@ -30,6 +30,7 @@ History:
 2010-06-07 ROwen    Added a few commented-out print statements.
 2010-08-26 ROwen    Tweaked commented-out print statements.
 2011-02-18 ROwen    Added callbacksEnabled method.
+2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
 """
 import re
 import sys
@@ -159,8 +160,6 @@ class BaseMixin(object):
             for func in self._callbacks[:]:
                 try:
                     func(*args, **kargs)
-                except (SystemExit, KeyboardInterrupt):
-                    raise
                 except Exception, e:
                     sys.stderr.write("Callback of %s by %s failed: %s\n" % (func, self, e,))
                     traceback.print_exc(file=sys.stderr)

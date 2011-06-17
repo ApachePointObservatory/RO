@@ -22,6 +22,7 @@ History:
                     Bug fix: if a read or write error occurred, the exception would be thrown repeatedly
                     Now the connection is automatically closed on error (note: the only cross-platform way
                     to detect a port error is to catch a read or write error).
+2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
 """
 __all__ = ["TkSerial", "NullSerial"]
 import sys
@@ -119,8 +120,6 @@ class TkBaseSerial(object):
         if stateCallback:
             try:
                 stateCallback(self)
-            except (SystemExit, KeyboardInterrupt):
-                raise
             except Exception, e:
                 sys.stderr.write("%s state callback %s failed: %s\n" % (self, self._stateCallback, e,))
                 traceback.print_exc(file=sys.stderr)

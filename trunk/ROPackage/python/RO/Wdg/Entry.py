@@ -152,6 +152,7 @@ History:
                     - It is only called for user interaction, not by set or similar methods.
                     - It is less likely to be called multiple times for the same value.
                     Added inMethodCall method.
+2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
 """
 __all__ = ['StrEntry', 'ASCIIEntry', 'FloatEntry', 'IntEntry', 'DMSEntry']
 
@@ -945,8 +946,6 @@ class _NumEntry (_BaseEntry):
             format = self.defFormat
         try:
             return format % (numVal,)
-        except (SystemExit, KeyboardInterrupt):
-            raise
         except:
             raise ValueError("%scannot format data %r with format %r" % \
                 (self._getErrorPrefix(), numVal, format))
@@ -1270,8 +1269,6 @@ class DMSEntry (_NumEntry):
         try:
             nFields, precision = format
             constrainedFormat = (max(0, int(nFields)), max(0, int(precision)))
-        except (SystemExit, KeyboardInterrupt):
-            raise
         except:
             raise ValueError("%sinvalid format %r; must be (nFields, precision)" % \
                 (self._getErrorPrefix(), format,))
