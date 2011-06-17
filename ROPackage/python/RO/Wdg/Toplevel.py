@@ -49,6 +49,7 @@ History:
                     monitor). The code assumes your visible screen is a rectangle, so it can be fooled
                     by strange screen arrangements.
 2010-06-28 ROwen    Removed one unused import (thanks to pychecker).
+2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
 """
 __all__ = ['tl_CloseDestroys', 'tl_CloseWithdraws', 'tl_CloseDisabled', 'Toplevel', 'ToplevelSet']
 
@@ -137,8 +138,6 @@ class Toplevel(Tkinter.Toplevel):
             try:
                 self.__wdg = wdgFunc(self)
                 self.__wdg.pack(expand="yes", fill="both")
-            except (SystemExit, KeyboardInterrupt):
-                raise
             except Exception, e:
                 sys.stderr.write("Could not create window %r: %s\n" % (title, e))
                 traceback.print_exc(file=sys.stderr)

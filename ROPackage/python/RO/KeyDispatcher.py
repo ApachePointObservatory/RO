@@ -77,6 +77,9 @@ History:
 2010-07-21 ROwen    Changed refreshAllVar to handle setting keyVars not current differently; instead of
                     implicitly basing it on the connection state, it now is based on a new argument.
                     Added readUnixTime field.
+2011-06-16 ROwen    API change: log messages receive a new keyword argument: cmdID.
+                    Added static method getMaxUserCmdID.
+                    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
 """
 import sys
 import time
@@ -300,8 +303,6 @@ class KeyDispatcher(object):
             for keyVar in keyVarList:
                 try:
                     keyVar.set(valueTuple, msgDict = msgDict)
-                except (SystemExit, KeyboardInterrupt):
-                    raise
                 except:
                     traceback.print_exc(file=sys.stderr)
 
@@ -323,8 +324,6 @@ class KeyDispatcher(object):
         self.readUnixTime = time.time()
         try:
             msgDict = RO.ParseMsg.parseHubMsg(msgStr)
-        except (SystemExit, KeyboardInterrupt):
-            raise
         except Exception, e:
             self.logMsg(
                 msgStr = "CouldNotParse; Msg=%r; Text=%r" % (msgStr, RO.StringUtil.strFromException(e)),
@@ -338,8 +337,6 @@ class KeyDispatcher(object):
         # dispatch message
         try:
             self.dispatch(msgDict)
-        except (SystemExit, KeyboardInterrupt):
-            raise
         except Exception, e:
             sys.stderr.write("Could not dispatch: %r\n" % (msgDict,))
             traceback.print_exc(file=sys.stderr)
@@ -384,10 +381,9 @@ class KeyDispatcher(object):
             self.logMsg (
                 msgStr = fullCmd,
                 actor = cmdVar.actor,
+                cmdID = cmdVar.cmdID,
             )
 #           print "executing:", fullCmd
-        except (SystemExit, KeyboardInterrupt):
-            raise
         except Exception, e:
             errMsgDict = self.makeMsgDict(
                 cmdID = cmdVar.cmdID,
@@ -395,12 +391,22 @@ class KeyDispatcher(object):
                     cmdVar.actor, cmdVar.cmdStr, RO.StringUtil.strFromException(e)),
             )
             self._replyCmdVar(cmdVar, errMsgDict)
+
+    @staticmethod
+    def getMaxUserCmdID():
+        """Return the maximum user command ID number.
+        
+        User command ID numbers range from 1 through getMaxUserCmdID()
+        Refresh command ID numbers range from getMaxUserCmdID() + 1 through 2 * getMaxUserCmdID()
+        """
+        return _CmdNumWrap
         
     def logMsg(self,
         msgStr,
         severity = RO.Constants.sevNormal,
         actor = "TUI",
         cmdr = None,
+        cmdID = 0,
     ):
         """Writes a message to the log.
         
@@ -423,9 +429,8 @@ class KeyDispatcher(object):
                 severity = severity,
                 actor = actor,
                 cmdr = cmdr,
+                cmdID = cmdID,
             )
-        except (SystemExit, KeyboardInterrupt):
-            raise
         except Exception, e:
             sys.stderr.write("Could not log: %r; severity=%r; actor=%r; cmdr=%r\n" % \
                 (msgStr, severity, actor, cmdr))
@@ -440,9 +445,8 @@ class KeyDispatcher(object):
                 severity = severity,
                 actor = msgDict["actor"],
                 cmdr = msgDict["cmdr"],
+                cmdID = msgDict["cmdID"],
             )
-        except (SystemExit, KeyboardInterrupt):
-            raise
         except Exception, e:
             sys.stderr.write("Could not log message dict:\n%r\n" % (msgDict,))
             traceback.print_exc(file=sys.stderr)
@@ -471,8 +475,6 @@ class KeyDispatcher(object):
         msgStr = " ".join((headerStr, dataStr))
         try:
             return RO.ParseMsg.parseHubMsg(msgStr)
-        except (SystemExit, KeyboardInterrupt):
-            raise
         except Exception, e:
             sys.stderr.write("Could not make message dict from %r; error: %s" % (msgStr, e))
             traceback.print_exc(file=sys.stderr)
@@ -599,8 +601,6 @@ class KeyDispatcher(object):
                 # (thereby giving other time to other events)
                 # continuing where I left off
                 self._checkRemCmdID = self.tkWdg.after(1, self._checkRemCmdTimeouts, cmdVarIter)
-        except (SystemExit, KeyboardInterrupt):
-            raise
         except:
             sys.stderr.write ("RO.KeyDispatcher._checkRemCmdTimeouts failed\n")
             traceback.print_exc(file=sys.stderr)
@@ -630,7 +630,11 @@ class KeyDispatcher(object):
             keyVarNamesStr = ", ".join(sorted([kv.keyword for kv in keyVarSet]))
             errMsg = "Refresh command %s %s failed; keyVars not refreshed: %s" % \
                 (cmdVar.actor, cmdVar.cmdStr, keyVarNamesStr)
-            self.logMsg(errMsg, severity=RO.Constants.sevWarning)
+            self.logMsg(
+                msgStr = errMsg,
+                severity = RO.Constants.sevWarning,
+                cmdID = cmdVar.cmdID,
+            )
         elif keyVarSet:
             aKeyVar = iter(keyVarSet).next()
             actor = aKeyVar.actor

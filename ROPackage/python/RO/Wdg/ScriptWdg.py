@@ -25,6 +25,7 @@ History:
                     this makes it easier to find help files.
 2010-02-17 ROwen    Improved the way the Pause/Resume button name is managed.
                     Removed several unused imports.
+2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
 """
 __all__ = ['BasicScriptWdg', 'ScriptModuleWdg', 'ScriptFileWdg']
 
@@ -337,8 +338,6 @@ class _BaseUserScriptWdg(Tkinter.Frame, BasicScriptWdg):
             self.scriptFrame.grid(row=self.scriptFrameRow, column=0, sticky="news")
             self._makeScriptRunner(self.scriptFrame, **srArgs)
             self.scriptStatusBar.setMsg("Reloaded", RO.Constants.sevNormal)
-        except (SystemExit, KeyboardInterrupt):
-            raise
         except:
             self.scriptStatusBar.setMsg("Reload failed; see error log", RO.Constants.sevError)
             raise

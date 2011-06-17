@@ -111,6 +111,7 @@ History:
 2009-07-20 ROwen    Modified for tweaked KeyDispatcher API.
                     Removed support for refreshTimeLim (it is now a constant in the KeyDispatcher).
 2011-02-17 ROwen    Document that addROWdgSet can take fewer widgets than values, but not more.
+2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
 """
 import sys
 import time
@@ -900,8 +901,6 @@ class CmdVar(object):
             if msgType in callTypes:
                 try:
                     callFunc(msgType, msgDict, cmdVar=self)
-                except (SystemExit, KeyboardInterrupt):
-                    raise
                 except:
                     sys.stderr.write ("%s callback %s failed\n" % (self, callFunc))
                     traceback.print_exc(file=sys.stderr)

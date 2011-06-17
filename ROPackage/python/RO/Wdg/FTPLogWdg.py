@@ -43,6 +43,7 @@ History:
                     (or no entry selected).
                     Slowed down update rate to avoid hogging CPU.
 2005-06-14 ROwen    Rewritten for new FTPGet that no longer supports callbacks.
+2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
 """
 __all__ = ['FTPLogWdg']
 
@@ -78,8 +79,6 @@ class FTPCallback(object):
         if self.callFunc:
             try:
                 self.callFunc(self.ftpGet)
-            except (SystemExit, KeyboardInterrupt):
-                raise
             except Exception, e:
                 errMsg = "ftpGet callback %r failed: %s" % (self.callFunc, e)
                 sys.stderr.write(errMsg + "\n")

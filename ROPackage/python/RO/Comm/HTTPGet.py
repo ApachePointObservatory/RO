@@ -26,6 +26,7 @@ History:
 2008-04-29 ROwen    Fixed reporting of exceptions that contain unicode arguments.
 2010-05-26 ROwen    Tweaked to use _removeAllCallbacks() instead of nulling _callbacks.
 2010-11-12 ROwen    Bug fix: timeLim was mishandled.
+2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
 """
 __all__ = ['HTTPGet']
 
@@ -264,9 +265,6 @@ class HTTPGet(RO.AddCallback.BaseMixin):
                 '-binary', self.isBinary,
                 '-timeout', self.timeLimMS
             )
-        except (SystemExit, KeyboardInterrupt), e:
-            self._setState(self.Failed, RO.StringUtil.strFromException(e))
-            raise
         except Exception, e:
             self._setState(self.Failed, RO.StringUtil.strFromException(e))
             return
@@ -361,8 +359,6 @@ class HTTPGet(RO.AddCallback.BaseMixin):
             for func in self._doneCallbacks[:]:
                 try:
                     func(self)
-                except (SystemExit, KeyboardInterrupt), e:
-                    raise
                 except Exception, e:
                     sys.stderr.write("Callback of %s by %s failed: %s\n" % (func, self, e,))
                     traceback.print_exc(file=sys.stderr)

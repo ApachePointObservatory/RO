@@ -7,6 +7,13 @@
 
 <h2>Version history for the <a href="Overview.html">RO Python Package</a></h2>
 
+<h3>2.9.0b2 2011-06-16</h3>
+
+<ul>
+    <li>RO.KeyDispatcher.KeyDispatcher API change: the log function now receives an extra keyword argument: cmdID.
+    <li>Removed obsolete "except (SystemExit, KeyboardInterrupt): raise" code.
+</ul>
+
 <h3>2.9.0b1 2011-06-10</h3>
 
 <ul>
@@ -18,6 +25,7 @@
         <li>Added a method inMethodCall which indicates whether callbacks are being called due to method calls (such as set) or user interaction.
     </ul>
     <li>Bug fix: RO.Wdg.StatusConfigGridder.getMaxNextCol was not reliable.
+    <li>Removed obsolete "except (SystemExit, KeyboardInterrupt): raise" code.
 </ul>
 
 <h3>2.8.0 2011-03-29</h3>
