@@ -8,6 +8,9 @@ Required packages:
 - numpy
 - PIL
 
+Warning:
+- There is a memory error in numpy 1.6.0 (ticket #1896) that this code triggers.
+
 Mouse Gestures
     Zoom (Z mode or use button 3):
     - Drag UL->LR to zoom in on the enclosed region.
@@ -151,6 +154,8 @@ History:
 2009-11-04 ROwen    Added ann_Line and ann_Text annotations.
                     Added cnvOffset argument to Annotation and GrayImageWdg.addAnnotation.
 2010-10-19 ROwen    Made value a float instead of an int to handle float images better, including NaN.
+2011-07-06 ROwen    Made scaling functions operate on scaledArr in place.
+                    Added doRescale argument to redisplay to reduce needless recomputation of scaledArr.
 """
 import weakref
 import Tkinter
@@ -1056,38 +1061,39 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
         """Ignore an event."""
         return
     
-    def redisplay(self):
+    def redisplay(self, doRescale=True):
         """Starting from the data array, redisplay the data.
         """
         if self.dataArr == None:
             return
-        
+            
         self.strMsgWdg.grid_remove()
 
         try:
             dataShapeXY = self.dataArr.shape[::-1]
             
-            # offset so minimum display value = scaling function minimum input
-            # note: this form of equation reuses the input array for output
-            numpy.subtract(self.dataArr, float(self.dataDispMin), self.scaledArr)
-            
-            offsetDispRange = [0.0, float(self.dataDispMax - self.dataDispMin)]
-            
-            # apply scaling function, if any
-            if self.scaleFunc:
-                self.scaledArr = self.scaleFunc(self.scaledArr).astype(numpy.float32)
-                scaledMin, scaledMax = self.scaleFunc(offsetDispRange).astype(float)
-            else:
-                scaledMin, scaledMax = offsetDispRange
-            # linearly offset and stretch data so that
-            # dataDispMin maps to 0 and dataDispMax maps to 256
-            # (note: for most functions scaledMin is already 0
-            # so the offset is superfluous)
-            adjOffset = scaledMin
-            adjScale = 256.0 / max((scaledMax - scaledMin), 1.0)
-            #print "apply adjOffset=%s; adjScale=%s" % (adjOffset, adjScale)
-            self.scaledArr -= adjOffset
-            self.scaledArr *= adjScale
+            if doRescale or (self.scaledArr is None):
+                # offset so minimum display value = scaling function minimum input
+                # note: this form of equation reuses the input array for output
+                numpy.subtract(self.dataArr, float(self.dataDispMin), self.scaledArr)
+                
+                offsetDispRange = [0.0, float(self.dataDispMax - self.dataDispMin)]
+                
+                # apply scaling function, if any
+                if self.scaleFunc:
+                    self.scaleFunc(self.scaledArr, self.scaledArr)
+                    scaledMin, scaledMax = self.scaleFunc(offsetDispRange).astype(float)
+                else:
+                    scaledMin, scaledMax = offsetDispRange
+                # linearly offset and stretch data so that
+                # dataDispMin maps to 0 and dataDispMax maps to 256
+                # (note: for most functions scaledMin is already 0
+                # so the offset is superfluous)
+                adjOffset = scaledMin
+                adjScale = 256.0 / max((scaledMax - scaledMin), 1.0)
+                #print "apply adjOffset=%s; adjScale=%s" % (adjOffset, adjScale)
+                self.scaledArr -= adjOffset
+                self.scaledArr *= adjScale
 
             # reshape canvas, if necessary
             subFrameShapeIJ = numpy.subtract(self.endIJ, self.begIJ)
@@ -1164,8 +1170,8 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
         I don't yet set m. I might be able to add it, I'm just not sure
         it's useful given how I already stretch data
         """
-        def arcsinh(x):
-            return numpy.arcsinh(numpy.multiply(x, scaleFac))
+        def arcsinh(x, out=None):
+            return numpy.arcsinh(numpy.multiply(x, scaleFac), out)
         self.setScaleFunc(arcsinh)
     
     def scaleLinear(self):
@@ -1396,7 +1402,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
             self.currZoomWdg.set(self.zoomFac)
 #           print "self._updImBounds; sizeIJ=%s, frameShape=%s, actZoomIJ=%s, desZoomFac=%s, zoomFac=%s" % (sizeIJ, self.frameShape, actZoomIJ, desZoomFac, self.zoomFac)
         
-        self.redisplay()
+        self.redisplay(doRescale=False)
 
     def cnvPosFromImPos(self, imPos):
         """Convert image pixel position to canvas position
