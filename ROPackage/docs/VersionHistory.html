@@ -7,9 +7,10 @@
 
 <h2>Version history for the <a href="Overview.html">RO Python Package</a></h2>
 
-<h3>2.9.0b3 2011-06-17</h3>
+<h3>2.9.0b3+ 2011-07-21</h3>
 
 <ul>
+    <li>MathUtil.rThetaFromXY: API change and bug fix: it now returns theta=NaN if too near the pole; formerly it was documented to raise an exception if too near the pole, but that exception was not raised reliably, if at all.
     <li>Message dictionary change: renamed "type" to "msgType" to avoid conflict with the Python built in function. This introduces minor API changes to:
     <ul>
         <li>RO.KeyDispatcher: KeyDispatcher methods dispatch, logMsgDict and makeMsgDict
