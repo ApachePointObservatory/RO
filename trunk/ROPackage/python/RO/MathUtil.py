@@ -19,12 +19,17 @@ History:
                     removeDups and matchLists to SeqUtil.
 2007-04-24 ROwen    Changed Numeric to numpy in a doc string.
 2010-07-30 ROwen    Bug fix: wrapPos returned 360 if input was a very small negative value.
+2011-07-21 ROwen    API change and bug fix: rThetaFromXY was documented to raise an exception
+                    if too near the pole, but it did not do this reliably, if at all.
+                    Changed to return theta = NaN (numpy.nan) if too near the pole.
 """
 import math
+import numpy
 from RO.PhysConst import RadPerDeg
 import RO.SysConst
 
 DegPerRad = 1.0 / RadPerDeg
+_TinyFloat = numpy.finfo(float).tiny
 
 # The following were commented out 2001-01-10 because inf and nan
 # are not handled on Mac OS X (Python 2.2 from fink).
@@ -184,13 +189,20 @@ def rot2D (xyVec, angDeg):
 
 def rThetaFromXY(xy):
     """Returns the magnitude and angle of a 2-dim vector.
-    Raises ValueError if too near the pole to compute.
+    
+    Inputs:
+    - xy: cartesian coordinates
+    
+    Returns:
+    - r: radius
+    - theta: theta (deg); NaN if cannot be reliably computed
     """
-    x, y = xy
-    return (
-        math.sqrt((x * x) + (y * y)),
-        atan2d(y, x),
-    )
+    r = math.hypot(*xy)
+    if r < _TinyFloat:
+        theta = numpy.nan
+    else:
+        theta = math.atan2(xy[1], xy[0]) / RO.PhysConst.RadPerDeg
+    return (r, theta)
 
 def xyFromRTheta(rTheta):
     """Returns the x and y components of a polar vector"""
