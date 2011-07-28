@@ -81,6 +81,7 @@ History:
                     Added static method getMaxUserCmdID.
                     Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
 2011-06-17 ROwen    Changed "type" to "msgType" in parsed message dictionaries to avoid conflict with builtin.
+2011-07-27 ROwen    Changed the executeCmd method to not log a message.
 """
 import sys
 import time
@@ -379,11 +380,11 @@ class KeyDispatcher(object):
         try:
             fullCmd = "%d %s %s" % (cmdVar.cmdID, cmdVar.actor, cmdVar.cmdStr)
             self.connection.writeLine (fullCmd)
-            self.logMsg (
-                msgStr = fullCmd,
-                actor = cmdVar.actor,
-                cmdID = cmdVar.cmdID,
-            )
+#             self.logMsg (
+#                 msgStr = fullCmd,
+#                 actor = cmdVar.actor,
+#                 cmdID = cmdVar.cmdID,
+#             )
 #           print "executing:", fullCmd
         except Exception, e:
             errMsgDict = self.makeMsgDict(

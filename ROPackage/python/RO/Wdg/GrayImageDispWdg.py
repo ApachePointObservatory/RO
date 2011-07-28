@@ -156,6 +156,8 @@ History:
 2010-10-19 ROwen    Made value a float instead of an int to handle float images better, including NaN.
 2011-07-06 ROwen    Made scaling functions operate on scaledArr in place.
                     Added doRescale argument to redisplay to reduce needless recomputation of scaledArr.
+2011-07-27 ROwen    Removed doRescale argument from redisplay because it was causing bugs.
+                    Simplified the code for reusing scaledArr.
 """
 import weakref
 import Tkinter
@@ -1061,7 +1063,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
         """Ignore an event."""
         return
     
-    def redisplay(self, doRescale=True):
+    def redisplay(self):
         """Starting from the data array, redisplay the data.
         """
         if self.dataArr == None:
@@ -1072,28 +1074,30 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
         try:
             dataShapeXY = self.dataArr.shape[::-1]
             
-            if doRescale or (self.scaledArr is None):
-                # offset so minimum display value = scaling function minimum input
-                # note: this form of equation reuses the input array for output
+            # offset so minimum display value = scaling function minimum input
+            # reuse existing scaledArr memory if possible
+            if self.scaledArr == None or self.scaledArr.shape != self.dataArr.shape:
+                self.scaledArr = self.dataArr - float(self.dataDispMin)
+            else:
                 numpy.subtract(self.dataArr, float(self.dataDispMin), self.scaledArr)
-                
-                offsetDispRange = [0.0, float(self.dataDispMax - self.dataDispMin)]
-                
-                # apply scaling function, if any
-                if self.scaleFunc:
-                    self.scaleFunc(self.scaledArr, self.scaledArr)
-                    scaledMin, scaledMax = self.scaleFunc(offsetDispRange).astype(float)
-                else:
-                    scaledMin, scaledMax = offsetDispRange
-                # linearly offset and stretch data so that
-                # dataDispMin maps to 0 and dataDispMax maps to 256
-                # (note: for most functions scaledMin is already 0
-                # so the offset is superfluous)
-                adjOffset = scaledMin
-                adjScale = 256.0 / max((scaledMax - scaledMin), 1.0)
-                #print "apply adjOffset=%s; adjScale=%s" % (adjOffset, adjScale)
-                self.scaledArr -= adjOffset
-                self.scaledArr *= adjScale
+            
+            offsetDispRange = [0.0, float(self.dataDispMax - self.dataDispMin)]
+            
+            # apply scaling function, if any
+            if self.scaleFunc:
+                self.scaleFunc(self.scaledArr, self.scaledArr)
+                scaledMin, scaledMax = self.scaleFunc(offsetDispRange).astype(float)
+            else:
+                scaledMin, scaledMax = offsetDispRange
+            # linearly offset and stretch data so that
+            # dataDispMin maps to 0 and dataDispMax maps to 256
+            # (note: for most functions scaledMin is already 0
+            # so the offset is superfluous)
+            adjOffset = scaledMin
+            adjScale = 256.0 / max((scaledMax - scaledMin), 1.0)
+            #print "apply adjOffset=%s; adjScale=%s" % (adjOffset, adjScale)
+            self.scaledArr -= adjOffset
+            self.scaledArr *= adjScale
 
             # reshape canvas, if necessary
             subFrameShapeIJ = numpy.subtract(self.endIJ, self.begIJ)
@@ -1271,14 +1275,9 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
             self.sortedData = unmaskedArr
             self.sortedData.sort()
     
-            # scaledArr gets computed in place by redisplay;
-            # for now just allocate space of the appropriate type
-            self.scaledArr = numpy.zeros(self.dataArr.shape, dtype=numpy.float32)
-            
             # look for data leaks
             self._trackMem(self.dataArr, "dataArr")
             self._trackMem(self.sortedData, "sortedData")
-            self._trackMem(self.scaledArr, "scaledArr")
             
             self.doRangeMenu(redisplay=False)
             
@@ -1402,7 +1401,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
             self.currZoomWdg.set(self.zoomFac)
 #           print "self._updImBounds; sizeIJ=%s, frameShape=%s, actZoomIJ=%s, desZoomFac=%s, zoomFac=%s" % (sizeIJ, self.frameShape, actZoomIJ, desZoomFac, self.zoomFac)
         
-        self.redisplay(doRescale=False)
+        self.redisplay()
 
     def cnvPosFromImPos(self, imPos):
         """Convert image pixel position to canvas position

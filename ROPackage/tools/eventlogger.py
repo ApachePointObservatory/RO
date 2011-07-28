@@ -42,6 +42,8 @@ class EventLogger(Tkinter.Frame):
         Tkinter.Frame.__init__(self, master)
         # dict of event type: event name
         
+        self.eventInd = 0
+        
         self.userLabel = Tkinter.Label(self, text="Type here:")
         self.userEntry  = Tkinter.Entry(self, highlightthickness=2)
         self.logWdg = RO.Wdg.LogWdg(self)
@@ -61,22 +63,23 @@ class EventLogger(Tkinter.Frame):
     def reportEvent(self, evt):
         eventName = self.EventDict.get(evt.type, 'Unknown')
         rptList = [
-            '\n\n%s\nEvent:' % (80*'=',),
-            ' type=%r (%r' % (evt.type, eventName,),
-            '\nserial=%r' % (evt.serial,),
+            '\n\nEvent %d' % (self.eventInd,),
+            'type=%r (%s)' % (evt.type, eventName,),
+            'serial=%r' % (evt.serial,),
             'time=%r' % (evt.time,),
             'widget=%r' % (evt.widget,),
             '\nx=%r  y=%r' % (evt.x, evt.y),
             'x_root=%r' % (evt.x_root,),
             'y_root=%r' % (evt.y_root,),
-            '\nnum=%r' % (evt.num,),
+            'num=%r' % (evt.num,),
             'char=%r' % (evt.char,),
             'keysym=%r' % (evt.keysym,),
             'keysym_num=%r' % (evt.keysym_num,),
-            'delta=%r' % (evt.delta,),
-            '\nheight=%r' % (evt.height,),
+            '\ndelta=%r' % (evt.delta,),
+            'height=%r' % (evt.height,),
             'width=%r' % (evt.width,),
         ]
+        self.eventInd += 1
     
         #### some event types don't have these attributes 
         try:
@@ -92,12 +95,13 @@ class EventLogger(Tkinter.Frame):
         except AttributeError:
             pass
         
+#        print '; '.join(rptList)
         self.logWdg.addOutput('; '.join(rptList))
             
 
 if __name__ == "__main__":
     root = Tkinter.Tk()
-    root.geometry("500x400")
+    root.geometry("800x500")
     root.wm_title("Event Logger")
     evtLogger = EventLogger(root)
     evtLogger.pack(expand=True, fill="both")
