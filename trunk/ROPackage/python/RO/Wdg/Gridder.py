@@ -30,7 +30,8 @@ History:
 2007-09-19 ROwen    gridWdg was ignoring the helpText and helpURL arguments (thanks, pychecker!).
 2010-03-11 ROwen    Changed the default for gridWdg to copy helpText and helpURL from the first data widget.
                     Bug fix: gridWdg would fail if helpText or helpURL was True and the first data widget
-                    was missing the associated attribute.                
+                    was missing the associated attribute.
+2011-07-29 ROwen    _BaseGridSet: added __getitem__, __len__  and __length__ to simplify access to widgets.
 """
 __all__ = ['Gridder']
 
@@ -406,6 +407,23 @@ class _BaseGridSet:
             self.helpText = getattr(firstWdg, "helpText", None)
         if self.helpURL == True:
             self.helpURL = getattr(firstWdg, "helpURL", None)
+    
+    def __getitem__(self, ind):
+        """Implement keyVar[ind] to return the specified value from the wdgSet.
+        
+        @raise IndexError if ind is out of range
+        """
+        return self.wdgSet[ind]
+
+    def __iter__(self):
+        """Implement for x in keyVar (appears to be redundant, but can't hurt)
+        """
+        return iter(self.wdgSet)
+
+    def __len__(self):
+        """Implement len(keyVar) to return the number of values
+        """
+        return len(self.wdgSet)
 
 
 class _GridSet (_BaseGridSet):
