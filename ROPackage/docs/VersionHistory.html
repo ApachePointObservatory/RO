@@ -7,7 +7,7 @@
 
 <h2>Version history for the <a href="Overview.html">RO Python Package</a></h2>
 
-<h3>2.9.0b3+ 2011-07-29</h3>
+<h3>2.9.0b3+ 2011-08-01</h3>
 
 <ul>
     <li>MathUtil.rThetaFromXY: API change and bug fix: it now returns theta=NaN if too near the pole; formerly it was documented to raise an exception if too near the pole, but that exception was not raised reliably, if at all.
@@ -17,9 +17,13 @@
         <li>RO.KeyVariable: KeyVar.set and CmdVar.reply
         <li>ParseMsg.parseHubMsg
     </ul>
-    <li>RO.Wdg.Gridder: the object returned by gridWdg now has __getitem__, __iter__ and __len__ methods for accessing the widgets.
-    <li>RO.Wdg.GrayImgaeDispWdg: improved efficiency by reusing an internal scaled array when possible.
-
+    <li>RO.Wdg
+    <ul>
+        <li>RO.Wdg.Gridder: the object returned by gridWdg now has __getitem__, __iter__ and __len__ methods for accessing the widgets.
+        <li>RO.Wdg.GrayImgaeDispWdg: improved efficiency by reusing an internal scaled array when possible.
+        <li>RO.Wdg.DropletApp: added support for recursion. Added arguments: patterns, exclPatterns, dirPatterns, exclDirPatterns, recursionDepth and processDirs. Call update_idletasks after processing each file so messages are more likely to be printed when they arrive.
+    </ul>
+    <li>RO.OS.findFiles: added arguments patterns, exclPatterns, dirPatterns, exclDirPatterns, recursionDepth and processDirs.
 </ul>
 
 <h3>2.9.0b2 2011-06-16</h3>

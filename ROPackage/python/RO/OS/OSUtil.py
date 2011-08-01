@@ -18,6 +18,7 @@ History:
                     (disk letter) included a backslash.
 2006-08-18 ROwen    Added delDir.
 2007-01-17 ROwen    Modified getResourceDir to work with pyinstaller.
+2011-08-01 ROwen    findFiles: added arguments dirPatterns and exclDirPatterns; modified to use os.walk.
 """
 import os.path
 import sys
@@ -69,53 +70,49 @@ except AttributeError:
     def realPath(path):
         return path
 
-def findFiles(paths, patterns=None, exclPatterns=None, returnDirs=False, recursionDepth=None, patWarn=False):
+def findFiles(paths, patterns=None, exclPatterns=None, dirPatterns=None, exclDirPatterns=None,
+    recursionDepth=None, returnDirs=False, patWarn=False):
     """Search for files that match a given pattern, returning a list of unique paths.
     
     paths may include files and/or directories.
-    - All directories that are on the list are searched for files
-     (and so on recursively to the specified depth).
-    - Any files in paths or that are found while searching
-      are included in the output list *if* they match the patterns
-      (this includes directories if returnDirs is true).
+    - All matching directories in paths, and matching subdirectories of same (to the specified recursion depth)
+        are searched for files. Matching directories are also included in the output list if returnDirs is true.
+    - All matching files in paths or in searched directories are included in the output list.
     
-    One use for this is to handle a list of files that has been
-    dragged and dropped on an applet.
+    One use is to handle a list of files that has been dragged and dropped on an applet.
 
     Inputs:
-    - paths: one or more paths; files are checked to see if they match
+    - paths: one or a sequence of paths; files are checked to see if they match
         the specified pattern and directories are searched
         if they don't exceed the recursion level
-    - patterns: one or more patterns the file name must match;
-        is omitted, all files are matched.
+    - patterns: one or a sequence of inclusion patterns; each file name must match at least one of these;
+        if None or [] then ["*"] is used.
         Patterns are matched using fnmatch, which does unix-style matching
         (* for any char sequence, ? for one char).
-    - exclPatterns: one or more patterns the file name must not match;
-        if omitted, nothing is excluded
-    - recursionDepth: recursion level; None or an integer n:
-        None means infinite recursion
-        n means go down n levels from the root path, for example:
-        0 means don't even look inside directories in paths
-        1 means look inside directories in paths but no deeper
-    - returnDirs: should directories be included in the returned list?
-    - patWarn: print names of files that don't match the pattern to stderr
+    - exclPatterns: one or a sequence of exclusion patterns; each file name must not match any of these
+    - dirPatterns: one or a sequence of inclusion patterns; each directory name must match at least one of these;
+        if None or [] then ["*"] is used.
+    - exclDirPatterns: one or a sequence of exclusion patterns; each directory name must not match any of these
+    - returnDirs: include directories in the returned list?
+    - patWarn: print to sys.stderr names of files and directories that don't match the pattern
+    
+    Notes:
+    - Pattern matching is applied to files and directories in the paths argument,
+      as well as files and directories in subdirectories.
+    - Duplicate paths are removed
     
     Pattern special characters are those for fnmatch:
     *       match any sequence of 0 or more characters
     ?       match any single character
     [seq]   matches any character in seq
     [!seq]  matches any character not in seq
-
-    Note: EVERY directory that is found is searched (if the recursion level
-    is not exhausted). Whether a directory is searched has nothing to do with
-    patterns, exclPatterns or returnDirs.
     """
     # process the inputs
     paths = RO.SeqUtil.asSequence(paths)
-    patterns = patterns or ("*",)
-    patterns = RO.SeqUtil.asSequence(patterns)
-    exclPatterns = exclPatterns or ()
-    exclPatterns = RO.SeqUtil.asSequence(exclPatterns)
+    patterns = RO.SeqUtil.asSequence(patterns or "*")
+    exclPatterns = RO.SeqUtil.asSequence(exclPatterns or ())
+    dirPatterns = RO.SeqUtil.asSequence(dirPatterns or "*")
+    exclDirPatterns = RO.SeqUtil.asSequence(exclDirPatterns or ())
     if recursionDepth == None:
         recursionDepth = _Inf()
     else:
@@ -124,32 +121,46 @@ def findFiles(paths, patterns=None, exclPatterns=None, returnDirs=False, recursi
     # perform the search
     foundPathList = []
     for path in paths:
-        isFile = os.path.isfile(path)
-        isDir = os.path.isdir(path)
-        if isFile or (returnDirs and isDir):
+        if os.path.isfile(path):
             if _nameMatch(path, patterns, exclPatterns):
                 foundPathList.append(path)
             elif patWarn:
-                sys.stderr.write("Skipping %r: no pattern match\n" % (path,))
+                sys.stderr.write("Skipping file %r: no pattern match\n" % (path,))
+        elif os.path.isdir(path):
+            strippedPath = path.rstrip(os.path.sep)
+            baseLevel = strippedPath.count(os.path.sep)
+            if _nameMatch(path, dirPatterns, exclDirPatterns):
+                if returnDirs:
+                    foundPathList.append(path)
+                for root, dirs, files in os.walk(path):
+                    newDirs = []
+                    subLevel = root.count(os.path.sep)
+                    if recursionDepth != None and subLevel - baseLevel >= recursionDepth:
+                        del dirs[:]
+                    else:
+                        for d in dirs:
+                            dPath = os.path.join(root, d)
+                            if _nameMatch(d, dirPatterns, exclDirPatterns):
+                                newDirs.append(d)
+                                if returnDirs:
+                                    foundPathList.append(dPath)
+                            elif patWarn:
+                                sys.stderr.write("Skipping dir %r: no pattern match\n" % (dPath,))
+                        if len(dirs) > len(newDirs):
+                            dirs[:] = newDirs
 
-        if isDir:
-            # directory: recurse into it if depth not exceeded
-            if recursionDepth > 0:
-                foundPathList += list(_findFilesIter(
-                    dirPath = path,
-                    patterns = patterns,
-                    exclPatterns = exclPatterns,
-                    returnDirs = False,
-                    recursionDepth = recursionDepth - 1,
-                    patWarn = patWarn,
-                ))
-        elif not isFile:
-            # bad path or something weird
-            if not os.path.exists(path):
-                sys.stderr.write("Warning: file does not exist: %s\n" % path)
-            else:
-                sys.stderr.write("Warning: skipping mysterious non-file, non-directory: %s\n" % path)
-            continue
+                    for f in files:
+                        fPath = os.path.join(root, f)
+                        if _nameMatch(f, patterns, exclPatterns):
+                            foundPathList.append(fPath)
+                        elif patWarn:
+                            sys.stderr.write("Skipping file %r: no pattern match\n" % (fPath,))
+            elif patWarn:
+                sys.stderr.write("Skipping dir %r: no pattern match\n" % (path,))
+        elif not os.path.exists(path):
+            sys.stderr.write("Warning: file does not exist: %s\n" % path)
+        else:
+            sys.stderr.write("Skipping non-file, non-directory: %s\n" % path)
     
     return removeDupPaths(foundPathList)
 
@@ -257,37 +268,6 @@ def openUniv(path):
         openMode = 'r'
     return open(path, openMode)
 
-def _findFilesIter(dirPath, patterns, exclPatterns=(), returnDirs=False, recursionDepth=None, patWarn=False):
-    """Helper function for findFiles that does most of the work.
-    Allows findFiles to clean up patterns once, instead of for every recursion.
-    
-    Assumes dirPath is the path to an existing directory.
-    Never returns dirPath itself!
-    """
-#   print "_findFilesIter(%r, %r, %r, %r, %r, %r)" % (dirPath, patterns, exclPatterns, returnDirs, recursionDepth, patWarn)
-    # check each file
-    for baseName in os.listdir(dirPath):
-        fullPath = os.path.normpath(os.path.join(dirPath, baseName))
-        
-        # grab if it matches our pattern and entry type
-        if os.path.isfile(fullPath) or returnDirs:
-            if _nameMatch(baseName, patterns, exclPatterns):
-                yield fullPath
-            elif patWarn:
-                sys.stderr.write("Skipping %r: no pattern match\n" % (fullPath,))
-                
-        # recursively scan other folders, appending results
-        if recursionDepth > 0 and os.path.isdir(fullPath):
-            for x in _findFilesIter(
-                dirPath = fullPath,
-                patterns = patterns,
-                exclPatterns = exclPatterns,
-                returnDirs = returnDirs,
-                recursionDepth = recursionDepth - 1,
-                patWarn = patWarn,
-            ):
-                yield x
-
 class _Inf:
     def __gt__(self, other):
         return True
@@ -324,6 +304,8 @@ def _nameMatch(path, patterns, exclPatterns):
     Returns True if baseName matches any pattern in patterns
     and does not match any pattern in exclPatterns.
     Matching is done by fnmatch.fnmatch.
+    
+    Also returns True if there are no patterns or exclPatterns.
     
     Does no verification of any input.
     """
