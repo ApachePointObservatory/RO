@@ -6,22 +6,31 @@ To build a Mac droplet using py2app, in the PList specify the sorts of files tha
     plist = dict(
     ...
         CFBundleDocumentTypes       = [
+            # support drag and drop of text files
             dict(
-                CFBundleTypeName = "TEXT",
+                CFBundleTypeName = "Text File",
+                CFBundleTypeRole = "Editor",
                 LSItemContentTypes = [
                     "public.plain-text",
                     "public.text",
                     "public.data",
                 ],
+            ),
+            # support drag and drop of folders
+            dict(
+                CFBundleTypeName = "Folder",
                 CFBundleTypeRole = "Viewer",
+                LSItemContentTypes = [
+                    "public.folder",
+                ],
             ),
         ],
     )
 
     Notes:
     - There are keywords that allow you to specify allowed file suffixes
-      but they are deprecated in Mac OS X 10.5 so I don't show them:
-    - CFBundleTypeRole is required; another common value is "Editor".
+      but they are deprecated in Mac OS X 10.5 so I don't show them.
+    - CFBundleTypeRole is required; the two allowed values are "Viewer" and "Editor".
 
 History:
 2011-02-25 ROwen
