@@ -10,6 +10,7 @@ History:
 2004-05-18 ROwen    Stopped importing string, sys and types since they weren't used.
 2004-08-11 ROwen    Define __all__ to restrict import.
 2004-12-13 ROwen    Added removeCallback; added addCallback arg. callNow.
+2011-08-11 ROwen    Added support for a state tracker.
 """
 __all__ = ['InputContFrame']
 
@@ -23,8 +24,9 @@ class InputContFrame(Tkinter.Frame):
     This is a substitute for inheritance; it is less robust with regards to
     changes in InputCont, but avoids cluttering up your class with attributes.
     """
-    def __init__(self, master, **kargs):
+    def __init__(self, master, stateTracker=None, **kargs):
         Tkinter.Frame.__init__(self, master, **kargs)
+        self._stateTracker = stateTracker
     
     def addCallback(self, callFunc, callNow=False):
         return self.inputCont.addCallback(callFunc, callNow = callNow)

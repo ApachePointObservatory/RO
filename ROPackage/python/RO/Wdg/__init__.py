@@ -28,6 +28,7 @@ from ResizableRect import *
 from ScriptWdg import *
 from ScrolledWdg import *
 from Sound import *
+from StateTracker import *
 from StatusBar import *
 from StatusConfigGridder import *
 from Text import *

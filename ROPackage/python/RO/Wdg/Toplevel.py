@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """RO.Wdg.Toplevel wdigets are windows with some enhanced functionality, including:
-- Remembers last position if closed or iconified
-- Can record position and visiblity in a file
+- Remembers last geometry if closed or iconified
+- Can record geometry, visibility and widget state in a file
 
 History:
 2002-03-18 ROwen    First release.
@@ -50,9 +50,12 @@ History:
                     by strange screen arrangements.
 2010-06-28 ROwen    Removed one unused import (thanks to pychecker).
 2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
+2011-08-11 ROwen    Added support for saving and restoring widget state.
+                    Made error handling safer by using RO.StringUtil.strFromException.
 """
 __all__ = ['tl_CloseDestroys', 'tl_CloseWithdraws', 'tl_CloseDisabled', 'Toplevel', 'ToplevelSet']
 
+import json
 import os.path
 import sys
 import traceback
@@ -60,6 +63,7 @@ import Tkinter
 import RO.CnvUtil
 import RO.OS
 import RO.SeqUtil
+import RO.StringUtil
 import RO.TkUtil
 
 # constants for the closeMode argument
@@ -75,7 +79,8 @@ class Toplevel(Tkinter.Toplevel):
         visible=True,
         resizable=True,
         closeMode=tl_CloseWithdraws,
-        wdgFunc=None,       
+        wdgFunc=None,
+        doSaveState=False,
     ):
         """Creates a new Toplevel. Inputs are:
         - master: master window; if omitted, root is used
@@ -94,6 +99,10 @@ class Toplevel(Tkinter.Toplevel):
         - wdgFunc: a function which, when called with the toplevel as its only argument,
           creates a widget which is to be packed into the Toplevel.
           The widget is packed to grow as required based on resizable.
+        - doSaveState: save window state in the geometry file? If True then you must provide wdgFunc
+            and the widget it returns must support this method:
+            - getStateTracker(): return an RO.Wdg.StateTracker object
+            State is saved in the geometry file as a JSon encoding of the dict.
           
         Typically one uses RO.Alg.GenericCallback or something similar to generate wdgFunc,
         for example: GenericFunction(Tkinter.Label, text="this is a label").
@@ -113,6 +122,8 @@ class Toplevel(Tkinter.Toplevel):
         self.__geometry = ""
         self.__wdg = None  # contained widget, but only if wdgFunc specified
         self._reportedBadPosition = False
+        self._defState = {}
+        self._stateTracker = None
 
         if title:
             self.wm_title(title)
@@ -139,9 +150,17 @@ class Toplevel(Tkinter.Toplevel):
                 self.__wdg = wdgFunc(self)
                 self.__wdg.pack(expand="yes", fill="both")
             except Exception, e:
-                sys.stderr.write("Could not create window %r: %s\n" % (title, e))
+                sys.stderr.write("Could not create window %r: %s\n" % (title, RO.StringUtil.strFromException(e)))
                 traceback.print_exc(file=sys.stderr)
                 raise
+            if doSaveState:
+                self._stateTracker = self.__wdg.getStateTracker()
+                if self._stateTracker == None:
+                    raise RuntimeError("getStateTracker returned None")
+                    
+            
+        elif doSaveState:
+            raise RuntimeError("You must provide wdgFunc if you specify doSaveState True")
 
         # Once window initial size is set, shrink-wrap behavior
         # goes away in both dimensions. If the window can only be
@@ -168,6 +187,11 @@ class Toplevel(Tkinter.Toplevel):
             self.makeVisible()
         else:
             self.setGeometry(geometry)
+        
+        # it is unlikely that the state will depend on the geometry, but just in case,
+        # record the default state last
+        if self.getDoSaveState():
+            self._defState = self._stateTracker.getState()
     
     def setGeometry(self, geomStr):
         """Set the geometry of the window based on a Tk geometry string.
@@ -245,6 +269,37 @@ class Toplevel(Tkinter.Toplevel):
             self.__recordGeometry()
         return self.__geometry
     
+    def getDoSaveState(self):
+        """Returns True if saving state
+        """
+        return self._stateTracker != None
+    
+    def getStateIsDefault(self):
+        """Returns the state dictionary of the underlying widget and a flag indicating if default
+        
+        Returns three items:
+        - stateDict: the state dictionary of the underlying widget, or {} if not saving state
+        - isDefault: a flag indicating whether the state is the default state;
+            always True if not saving state
+        
+        Raise RuntimeError if not saving state
+        """
+        if not self.getDoSaveState():
+            raise RuntimeError("Not saving state")
+        stateDict = self._stateTracker.getState()
+        isDefault = stateDict == self._defState
+#         print "getStateIsDefault: stateDict=%s, self._defState=%s, isDefault=%s" % (stateDict, self._defState, isDefault)
+        return stateDict, isDefault
+
+    def setState(self, stateDict):
+        """Set the state dictionary of the underlying widget
+        
+        Raise RuntimeError if not saving state
+        """
+        if not self.getDoSaveState():
+            raise RuntimeError("Not saving state")
+        self._stateTracker.setState(stateDict)
+        
     def getWdg(self):
         """Returns the contained widget, if it was specified at creation with wdgFunc.
         Please use with caution; this is primarily intended for debugging.
@@ -281,9 +336,9 @@ class ToplevelSet(object):
     """A set of Toplevel windows that can record and restore positions to a file.
     """
     def __init__(self,
-        fileName=None,
-        defGeomVisDict=None,
-        createFile=False,
+        fileName = None,
+        defGeomVisDict = None,
+        createFile = False,
     ):
         """Create a ToplevelSet
         Inputs:
@@ -294,21 +349,23 @@ class ToplevelSet(object):
             whose keys are window names and values are tuples of:
             - Tk geometry strings: WxH+-X+-Y; None or "" for no default
             - visible flag; None for no default
-        - createFile: if the geometry file does not exist,
-            create a new blank one?
+        - createFile: if the geometry file does not exist, create a new blank one?
         """
         
         self.defFileName = fileName
 
-        # geometry and visibility dictionaries
+        # geometry, visibility and state dictionaries
         # the file dictionaries contain data read from the geom/vis file
         # the default dictionaries contain programmer-supplied defaults
+        # (there is no default state dict because default state is obtained from the Toplevel)
         # file data overrides programmer defaults
         # all dictionaries have name as the key
         # Geom dictionaries have a Tk geometry string as the value
-        # Vis dictaraies have a boolean as the value
+        # Vis dictionaries have a boolean as the value
+        # fileState has a state dictionary as the value
         self.fileGeomDict = {}
         self.fileVisDict = {}
+        self.fileState = {}
         self.defGeomDict = {}
         self.defVisDict = {}
         if defGeomVisDict:
@@ -375,6 +432,16 @@ class ToplevelSet(object):
             kargs["title"] = name.split(".")[-1]
         #print "ToplevelSet is creating %r with master = %r, geom= %r, kargs = %r" % (name, master, geom, kargs)
         newToplevel = Toplevel(master, geom, **kargs)
+        
+        # restore state, if appropriate
+        if newToplevel.getDoSaveState():
+            stateDict = self.fileState.get(name)
+            if stateDict != None:
+#                 print "restoring state for Toplevel %s: %s" % (name, stateDict)
+                newToplevel.setState(stateDict)
+#             else:
+#                 print "no saved state for Toplevel %s" % (name,)
+            
         self.tlDict[name] = newToplevel
         return newToplevel
     
@@ -439,7 +506,7 @@ class ToplevelSet(object):
         tl.makeVisible()
     
     def readGeomVisFile(self, fileName=None, doCreate=False):
-        """Read toplevel geometry from a file.
+        """Read toplevel geometry, visibility and state from a file.
         Inputs:
         - fileName: full path to file
         - doCreate: if file does not exist, create a blank one?
@@ -447,12 +514,11 @@ class ToplevelSet(object):
         File format:
         - Comments (starting with "#") and blank lines are ignored.
         - Data lines have the format:
-          name = geometry, vis
+          name = geometry[, isVisible[, stateDict]]
           where:
           - geometry is a Tk geometry string (size info optional)
-          - vis is optional
-          - either value may be omitted to use the program default
-          - if the second value is omitted then the comma is also optional
+          - isVisible is a boolean flag
+          - stateDict is json-encoded state dictionary
         """
         fileName = fileName or self.defFileName
         if not fileName:
@@ -464,7 +530,7 @@ class ToplevelSet(object):
                     outFile = open(fileName, "w")
                     outFile.close()
                 except StandardError, e:
-                    sys.stderr.write ("Could not create geometry file %r; error: %s\n" % (fileName, e))
+                    sys.stderr.write ("Could not create geometry file %r; error: %s\n" % (fileName, RO.StringUtil.strFromException(e)))
                 sys.stderr.write ("Created blank geometry file %r\n" % (fileName,))
             else:
                 sys.stderr.write ("Geometry file %r does not exist; using default values\n" % (fileName,))
@@ -473,12 +539,13 @@ class ToplevelSet(object):
         try:
             inFile = RO.OS.openUniv(fileName)
         except StandardError, e:
-            raise RuntimeError, "Could not open geometry file %r; error: %s\n" % (fileName, e)
+            raise RuntimeError, "Could not open geometry file %r; error: %s\n" % (fileName, RO.StringUtil.strFromException(e))
             
         newGeomDict = {}
         newVisDict = {}
+        newState = {}
         try:
-            for line in inFile:
+            for ind, line in enumerate(inFile):
                 # if line starts with #, it is a comment, skip it
                 if line.startswith("#"):
                     continue
@@ -490,7 +557,7 @@ class ToplevelSet(object):
                 if len(name) == 0:
                     continue
 
-                geomVisList = data[1].split(",")
+                geomVisList = data[1].split(",", 2)
                 if len(geomVisList) == 0:
                     continue
 
@@ -503,8 +570,21 @@ class ToplevelSet(object):
                     if vis:
                         vis = RO.CnvUtil.asBool(vis)
                         newVisDict[name] = vis
+                
+                if len(geomVisList) > 2:
+                    stateDictStr = geomVisList[2].strip()
+                    if stateDictStr:
+                        try:
+                            stateDict = json.loads(stateDictStr)
+                            newState[name] = stateDict
+                        except Exception, e:
+                            sys.stderr.write("Error reading line %d of geometry file %s: %s" % (ind+1, fileName, line))
+                            sys.stderr.write("  failed to parse state: %r\n" % (stateDictStr,))
+                            sys.stderr.write("  error: %s\n" % (RO.StringUtil.strFromException(e),))
+
             self.fileGeomDict = newGeomDict
             self.fileVisDict = newVisDict
+            self.fileState = newState
         finally:
             inFile.close()
         
@@ -529,7 +609,7 @@ class ToplevelSet(object):
         try:
             outFile = open(fileName, "w")
         except StandardError, e:
-            raise RuntimeError, "Could not open geometry file %r; error: %s\n" % (fileName, e)
+            raise RuntimeError, "Could not open geometry file %r; error: %s\n" % (fileName, RO.StringUtil.strFromException(e))
             
         try:
             names = self.getNames()
@@ -537,30 +617,40 @@ class ToplevelSet(object):
             for name in names:
                 defGeom = self.defGeomDict.get(name, "")
                 defVis = self.defVisDict.get(name, None)
+                doSaveState = False
+                currState = {}
+                isDefaultState = True
                 
                 tl = self.getToplevel(name)
                 if tl:
                     currGeom = tl.getGeometry() or defGeom # getGeometry may return "" if window never displayed
                     currVis = tl.getVisible()
+                    doSaveState = tl.getDoSaveState()
+                    if doSaveState:
+                        currState, isDefaultState = tl.getStateIsDefault()
+#                         print "for Toplevel %s: isDefaultState=%s, currState=%s" % (name, isDefaultState, currState)
                 else:
+                    # Unknown toplevel (e.g. a script window)
                     currGeom = defGeom
                     currVis = False
+                isDefaultGeom = currGeom == defGeom
+                isDefaultVis = currVis == defVis
                 
-                # record current values in file dictionary
-                # (since we're about to update that)
-                if (currGeom != defGeom):
-                    self.fileGeomDict[name] = currGeom
-                if (currVis != defVis):
-                    self.fileVisDict[name] = currVis
+                # record current values in file dictionaries (to match the file we're writing)
+                self.fileGeomDict[name] = currGeom
+                self.fileVisDict[name] = currVis
+                self.fileState[name] = currState
+                
+                valueList = [currGeom, str(currVis)]
+                if doSaveState:
+                    valueList.append(json.dumps(currState))
                     
-                # comment out entry if there is no entry in either file dictionary
-                # (which can only be true if curr = def for geom and vis
-                # and there was no entry in the file when it was last read)
-                if self.fileGeomDict.has_key(name) or self.fileVisDict.has_key(name):
-                    prefixStr = ""
-                else:
+                # comment out entry if all values are default
+                if isDefaultGeom and isDefaultVis and isDefaultState:
                     prefixStr = "# "
-                outFile.write("%s%s = %s, %s\n" % (prefixStr, name, currGeom, currVis))
+                else:
+                    prefixStr = ""
+                outFile.write("%s%s = %s\n" % (prefixStr, name, ", ".join(valueList)))
         finally:
             outFile.close()
 
