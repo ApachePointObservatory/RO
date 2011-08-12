@@ -19,10 +19,11 @@
     </ul>
     <li>RO.Wdg
     <ul>
+        <li>RO.Wdg.DropletApp: added support for recursion. Added arguments: patterns, exclPatterns, dirPatterns, exclDirPatterns, recursionDepth and processDirs. Call update_idletasks after processing each file so messages are more likely to be printed when they arrive.
         <li>RO.Wdg.Gridder: the object returned by gridWdg now has __getitem__, __iter__ and __len__ methods for accessing the widgets.
         <li>RO.Wdg.GrayImgaeDispWdg: improved efficiency by reusing an internal scaled array when possible.
-        <li>RO.Wdg.DropletApp: added support for recursion. Added arguments: patterns, exclPatterns, dirPatterns, exclDirPatterns, recursionDepth and processDirs. Call update_idletasks after processing each file so messages are more likely to be printed when they arrive.
-        <li>RO.Wdg.Toplevel and ToplevelSet: added support for saving and restoring internal state.
+        <li>RO.Wdg.Toplevel and ToplevelSet: added support for saving and restoring widget state.
+        <li>RO.Wdg.StateTracker: a new object used by Toplevel and ToplevelSet to save and restore widget state.
     </ul>
     <li>RO.OS.findFiles: added arguments patterns, exclPatterns, dirPatterns, exclDirPatterns, recursionDepth and processDirs.
 </ul>
