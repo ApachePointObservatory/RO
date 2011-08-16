@@ -7,7 +7,7 @@
 
 <h2>Version history for the <a href="Overview.html">RO Python Package</a></h2>
 
-<h3>2.9.0b3+ 2011-08-11</h3>
+<h3>2.9.0 2011-08-16</h3>
 
 <ul>
     <li>MathUtil.rThetaFromXY: API change and bug fix: it now returns theta=NaN if too near the pole; formerly it was documented to raise an exception if too near the pole, but that exception was not raised reliably, if at all.
@@ -17,34 +17,24 @@
         <li>RO.KeyVariable: KeyVar.set and CmdVar.reply
         <li>ParseMsg.parseHubMsg
     </ul>
+    <li>RO.KeyDispatcher.KeyDispatcher API change: the log function now receives an extra keyword argument: cmdID.
     <li>RO.Wdg
     <ul>
+        <li>RO.Wdg.CtxMenu modified to restore focus to the widget on which the menu is raised. This give better visual feedback when using the menu to work with data, since the field containing the data is highlighted.
         <li>RO.Wdg.DropletApp: added support for recursion. Added arguments: patterns, exclPatterns, dirPatterns, exclDirPatterns, recursionDepth and processDirs. Call update_idletasks after processing each file so messages are more likely to be printed when they arrive.
+        <li>RO.Wdg.Entry changes:
+        <ul>
+            <li>doneFunc is no longer called in response to methods such as set, but in response to user interaction.
+            <li>doneFunc is much less likely to be called multiple times for the same value. The test resets whenever the displayed value changes.
+            <li>Added a method inMethodCall which indicates whether callbacks are being called due to method calls (such as set) or user interaction.
+        </ul>
         <li>RO.Wdg.Gridder: the object returned by gridWdg now has __getitem__, __iter__ and __len__ methods for accessing the widgets.
         <li>RO.Wdg.GrayImgaeDispWdg: improved efficiency by reusing an internal scaled array when possible.
-        <li>RO.Wdg.Toplevel and ToplevelSet: added support for saving and restoring widget state.
         <li>RO.Wdg.StateTracker: a new object used by Toplevel and ToplevelSet to save and restore widget state.
+        <li>RO.Wdg.StatusConfigGridder bug fix: getMaxNextCol was not reliable.
+        <li>RO.Wdg.Toplevel and ToplevelSet: added support for saving and restoring widget state.
     </ul>
     <li>RO.OS.findFiles: added arguments patterns, exclPatterns, dirPatterns, exclDirPatterns, recursionDepth and processDirs.
-</ul>
-
-<h3>2.9.0b2 2011-06-16</h3>
-
-<ul>
-    <li>RO.KeyDispatcher.KeyDispatcher API change: the log function now receives an extra keyword argument: cmdID.
-</ul>
-
-<h3>2.9.0b1 2011-06-10</h3>
-
-<ul>
-    <li>Modified RO.Wdg.CtxMenu to restore focus to the widget on which the menu is raised. This give better visual feedback when using the menu to work with data, since the field containing the data is highlighted.
-    <li>Modified RO.Wdg.Entry:
-    <ul>
-        <li>doneFunc is no longer called in response to methods such as set, but in response to user interaction.
-        <li>doneFunc is much less likely to be called multiple times for the same value. The test resets whenever the displayed value changes.
-        <li>Added a method inMethodCall which indicates whether callbacks are being called due to method calls (such as set) or user interaction.
-    </ul>
-    <li>Bug fix: RO.Wdg.StatusConfigGridder.getMaxNextCol was not reliable.
 </ul>
 
 <h3>2.8.0 2011-03-29</h3>
