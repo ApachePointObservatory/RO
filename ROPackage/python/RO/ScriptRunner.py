@@ -77,6 +77,7 @@ History:
                     Removed unused and broken internal method _waitEndFunc (thanks to pychecker).
 2010-10-20 ROwen    Tweaked waitCmd doc string.
 2011-06-17 ROwen    Changed "type" to "msgType" in parsed message dictionaries to avoid conflict with builtin.
+2011-08-16 ROwen    Commented out a diagnostic print statement.
 """
 import sys
 import threading
@@ -973,7 +974,7 @@ class _WaitCmdVars(_WaitBase):
         if self.getState()[0] != 0:
             # no need to wait; commands are already done or one has failed
             # schedule a callback for asap
-            print "_WaitCmdVars: no need to wait"
+#             print "_WaitCmdVars: no need to wait"
             self.master.after(1, self.varCallback)
         else:
             # need to wait; add self as callback to each cmdVar

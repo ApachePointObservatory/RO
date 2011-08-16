@@ -10,9 +10,11 @@ Tkinter's implementation of OptionMenu.
 To do:
 - Color menu items in autoIsCurrent mode.
 
-Warning: as of Tk 8.4.15, MacOS X has poor visual support for background color
-(isCurrent) and no support for foreground color (state) for OptionMenu
-and for MenuButtons in general.
+Warnings:
+- If "" is a valid option then be sure to set noneDisplay to something other than "".
+  Otherwise getString will return the default value when the "" is selected.
+- As of Tk 8.4.19, MacOS X has poor visual support for background color (isCurrent)
+  and no support for foreground color (state) for OptionMenu and for MenuButtons in general.
 
 History:
 2002-11-15 ROwen
@@ -82,6 +84,8 @@ History:
                     so that the initial value of the var is shown, even if not in the list.
                     Bug fix: defValue not shown as initial value.
 2009-07-23 ROwen    Save the label argument as an attribute.
+2011-08-16 ROwen    Bug fix/API change: getString returned the default value if the current value was "";
+                    now it only returns the default value if the current value is noneDisplay.
 """
 __all__ = ['OptionMenu']
 
@@ -343,7 +347,7 @@ class OptionMenu (Tkinter.Menubutton, RO.AddCallback.TkVarMixin,
         val = self._var.get()
         if val == self.noneDisplay:
             return self.defValue or ""
-        return val or self.defValue or ""
+        return val
     
     def getVar(self):
         """Returns the variable that is set to the currently selected item
