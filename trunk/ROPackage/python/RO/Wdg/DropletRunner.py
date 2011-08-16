@@ -48,6 +48,7 @@ History:
 2010-07-12 ROwen    Bug fix: DropletRunner() was an old-style class which is not compatible with some
                     versions of Python; made it a new-style class (as originally intended).
 2011-02-25 ROwen    Tweaked usage documentation.
+2011-08-16 ROwen    Commented out two diagnostic print statements.
 """
 import sys
 import os.path
@@ -131,9 +132,7 @@ class DropletRunner(object):
     def _poll(self):
         """Poll for subprocess completion
         """
-        print "poll"
         if self.subProc.returncode != None:
-            print "self.subProc.returncode=%s" % (self.subProc.returncode,)
             self._cleanup()
         else:
             self.tkRoot.after(100, self._poll)
