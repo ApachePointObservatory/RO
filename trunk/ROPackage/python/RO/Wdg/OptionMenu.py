@@ -84,8 +84,12 @@ History:
                     so that the initial value of the var is shown, even if not in the list.
                     Bug fix: defValue not shown as initial value.
 2009-07-23 ROwen    Save the label argument as an attribute.
-2011-08-16 ROwen    Bug fix/API change: getString returned the default value if the current value was "";
-                    now it only returns the default value if the current value is noneDisplay.
+2011-08-17 ROwen    Modified asValue to return default only if value = noneDisplay and noneDisplay
+                    is not a valid value (the latter condition is new).
+                    Modified getString to return the default value only if the current value is invalid;
+                    formerly it would return the default if the current value was noneDisplay,
+                    which caused surprising behavior if noneDisplay was a valid value.
+                    Added method isValid.
 """
 __all__ = ['OptionMenu']
 
@@ -254,14 +258,18 @@ class OptionMenu (Tkinter.Menubutton, RO.AddCallback.TkVarMixin,
     
     def asValue(self, str):
         """Return value associated with display string:
-        None if str = self.noneDisplay, str otherwise.
+        None if str = self.noneDisplay and str is not a valid value, str otherwise.
+        
+        Note: this is the inverse transform of asString only if noneDisplay is not a valid value.
         """
-        if str == self.noneDisplay:
+        if str == self.noneDisplay and str not in self._items:
             return None
         else:
             return str
 
     def clear(self):
+        """Clear the display
+        """
         self._var.set("")
 
     def ctxConfigMenu(self, menu):
@@ -342,12 +350,13 @@ class OptionMenu (Tkinter.Menubutton, RO.AddCallback.TkVarMixin,
         return self._menu
     
     def getString(self):
-        """Returns the current value of the field, or the default if none selected.
+        """Returns the current value of the field, or the default if the current value is not valid.
+        
+        If you want the displayed value, regardless of validity, use getVar().get()
         """
-        val = self._var.get()
-        if val == self.noneDisplay:
+        if not self.isValid():
             return self.defValue or ""
-        return val
+        return self._var.get()
     
     def getVar(self):
         """Returns the variable that is set to the currently selected item
@@ -383,8 +392,15 @@ class OptionMenu (Tkinter.Menubutton, RO.AddCallback.TkVarMixin,
     
     def isDefault(self):
         """Return True if current value matches the default value.
+        
+        Note that it returns false if the current value is not valid.
         """
         return self._var.get() == self.asString(self.defValue)
+    
+    def isValid(self):
+        """Return True if the currently displayed value is one of the items set by setItems
+        """
+        return self._var.get() in self._items
     
     def restoreDefault(self):
         """Restore the default value.
