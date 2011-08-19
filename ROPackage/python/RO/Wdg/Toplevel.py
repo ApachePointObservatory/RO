@@ -52,10 +52,14 @@ History:
 2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
 2011-08-11 ROwen    Added support for saving and restoring widget state.
                     Made error handling safer by using RO.StringUtil.strFromException.
+2011-08-19 ROwen    Support Python < 2.6 by importing simplejson if json not found.
 """
 __all__ = ['tl_CloseDestroys', 'tl_CloseWithdraws', 'tl_CloseDisabled', 'Toplevel', 'ToplevelSet']
 
-import json
+try:
+    import json
+except Exception:
+    import simplejson as json
 import os.path
 import sys
 import traceback
