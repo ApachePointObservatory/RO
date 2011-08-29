@@ -158,6 +158,7 @@ History:
                     Added doRescale argument to redisplay to reduce needless recomputation of scaledArr.
 2011-07-27 ROwen    Removed doRescale argument from redisplay because it was causing bugs.
                     Simplified the code for reusing scaledArr.
+2011-08-29 ROwen    Bug fix: display was incorrect unless data array was 32-bit float.
 """
 import weakref
 import Tkinter
@@ -1077,7 +1078,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
             # offset so minimum display value = scaling function minimum input
             # reuse existing scaledArr memory if possible
             if self.scaledArr == None or self.scaledArr.shape != self.dataArr.shape:
-                self.scaledArr = self.dataArr - float(self.dataDispMin)
+                self.scaledArr = numpy.subtract(self.dataArr, float(self.dataDispMin), dtype=numpy.float32)
             else:
                 numpy.subtract(self.dataArr, float(self.dataDispMin), self.scaledArr)
             
@@ -1542,11 +1543,12 @@ if __name__ == "__main__":
     if not fileName:
         arrSize = 255
         
-        arr = numpy.arange(arrSize**2).reshape([arrSize,arrSize])
+        imArr = numpy.arange(arrSize**2, dtype=numpy.float64).reshape([arrSize, arrSize])
         # put marks at center
         ctr = (arrSize - 1) / 2
-        arr[ctr] = 0
-        arr[:,ctr] = 0
+        imArr[ctr] = 0
+        imArr[:,ctr] = 0
+        mask = None
     else:
         dirName = os.path.dirname(__file__)
         filePath = os.path.join(dirName, fileName)
