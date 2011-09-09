@@ -19,6 +19,7 @@ History:
 2006-08-18 ROwen    Added delDir.
 2007-01-17 ROwen    Modified getResourceDir to work with pyinstaller.
 2011-08-01 ROwen    findFiles: added arguments dirPatterns and exclDirPatterns; modified to use os.walk.
+2011-09-09 ROwen    Misfeature fix: findFiles could return paths that start with "./".
 """
 import os.path
 import sys
@@ -95,6 +96,8 @@ def findFiles(paths, patterns=None, exclPatterns=None, dirPatterns=None, exclDir
     - exclDirPatterns: one or a sequence of exclusion patterns; each directory name must not match any of these
     - returnDirs: include directories in the returned list?
     - patWarn: print to sys.stderr names of files and directories that don't match the pattern
+
+    Returns a list of unique paths.
     
     Notes:
     - Pattern matching is applied to files and directories in the paths argument,
@@ -133,6 +136,8 @@ def findFiles(paths, patterns=None, exclPatterns=None, dirPatterns=None, exclDir
                 if returnDirs:
                     foundPathList.append(path)
                 for root, dirs, files in os.walk(path):
+                    if root == ".":
+                        root = ""
                     newDirs = []
                     subLevel = root.count(os.path.sep)
                     if recursionDepth != None and subLevel - baseLevel >= recursionDepth:
