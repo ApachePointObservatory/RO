@@ -48,13 +48,6 @@ class ScrolledWdg(Tkinter.Frame):
         # create the canvas
         self._cnv = Tkinter.Canvas(self, height=height, highlightthickness=0, selectborderwidth=0)
         self._cnv.grid(row=0, column=0, sticky="nsew")
-        def printConfig(descr, wdg):
-            print "Properties for %s:" % (descr,)
-            cd = wdg.config()
-            for k in sorted(cd.keys()):
-                print "  %s = %s = %r" % (k, wdg[k], wdg[k])
-        printConfig("scrolled canvas", self._cnv)
-        
         
         # create the scrollbars and connect them up
         if hscroll:
