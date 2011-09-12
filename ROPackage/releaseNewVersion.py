@@ -80,3 +80,5 @@ shutil.rmtree(distDir)
 
 print "Deleting egg info %r" % (eggDir,)
 shutil.rmtree(eggDir)
+
+print "***** Update documentation on the UW server! *****"
