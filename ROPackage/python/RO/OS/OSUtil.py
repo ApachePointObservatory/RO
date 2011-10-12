@@ -20,6 +20,7 @@ History:
 2007-01-17 ROwen    Modified getResourceDir to work with pyinstaller.
 2011-08-01 ROwen    findFiles: added arguments dirPatterns and exclDirPatterns; modified to use os.walk.
 2011-09-09 ROwen    Misfeature fix: findFiles could return paths that start with "./".
+2011-10-11 ROwen    findFiles: document recursionDepth argument.
 """
 import os.path
 import sys
@@ -71,8 +72,16 @@ except AttributeError:
     def realPath(path):
         return path
 
-def findFiles(paths, patterns=None, exclPatterns=None, dirPatterns=None, exclDirPatterns=None,
-    recursionDepth=None, returnDirs=False, patWarn=False):
+def findFiles(
+    paths,
+    patterns = None,
+    exclPatterns = None,
+    dirPatterns = None,
+    exclDirPatterns = None,
+    recursionDepth = None,
+    returnDirs = False,
+    patWarn = False,
+):
     """Search for files that match a given pattern, returning a list of unique paths.
     
     paths may include files and/or directories.
@@ -84,16 +93,20 @@ def findFiles(paths, patterns=None, exclPatterns=None, dirPatterns=None, exclDir
 
     Inputs:
     - paths: one or a sequence of paths; files are checked to see if they match
-        the specified pattern and directories are searched
-        if they don't exceed the recursion level
+        the specified pattern and directories are searched if they don't exceed the recursion level
     - patterns: one or a sequence of inclusion patterns; each file name must match at least one of these;
         if None or [] then ["*"] is used.
-        Patterns are matched using fnmatch, which does unix-style matching
+        Patterns are matched using fnmatch, which does unix shell-style matching
         (* for any char sequence, ? for one char).
     - exclPatterns: one or a sequence of exclusion patterns; each file name must not match any of these
     - dirPatterns: one or a sequence of inclusion patterns; each directory name must match at least one of these;
         if None or [] then ["*"] is used.
     - exclDirPatterns: one or a sequence of exclusion patterns; each directory name must not match any of these
+    - recursionDepth: recursion level; None or an integer n:
+        None means infinite recursion
+        n means go down n levels from the root path, for example:
+        0 means don't even look inside directories in paths
+        1 means look inside directories in paths but no deeper
     - returnDirs: include directories in the returned list?
     - patWarn: print to sys.stderr names of files and directories that don't match the pattern
 

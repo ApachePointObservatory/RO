@@ -37,6 +37,8 @@ History:
 2011-08-01 ROwen    Added support for recursion.
                     Added arguments patterns, exclPatterns, dirPatterns, exclDirPatterns, recursionDepth and processDirs.
                     Call update_idletasks after each file is processed so messages are more likely to be logged as they arrive.
+2011-10-07 ROwen    Added doneMsg argument. 
+                    Bug fix: the default for recursionDepth was False, which is not a valid value; changed to None.
 """
 import os.path
 import sys
@@ -55,9 +57,20 @@ class DropletApp(Tkinter.Frame):
     
     Your typical code will look like the example at the end.
     """
-    def __init__(self, master, width, height, font=None, printTraceback=False,
-         patterns=None, exclPatterns=None, dirPatterns=None, exclDirPatterns=None,
-         recursionDepth=False, processDirs=False):
+    def __init__(self,
+        master,
+        width,
+        height,
+        font = None,
+        printTraceback = False,
+        patterns = None,
+        exclPatterns = ".*",
+        dirPatterns = None,
+        exclDirPatterns = ".*",
+        recursionDepth = None,
+        processDirs = False,
+        doneMsg = "Done",
+    ):
         """Construct a DropletApp
         
         Inputs:
@@ -68,18 +81,23 @@ class DropletApp(Tkinter.Frame):
         - printTraceback: print a traceback to stderr if processing a file fails?
         - patterns: one or a sequence of inclusion patterns; each file name must match at least one of these;
             if None or [] then ["*"] is used.
-            Patterns are matched using fnmatch, which does unix-style matching
+            Patterns are matched using fnmatch, which does unix shell-style matching
             (* for any char sequence, ? for one char).
-        - exclPatterns: one or a sequence of exclusion patterns; each file name must not match any of these
+        - exclPatterns: one or a sequence of exclusion patterns; each file name must not match any of these;
+            if None or [] then no files are excluded.
         - dirPatterns: one or a sequence of inclusion patterns; each directory name must match at least one of these;
             if None or [] then ["*"] is used.
-        - exclDirPatterns: one or a sequence of exclusion patterns; each directory name must not match any of these
+        - exclDirPatterns: one or a sequence of exclusion patterns; each directory name must not match any of these;
+            if None or [] then no directories are excluded.
         - recursionDepth: recursion level; None or an integer n:
             None means infinite recursion
             n means go down n levels from the root path, for example:
             0 means don't even look inside directories in paths
             1 means look inside directories in paths but no deeper
         - processDirs: if True then processFile is sent directories as well as files, else it receives only files.
+        - doneMsg: a message to print after each batch of files is processed.
+            If None then no final message is printed.
+            If supplied then a final \n is also added.
         """
         Tkinter.Frame.__init__(self, master)
         self.printTraceback = bool(printTraceback)
@@ -89,6 +107,7 @@ class DropletApp(Tkinter.Frame):
         self.exclDirPatterns = exclDirPatterns
         self.recursionDepth = recursionDepth
         self.processDirs = bool(processDirs)
+        self.doneMsg = doneMsg + "\n"
         
         self.logWdg = RO.Wdg.LogWdg(
             master = self,
@@ -133,6 +152,8 @@ class DropletApp(Tkinter.Frame):
                 self.logWdg.addOutput("%s failed: %s\n" % (filePath, e), severity=RO.Constants.sevError)
                 if self.printTraceback:
                     traceback.print_exc(file=sys.stderr)
+        if self.doneMsg:
+            self.logWdg.addOutput(self.doneMsg, severity=RO.Constants.sevNormal)
 
     def _macOpenDocument(self, *filePathList):
         """Handle Mac OpenDocument event

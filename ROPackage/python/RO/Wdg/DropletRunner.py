@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 """Run a script as a droplet (an application onto which you drop file) with a log window
 
+Deprecated. use DropletApp instead.
+
 To build a Mac droplet using py2app, assuming the code that does the work is in mainScript.py:
 
 - Write a trivial script that constructs/runs DropletRunner; this is the script
@@ -49,6 +51,7 @@ History:
                     versions of Python; made it a new-style class (as originally intended).
 2011-02-25 ROwen    Tweaked usage documentation.
 2011-08-16 ROwen    Commented out two diagnostic print statements.
+2011-10-11 ROwen    Documented as deprecated.
 """
 import sys
 import os.path
