@@ -78,6 +78,7 @@ History:
 2010-10-20 ROwen    Tweaked waitCmd doc string.
 2011-06-17 ROwen    Changed "type" to "msgType" in parsed message dictionaries to avoid conflict with builtin.
 2011-08-16 ROwen    Commented out a diagnostic print statement.
+2012-01-26 ROwen    Write full state to stderr on unexpected errors.
 """
 import sys
 import threading
@@ -778,6 +779,7 @@ class ScriptRunner(RO.AddCallback.BaseMixin):
             self._setState(Failed, RO.StringUtil.strFromException(e))
         except Exception, e:
             traceback.print_exc(file=sys.stderr)
+            self._printFullState()
             self._setState(Failed, RO.StringUtil.strFromException(e))
     
     def _printState(self, prefix):
@@ -787,6 +789,13 @@ class ScriptRunner(RO.AddCallback.BaseMixin):
         if _DebugState:
             print "Script %s: %s: state=%s, iterID=%s, waiting=%s, iterStack depth=%s" % \
                 (self.name, prefix, self._state, self._iterID, self._waiting, len(self._iterStack))
+    
+    def _printFullState(self):
+        """Print the full state to stderr
+        """
+        sys.stderr.write("self.name=%s, self._state=%s, self._iterID=%r, self._waiting=%r, self._userWaitID=%r, self.value=%r\n" % \
+            (self.name, self._state, self._iterID, self._waiting, self._userWaitID, self.value))
+        sys.stderr.write("self._iterStack=%r\n" % (self._iterStack,))
 
     def _showCmdMsg(self, msg, severity=RO.Constants.sevNormal):
         """Display a message--on the command status bar, if available,
