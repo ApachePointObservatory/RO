@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""A widget to changing values in real time as a strip chart
+"""A widget to display changing values in real time as a strip chart
 
 Known issues:
 Matplotlib's defaults present a number of challenges for making a nice strip chart display.
@@ -47,7 +47,6 @@ Here are manual workarounds for some common problems:
 
 Requirements:
 - Requires matplotlib built with TkAgg support
-- This widget is somewhat experimental and the API may change.
 
 Acknowledgements:
 I am grateful to Benjamin Root, Tony S Yu and others on matplotlib-users
@@ -67,6 +66,7 @@ History:
                 - They return an object.
             Added removeLine method.
 2010-12-29  Document useful arguments for addLine.
+2012-05-31  Add a clear method to StripChartWdg and _Line.
 """
 import bisect
 import datetime
@@ -214,6 +214,15 @@ class StripChartWdg(Tkinter.Frame):
         """
         subplot = self.subplotArr[subplotInd]
         return _Line(subplot, self._cnvTimeFunc, **kargs)
+    
+    def clear(self):
+        """Clear data in all non-constant lines
+        """
+        for subplot in self.subplotArr:
+            for line in subplot._scwLines:
+                line.clear()
+                subplot.draw_artist(line.line2d)
+            self.canvas.blit(subplot.bbox)
 
     def getDoAutoscale(self, subplotInd=0):
         return self.subplotArr[subplotInd].get_autoscaley_on()
@@ -382,6 +391,13 @@ class _Line(object):
             for line in self.subplot._scwLines:
                 self.subplot.draw_artist(line.line2d)
             canvas.blit(self.subplot.bbox)
+    
+    def clear(self):
+        """Clear all data
+        """
+        self._tList = []
+        self._yList = []
+        self.line2d.set_data(self._tList, self._yList)
 
     def _purgeOldData(self, minMplDays):
         """Purge data with t < minMplDays
