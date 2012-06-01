@@ -113,6 +113,10 @@ History:
 2011-02-17 ROwen    Document that addROWdgSet can take fewer widgets than values, but not more.
 2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
 2011-06-17 ROwen    Changed "type" to "msgType" in parsed message dictionaries to avoid conflict with builtin.
+2012-06-01 ROwen    Modified CmdVar cleanup as follows:
+                    - Do NOT remove keyVars (so the user can still read them)
+                    - Remove the time limit keyVar callback, if present
+                    - Use best effort to remove callbacks (do not raise an exception)
 """
 import sys
 import time
@@ -929,16 +933,16 @@ class CmdVar(object):
                 self.maxEndTime += self.timeLim
 
     def _cleanup(self):
-        """Call when command is finished
-        to remove callbacks and avoid memory waste.
+        """Call when command is finished to remove callbacks and avoid wasting or leaking memory.
         """
         self.callTypesFuncList = []
         for keyVar in self.keyVars:
             try:
-                keyVar.removeCallback(self._keyVarCallback)
+                keyVar.removeCallback(self._keyVarCallback, doRaise=False)
             except ValueError:
                 pass
-        self.keyVars = []               
+        if self.timeLimKeyword:
+            self.removeCallback(self._checkForTimeLimKeyword, doRaise=False)
     
     def _setStartInfo(self, dispatcher, cmdID):
         """Called by the dispatcher when dispatching the command.

@@ -79,6 +79,9 @@ History:
 2011-06-17 ROwen    Changed "type" to "msgType" in parsed message dictionaries to avoid conflict with builtin.
 2011-08-16 ROwen    Commented out a diagnostic print statement.
 2012-01-26 ROwen    Write full state to stderr on unexpected errors.
+2012-06-01 ROwen    Use best effort to remove callbacks during cleanup, instead of raising an exception on failure.
+                    Modified _WaitCmdVars to not try to register callbacks on commands that are finished,
+                    and to not try to remove callbacks from CmdVars that are done.
 """
 import sys
 import threading
@@ -988,9 +991,10 @@ class _WaitCmdVars(_WaitBase):
         else:
             # need to wait; add self as callback to each cmdVar
             for cmdVar in self.cmdVars:
-                cmdVar.removeCallback(self.scriptRunner._cmdFailCallback, doRaise=False)
-                cmdVar.addCallback(self.varCallback)
-            self.addedCallback = True
+                if not cmdVar.isDone():
+                    cmdVar.removeCallback(self.scriptRunner._cmdFailCallback, doRaise=False)
+                    cmdVar.addCallback(self.varCallback)
+                    self.addedCallback = True
 
     def getState(self):
         """Return one of:
@@ -1032,10 +1036,10 @@ class _WaitCmdVars(_WaitBase):
 #       print "_WaitCmdVars.cleanup"
         if self.addedCallback:
             for cmdVar in self.cmdVars:
-                didRemove = cmdVar.removeCallback(self.varCallback, doRaise=False)
-                if not didRemove:
-                    sys.stderr.write("_WaitCmdVar cleanup could not remove callback from %s\n" % \
-                        (cmdVar,))
+                if not cmdVar.isDone():
+                    didRemove = cmdVar.removeCallback(self.varCallback, doRaise=False)
+                    if not didRemove:
+                        sys.stderr.write("_WaitCmdVar cleanup could not remove callback from %s\n" % (cmdVar,))
 
     def fail(self, cmdVar):
         """A command var failed.
@@ -1107,7 +1111,7 @@ class _WaitKeyVar(_WaitBase):
         """
 #       print "_WaitKeyVar.cleanup"
         if self.addedCallback:
-            self.keyVar.removeCallback(self.varCallback)
+            self.keyVar.removeCallback(self.varCallback, doRaise=False)
         
     def getVal(self):
         """Return isCurrent, currVal, where currVal
