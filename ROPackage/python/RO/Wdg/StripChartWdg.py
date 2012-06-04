@@ -67,6 +67,7 @@ History:
             Added removeLine method.
 2010-12-29  Document useful arguments for addLine.
 2012-05-31  Add a clear method to StripChartWdg and _Line.
+2012-06-04  Reduce CPU usage by doing less work if not visible (not mapped).
 """
 import bisect
 import datetime
@@ -136,6 +137,8 @@ class StripChartWdg(Tkinter.Frame):
         Tkinter.Frame.__init__(self, master)
         
         self._timeRange = timeRange
+        self._isVisible = self.winfo_ismapped()
+        self._isFirst = True
         if updateInterval == None:
             updateInterval = max(0.1, min(5.0, timeRange / 2000.0))
         self.updateInterval = float(updateInterval)
@@ -178,6 +181,8 @@ class StripChartWdg(Tkinter.Frame):
             subplot.label_outer() # disable axis labels on all but the bottom subplot
             subplot.set_ylim(auto=True) # set auto scaling for the y axis
         
+        self.bind("<Map>", self._handleMap)
+        self.bind("<Unmap>", self._handleUnmap)
         self._timeAxisTimer = None
         self._updateTimeAxis()
 
@@ -213,7 +218,11 @@ class StripChartWdg(Tkinter.Frame):
           Arguments to avoid include: animated, data, xdata, ydata, zdata, figure.
         """
         subplot = self.subplotArr[subplotInd]
-        return _Line(subplot, self._cnvTimeFunc, **kargs)
+        return _Line(
+            subplot = subplot,
+            cnvTimeFunc = self._cnvTimeFunc,
+            wdg = self,
+        **kargs)
     
     def clear(self):
         """Clear data in all non-constant lines
@@ -221,8 +230,6 @@ class StripChartWdg(Tkinter.Frame):
         for subplot in self.subplotArr:
             for line in subplot._scwLines:
                 line.clear()
-                subplot.draw_artist(line.line2d)
-            self.canvas.blit(subplot.bbox)
 
     def getDoAutoscale(self, subplotInd=0):
         return self.subplotArr[subplotInd].get_autoscaley_on()
@@ -294,7 +301,7 @@ class StripChartWdg(Tkinter.Frame):
             subplot.relim()
             subplot.autoscale_view(scalex=False, scaley=True)
 
-    def _handleDrawEvent(self, event):
+    def _handleDrawEvent(self, event=None):
         """Handle draw event
         """
 #         print "handleDrawEvent"
@@ -303,6 +310,18 @@ class StripChartWdg(Tkinter.Frame):
             for line in subplot._scwLines:
                 subplot.draw_artist(line.line2d)
             self.canvas.blit(subplot.bbox)
+    
+    def _handleMap(self, evt):
+        """Handle map event (widget made visible)
+        """
+        self._isVisible = True
+        self._handleDrawEvent()
+        self._updateTimeAxis()
+    
+    def _handleUnmap(self, evt):
+        """Handle unmap event (widget made not visible)
+        """
+        self._isVisible = False
     
     def _updateTimeAxis(self):
         """Update the time axis; calls itself
@@ -317,17 +336,22 @@ class StripChartWdg(Tkinter.Frame):
         
         self._purgeCounter = (self._purgeCounter + 1) % self._maxPurgeCounter
         doPurge = self._purgeCounter == 0
-        
-        for subplot in self.subplotArr:
-            subplot.set_xlim(minMplDays, maxMplDays)
-            if doPurge:
+
+        if doPurge:
+            for subplot in self.subplotArr:
                 for line in subplot._scwLines:
                     line._purgeOldData(minMplDays)
-                if subplot.get_autoscaley_on():
-                    # since data is being purged the y limits may have changed
-                    subplot.relim()
-                    subplot.autoscale_view(scalex=False, scaley=True)
-        self.canvas.draw()
+        
+        if self._isVisible or self._isFirst:
+            for subplot in self.subplotArr:
+                subplot.set_xlim(minMplDays, maxMplDays)
+                if doPurge:
+                    if subplot.get_autoscaley_on():
+                        # since data is being purged the y limits may have changed
+                        subplot.relim()
+                        subplot.autoscale_view(scalex=False, scaley=True)
+            self._isFirst = False
+            self.canvas.draw()
         self._timeAxisTimer = self.after(int(self.updateInterval * 1000), self._updateTimeAxis)
 
 
@@ -340,17 +364,19 @@ class _Line(object):
     - cnvTimeFunc: a function that takes a POSIX timestamp (e.g. time.time()) and returns matplotlib days;
         typically an instance of TimeConverter; defaults to TimeConverter(useUTC=False)
     """
-    def __init__(self, subplot, cnvTimeFunc, **kargs):
+    def __init__(self, subplot, cnvTimeFunc, wdg, **kargs):
         """Create a line
         
         Inputs:
         - subplot: the matplotlib Subplot instance displaying this line
         - cnvTimeFunc: a function that takes a POSIX timestamp (e.g. time.time()) and returns matplotlib days;
             typically an instance of TimeConverter; defaults to TimeConverter(useUTC=False)
+        - wdg: parent strip chart widget; used to test visibility
         - **kargs: keyword arguments for matplotlib Line2D, such as color
         """
         self.subplot = subplot
         self._cnvTimeFunc = cnvTimeFunc
+        self._wdg = wdg
         # do not use the data in the Line2D because in some versions of matplotlib
         # line.get_data returns numpy arrays, which cannot be appended to
         self._tList = []
@@ -374,15 +400,24 @@ class _Line(object):
 
         self._tList.append(mplDays)
         self._yList.append(y)
-        if self.subplot.get_autoscaley_on() and numpy.isfinite(y):
-            yMin, yMax = self.subplot.get_ylim()
-            self.line2d.set_data(self._tList, self._yList)
-            if not (yMin <= y <= yMax):
-                self.subplot.relim()
-                self.subplot.autoscale_view(scalex=False, scaley=True)
-                return # a draw event was triggered
-        else:
-            self.line2d.set_data(self._tList, self._yList)
+        self._redraw()
+    
+    def _redraw(self):
+        """Redraw the graph
+        """
+        self.line2d.set_data(self._tList, self._yList)
+        if not self._wdg.winfo_ismapped():
+            return
+        if len(self._yList) > 0:
+            # see if limits need updating to include last point
+            lastY = self._yList[-1]
+            if self.subplot.get_autoscaley_on() and numpy.isfinite(lastY):
+                yMin, yMax = self.subplot.get_ylim()
+                self.line2d.set_data(self._tList, self._yList)
+                if not (yMin <= lastY <= yMax):
+                    self.subplot.relim()
+                    self.subplot.autoscale_view(scalex=False, scaley=True)
+                    return # a draw event was triggered
 
         # did not trigger redraw event so do it now
         if self.subplot._scwBackground:
@@ -391,13 +426,13 @@ class _Line(object):
             for line in self.subplot._scwLines:
                 self.subplot.draw_artist(line.line2d)
             canvas.blit(self.subplot.bbox)
-    
+
     def clear(self):
         """Clear all data
         """
         self._tList = []
         self._yList = []
-        self.line2d.set_data(self._tList, self._yList)
+        self._redraw()
 
     def _purgeOldData(self, minMplDays):
         """Purge data with t < minMplDays
