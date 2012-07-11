@@ -74,7 +74,8 @@ History:
 2008-01-16 ROwen    TkSocket: added pre-test for socket existing to write and writeLine.
 2008-03-06 ROwen    Stopped setting instance variable _prevLine; it was not used anywhere.
 2010-06-28 ROwen    Modified to require Python 2.4 by assuming set is a builtin type.
-2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
+2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code.
+2012-07-09 ROwen    Modified test code to use RO.TkUtil.Timer.
 """
 __all__ = ["TkSocket", "TkServerSocket", "BaseServer", "NullSocket"]
 import sys
@@ -715,7 +716,7 @@ if __name__ == "__main__":
                 ts.write(testStr)
             else:
                 ts.writeLine(testStr)
-            root.after(500, runTest)
+            RO.TkUtil.Timer(0.5, runTest)
         except StopIteration:
             pass
 

@@ -55,6 +55,7 @@ History:
                     - Use PrefVar's internal defaults instead of creating its own
                     - Use a StringVar for the font size, since OptionMenu prefers that.
                     - The options menu button now has text Options.
+2012-07-09 ROwen    Modified to use RO.TkUtil.Timer.
 """
 import sys
 import PrefVar
@@ -63,6 +64,7 @@ import tkColorChooser
 import tkFont
 import RO.Alg
 import RO.Wdg
+from RO.TkUtil import Timer
 
 def getPrefEditor(
     prefVar,
@@ -141,6 +143,8 @@ class PrefEditor(object):
                 wdg.grid(row=row, column=column, sticky=sticky)
             column += 1
         
+        self.timer = Timer()
+        
         self._setupCallbacks()
         
     def getCurrentValue(self):
@@ -191,7 +195,7 @@ class PrefEditor(object):
     def updateChanged(self):
         """Updates the "value changed" indicator.
         """
-        self.afterID = None
+        self.timer.cancel()
         editValue = self.getEditValue()
 #       print "updateChanged called"
 #       print "editValue = %r" % editValue
@@ -220,15 +224,12 @@ class PrefEditor(object):
         and so the changed indicator falsely turns on.
         """
 #       print "_editCallback; afterID=", self.afterID
-        if self.afterID:
-            self.editWdg.after_cancel(self.afterID)
-        self.afterID = self.editWdg.after(10, self.updateChanged)       
+        self.timer.start(0.001, self.updateChanged)
         
     def _setupCallbacks(self):
         """Set up a callback to call self.updateChanged
         whenever the edit value changes.
         """
-        self.afterID = None
         self.editVar.trace_variable("w", self._editCallback)
 
     def _getEditWdg(self):

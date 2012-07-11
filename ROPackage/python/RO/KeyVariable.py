@@ -117,6 +117,8 @@ History:
                     - Do NOT remove keyVars (so the user can still read them)
                     - Remove the time limit keyVar callback, if present
                     - Use best effort to remove callbacks (do not raise an exception)
+2012-07-09 ROwen    Removed unused import in demo section.
+2012-07-09 ROwen    Modified to use RO.TkUtil.Timer.
 """
 import sys
 import time
@@ -130,6 +132,7 @@ import RO.LangUtil
 import RO.PVT
 import RO.StringUtil
 import RO.SeqUtil
+from RO.TkUtil import Timer
 
 # TypeDict translates message type characters to message categories
 # entries are: (meaning, category), where:
@@ -578,13 +581,16 @@ class KeyVar(RO.AddCallback.BaseMixin):
 
 class PVTKeyVar(KeyVar):
     """Position, velocity, time tuple for a given # of axes.
+    
+    To do: make regular callbacks optional for vel!=0 or remove entirely
+    and ask the user to implement this directly.
 
     Similar to KeyVar except:
     - The supplied keyword data is in the form:
         pos1, vel1, t1, pos2, vel2, t2..., pos<naxes>, vel<naxes>, t<naxes>
     - Values are PVTs
+    - The callback function is called once per second if velocity nonzero for any axis.
     """
-    _tkWdg = None
     def __init__(self,
         keyword,
         naxes=1,
@@ -601,9 +607,7 @@ class PVTKeyVar(KeyVar):
         **kargs)
 
         self._hasVel = False
-        if PVTKeyVar._tkWdg == None:
-            PVTKeyVar._tkWdg = Tkinter.Frame()
-        self._afterID = None
+        self._timer = Timer()
 
     def addPosCallback(self, callFunc, ind=0, callNow=True):
         """Similar to addIndexedCallback, but the call function
@@ -699,11 +703,10 @@ class PVTKeyVar(KeyVar):
     def _doCallbacks(self):
         """Call the callback functions.
         """
-        if self._afterID:
-            PVTKeyVar._tkWdg.after_cancel(self._afterID)
+        self._timer.cancel()
         KeyVar._doCallbacks(self)
         if self._hasVel:
-            self._afterID = PVTKeyVar._tkWdg.after(1000, self._doCallbacks)
+            self._timer.start(1.0, self._doCallbacks)
 
 class CmdVar(object):
     """Issue a command via the dispatcher and receive callbacks
@@ -1095,7 +1098,6 @@ class KeyVarFactory(object):
 if __name__ == "__main__":
     doBasic = True
     doFmt = True
-    import RO.KeyDispatcher
     import RO.Astro.Tm
     
     root = Tkinter.Tk()

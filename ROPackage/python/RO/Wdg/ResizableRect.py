@@ -23,6 +23,7 @@ Implementation note:
   
 History:
 2006-09-13 ROwen
+2012-07-10 ROwen    Removed use of update_idletasks in test code.
 """
 __all__ = ["ResizableRect"]
 
@@ -338,10 +339,6 @@ if __name__ == "__main__":
         width = 200,
     )
     cnv.pack()
-    
-    # draw canvas before creating rectangle
-    # so the rectangle can have a reasonable size
-    root.update_idletasks()
         
     def printCoords(rr):
         print rr.getCoords()

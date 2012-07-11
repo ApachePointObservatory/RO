@@ -20,6 +20,7 @@ History:
                     (which is platform-specific to work around cosmetic problems).
 2007-08-09 ROwen    OptionPanelControl: added setBool method.
                     _WdgButton: renamed doClick to _updVisible.
+2012-07-10 ROwen    Removed use of update_idletasks.
 """
 __all__ = ['OptionPanelControl']
 
@@ -99,11 +100,9 @@ class OptionPanelControl(Tkinter.Frame, CtxMenuMixin):
         - takefocus should the checkbuttons take focus?
         - **kargs   keyword arguments for Tkinter.Frame
         
-        All widgets in wdgList must have a common master, which the user
-        is responsible for displaying (i.e. packing or gridding).
-        This widget displays checkbuttons which will automatically
-        show or hide (by gridding or ungridding) the widgets
-        within their master frame.
+        All widgets in wdgList must have a common master, which the user is responsible for displaying
+        (i.e. packing or gridding). This widget displays checkbuttons which will automatically
+        show or hide (by gridding or ungridding) the widgets within their master frame.
         """
         Tkinter.Frame.__init__(self, master, **kargs)
         CtxMenuMixin.__init__(self)
@@ -115,8 +114,6 @@ class OptionPanelControl(Tkinter.Frame, CtxMenuMixin):
         wdgMaster = wdgList[0][1].master
         emptyFrame = Tkinter.Frame(wdgMaster)
         emptyFrame.grid(row=0, column=0)
-        self.update_idletasks()
-        
         
         for ind in range(len(wdgList)):
             wdgData = wdgList[ind]

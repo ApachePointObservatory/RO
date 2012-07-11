@@ -37,10 +37,9 @@ History:
 2004-06-30 ROwen    Added abortCmdByID method to KeyDispatcher.
                     Modified for RO.Keyvariable.KeyCommand->CmdVar.
 2004-07-23 ROwen    When disconnected, all pending commands time out.
-                    Improved variable refresh and command variable timeout handling
-                    to better allow other tasks to run: eliminated the use of
-                    update_idletasks in favor of scheduling a helper function
-                    that works through an iterator and reschedules itself
+                    Improved variable refresh and command variable timeout handling to better allow
+                    other tasks to run: eliminated the use of update_idletasks in favor of scheduling
+                    a helper function that works through an iterator and reschedules itself
                     until the iterator is exhausted, then schedules the main task.
                     If a refresh command fails, the message is now printed to the log, not stderr.
                     Added _replyCmdVar to centralize sending messages to cmdVars
@@ -73,7 +72,7 @@ History:
 2009-07-20 ROwen    Renamed add method to addKeyVar and remove to removeKeyVar.
                     Overhauled keyVar refresh to be more efficient and to run each refresh command only once.
                     Modified to not log if logFunc = None; tweaked convenience logging function.
-2009-09-10 ROwen    Bug fix: check self._refreshAllID before using it with after_cancel.
+2009-09-10 ROwen    Bug fix: check self._refreshAllTimer before using it with after_cancel.
 2010-07-21 ROwen    Changed refreshAllVar to handle setting keyVars not current differently; instead of
                     implicitly basing it on the connection state, it now is based on a new argument.
                     Added readUnixTime field.
@@ -82,6 +81,8 @@ History:
                     Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
 2011-06-17 ROwen    Changed "type" to "msgType" in parsed message dictionaries to avoid conflict with builtin.
 2011-07-27 ROwen    Changed the executeCmd method to not log a message.
+2012-07-09 ROwen    Removed tkWdg argument from constructor.
+                    Modified to use RO.TkUtil.Timer.
 """
 import sys
 import time
@@ -93,13 +94,14 @@ import RO.KeyVariable
 import RO.Comm.HubConnection
 import RO.ParseMsg
 import RO.StringUtil
+from RO.TkUtil import Timer
 
 __all__ = ["logToStdOut", "KeyDispatcher"]
 
 # intervals (in milliseconds) for various background tasks
 _RefreshIntervalMS = 1000 # time interval between variable refresh checks (msec)
-_TimeoutIntervalMS = 1300 # time interval between checks for command timeout checks (msec)
-_ShortIntervalMS = 50     # short time interval; used to schedule a callback right after pending events (sec)
+_TimeoutInterval = 1.3  # time interval between checks for command timeout checks (sec)
+_ShortInterval = 0.05   # short time interval; used to schedule a callback right after pending events (sec)
 
 _CmdNumWrap = 1000 # value at which user command ID numbers wrap
 
@@ -108,24 +110,12 @@ _RefreshTimeLim = 20 # time limit for refresh commands (sec)
 def logToStdOut(msgStr, severity, actor, cmdr):
     print msgStr
 
-class _NullRoot(object):
-    def after(self, *args, **kargs):
-        pass
-    def after_cancel(self, *args, **kargs):
-        pass
-    def update(self):
-        pass
-    def update_idletasks(self):
-        pass
-
 class KeyDispatcher(object):
     """
     A keyword dispatcher sets keyword variables based on keyword/value data.
     
     Inputs:
     - name: used as the actor when the dispatcher reports errors
-    - tkWdg: any Tk widget (used for "after" and "after_cancel" events);
-      if omitted, KeyVariables do not self-update
     - connection: an RO.Conn.HubConnection object or similar;
       if omitted, an RO.Conn.HubConnection.NullConnection is used,
       which is useful for testing.
@@ -137,13 +127,11 @@ class KeyDispatcher(object):
     - readUnixTime: unix time at which last message received from connection; 0 if no message ever received.
     """
     def __init__(self,
-        name="KeyDispatcher",
-        tkWdg = None,
+        name = "KeyDispatcher",
         connection = None,
         logFunc = None,
     ):
         self.name = name
-        self.tkWdg = tkWdg or _NullRoot()
         self.readUnixTime = 0
 
         self._isConnected = False
@@ -159,11 +147,10 @@ class KeyDispatcher(object):
         # refresh command: set of keyVars that use this command
         self.refreshCmdDict = {}
         
-        # IDs of various scheduled callbacks
-        self._checkCmdID = None
-        self._checkRemCmdID = None
-        self._refreshAllID = None
-        self._refreshNextID = None
+        self._checkCmdTimer = Timer()
+        self._checkRemCmdTimer = Timer()
+        self._refreshAllTimer = Timer()
+        self._refreshNextTimer = Timer()
         
         if connection:
             self.connection = connection
@@ -177,16 +164,9 @@ class KeyDispatcher(object):
         
         self.setLogFunc(logFunc)        
         
-        # if a Tk tkWdg supplied, start background tasks (refresh variables and check command timeout)
-        if tkWdg:
-            self.refreshAllVar()
-            self.checkCmdTimeouts()
+        self.refreshAllVar()
+        self.checkCmdTimeouts()
         
-        # exhibit the bug that shows up Tcl/Tk 8.4.15
-#        s = tkWdg.tk.call("tk_chooseColor")
-#        print "s=%r" % (s,)
-#        sys.exit(1)
-    
     def abortCmdByID(self, cmdID):
         """Abort the command with the specified ID.
         
@@ -251,19 +231,15 @@ class KeyDispatcher(object):
             else:
                 self.refreshCmdDict[refreshInfo] = set((keyVar,))
             if self._isConnected:
-                if self._refreshAllID != None:
-                    self.tkWdg.after_cancel(self._refreshAllID)
-                self._refreshAllID = self.tkWdg.after(_ShortIntervalMS, self.refreshAllVar, False)
+                self._refreshAllTimer.start(_ShortInterval, self.refreshAllVar, False)
 
     def checkCmdTimeouts(self):
         """Check all pending commands for timeouts"""
 #       print "RO.KeyDispatcher.checkCmdTimeouts()"
         
         # cancel pending update, if any
-        if self._checkCmdID:
-            self.tkWdg.after_cancel(self._checkCmdID)
-        if self._checkRemCmdID:
-            self.tkWdg.after_cancel(self._checkRemCmdID)
+        self._checkCmdTimer.cancel()
+        self._checkRemCmdTimer.cancel()
         
         # iterate over a copy of the values
         # so we can modify the dictionary while checking command timeouts
@@ -495,10 +471,8 @@ class KeyDispatcher(object):
 #         print "refreshAllVar()"
 
         # cancel pending update, if any
-        if self._refreshAllID:
-            self.tkWdg.after_cancel(self._refreshAllID)
-        if self._refreshNextID:
-            self.tkWdg.after_cancel(self._refreshNextID)
+        self._refreshAllTimer.cancel()
+        self._refreshNextTimer.cancel()
     
         if resetAll:
             # clear the refresh command dict
@@ -602,14 +576,14 @@ class KeyDispatcher(object):
                 # schedule myself to run again shortly
                 # (thereby giving other time to other events)
                 # continuing where I left off
-                self._checkRemCmdID = self.tkWdg.after(1, self._checkRemCmdTimeouts, cmdVarIter)
+                self._checkRemCmdTimer.start(_ShortInterval, self._checkRemCmdTimeouts, cmdVarIter)
         except:
             sys.stderr.write ("RO.KeyDispatcher._checkRemCmdTimeouts failed\n")
             traceback.print_exc(file=sys.stderr)
 
         # finished checking all commands in the current cmdVarIter;
         # schedule a new checkCmdTimeouts at the usual interval
-        self._checkCmdID = self.tkWdg.after(_TimeoutIntervalMS, self.checkCmdTimeouts)
+        self._checkCmdTimer.start(_TimeoutInterval, self.checkCmdTimeouts)
 
     def _connStateCallback(self, conn):
         """If connection state changes, update refresh variables.
@@ -618,8 +592,7 @@ class KeyDispatcher(object):
         self._isConnected = conn.isConnected()
 
         if wasConnected != self._isConnected:
-            self.tkWdg.after(_ShortIntervalMS, self.refreshAllVar)
-    
+            self._refreshAllTimer.start(_ShortInterval, self.refreshAllVar)
 
     def _refreshCmdCallback(self, msgType, msgDict, cmdVar):
         """Refresh command callback; complain if command failed or some keyVars not updated
@@ -705,7 +678,7 @@ class KeyDispatcher(object):
         except:
             sys.stderr.write("%s._sendNextRefreshCmd: refresh command %s failed:\n" % (self.__class__.__name__, cmdVar,))
             traceback.print_exc(file=sys.stderr)
-        self._refreshNextID = self.tkWdg.after(_ShortIntervalMS, self._sendNextRefreshCmd, refreshCmdItemIter)
+        self._refreshNextTimer.start(_ShortInterval, self._sendNextRefreshCmd, refreshCmdItemIter)
     
 
 if __name__ == "__main__":
@@ -825,6 +798,5 @@ if __name__ == "__main__":
     }
     print "\nDispatching message correctly; all should work:"
     kdb.dispatch(msgDict)
-    
-    print "\nTesting keyVar refresh"
-    kdb.gg()
+
+    root.mainloop()

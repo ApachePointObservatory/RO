@@ -15,8 +15,9 @@ History:
 2010-05-21 ROwen    Bug fix: Geometry.toTkStr could include extent when it shouldn't.
 2010-07-20 ROwen    Added Timer class.
 2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
+2012-07-09 ROwen    Added Timer to __all__.
 """
-__all__ = ['addColors', 'colorOK', 'EvtNoProp', 'getWindowingSystem', 'TclFunc', 'Geometry',
+__all__ = ['addColors', 'colorOK', 'EvtNoProp', 'getWindowingSystem', 'TclFunc', 'Geometry', 'Timer',
     'WSysAqua', 'WSysX11', 'WSysWin']
 
 import re
@@ -415,7 +416,7 @@ class Timer(object):
         self._tkWdg = _getTkWdg()
         self._timerID = None
         if sec != None:
-            self.startTimer(sec, callFunc, *args)
+            self.start(sec, callFunc, *args)
     
     def start(self, sec, callFunc, *args):
         """Start or restart the timer, cancelling a pending timer if present
@@ -426,12 +427,29 @@ class Timer(object):
         *args: arguments for callFunc
         """
         self.cancel()
-        self._timerID = self._tkWdg.after(int(0.5 + (1000.0 * sec)), callFunc, *args)
+        
+        def doit():
+            self._timerID = None
+            callFunc(*args)
+
+        self._timerID = self._tkWdg.after(int(0.5 + (1000.0 * sec)), doit)
 
     def cancel(self):
-        """Cancel the timer; a no-op if the timer is not active"""
-        if self._timerID:
+        """Cancel the timer; a no-op if the timer is not active
+        
+        Return True if timer was running, False otherwise
+        """
+        if self._timerID is not None:
             self._tkWdg.after_cancel(self._timerID)
+            self._timerID = None
+            return True
+        return False
+    
+    @property
+    def isActive(self): 
+        """True if timer is active, False otherwise
+        """
+        return self._timerID is not None
 
 
 def _getTkWdg():

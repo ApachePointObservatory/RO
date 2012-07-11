@@ -28,6 +28,7 @@ History:
 2005-08-12 ROwen    Removed unused import of string module.
 2005-09-15 ROwen    Added getCategories and showCategory methods.
                     Renamed internal method selectCategory to _showSelectedCategory.
+2012-07-10 ROwen    Removed use of update_idletasks.
 """
 import Tkinter
 import PrefVar
@@ -157,7 +158,6 @@ class PrefWdg(Tkinter.Frame):
         self.statusBar.setMsg(
             msgStr = "Applying prefs",
         )
-        self.update_idletasks()
         for prefEditor in self.prefEditorList:
             if prefEditor.unappliedChanges():
                 prefEditor.setVariable()
