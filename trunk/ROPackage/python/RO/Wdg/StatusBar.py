@@ -55,6 +55,7 @@ History:
 2010-03-05 ROwen    Fixed an error in the tracking of command reply severity.
 2010-03-08 ROwen    Bug fix: command replies were sometimes displayed with the wrong color.
 2011-06-17 ROwen    Changed "type" to "msgType" in parsed message dictionaries to avoid conflict with builtin.
+2012-07-09 ROwen    Modified to use RO.TkUtil.Timer.
 """
 __all__ = ['StatusBar']
 
@@ -64,6 +65,7 @@ import RO.Alg
 import RO.Constants
 import RO.KeyVariable
 import RO.Prefs.PrefVar
+from RO.TkUtil import Timer
 import Sound
 import Entry
 
@@ -255,7 +257,7 @@ class StatusBar(Tkinter.Frame):
         if isTemp:
             self.currID = self.tempIDGen.next()
             if duration != None:
-                self.displayWdg.after(int(duration), self.clearTempMsg, self.currID)
+                Timer(duration / 1000.0, self.clearTempMsg, self.currID)
         else:
             self.permMsg = msgStr
             self.permSeverity = severity

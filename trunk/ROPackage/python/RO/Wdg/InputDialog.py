@@ -21,6 +21,7 @@ History:
                     the example in Welch's Practical Programming in Tcl and Tk.
 2005-06-16 ROwen    Bug fix: was referencing TclError, not Tkinter.TclError (caught by pychecker).
                     Removed an unused variable (caught by pychecker).
+2012-07-10 ROwen    Removed use of update_idletasks; it no longer appears to be necessary on Mac OS X.
 """
 __all__ = ['ModalDialogBase']
 
@@ -81,8 +82,6 @@ class ModalDialogBase(Tkinter.Toplevel):
             self.grab_set()
         except Tkinter.TclError:
             pass
-
-        self.update_idletasks() # solves a few problems on MacOS X
 
         self.wait_variable(self.doneVar)
 

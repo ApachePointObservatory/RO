@@ -53,6 +53,8 @@ History:
 2011-08-11 ROwen    Added support for saving and restoring widget state.
                     Made error handling safer by using RO.StringUtil.strFromException.
 2011-08-19 ROwen    Support Python < 2.6 by importing simplejson if json not found.
+2012-07-10 ROwen    Removed used of update_idletasks; used a different technique to fix the problem
+                    that windows that are only resizable in one dimension are sometimes drawn incorrectly.
 """
 __all__ = ['tl_CloseDestroys', 'tl_CloseWithdraws', 'tl_CloseDisabled', 'Toplevel', 'ToplevelSet']
 
@@ -178,15 +180,10 @@ class Toplevel(Tkinter.Toplevel):
                 # must explicitly keep height correct
                 self.bind("<Configure>", self.__adjHeight)
 
-        # making the window visible after setting everything else up
-        # works around several glitches:
+        # making the window visible after setting everything else up works around several glitches:
         # - one of my windows was showing up in the wrong location, only on MacOS X aqua, for no obvious reason
         # - some windows with only one axis resizable were showing up with the wrong size
-        #   (a well placed update_idletasks() also fixed that problem)
         if visible:
-            # update_idletasks works around a bug in Tcl/Tk 8.4.13 that consistently caused
-            # the Offset and Permissions windows to be drawn in the wrong place
-            self.update_idletasks()
             self.setGeometry(geometry)
             self.makeVisible()
         else:
@@ -239,6 +236,8 @@ class Toplevel(Tkinter.Toplevel):
         Use as the binding for <Configure> if resizable = (True, False).
         """
         height = self.winfo_height()
+        if height < 2:
+            return
         reqwidth = self.winfo_reqwidth()
         if self.winfo_width() != reqwidth:
             self.geometry("%sx%s" % (reqwidth, height))
@@ -248,8 +247,10 @@ class Toplevel(Tkinter.Toplevel):
         
         Use as the binding for <Configure> if resizable = (False, True).
         """
-        reqheight = self.winfo_reqheight()
         width = self.winfo_width()
+        if width < 2:
+            return
+        reqheight = self.winfo_reqheight()
         if self.winfo_height() != reqheight:
             self.geometry("%sx%s" % (width, reqheight))
     

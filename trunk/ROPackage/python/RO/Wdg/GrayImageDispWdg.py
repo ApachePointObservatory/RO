@@ -159,6 +159,7 @@ History:
 2011-07-27 ROwen    Removed doRescale argument from redisplay because it was causing bugs.
                     Simplified the code for reusing scaledArr.
 2011-08-29 ROwen    Bug fix: display was incorrect unless data array was 32-bit float.
+2012-07-09 ROwen    Modified to use RO.TkUtil.Timer.
 """
 import weakref
 import Tkinter
@@ -466,7 +467,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
         self.dispMinLevel = 0.0
         self.dispMaxLevel = 256.0
         
-        self.clickID = None
+        self._dragLevelTimer = RO.TkUtil.Timer()
         
         # fields for drag-to-act
         self.dragStart = None
@@ -827,12 +828,6 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
                 image=self.tkIm,
             )
     
-    def cancelClickAfter(self):
-        if self.clickID:
-            #print "cancel click after"
-            self.after_cancel(self.clickID)
-            self.clickID = None
-
     def clear(self, clearArr=True):
         """Clear the display.
         """
@@ -937,7 +932,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
         """Adjust black and white levels based on position of cursor
         relative to the center of image portal.
         """
-        self.cancelClickAfter()
+        self._dragLevelTimer.cancel()
         if self.dataArr == None:
             return
         
@@ -957,7 +952,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
     def dragLevelReset(self, evt=None, isTemp=True):
         """Reset black and white levels to their default values.
         """
-        self.cancelClickAfter()
+        self._dragLevelTimer.cancel()
         self.dispMinLevel = 0
         self.dispMaxLevel = 256
         self.applyRange(redisplay=True)
@@ -968,8 +963,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
     def dragLevelStart(self, evt, isTemp=True):
         if isTemp:
             self.modeWdg.set(_ModeLevels, isTemp=True)
-        self.cancelClickAfter()
-        self.clickID = self.after(200, self.dragLevelContinue, evt)
+        self._dragLevelTimer.start(0.2, self.dragLevelContinue, evt)
 
     def dragZoomContinue(self, evt):
         if self.dragStart == None:

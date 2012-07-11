@@ -7,6 +7,22 @@
 
 <h2>Version history for the <a href="Overview.html">RO Python Package</a></h2>
 
+<h3>2.9.8b1 2012-07-10</h3>
+<ul>
+    <li>RO.Wdg
+    <ul>
+        <li>RO.Wdg.ScriptRunner: the "master" argument is now optional and moved to later in the argument list.
+        <li>RO.Wdg.DirWdg and FileWdg: modified to treat a path of "" like None. This improves path and dir preference behavior when no default is specified.
+        <li>Removed almost all use of update_idletasks. Most were relics of older, buggier versions of Tcl/Tk for MacOS X. A few needed some other workaround.
+    </ul>
+    <li>RO.TkUtil.Timer: 
+    <ul>
+        <li>Added isActive property
+        <li>Bug fix: could not construct a Timer if sec and callFunc were specified in the constructor.
+        <li>Modified most code in RO that used Tk "after" to use Timer instead.
+    </ul>
+</ul>
+
 <h3>2.9.7 2012-06-04</h3>
 <ul>
     <li>RO.Wdg.StripChartWdg: reduce CPU usage by doing less work if not visible.

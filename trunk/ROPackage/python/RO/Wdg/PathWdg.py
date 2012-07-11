@@ -18,6 +18,7 @@ History:
                     (but it still uses the value as the initial directory of the choose dialog).
                     Moved more functionality to BasePathWdg.
 2006-06-08 ROwen    FilePathWdg bug fix: initial defPath not shown.
+2012-07-09 ROwen    Modified to treat path="" as path=None. This fixes a problem with file and path prefs.
 """
 import os
 import tkFileDialog
@@ -93,8 +94,7 @@ class BasePathWdg (Tkinter.Button, RO.AddCallback.BaseMixin, CtxMenu.CtxMenuMixi
     def _initPath(self, defPath):
         """During initialization set self.defPath and self.path.
         """
-        #print "%s._initPath(%r)" % (self.__class__.__name__, defPath)
-        if defPath != None:
+        if defPath:
             try:
                 self.checkPath(defPath)
                 defPath = os.path.abspath(defPath)
@@ -108,7 +108,7 @@ class BasePathWdg (Tkinter.Button, RO.AddCallback.BaseMixin, CtxMenu.CtxMenuMixi
         """Raise ValueError if path not None and does not exist.
         Override from base class to make more specific.
         """
-        if path != None and not os.path.exists(path):
+        if path and not os.path.exists(path):
             raise ValueError("Path %r does not exist" % (path,))
     
     def setEnable(self, doEnable):
@@ -122,12 +122,14 @@ class BasePathWdg (Tkinter.Button, RO.AddCallback.BaseMixin, CtxMenu.CtxMenuMixi
         
     def setPath(self, path):
         """Set self.path to normalized version of path.
-        path may be None.
+        
+        Inputs:
+        - path: path; if None or "" then no path
         
         Raise ValueError if path invalid or nonexistent.
         """
         #print "%s.setPath(%r)" % (self.__class__.__name__, path)
-        if path == None:
+        if not path:
             dispStr = ""
         else:
             self.checkPath(path)
@@ -196,7 +198,7 @@ class DirWdg(BasePathWdg):
 
         # if path missing, try parent directory
         # and if that's gone, give up on startDir
-        if not os.path.isdir(startDir):
+        if startDir and not os.path.isdir(startDir):
             parDir = os.path.split(self.path)[0]
             if os.path.isdir(parDir):
                 startDir = parDir
@@ -218,7 +220,7 @@ class DirWdg(BasePathWdg):
     
     def checkPath(self, path):
         """Raise ValueError if path not None and not an existing directory"""
-        if path != None and not os.path.isdir(path):
+        if path and not os.path.isdir(path):
             raise ValueError("Path %r is not an existing directory" % (path,))
         
     
@@ -265,7 +267,7 @@ class FileWdg(BasePathWdg):
         """During initialization set self.defDir, self.defPath and self.path.
         """
         defDir = None
-        if defPath != None:
+        if defPath:
             if os.path.isfile(defPath):
                 defPath = os.path.abspath(defPath)
             elif os.path.isdir(defPath):
@@ -283,7 +285,7 @@ class FileWdg(BasePathWdg):
 
     def checkPath(self, path):
         """Raise ValueError if path not None and not not an existing file"""
-        if path != None and not os.path.isfile(path):
+        if path and not os.path.isfile(path):
             raise ValueError("Path %r is not an existing file" % (path,))
 
 

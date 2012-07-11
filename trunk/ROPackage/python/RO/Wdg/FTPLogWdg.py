@@ -44,6 +44,7 @@ History:
                     Slowed down update rate to avoid hogging CPU.
 2005-06-14 ROwen    Rewritten for new FTPGet that no longer supports callbacks.
 2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
+2012-07-09 ROwen    Modified to use RO.TkUtil.Timer.
 """
 __all__ = ['FTPLogWdg']
 
@@ -58,11 +59,12 @@ import Tkinter
 import RO.AddCallback
 import RO.Constants
 import RO.MathUtil
+from RO.TkUtil import Timer
 import RO.Comm.FTPGet as FTPGet
 import RO.Wdg
 import CtxMenu
 
-_StatusInterval = 200 # ms between status checks
+_StatusInterval = 0.200 # time between status checks (sec)
 
 _DebugMem = False
 
@@ -256,6 +258,8 @@ class FTPLogWdg(Tkinter.Frame):
         self.text.window_create("end", window=stateLabel)
         self.text.insert("end", ftpGet.dispStr)
         self.dispList.append(ftpGet)
+        
+        self._timer = Timer()
 
         # append ftpGet to the queue
         ftpCallback = FTPCallback(ftpGet, callFunc)
@@ -374,7 +378,7 @@ class FTPLogWdg(Tkinter.Frame):
     
         self._updDetailStatus()
          
-        self.after(_StatusInterval, self._updAllStatus)
+        self._timer.start(_StatusInterval, self._updAllStatus)
         
     def _updOneStatus(self, ftpGet, stateLabel):
         """Update the status of one transfer"""

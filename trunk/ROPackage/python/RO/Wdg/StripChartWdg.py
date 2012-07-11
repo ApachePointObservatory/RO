@@ -53,21 +53,22 @@ I am grateful to Benjamin Root, Tony S Yu and others on matplotlib-users
 for advice on tying the x axes together and improving the layout.
 
 History:
-2010-09-29  ROwen
-2010-11-30  Fixed a memory leak (Line._purgeOldData wasn't working correctly).
-2010-12-10  Document a memory leak caused by matplotlib's canvas.draw.
-2010-12-23  Backward-incompatible changes:
-            - addPoint is now called on the object returned by addLine, not StripChartWdg.
-                This eliminate the need to give lines unique names.
-            - addPoint is silently ignored if y is None
-            - addLine and addConstantLine have changed:
-                - There is no "name" argument; use label if you want a name that shows up in legends.
-                - The label does not have to be unique.
-                - They return an object.
-            Added removeLine method.
-2010-12-29  Document useful arguments for addLine.
-2012-05-31  Add a clear method to StripChartWdg and _Line.
-2012-06-04  Reduce CPU usage by doing less work if not visible (not mapped).
+2010-09-29 ROwen
+2010-11-30 ROwen    Fixed a memory leak (Line._purgeOldData wasn't working correctly).
+2010-12-10 ROwen    Document a memory leak caused by matplotlib's canvas.draw.
+2010-12-23 ROwen    Backward-incompatible changes:
+                    - addPoint is now called on the object returned by addLine, not StripChartWdg.
+                        This eliminate the need to give lines unique names.
+                    - addPoint is silently ignored if y is None
+                    - addLine and addConstantLine have changed:
+                        - There is no "name" argument; use label if you want a name that shows up in legends.
+                        - The label does not have to be unique.
+                        - They return an object.
+                    Added removeLine method.
+2010-12-29 ROwen    Document useful arguments for addLine.
+2012-05-31 ROwen    Add a clear method to StripChartWdg and _Line.
+2012-06-04 ROwen    Reduce CPU usage by doing less work if not visible (not mapped).
+2012-07-09 ROwen    Modified to use RO.TkUtil.Timer.
 """
 import bisect
 import datetime
@@ -77,6 +78,7 @@ import numpy
 import Tkinter
 import matplotlib
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from RO.TkUtil import Timer
 
 __all__ = ["StripChartWdg"]
 
@@ -183,7 +185,7 @@ class StripChartWdg(Tkinter.Frame):
         
         self.bind("<Map>", self._handleMap)
         self.bind("<Unmap>", self._handleUnmap)
-        self._timeAxisTimer = None
+        self._timeAxisTimer = Timer()
         self._updateTimeAxis()
 
     def addConstantLine(self, y, subplotInd=0, **kargs):
@@ -326,9 +328,6 @@ class StripChartWdg(Tkinter.Frame):
     def _updateTimeAxis(self):
         """Update the time axis; calls itself
         """
-        if self._timeAxisTimer != None:
-            self.after_cancel(self._timeAxisTimer)
-            self._timeAxisTimer = None
         tMax = time.time() + self.updateInterval
         tMin = tMax - self._timeRange
         minMplDays = self._cnvTimeFunc(tMin)
@@ -352,7 +351,7 @@ class StripChartWdg(Tkinter.Frame):
                         subplot.autoscale_view(scalex=False, scaley=True)
             self._isFirst = False
             self.canvas.draw()
-        self._timeAxisTimer = self.after(int(self.updateInterval * 1000), self._updateTimeAxis)
+        self._timeAxisTimer.start(self.updateInterval, self._updateTimeAxis)
 
 
 class _Line(object):
@@ -510,14 +509,19 @@ if __name__ == "__main__":
         walk1Line:  RO.Alg.RandomWalk.GaussianRandomWalk(0, 2),
         walk2Line: RO.Alg.RandomWalk.GaussianRandomWalk(0, 2),
     }
-    def addRandomValues(line, interval=100):
+    def addRandomValues(line, interval=0.1):
+        """Add random values to the specified strip chart line
+        Inputs:
+        - line: strip chart line
+        - interval: interval between updates (sec)
+        """
         var = varDict[line]
         line.addPoint(var.next())
-        root.after(interval, addRandomValues, line, interval)
+        Timer(interval, addRandomValues, line, interval)
 
-    addRandomValues(countsLine, interval=500)
-    addRandomValues(walk1Line, 1600)
-    addRandomValues(walk2Line, 1900)
+    addRandomValues(countsLine, interval=0.5)
+    addRandomValues(walk1Line, 1.6)
+    addRandomValues(walk2Line, 1.9)
     
     def deleteSatConstLine():
         stripChart.removeLine(satConstLine)

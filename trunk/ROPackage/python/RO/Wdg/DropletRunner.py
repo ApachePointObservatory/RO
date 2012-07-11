@@ -52,6 +52,7 @@ History:
 2011-02-25 ROwen    Tweaked usage documentation.
 2011-08-16 ROwen    Commented out two diagnostic print statements.
 2011-10-11 ROwen    Documented as deprecated.
+2012-07-09 ROwen    Modified to use RO.TkUtil.Timer.
 """
 import sys
 import os.path
@@ -59,6 +60,7 @@ import subprocess
 import Tkinter
 import RO.OS
 import RO.Constants
+from RO.TkUtil import Timer
 import LogWdg
 
 __all__ = ["DropletRunner"]
@@ -87,6 +89,7 @@ class DropletRunner(object):
             raise RuntimeError("Cannot find script %r" % (self.scriptPath,))
 
         self.tkRoot = Tkinter.Tk()
+        self._timer = Timer()
         
         if title == None:
             title = os.path.splitext(os.path.basename(scriptPath))[0]
@@ -138,7 +141,7 @@ class DropletRunner(object):
         if self.subProc.returncode != None:
             self._cleanup()
         else:
-            self.tkRoot.after(100, self._poll)
+            self._timer(0.1, self._poll)
     
     def _readStdOut(self, *dumArgs):
         """Read and log data from script's stdout
@@ -157,6 +160,7 @@ class DropletRunner(object):
     def _cleanup(self):
         """Close Tk file handlers and print any final data from the subprocess
         """
+        self._timer.cancel()
         if self.isRunning:
             self.isRunning = False
             self.tkRoot.tk.deletefilehandler(self.subProc.stdout)

@@ -45,7 +45,8 @@ History:
                     Modified to allow setting initial state.
                     Changed _setIsCurrent method to setIsCurrent.
 2005-01-05 ROwen    Changed message state to severity, set/getState to set/getSeverity.
-2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
+2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code.
+2012-07-09 ROwen    Modified test code to user RO.TkUtil.Timer.
 """
 __all__ = ['Label', 'BoolLabel', 'StrLabel', 'IntLabel', 'FloatLabel', 'DMSLabel']
 
@@ -351,6 +352,7 @@ class DMSLabel(Label):
 
 if __name__ == "__main__":
     import PythonTk
+    from RO.TkUtil import Timer
     root = PythonTk.PythonTk()
 
     wdgSet = (
@@ -416,7 +418,7 @@ if __name__ == "__main__":
             wdg.set(*val)
         ind += 1
         if ind < len(testData):
-            root.after(1200, displayNext)
-    root.after(1200, displayNext)
+            Timer(1.2, displayNext)
+    Timer(1.2, displayNext)
             
     root.mainloop()

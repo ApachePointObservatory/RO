@@ -46,6 +46,7 @@ import traceback
 import Tkinter
 import RO.OS
 import RO.Constants
+from RO.TkUtil import Timer
 import LogWdg
 
 __all__ = ["DropletApp"]
@@ -128,8 +129,33 @@ class DropletApp(Tkinter.Frame):
         """
         raise RuntimeError("Subclass must override")
     
+    def _processNextFile(self, filePathList):
+        """Helper for processFileList
+        
+        The main purpose of this helper is to yield some time between each file
+        so the log window can update (without using update_idletasks).
+        """
+        if filePathList:
+            filePath = filePathList[0]
+            try:
+                self.processFile(filePath)
+            except Exception, e:
+                self.logWdg.addOutput("%s failed: %s\n" % (filePath, e), severity=RO.Constants.sevError)
+                if self.printTraceback:
+                    traceback.print_exc(file=sys.stderr)
+
+        remFilePathList = filePathList[1:]
+        if remFilePathList:
+            Timer(0.001, self._processNextFile, remFilePathList)
+        elif self.doneMsg:
+            self.logWdg.addOutput(self.doneMsg, severity=RO.Constants.sevNormal)
+    
     def processFileList(self, filePathList):
-        """Process a list of files
+        """Find and process a list of files
+        
+        Inputs:
+        - filePathList: a sequence of file and/or directory paths;
+            these are searched using the patterns specified during construction
         
         Includes basic error handling: if an error is raised,
         prints a message to the log window and goes on to the next file.
@@ -143,17 +169,8 @@ class DropletApp(Tkinter.Frame):
             recursionDepth = self.recursionDepth,
             returnDirs = self.processDirs,
         )
-
-        for filePath in filteredPathList:
-            try:
-                self.processFile(filePath)
-                self.update_idletasks()
-            except Exception, e:
-                self.logWdg.addOutput("%s failed: %s\n" % (filePath, e), severity=RO.Constants.sevError)
-                if self.printTraceback:
-                    traceback.print_exc(file=sys.stderr)
-        if self.doneMsg:
-            self.logWdg.addOutput(self.doneMsg, severity=RO.Constants.sevNormal)
+        
+        self._processNextFile(filteredPathList)
 
     def _macOpenDocument(self, *filePathList):
         """Handle Mac OpenDocument event

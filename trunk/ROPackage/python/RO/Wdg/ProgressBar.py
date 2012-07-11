@@ -22,11 +22,14 @@ History:
 2006-03-06 ROwen    Added setUnknown method. To support this, many parameters
                     now can take two values for (known, unknown) state.
                     Added barStipple argument.
+2012-07-10 ROwen    Modified to use RO.TkUtil.Timer.
+                    Removed use of update_idletasks.
 """
 __all__ = ['ProgressBar', 'TimeBar']
 
 import time
 import RO.SeqUtil
+from RO.TkUtil import Timer
 import Tkinter
 import Button
 import Entry
@@ -293,7 +296,6 @@ class ProgressBar (Tkinter.Frame):
                 self.numWdg["text"] = self.valueFormat[0] % (value,)
             else:
                 self.numWdg["text"] = self.valueFormat[1]
-        self.cnv.update_idletasks()
 
     def _configureEvt(self, evt=None):
         """Handle the <Configure> event.
@@ -383,8 +385,8 @@ class TimeBar(ProgressBar):
         self._autoStop = bool(autoStop)
         self._countUp = bool(countUp)
 
-        self._afterID = None
-        self._updateIntervalMS = int((updateInterval * 1000) + 0.5)
+        self._updateInterval = updateInterval
+        self._updateTimer = Timer()
         self._startTime = None
 
         if kargs.has_key("value"):
@@ -393,7 +395,7 @@ class TimeBar(ProgressBar):
     def clear(self):
         """Set the bar length to zero, clear the numeric time display and stop the timer.
         """
-        self._cancelUpdate()
+        self._updateTimer.cancel()
         ProgressBar.clear(self)
         self._startTime = None
     
@@ -405,7 +407,8 @@ class TimeBar(ProgressBar):
         
         Error conditions: does nothing if not running.
         """
-        if self._cancelUpdate():
+        if self._updateTimer.cancel():
+            # update timer was running
             if value:
                 self.setValue(value)
             else:
@@ -448,17 +451,6 @@ class TimeBar(ProgressBar):
         
         self._startUpdate()
     
-    def _cancelUpdate(self):
-        """Stops next scheduled update; returns True if there was one,
-        False otherwise.
-        """
-        if self._afterID:
-            self.after_cancel(self._afterID)
-            self._afterID = ""
-            return True
-        else:
-            return False
-    
     def _startUpdate(self):
         """Starts updating from the current value.
         """
@@ -474,7 +466,7 @@ class TimeBar(ProgressBar):
         """
         # print "_updateTime called"
         # cancel pending update, if any
-        self._cancelUpdate()
+        self._updateTimer.cancel()
         
         if self._startTime == None:
             raise RuntimeError, "bug! nothing to update"
@@ -484,20 +476,18 @@ class TimeBar(ProgressBar):
             value = time.time() - self._startTime
             if (self._autoStop and value >= self.maxValue):
                 self.setValue(self.maxValue)
-                self._cancelUpdate()
                 return
         else:
             value = (self._startTime + self.maxValue) - time.time()
             if (self._autoStop and value <= 0.0):
                 self.setValue(0)
-                self._cancelUpdate()
                 return
         
         self.setValue(value)
 
         # if requested, schedule next update
         if reschedule:
-            self._afterID = self.after (self._updateIntervalMS, self._updateTime)
+            self._updateTimer.start(self._updateInterval, self._updateTime)
         
 
 if __name__ == "__main__":

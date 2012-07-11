@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-"""Code to run scripts that can wait for various things
-without messing up the main Tk event loop
+"""Code to run scripts that can wait for various things without messing up the main event loop
 (and thus starving the rest of your program).
 
 ScriptRunner allows your script to wait for the following:
@@ -11,9 +10,8 @@ ScriptRunner allows your script to wait for the following:
   - start each command with startCmd,
   - wait for one or more commands to finish using waitCmdVars
 - wait for a keyword variable to be set using waitKeyVar
-- wait for a subscript by yielding it (i.e. yield subscript(...))
-  note that the subscript must contain a yield for this to work;
-  if it has no yield then just call it directly
+- wait for a sub-script by yielding it (i.e. yield subscript(...));
+  the sub-script must contain a yield for this to work; if it has no yield then just call it directly
 
 An example is given as the test code at the end.
   
@@ -82,17 +80,19 @@ History:
 2012-06-01 ROwen    Use best effort to remove callbacks during cleanup, instead of raising an exception on failure.
                     Modified _WaitCmdVars to not try to register callbacks on commands that are finished,
                     and to not try to remove callbacks from CmdVars that are done.
+2012-07-09 ROwen    Made ScriptRunner argument "master" optional and moved later in argument list.
+                    Modified to use RO.TkUtil.Timer.
 """
 import sys
 import threading
 import Queue
 import traceback
-import Tkinter
 import RO.AddCallback
 import RO.Constants
 import RO.KeyVariable
 import RO.SeqUtil
 import RO.StringUtil
+from RO.TkUtil import Timer
 
 # state constants
 Ready = 2
@@ -115,7 +115,7 @@ _StateDict = {
 }
 
 # internal constants
-_PollDelayMS = 100 # polling interval (in ms)
+_PollDelaySec = 0.1 # polling interval for threads (sec)
 
 # a list of possible keywords that hold reasons for a command failure
 # in the order in which they are checked
@@ -134,63 +134,14 @@ class ScriptError (RuntimeError):
 class ScriptRunner(RO.AddCallback.BaseMixin):
     """Execute a script.
 
-    Allows waiting for various things without messing up Tkinter's event loop.
-    
-    Inputs:
-    - master        master Tk widget; when that widget is destroyed
-                    the script function is cancelled.
-    - name          script name; used to report status
-    - runFunc       the main script function; executed whenever
-                    the start button is pressed
-    - scriptClass   a class with a run method and an optional end method;
-                    if specified, runFunc, initFunc and endFunc may not be specified.
-    - dispatcher    keyword dispatcher (see RO.KeyDispatcher);
-                    required to use the waitCmd and startCmd methods
-    - initFunc      function to call ONCE when the ScriptRunner is constructed
-    - endFunc       function to call when runFunc ends for any reason
-                    (finishes, fails or is cancelled); used for cleanup
-    - stateFunc     function to call when the ScriptRunner changes state
-    - startNow      if True, starts executing the script immediately
-                    instead of waiting for user to call start.
-    - statusBar     status bar, if available. Used by showMsg
-    - cmdStatusBar  command status bar, if available.
-                    Used to show the status of executing commands.
-                    May be the same as statusBar.
-    - debug         if True, startCmd and wait... print diagnostic messages to stdout
-                    and there is no waiting for commands or keyword variables. Thus:
-                    - waitCmd and waitCmdVars return success immediately
-                    - waitKeyVar returns defVal (or None if not specified) immediately
-
-    All functions (runFunc, initFunc, endFunc and stateFunc) receive one argument: sr,
-    this ScriptRunner object. The functions can pass information using sr.globals,
-    an initially empty object (to which you can add instance variables and set or read them).
-    
-    Only runFunc is allowed to call sr methods that wait.
-    The other functions may only run non-waiting code.
-
-    WARNING: when runFunc calls any of the ScriptRunner methods that wait,
-    IT MUST YIELD THE RESULT, as in:
-        def runFunc(sr):
-            ...
-            yield sr.waitMS(500)
-            ...
-    All such methods are marked "yield required".
-    
-    If you forget to yield, your script will not wait. Your script will then halt
-    with an error message when it calls the next ScriptRunner method that involves waiting
-    (but by the time it gets that far it may have done some strange things).
-    
-    If your script yields when it should not, it will simply halt.
-
-    Using commands or keyword variables requires a dispatcher
-    (see RO.KeyDispatcher and RO.KeyVariable).
+    Allows waiting for various things without messing up the main event loop.
     """
     def __init__(self,
-        master,
         name,
         runFunc = None,
         scriptClass = None,
         dispatcher = None,
+        master = None,
         initFunc = None,
         endFunc = None,
         stateFunc = None,
@@ -199,6 +150,54 @@ class ScriptRunner(RO.AddCallback.BaseMixin):
         cmdStatusBar = None,
         debug = False,
     ):
+        """Create a ScriptRunner
+        
+        Inputs:
+        - name          script name; used to report status
+        - runFunc       the main script function; executed whenever
+                        the start button is pressed
+        - scriptClass   a class with a run method and an optional end method;
+                        if specified, runFunc, initFunc and endFunc may not be specified.
+        - dispatcher    keyword dispatcher (opscore.actor.CmdKeyVarDispatcher);
+                        required to use wait methods and startCmd.
+        - master        master Tk widget; your script may grid or pack objects into this;
+                        may be None for scripts that do not have widgets.
+        - initFunc      function to call ONCE when the ScriptRunner is constructed
+        - endFunc       function to call when runFunc ends for any reason
+                        (finishes, fails or is cancelled); used for cleanup
+        - stateFunc     function to call when the ScriptRunner changes state
+        - startNow      if True, starts executing the script immediately
+                        instead of waiting for user to call start.
+        - statusBar     status bar, if available. Used by showMsg
+        - cmdStatusBar  command status bar, if available.
+                        Used to show the status of executing commands.
+                        May be the same as statusBar.
+        - debug         if True, startCmd and wait... print diagnostic messages to stdout
+                        and there is no waiting for commands or keyword variables. Thus:
+                        - waitCmd and waitCmdVars return success immediately
+                        - waitKeyVar returns defVal (or None if not specified) immediately
+    
+        All functions (runFunc, initFunc, endFunc and stateFunc) receive one argument: sr,
+        this ScriptRunner object. The functions can pass information using sr.globals,
+        an initially empty object (to which you can add instance variables and set or read them).
+        
+        Only runFunc is allowed to call sr methods that wait.
+        The other functions may only run non-waiting code.
+    
+        WARNING: when runFunc calls any of the ScriptRunner methods that wait,
+        IT MUST YIELD THE RESULT, as in:
+            def runFunc(sr):
+                ...
+                yield sr.waitMS(500)
+                ...
+        All such methods are marked "yield required".
+        
+        If you forget to yield, your script will not wait. Your script will then halt
+        with an error message when it calls the next ScriptRunner method that involves waiting
+        (but by the time it gets that far it may have done some strange things).
+        
+        If your script yields when it should not, it will simply halt.
+        """
         if scriptClass:
             if runFunc or initFunc or endFunc:
                 raise ValueError("Cannot specify runFunc, initFunc or endFunc with scriptClass")
@@ -209,10 +208,10 @@ class ScriptRunner(RO.AddCallback.BaseMixin):
         elif not callable(runFunc):
             raise ValueError("runFunc=%r not callable" % (runFunc,))
 
-        self.master = master
         self.runFunc = runFunc
         self.name = name
         self.dispatcher = dispatcher
+        self.master = master
         self.initFunc = initFunc
         self.endFunc = endFunc
         self.debug = bool(debug)
@@ -239,8 +238,10 @@ class ScriptRunner(RO.AddCallback.BaseMixin):
           child widget. Thus the <Delete> binding would be called repeatedly,
           which is needlessly inefficient.
         """
-        self._privateWdg = Tkinter.Frame()
-        self._privateWdg.bind("<Destroy>", self.__del__)
+        if self.master:
+            import Tkinter
+            self._privateWdg = Tkinter.Frame(self.master)
+            self._privateWdg.bind("<Destroy>", self.__del__)
 
         if stateFunc:
             self.addCallback(stateFunc)
@@ -473,7 +474,7 @@ class ScriptRunner(RO.AddCallback.BaseMixin):
         keyVars = None,
         checkFail = True,
     ):
-        """Start a command using the same arguments as waitCmd (which see).
+        """Start a command using the same arguments as waitCmd.
         
         Inputs: same as waitCmd, which see.
 
@@ -526,7 +527,7 @@ class ScriptRunner(RO.AddCallback.BaseMixin):
                 cmdVar.reply(endMsgDict)
                 msgStr = "%s finished" % cmdVar.cmdStr
                 self._showCmdMsg("%s finished" % cmdVar.cmdStr)
-            self.master.after(1000, endCmd)
+            Timer(1.0, endCmd)
 
         else:
             if self._cmdStatusBar:
@@ -956,14 +957,12 @@ class _WaitBase(object):
 
 class _WaitMS(_WaitBase):
     def __init__(self, scriptRunner, msec):
+        self._waitTimer = Timer()
         _WaitBase.__init__(self, scriptRunner)
-
-        self.msec = int(msec)
-
-        self.afterID = self.master.after(self.msec, self._continue)
+        self._waitTimer.start(msec / 1000.0, self._continue)
     
     def cancelWait(self):
-        self.master.after_cancel(self.afterID)
+        self._waitTimer.cancel()
 
 
 class _WaitCmdVars(_WaitBase):
@@ -986,10 +985,11 @@ class _WaitCmdVars(_WaitBase):
         if self.getState()[0] != 0:
             # no need to wait; commands are already done or one has failed
             # schedule a callback for asap
-#             print "_WaitCmdVars: no need to wait"
-            self.master.after(1, self.varCallback)
+#            print "_WaitCmdVars: no need to wait"
+            Timer(0.001, self.varCallback)
         else:
             # need to wait; add self as callback to each cmdVar
+            # and remove self.scriptRunner._cmdFailCallback if present
             for cmdVar in self.cmdVars:
                 if not cmdVar.isDone():
                     cmdVar.removeCallback(self.scriptRunner._cmdFailCallback, doRaise=False)
@@ -1013,8 +1013,7 @@ class _WaitCmdVars(_WaitBase):
         return (allDone, None)
     
     def varCallback(self, *args, **kargs):
-        """Check all command variables;
-        if any has failed, remove all callbacks and fail
+        """Check state of script runner and fail or continue if appropriate
         """
         currState, cmdVar = self.getState()
         if currState < 0:
@@ -1060,6 +1059,14 @@ class _WaitKeyVar(_WaitBase):
         defVal,
         waitNext,
     ):
+        """
+        Inputs:
+        - scriptRunner: a ScriptRunner instance
+        - keyVar    keyword variable
+        - ind       index of desired value (None for all values)
+        - defVal    value to return if value cannot be determined; if Exception, the script halts
+        - waitNext  if True, ignore the current value and wait for the next transition.
+        """
         self.keyVar = keyVar
         self.ind = ind
         self.defVal = defVal
@@ -1070,7 +1077,7 @@ class _WaitKeyVar(_WaitBase):
         if self.keyVar.isCurrent() and not self.waitNext:
             # no need to wait; value already known
             # schedule a wakeup for asap
-            self.master.after(1, self.varCallback)
+            Timer(0.001, self.varCallback)
         elif self.scriptRunner.debug:
             # display message
             argList = ["keyVar=%s" % (keyVar,)]
@@ -1078,7 +1085,7 @@ class _WaitKeyVar(_WaitBase):
                 argList.append("ind=%s" % (ind,))
             if defVal != Exception:
                 argList.append("defVal=%r" % (defVal,))
-            if waitNext != False:
+            if waitNext:
                 argList.append("waitNext=%r" % (waitNext,))
             print "waitKeyVar(%s)" % ", ".join(argList)
 
@@ -1086,7 +1093,7 @@ class _WaitKeyVar(_WaitBase):
             if self.defVal == Exception:
                 self.defVal = None
 
-            self.master.after(1, self.varCallback)
+            Timer(0.001, self.varCallback)
         else:
             # need to wait; set self as a callback
 #           print "_WaitKeyVar adding callback"
@@ -1128,6 +1135,7 @@ class _WaitKeyVar(_WaitBase):
 class _WaitThread(_WaitBase):
     def __init__(self, scriptRunner, func, *args, **kargs):
 #       print "_WaitThread.__init__(%r, *%r, **%r)" % (func, args, kargs)
+        self._pollTimer = Timer()
         _WaitBase.__init__(self, scriptRunner)
         
         if not callable(func):
@@ -1139,12 +1147,12 @@ class _WaitThread(_WaitBase):
         self.threadObj = threading.Thread(target=self.threadFunc, args=args, kwargs=kargs)
         self.threadObj.setDaemon(True)
         self.threadObj.start()
-        self.afterID = self.master.after(_PollDelayMS, self.checkEnd)
+        self._pollTimer.start(_PollDelaySec, self.checkEnd)
 #       print "_WaitThread__init__(%r) done" % self.func
     
     def checkEnd(self):
         if self.threadObj.isAlive():
-            self.afterID = self.master.after(_PollDelayMS, self.checkEnd)
+            self._pollTimer.start(_PollDelaySec, self.checkEnd)
             return
 #       print "_WaitThread(%r).checkEnd: thread done" % self.func
         
@@ -1154,8 +1162,7 @@ class _WaitThread(_WaitBase):
         
     def cleanup(self):
 #       print "_WaitThread(%r).cleanup" % self.func
-        if self.afterID:
-            self.master.after_cancel(self.afterID)
+        self._pollTimer.cancel()
         self.threadObj = None
 
     def threadFunc(self, *args, **kargs):
@@ -1164,6 +1171,7 @@ class _WaitThread(_WaitBase):
 
 
 if __name__ == "__main__":
+    import Tkinter
     import RO.KeyDispatcher
     import time
 
@@ -1226,8 +1234,8 @@ if __name__ == "__main__":
     
     # start the scripts in a staggared fashion
     sr1.start()
-    root.after(1500, sr1.pause)
-    root.after(3000, sr1.resume)
-    root.after(2500, sr2.start)
+    Timer(1.5, sr1.pause)
+    Timer(3.0, sr1.resume)
+    Timer(2.5, sr2.start)
     
     root.mainloop()
