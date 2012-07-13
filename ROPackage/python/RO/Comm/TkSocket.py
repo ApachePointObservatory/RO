@@ -77,14 +77,16 @@ History:
 2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code.
 2012-07-09 ROwen    Modified test code to use RO.TkUtil.Timer.
 """
-__all__ = ["TkSocket", "TkServerSocket", "BaseServer", "NullSocket"]
+__all__ = ["TkSocket", "TkServerSocket", "BaseServer"]
+
 import sys
 import traceback
 import Tkinter
 import RO.TkUtil
+from .BaseSocket import BaseSocket
 
-class TkBaseSocket(object):
-    """A basic TCP/IP socket.
+class TkBaseSocket(BaseSocket):
+    """A basic TCP/IP socket using Tk sockets.
     
     Inputs:
     - tkSock    the tk socket connection; if not None then sockArgs is ignored
@@ -92,45 +94,24 @@ class TkBaseSocket(object):
     - state     the initial state
     - addr      the IP address
     - port      the port
+    - readCallback: function to call when data read; receives: self
     - stateCallback a state callback function; see addStateCallback for details
     """
-    Connecting = 4
-    Connected = 3
-    Closing = 2
-    Failing = 1
-    Closed = 0
-    Failed = -1
-    
-    _StateDict = {
-        Connecting: "Connecting",
-        Connected: "Connected",
-        Closing: "Closing",
-        Failing: "Failing",
-        Closed: "Closed",
-        Failed: "Failed",
-    }
-        
-    StateStrMaxLen = 0
-    for _stateStr in _StateDict.itervalues():
-        StateStrMaxLen = max(StateStrMaxLen, len(_stateStr))
-    del(_stateStr)
     
     def __init__(self,
         tkSock = None,
         sockArgs = None,
-        state = Connected,
+        state = BaseSocket.Connected,
         addr = None,
         port = None,
+        readCallback = None,
         stateCallback = None,
     ):
-        self._sock = None
-        self._state = state
-        self._reason = ""
         self._addr = addr
         self._port = port
-        self._stateCallback = stateCallback
-        self._tkCallbackDict = dict()
 
+        self._sock = None
+        self._tkCallbackDict = dict()
         self._tk = Tkinter.StringVar()._tk
         
         if tkSock:
@@ -143,20 +124,40 @@ class TkBaseSocket(object):
         else:
             raise RuntimeError("Must specify tkSock or sockArgs")
 
-    def close(self, isOK=True, reason=None):
-        """Start closing the socket.
-        
-        Does nothing if the socket is already closed or failed.
-        
-        Inputs:
-        - isOK: if True, mark state as Closed, else Failed
-        - reason: a string explaining why, or None to leave unchanged;
-            please specify if isOK is false.
+        BaseSocket.__init__(self,
+            state = state,
+            readCallback = readCallback,
+            stateCallback = stateCallback,
+        )
+    
+    def _assertConn(self):
+        """Check connection; close and raise RuntimeError if not OK.
         """
-        #print "%s.close(isOK=%s, reason=%s)" % (self.__class__.__name__, isOK, reason)
-        if self._state <= self.Closed:
-            return
+        if not self._checkSocket():
+            raise RuntimeError("%s not connected" % (self,))
+    
+    def _checkSocket(self):
+        """Check socket for errors.
 
+        Return True if OK.
+        Close socket and return False if errors found.
+        """
+        #print "%s._checkSocket()" % (self.__class__.__name__,)
+        if self.isClosed():
+            return False
+        errStr = self._tk.call('fconfigure', self._sock, '-error')
+        if errStr:
+            self.close(isOK = False, reason = errStr)
+            return False
+        isEOFStr = self._tk.call('eof', self._sock)
+        if int(isEOFStr):
+            self.close(isOK = True, reason = "closed by remote host")
+            return False
+        return True
+
+    def _basicClose(self):
+        """Close the Tk socket.
+        """
         if self._sock:
             try:
                 # close socket (this automatically deregisters any file events)
@@ -165,64 +166,7 @@ class TkBaseSocket(object):
                 pass
             self._sock = None
         self._tk = None
-        if isOK:
-            self._setState(self.Closed, reason)
-        else:
-            self._setState(self.Failed, reason)
     
-    def getFullState(self):
-        """Returns the current state as a tuple:
-        - state: a numeric value; named constants are available
-        - stateStr: a short string describing the state
-        - reason: the reason for the state ("" if none)
-        """
-        state, reason = self._state, self._reason
-        return (state, self.getStateStr(state), reason)
-    
-    def getState(self):
-        """Returns the current state as a constant.
-        """
-        return self._state
-
-    def getStateStr(self, state=None):
-        """Return the string description of a state.
-        If state is omitted, return description of current state.
-        """
-        if state == None:
-            state = self._state
-        try:
-            return self._StateDict[state]
-        except KeyError:
-            return "Unknown (%r)" % (state,)
-        
-    def isClosed(self):
-        """Return True if socket no longer connected.
-        Return False if connecting or connected.
-        """
-        return (self._state < self.Connected)
-    
-    def isConnected(self):
-        """Return True if socket is connected.
-        Return False otherwise (even if socket is connecting).
-        """
-        return (self._state == self.Connected)
-    
-    def setStateCallback(self, callFunc=None):
-        """Specifies a state callback function
-        (replacing the current one, if one exists).
-        
-        Inputs:
-        - callFunc: the callback function, or None if none wanted
-                    The function is sent one argument: this TkSocket
-        """
-        self._stateCallback = callFunc
-    
-    def _assertConn(self):
-        """If not (connected and socket error-free), raise RuntimeError.
-        """
-        if not self._checkSocket():
-            raise RuntimeError("%s not connected" % (self,))
-
     def _checkSocket(self):
         """Check socket for errors.
         Return True if OK.
@@ -256,7 +200,7 @@ class TkBaseSocket(object):
         """
         #print "TkSocket.__del__ called"
         self._stateCallback = None
-        self.close()
+        self._basicClose()
 
     def _setSockCallback(self, callFunc=None, doWrite=False):
         """Set, replace or clear the read or write callback.
@@ -293,32 +237,9 @@ class TkBaseSocket(object):
         # Save a reference to the new tclFunc,, if any
         if tclFunc:
             self._tkCallbackDict[typeStr] = tclFunc
-    
-    def _setState(self, newState, reason=None):
-        """Change the state.
-        
-        Inputs:
-        - newState: the new state
-        - reason: an explanation (None to leave alone)
-        """
-        #print "_setState(%r, %r)" % (newState, reason)
-        self._state = newState
-        if reason != None:
-            self._reason = str(reason)
 
-        stateCallback = self._stateCallback
-        if self.isClosed():
-            self._clearCallbacks()
-        
-        if stateCallback:
-            try:
-                stateCallback(self)
-            except Exception, e:
-                sys.stderr.write("%s state callback %s failed: %s\n" % (self, self._stateCallback, e,))
-                traceback.print_exc(file=sys.stderr)
-    
     def __str__(self):
-        return "%s %s:%s" % (self.__class__.__name__, self._addr, self._port)
+        return "%s(addr=%r, port=%r)" % (self.__class__.__name__, self._addr, self._port)
 
 
 class TkSocket(TkBaseSocket):
@@ -335,7 +256,7 @@ class TkSocket(TkBaseSocket):
     def __init__(self,
         addr,
         port,
-        binary=False,
+        binary = False,
         readCallback = None,
         stateCallback = None,
         tkSock = None,
@@ -414,16 +335,6 @@ class TkSocket(TkBaseSocket):
         #print "readLine returning %r" % (readStr,)
         return readStr
     
-    def setReadCallback(self, callFunc=None):
-        """Specifies a read callback function
-        (replacing the current one, if one exists).
-        
-        Inputs:
-        - callFunc: the callback function, or None if none wanted.
-                    The function is sent one argument: this TkSocket
-        """
-        self._readCallback = callFunc
-    
     def write(self, data):
         """Write data to the socket. Does not block.
         
@@ -497,9 +408,8 @@ class TkServerSocket(TkBaseSocket):
     """A tcp server socket
     
     Inputs:
-    - connCallback  function to call when a client connects;
-                it recieves the following arguments:
-                - sock, a TkBaseSocket
+    - connCallback  function to call when a client connects; it recieves the following arguments:
+                - sock, a TkSocket
     - port      port number or name of supported service;
                 if 0 then a port is automatically chosen
     - binary    should new connections be set to binary?
@@ -599,30 +509,6 @@ class BaseServer:
     def stateChanged(self, tkSock):
         if tkSock.isClosed():
             self.sockSet.remove(tkSock)
-
-class NullSocket(TkBaseSocket):
-    """Null connection.
-    Forbids read, write and setting a new state callback.
-    Close is OK and the state is always Closed.
-    """
-    def __init__ (self):
-        TkBaseSocket.__init__(self,
-            tkSock = "NullSocket",
-            state = self.Closed,
-        )
-        self._reason = "This is an instance of NullSocket"
-
-    def read(self, *args, **kargs):
-        raise RuntimeError("Cannot read from null socket")
-        
-    def readLine(self, *args, **kargs):
-        raise RuntimeError("Cannot readLine from null socket")
-
-    def write(self, astr):
-        raise RuntimeError("Cannot write %r to null socket" % astr)
-
-    def writeLine(self, astr):
-        raise RuntimeError("Cannot writeLine %r to null socket" % astr)
 
 
 if __name__ == "__main__":

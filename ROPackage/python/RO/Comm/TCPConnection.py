@@ -46,7 +46,8 @@ History:
 2010-06-28 ROwen    Removed unused import (thanks to pychecker).
 """
 import sys
-from TkSocket import TkSocket, NullSocket
+from .TkSocket import TkSocket
+from .BaseSocket import NullSocket
 
 # states
 Connecting = 5
@@ -78,7 +79,7 @@ class TCPConnection(object):
     - port: initial port (can be changed when connecting);
       defaults to 23, the standard telnet port
     - readCallback: function to call whenever data is read;
-      see addReadsubr for details.
+      see addReadCallback for details.
     - readLines: if True, the read callbacks receive entire lines
         minus the terminator; otherwise the data is distributed as received
     - stateCallback: a function to call whenever the state or reason changes;
