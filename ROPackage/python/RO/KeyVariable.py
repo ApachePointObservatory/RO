@@ -118,12 +118,11 @@ History:
                     - Remove the time limit keyVar callback, if present
                     - Use best effort to remove callbacks (do not raise an exception)
 2012-07-09 ROwen    Removed unused import in demo section.
-2012-07-09 ROwen    Modified to use RO.TkUtil.Timer.
+2012-07-18 ROwen    Modified to use RO.Comm.Generic.Timer.
 """
 import sys
 import time
 import traceback
-import Tkinter
 import RO.AddCallback
 import RO.Alg
 import RO.CnvUtil
@@ -132,7 +131,7 @@ import RO.LangUtil
 import RO.PVT
 import RO.StringUtil
 import RO.SeqUtil
-from RO.TkUtil import Timer
+from RO.Comm.Generic import Timer
 
 # TypeDict translates message type characters to message categories
 # entries are: (meaning, category), where:
@@ -1096,6 +1095,7 @@ class KeyVarFactory(object):
 
 
 if __name__ == "__main__":
+    import Tkinter
     doBasic = True
     doFmt = True
     import RO.Astro.Tm

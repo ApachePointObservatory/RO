@@ -84,7 +84,7 @@ def setFramework(framework):
         import RO.Comm.TwistedTimer
         TCPSocket = RO.Comm.TwistedSocket.TCPSocket
         TCPServer = RO.Comm.TwistedSocket.TCPServer
-        Timer = RO.Comm.TwistedTimer
+        Timer = RO.Comm.TwistedTimer.Timer
     else:
         raise ValueError("Bug! Unrecognized framework=%r" % (framework,))
     _Framework = framework

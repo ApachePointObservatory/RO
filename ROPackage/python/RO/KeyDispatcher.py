@@ -81,8 +81,8 @@ History:
                     Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
 2011-06-17 ROwen    Changed "type" to "msgType" in parsed message dictionaries to avoid conflict with builtin.
 2011-07-27 ROwen    Changed the executeCmd method to not log a message.
-2012-07-09 ROwen    Removed tkWdg argument from constructor.
-                    Modified to use RO.TkUtil.Timer.
+2012-07-18 ROwen    Removed tkWdg argument from constructor.
+                    Modified to use RO.Comm.Generic.Timer.
 """
 import sys
 import time
@@ -94,7 +94,7 @@ import RO.KeyVariable
 import RO.Comm.HubConnection
 import RO.ParseMsg
 import RO.StringUtil
-from RO.TkUtil import Timer
+from RO.Comm.Generic import Timer
 
 __all__ = ["logToStdOut", "KeyDispatcher"]
 

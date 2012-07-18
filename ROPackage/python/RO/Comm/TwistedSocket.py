@@ -4,7 +4,7 @@
 The intention is to work with TCPConnection and all the infrastructure that uses it.
 
 History:
-2012-07-17 ROwen
+2012-07-18 ROwen
 """
 __all__ = ["Socket", "TCPSocket", "Server", "TCPServer"]
 import re
@@ -20,9 +20,9 @@ from twisted.internet import reactor
 class _SocketProtocol(Protocol):
     """Twisted socket protocol for use with these socket classes
 
-    Based on twisted LineReceiver protocol, but adapted to my needs.
+    Based on twisted LineReceiver protocol.
     
-    @cvar lineEndPattern: line-ending delimiters used by readLine, as a compiled regular expression.
+    lineEndPattern: line-ending delimiters used by readLine, as a compiled regular expression.
         By default it uses any of \r\n, \r or \n
     """
     lineEndPattern = re.compile("\r\n|\r|\n")
@@ -207,17 +207,21 @@ class Socket(BaseSocket):
             self._protocol.transport.loseConnection()
     
     def read(self, nChar=None):
-        """Return up to nChar characters; if nChar is None then return all available characters.
+        """Read data. Do not block.
+        
+        Inputs:
+        - nChar: maximum number of chars to return; if None then all available data is returned.
+        
+        Raise RuntimeError if the socket is not connected.
         """
         if not self.isReady:
             raise RuntimeError("%s not connected" % (self,))
         return self._protocol.read(nChar)
     
     def readLine(self, default=None):
-        """Read one line of data.
+        """Read one line of data, not including the end-of-line indicator. Do not block.
         
-        Do not return the trailing newline.
-        If a full line is not available, return default.
+        Any of \r\n, \r or \n are treated as end of line.
         
         Inputs:
         - default   value to return if a full line is not available
@@ -302,7 +306,7 @@ class TCPSocket(Socket):
         )
     
     def _getArgStr(self):
-        return "name=%r, addr=%r, port=%r" % (self._name, self._addr, self._port)
+        return "name=%r, addr=%r, port=%r" % (self.name, self._addr, self._port)
 
 
 class Server(BaseServer):
@@ -391,7 +395,7 @@ class Server(BaseServer):
             protocol = protocol,
             readCallback = self._sockReadCallback,
             stateCallback = self._sockStateCallback,
-            name = "%s%d" % (self._name, self._numConn,)
+            name = "%s%d" % (self.name, self._numConn,)
         )
 
         try:
@@ -440,7 +444,7 @@ class TCPServer(Server):
     def _getArgStr(self):
         """Return main arguments as a string, for __str__
         """
-        return "name=%r, port=%r" % (self._name, self._port)
+        return "name=%r, port=%r" % (self.name, self._port)
 
 
 if __name__ == "__main__":
