@@ -7,16 +7,30 @@
 
 <h2>Version history for the <a href="Overview.html">RO Python Package</a></h2>
 
-<h3>3.0.0b1 2012-07-10</h3>
+<h3>3.0.0b1 2012-07-18</h3>
 <ul>
     <li>RO.Comm
     <ul>
-        <li>Added Twisted framework TCP/IP connections (but no support for HTTP or FTP yet).
-        <li>RO.Comm.Generic: support TCP/IP connections using Tcl/Tk or Twisted. Call setFramework before using.
+        <li>RO.Comm.Generic: event-based TCP/IP connections and event-based timers using Tcl/Tk or Twisted. <b>Note</b>: you must call RO.Comm.Generic.setFramework before using.
+        <li>RO.Comm.TkSocket:
+        <ul>
+            <li>Renamed TkSocket to TCPSocket, but the old name is still supported, for now
+            <li>Renamed TkServerSocket to TCPServer and expanded its capabilities. The old name is still supported for now.
+            <li>Removed BaseServer; use TCPServer instead.
+            <li>Eliminated the binary argument to TCLSocket and tcl end-of-line translation; instead writeLine always appends \r\n and readLine breaks on any of \r\n, \n or \r.
+        </ul>
+        <li>RO.Comm.TwistedSocket: event-based TCP/IP communications using Twisted framework.
+        <li>RO.Comm.TwistedTimer: event-based timers using Twisted framework.
+        <li>Added some unit tests in ROPackage/tests; these must be run using TwistedTrial.
+    </ul>
+    <li>Eliminated the dependency on Tkinter in the following modules; you may use Twisted for the event loop, instead. <b>Warning</b>: you must call RO.Comm.Generic.setFramework before using these:
+    <ul>
+        <li>RO.ScriptRunner. Note that the "master" argument is now optional and moved to later in the argument list.
+        <li>RO.KeyDispatcher
+        <li>RO.KeyVariable
     </ul>
     <li>RO.Wdg
     <ul>
-        <li>RO.Wdg.ScriptRunner: the "master" argument is now optional and moved to later in the argument list.
         <li>RO.Wdg.DirWdg and FileWdg: modified to treat a path of "" like None. This improves path and dir preference behavior when no default is specified.
         <li>Removed almost all use of update_idletasks. Most were relics of older, buggier versions of Tcl/Tk for MacOS X. A few needed some other workaround.
     </ul>

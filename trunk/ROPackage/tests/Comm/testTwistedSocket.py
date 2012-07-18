@@ -1,19 +1,15 @@
-# -*- test-case-name: tests.Comm.testTkSocket -*-
-import Tkinter
+# -*- test-case-name: tests.Comm.testTwistedSocket -*-
 from twisted.trial import unittest
 from twisted.internet.defer import Deferred
-import twisted.internet.tksupport
 from twisted.internet import reactor
-from RO.Comm.TkSocket import TCPSocket, TCPServer
-
-root = Tkinter.Tk()
+from RO.Comm.TwistedSocket import TCPSocket, TCPServer
 
 Port = 2210
 
 class TestRunner(object):
     def __init__(self, sendRcvList, binaryServer=False):
-        self.binaryServer = bool(binaryServer)
         self.sendRcvListIter = iter(sendRcvList)
+        self.binaryServer = bool(binaryServer)
         self.deferred = Deferred()
         self.endState = None
         self.clientSocket = None
@@ -121,12 +117,6 @@ class TestRunner(object):
 
 
 class TestTkSocket(unittest.TestCase):
-    def setUp(self):
-        twisted.internet.tksupport.install(root)
-
-    def tearDown(self):
-        twisted.internet.tksupport.uninstall()
-    
     def testText(self):
         sendRcvList = (
             ("foo", True, "foo", True),

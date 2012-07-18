@@ -49,7 +49,7 @@ class Base(object):
         self._state = state
         self._reason = ""
         self._stateCallback = stateCallback
-        self._name = name
+        self.name = name
 
     def setStateCallback(self, callFunc=nullCallback):
         """Set the state callback function (replacing the current one).
@@ -59,11 +59,6 @@ class Base(object):
                     The function is sent one argument: this TkSocket
         """
         self._stateCallback = callFunc
-    
-    def setName(self, newName):
-        """Set socket name
-        """
-        self._name = newName
     
     def getFullState(self):
         """Returns the current state as a tuple:
@@ -114,7 +109,7 @@ class Base(object):
     def setName(self, newName):
         """Set socket name
         """
-        self._name = newName
+        self.name = newName
 
     def _clearCallbacks(self):
         """Clear any callbacks added by this class.
@@ -153,7 +148,7 @@ class Base(object):
     def _getArgStr(self):
         """Return main arguments as a string, for __str__
         """
-        return "name=%r" % (self._name)
+        return "name=%r" % (self.name)
 
     def __str__(self):
         return "%s(%s)" % (self.__class__.__name__, self._getArgStr())

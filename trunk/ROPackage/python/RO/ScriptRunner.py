@@ -81,7 +81,7 @@ History:
                     Modified _WaitCmdVars to not try to register callbacks on commands that are finished,
                     and to not try to remove callbacks from CmdVars that are done.
 2012-07-09 ROwen    Made ScriptRunner argument "master" optional and moved later in argument list.
-                    Modified to use RO.TkUtil.Timer.
+                    Modified to use RO.Comm.Generic.Timer.
 """
 import sys
 import threading
@@ -92,7 +92,7 @@ import RO.Constants
 import RO.KeyVariable
 import RO.SeqUtil
 import RO.StringUtil
-from RO.TkUtil import Timer
+from RO.Comm.Generic import Timer
 
 # state constants
 Ready = 2
