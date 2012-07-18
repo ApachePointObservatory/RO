@@ -22,6 +22,8 @@ History:
 2009-07-17 ROwen    Eliminated deprecation warning in Python 2.6 by using hashlib if present.
 2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
 2011-06-17 ROwen    Changed "type" to "msgType" in parsed message dictionaries to avoid conflict with builtin.
+2012-07-16 ROwen    Added support for Twisted framework.
+                    You must now call RO.Comm.Generic.setFramework before importing this module.
 """
 try:
     import hashlib
@@ -30,20 +32,31 @@ except ImportError:
     import sha
     shaClass = sha.sha
 import sys
-from TCPConnection import *
+
+if __name__ == "__main__":
+    import RO.Comm.Generic
+    _UseTwistedForDemo = True
+    if _UseTwistedForDemo:
+        RO.Comm.Generic.setFramework("twisted")
+    else:
+        RO.Comm.Generic.setFramework("tk")
+
+from TCPConnection import TCPConnection
 import RO.ParseMsg
 import RO.StringUtil
 
 class HubConnection(TCPConnection):
+    """Connection to Apache Point Observatory hub
+    """
     def __init__ (self,
         host = None,
         port = 9877,
         readCallback = None,
         stateCallback = None,
         loginExtra = None,
+        name = "",
     ):
-        """
-        Creates a hub connection but does not connect.
+        """Create a hub connection, but do not connect
 
         Inputs:
         - host: default TCP address of host (can override when connecting)
@@ -64,6 +77,7 @@ class HubConnection(TCPConnection):
             stateCallback = stateCallback,
             authReadCallback = self._authRead,
             authReadLines = True,
+            name = name,
         )
         self._initData()
         self._loginExtra = loginExtra
@@ -74,6 +88,7 @@ class HubConnection(TCPConnection):
         self.cmdr = None
         self._authState = 0
         self.__password = None
+        self._didStartAuth = False
     
     def connect (self,
         progID,
@@ -98,10 +113,6 @@ class HubConnection(TCPConnection):
         self.__password = password
         self.desUsername = username
         TCPConnection.connect(self, host, port)
-        try:
-            self.writeLine("1 auth knockKnock")
-        except RuntimeError:
-            pass
             
     def getCmdr(self):
         """Returns the commander (in the form progID.username)
@@ -129,9 +140,6 @@ class HubConnection(TCPConnection):
         cmdr = self.getCmdr()
         return cmdr and cmdr.split(".")[1]
     
-    def isConnected(self):
-        return self._state == Connected
-
     def _authRead(self, sock, hubMsg):
         """Read callback for authorization.
         """
@@ -155,7 +163,7 @@ class HubConnection(TCPConnection):
                 # generate the combined password
                 combPassword = shaClass(nonce+password).hexdigest()
 
-                self._setState(Authorizing, "nonce received")
+                self._setState(self.Authorizing, "nonce received")
                 self._authState = 1
                 
                 # send the command auth login program=<user> password=<combPassword>
@@ -190,6 +198,12 @@ class HubConnection(TCPConnection):
             self._authState = -1
             self.disconnect(False, RO.StringUtil.strFromException(e))
 
+    def _setState(self, newState, reason=None):
+        # print "%s._setState(newState=%s, reason=%s)" % (self, newState, reason)
+        TCPConnection._setState(self, newState=newState, reason=reason)
+        if self._state == self.Authorizing and not self._didStartAuth:
+            self._didStartAuth = True
+            self.writeLine("1 auth knockKnock")
 
 class NullConnection(HubConnection):
     """Null connection for test purposes.
@@ -204,7 +218,7 @@ class NullConnection(HubConnection):
     
         self.desUsername = "me"
         self.cmdr = "TU01.me"
-        self._state = Connected
+        self._state = self.Connected
 
     def connect(self, *args, **kargs):
         raise RuntimeError("NullConnection is always connected")
@@ -220,8 +234,12 @@ if __name__ == "__main__":
     import Tkinter
     import RO.Wdg
     root = Tkinter.Tk()
+    if _UseTwistedForDemo:
+        import twisted.internet.tksupport
+        twisted.internet.tksupport.install(root)
+        reactor = twisted.internet.reactor
 
-    host = 'hub35m.apo.nmsu.edu'
+    host = "hub35m.apo.nmsu.edu"
     port = 9877
 
     def readCallback (sock, astr):
@@ -237,6 +255,7 @@ if __name__ == "__main__":
     myConn = HubConnection(
         readCallback = readCallback,
         stateCallback = stateCallback,
+        name = "client",
     )
 
     def doConnect(host, port):
@@ -285,4 +304,7 @@ if __name__ == "__main__":
 
     doConnect(host, port)
 
-    root.mainloop()
+    if _UseTwistedForDemo:
+        reactor.run()
+    else:
+        root.mainloop()

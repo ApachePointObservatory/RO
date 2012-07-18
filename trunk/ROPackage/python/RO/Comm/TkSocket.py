@@ -75,141 +75,124 @@ History:
 2008-03-06 ROwen    Stopped setting instance variable _prevLine; it was not used anywhere.
 2010-06-28 ROwen    Modified to require Python 2.4 by assuming set is a builtin type.
 2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code.
-2012-07-09 ROwen    Modified test code to use RO.TkUtil.Timer.
+2012-07-16 ROwen    Deprecated TkServerSocket; the new name is TCPServer and it is more powerful.
+                    Removed BaseServer; use TCPServer instead.
+                    Modified to use classes in BaseSocket for base classes.
+                    Modified test code to use RO.TkUtil.Timer.
+                    Fixed writeLine to work in binary mode.
 """
-__all__ = ["TkSocket", "TkServerSocket", "BaseServer"]
+__all__ = ["TkSocket", "TkServerSocket", "TCPServer"]
 
 import sys
 import traceback
 import Tkinter
 import RO.TkUtil
-from .BaseSocket import BaseSocket
+from RO.Comm.BaseSocket import BaseSocket, BaseServer, nullCallback
 
-class TkBaseSocket(BaseSocket):
-    """A basic TCP/IP socket using Tk sockets.
-    
-    Inputs:
-    - tkSock    the tk socket connection; if not None then sockArgs is ignored
-    - sockArgs  argument list for tk socket; ignored if tkSock not None
-    - state     the initial state
-    - addr      the IP address
-    - port      the port
-    - readCallback: function to call when data read; receives: self
-    - stateCallback a state callback function; see addStateCallback for details
+
+class _TkSocketWrapper(object):
+    """Convenience wrapper around a Tk socket
     """
-    
     def __init__(self,
         tkSock = None,
         sockArgs = None,
-        state = BaseSocket.Connected,
-        addr = None,
-        port = None,
-        readCallback = None,
-        stateCallback = None,
+        binary = False,
+        name = "",
     ):
-        self._addr = addr
-        self._port = port
+        """Create a _TkSocketWrapper
+    
+        Inputs:
+        - tkSock    the tk socket connection; if not None then sockArgs is ignored
+        - sockArgs  argument list for tk socket; ignored if tkSock not None
+        - binary    binary mode: if True then newline translation is disabled
+        - name      a string to identify this socket; strictly optional
+        """
+        self._binary = bool(binary)
+        self._name = name
+        self._tkSocket = None
+        # dictionary of typeStr:tclFunc, where:
+        # typeStr is one of "readable" or "writable"
+        # tclFunc is a tcl-wrapped function, an instance of RO.TkUtil.TclFunc
+        self._callbackDict = dict()
+        self._readVar = Tkinter.StringVar()
+        self._tk = self._readVar._tk
 
-        self._sock = None
-        self._tkCallbackDict = dict()
-        self._tk = Tkinter.StringVar()._tk
-        
         if tkSock:
-            self._sock = tkSock
+            self._tkSocket = tkSock
         elif sockArgs:
             try:
-                self._sock = self._tk.call('socket', *sockArgs)
+                self._tkSocket = self._tk.call('socket', *sockArgs)
             except Tkinter.TclError, e:
                 raise RuntimeError(e)
         else:
             raise RuntimeError("Must specify tkSock or sockArgs")
 
-        BaseSocket.__init__(self,
-            state = state,
-            readCallback = readCallback,
-            stateCallback = stateCallback,
-        )
-    
-    def _assertConn(self):
-        """Check connection; close and raise RuntimeError if not OK.
-        """
-        if not self._checkSocket():
-            raise RuntimeError("%s not connected" % (self,))
-    
-    def _checkSocket(self):
-        """Check socket for errors.
+        try:
+            configArgs = (
+                '-blocking', 0,
+                '-buffering', 'none',
+                '-encoding', 'binary',
+            )
+            if self._binary:
+                configArgs += (
+                    '-translation', 'binary',
+                )
+            self._tk.call('fconfigure', self._tkSocket, *configArgs)
+        except Tkinter.TclError, e:
+            raise RuntimeError(e)
 
-        Return True if OK.
-        Close socket and return False if errors found.
+    def getState(self):
+        """Return isOK, errStr
+        
+        Returns:
+        - True, "" if OK
+        - False, errStr if an error
+        - True, errStr if closed without error
         """
-        #print "%s._checkSocket()" % (self.__class__.__name__,)
-        if self.isClosed():
-            return False
-        errStr = self._tk.call('fconfigure', self._sock, '-error')
+        #print "%s.getState()" % (self,)
+        errStr = self._tk.call('fconfigure', self._tkSocket, '-error')
         if errStr:
-            self.close(isOK = False, reason = errStr)
-            return False
-        isEOFStr = self._tk.call('eof', self._sock)
+            return False, errStr
+        isEOFStr = self._tk.call('eof', self._tkSocket)
         if int(isEOFStr):
-            self.close(isOK = True, reason = "closed by remote host")
-            return False
-        return True
+            return True, "closed by remote host"
+        return True, ""
 
-    def _basicClose(self):
-        """Close the Tk socket.
+    def close(self):
+        """Close the socket.
         """
-        if self._sock:
+        if self._tkSocket:
             try:
                 # close socket (this automatically deregisters any file events)
-                self._tk.call('close', self._sock)
+                self._tk.call('close', self._tkSocket)
             except Exception:
                 pass
-            self._sock = None
+            self._tkSocket = None
         self._tk = None
     
-    def _checkSocket(self):
-        """Check socket for errors.
-        Return True if OK.
-        Close socket and return False if errors found.
-        """
-        #print "%s._checkSocket()" % (self.__class__.__name__,)
-        if self._state not in (self.Connected, self.Connecting):
-            return False
-        errStr = self._tk.call('fconfigure', self._sock, '-error')
-        if errStr:
-            self.close(isOK = False, reason = errStr)
-            return False
-        isEOFStr = self._tk.call('eof', self._sock)
-        if int(isEOFStr):
-            self.close(isOK = True, reason = "closed by remote host")
-            return False
-        return True
-    
-    def _clearCallbacks(self):
+    def clearCallbacks(self):
         """Clear any callbacks added by this class.
         Called just after the socket is closed.
         """
-        #print "%s._clearCallbacks called" % (self.__class__.__name__,)
-        for tclFunc in self._tkCallbackDict.itervalues():
+        for tclFunc in self._callbackDict.itervalues():
             tclFunc.deregister()
-        self._tkCallbackDict = dict()
-        self._stateCallback = None
+        self._callbackDict = dict()
 
     def __del__(self):
         """At object deletion, make sure the socket is properly closed.
         """
-        #print "TkSocket.__del__ called"
-        self._stateCallback = None
-        self._basicClose()
+        if self._tk is not None:
+            self.clearCallbacks()
+            self.close()
 
-    def _setSockCallback(self, callFunc=None, doWrite=False):
+    def setCallback(self, callFunc=None, doWrite=False):
         """Set, replace or clear the read or write callback.
 
         Inputs:
         - callFunc  the new callback function, or None if none
         - doWrite   if True, a write callback, else a read callback
         """
-        #print "%s._setSockCallback(callFunc=%s, doWrite=%s)" % (self.__class__.__name__, callFunc, doWrite)
+        #print "%s.setCallback(callFunc=%s, doWrite=%s)" % (self, callFunc, doWrite)
         if doWrite:
             typeStr = 'writable'
         else:
@@ -223,117 +206,156 @@ class TkBaseSocket(BaseSocket):
             tkFuncName = ""
         
         try:
-            self._tk.call('fileevent', self._sock, typeStr, tkFuncName)
+            self._tk.call('fileevent', self._tkSocket, typeStr, tkFuncName)
         except Tkinter.TclError, e:
             if tclFunc:
                 tclFunc.deregister()
             raise RuntimeError(e)
 
         # deregister and dereference existing tclFunc, if any
-        oldCallFunc = self._tkCallbackDict.pop(typeStr, None)
+        oldCallFunc = self._callbackDict.pop(typeStr, None)
         if oldCallFunc:
             oldCallFunc.deregister()
 
         # Save a reference to the new tclFunc,, if any
         if tclFunc:
-            self._tkCallbackDict[typeStr] = tclFunc
+            self._callbackDict[typeStr] = tclFunc
+
+    def read(self, nChar=None):
+        """Return up to nChar characters; if nChar is None then return all available characters.
+        """
+        if nChar == None:
+            retVal = self._tk.call('read', self._tkSocket)
+        else:
+            retVal = self._tk.call('read', self._tkSocket, nChar)
+        #print "%s.read(nChar=%r) returning %r" % (self, nChar, retVal)
+        return retVal
+
+    def readLine(self):
+        """Read one line of data, if present. Omit the trailing newline.
+        
+        Return "" if a blank line read.
+        Return None if no data read, e.g. because a complete line was not available or the socket was closed.
+        """
+        nChar = self._tk.call('gets', self._tkSocket, self._readVar)
+        if nChar < 0:
+            retVal = None
+        else:
+            retVal = self._readVar.get()
+        #print "%s.readLine() nChar=%d returning %r" % (self, nChar, retVal)
+        return retVal
+
+    def write(self, data):
+        """Write data to the socket. Do not block.
+        
+        The data is queued if the socket is not yet connected.
+        The behavior is undefined if the socket has errors or has disconnected.
+        
+        Raises UnicodeError if the data cannot be expressed as ascii.
+        
+        An alternate technique (from Craig):
+        turn } into \}; consider escaping null and all but
+        the final \n in the same fashion
+        (to do this it probably makes sense to supply a writeLine
+        that escapes \n and \r and then appends \n).
+        Then:
+        self._tk.eval('puts -nonewline %s { %s }' % (self._tkSocket, escData))
+        """
+        #print "%s.write(data=%r)" % (self, data)
+        self._tk.call('puts', '-nonewline', self._tkSocket, data)
+    
+    @property
+    def tkSocket(self):
+        return self._tkSocket
+    
+    @property
+    def binary(self):
+        return self._binary
 
     def __str__(self):
-        return "%s(addr=%r, port=%r)" % (self.__class__.__name__, self._addr, self._port)
+        return "%s(name=%s)" % (self.__class__.__name__, self._name)
 
 
-class TkSocket(TkBaseSocket):
+class TkSocket(BaseSocket):
     """A TCP/IP socket that reads and writes using Tk events.
-    
-    Inputs:
-    - addr      IP address as dotted name or dotted numbers
-    - port      IP port
-    - binary    binary mode (disable newline translation)
-    - readCallback: function to call when data read; receives: self
-    - stateCallback: function to call when state or reason changes; receives: self
-    - tkSock    existing tk socket (if missing, one is created and connected)
     """
     def __init__(self,
         addr,
         port,
         binary = False,
-        readCallback = None,
-        stateCallback = None,
+        readCallback = nullCallback,
+        stateCallback = nullCallback,
         tkSock = None,
+        name = "",
     ):
-        self._binary = binary
-        self._readCallback = readCallback
-        
-        if tkSock:
-            state = self.Connected
-            sockArgs = None
-        else:
-            state = self.Connecting
-            sockArgs = ('-async', addr, port)
-        
-        TkBaseSocket.__init__(self,
-            tkSock = tkSock,
-            sockArgs = sockArgs,
-            state = state,
-            addr = addr,
-            port = port,
+        """Construct a TkSocket
+    
+        Inputs:
+        - addr      IP address as dotted name or dotted numbers
+        - port      IP port
+        - binary    binary mode: if True then newline translation is disabled
+        - readCallback  function to call when data read; receives: self
+        - stateCallback function to call when state or reason changes; receives: self
+        - tkSock    existing tk socket (if missing, one is created and connected)
+        - name      a string to identify this socket; strictly optional
+        """
+        self._addr = addr
+        self._port = port
+        BaseSocket.__init__(self,
+            readCallback = readCallback,
             stateCallback = stateCallback,
+            name = name,
         )
+        if tkSock is None:
+            sockArgs = ('-async', addr, port)
+        else:
+            sockArgs = None
+        self._tkSocketWrapper = _TkSocketWrapper(tkSock=tkSock, sockArgs=sockArgs, binary=binary, name=name)
 
         try:
-            # create and configure socket
-            configArgs = (
-                '-blocking', 0,
-                '-buffering', 'none',
-                '-encoding', 'binary',
-            )
-            if self._binary:
-                configArgs += (
-                    '-translation', 'binary',
-                )
-            self._tk.call('fconfigure', self._sock, *configArgs)
-                
             # add callbacks; the write callback indicates the socket is connected
             # and is just used to detect state
-            self._setSockCallback(self._doRead)
-            self._setSockCallback(self._doConnect, doWrite=True)
+            self._tkSocketWrapper.setCallback(self._doRead)
+            self._tkSocketWrapper.setCallback(self._doConnect, doWrite=True)
         except Tkinter.TclError, e:
             raise RuntimeError(e)
+        
+        # set EOL based on whether Tcl will be doing end-of-line translation;
+        # otherwise one outputs nonstandard EOL in binary mode
+        # or confuses Tcl with double line endings in non-binary mode
+        if binary:
+            self._EOL = "\r\n"
+        else:
+            self._EOL = "\n"
             
         self._setState(self.Connecting)
         self._checkSocket()
     
     def read(self, nChar=None):
-        """Return up to nChar characters; if nChar is None then return
-        all available characters.
+        """Return up to nChar characters; if nChar is None then return all available characters.
         """
-        if nChar == None:
-            retVal = self._tk.call('read', self._sock)
-        else:
-            retVal = self._tk.call('read', self._sock, nChar)
-        if not retVal:
+        data = self._tkSocketWrapper.read(nChar)
+        if not data:
             self._checkSocket()
-        #print "read returning %r" % retVal
-        return retVal
+        #print "%s.read(nChar=%r) returning %r" % (self, nChar, data)
+        return data
 
     def readLine(self, default=None):
-        """Read one line of data.
-        Do not return the trailing newline.
+        """Read one line of data. Do not return the trailing newline.
+        
         If a full line is not available, return default.
         
         Inputs:
-        - default   value to return if a full line is not available
-                    (in which case no data is read)
+        - default   value to return if a full line is not available (in which case no data is read)
         
         Raise RuntimeError if the socket is not connected.
         """
-        #print "%s.readLine(default=%s)" % (self.__class__.__name__, default)
-        readStr = self._tk.call('gets', self._sock)
-        if not readStr:
+        data = self._tkSocketWrapper.readLine()
+        if data is None:
             self._checkSocket()
             return default
-        #print "readLine returning %r" % (readStr,)
-        return readStr
+        #print "%s.readLine(default=%r) returning %r" % (self, default, data)
+        return data
     
     def write(self, data):
         """Write data to the socket. Does not block.
@@ -345,102 +367,141 @@ class TkSocket(TkBaseSocket):
         Raises RuntimeError if the socket is not connecting or connected.
         If an error occurs while sending the data, the socket is closed,
         the state is set to Failed and _reason is set.
-        
-        An alternate technique (from Craig):
-        turn } into \}; consider escaping null and all but
-        the final \n in the same fashion
-        (to do this it probably makes sense to supply a writeLine
-        that escapes \n and \r and then appends \n).
-        Then:
-        self._tk.eval('puts -nonewline %s { %s }' % (self._sock, escData))
         """
-        #print "write(%r)" % (data,)
+        #print "%s.write(%r)" % (self, data)
         if self._state not in (self.Connected, self.Connecting):
             raise RuntimeError("%s not connected" % (self,))
-        self._tk.call('puts', '-nonewline', self._sock, data)
+        self._tkSocketWrapper.write(data)
         self._assertConn()
-    
+
     def writeLine(self, data):
-        """Write a line of data terminated by standard newline
-        (which for the net is \r\n, but the socket's auto newline
-        translation takes care of it).
+        """Write a line of data terminated by standard newline.
+        
+        Note: Tcl/Tk translates \n into the standard newline.
         """
-        #print "writeLine(%r)" % (data,)
-        if self._state not in (self.Connected, self.Connecting):
+        #print "%s.writeLine(%r)" % (self, data)
+        self.write(data + self._EOL)
+    
+    def _assertConn(self):
+        """Check connection; close and raise RuntimeError if not OK.
+        """
+        if not self._checkSocket():
             raise RuntimeError("%s not connected" % (self,))
-        self._tk.call('puts', self._sock, data)
-        self._assertConn()
+
+    def _basicClose(self):
+        """Close the Tk socket.
+        """
+        self._tkSocketWrapper.close()
+        if self._state == self.Closing:
+            self._setState(self.Closed)
+        else:
+            self._setState(self.Failed)
+    
+    def _checkSocket(self):
+        """Check socket for errors.
+
+        Return True if OK.
+        Close socket and return False if errors found.
+        """
+        if self.isClosed():
+            return False
+        isOK, errStr = self._tkSocketWrapper.getState()
+        if errStr:
+            self.close(isOK=isOK, reason=errStr)
+            return False
+        return True
     
     def _clearCallbacks(self):
         """Clear any callbacks added by this class.
         Called just after the socket is closed.
         """
-        TkBaseSocket._clearCallbacks(self)
-        self._readCallback = None
+        BaseSocket._clearCallbacks(self)
+        self._tkSocketWrapper.clearCallbacks()
     
     def _doConnect(self):
-        """Called when connection finishes or fails.
-        
-        Sets up read handler.
+        """Called when connection made.
         """
-        #print "%s: _doConnect" % (self,)
-        # cancel write handler (it has done its job)
-        self._setSockCallback(callFunc=None, doWrite=True)
+        # cancel write handler; it has done its job
+        self._tkSocketWrapper.setCallback(callFunc=None, doWrite=True)
         
         if self._checkSocket():
             self._setState(self.Connected)
-    
+
     def _doRead(self):
         """Called when there is data to read"""
-        #print "%s _doRead" % (self,)
         if self._readCallback:
             try:
                 self._readCallback(self)
             except Exception, e:
                 sys.stderr.write("%s read callback %s failed: %s\n" % (self, self._readCallback, e,))
                 traceback.print_exc(file=sys.stderr)
-    
-    def __str__(self):
-        return "%s %s" % (self.__class__.__name__, self._sock)
+
+    def _getArgStr(self):
+        return "name=%r, addr=%r, port=%r" % (self._name, self._addr, self._port)
 
 
-class TkServerSocket(TkBaseSocket):
-    """A tcp server socket
+class TCPServer(BaseServer):
+    """A tcp socket server
     
     Inputs:
     - connCallback  function to call when a client connects; it recieves the following arguments:
                 - sock, a TkSocket
-    - port      port number or name of supported service;
-                if 0 then a port is automatically chosen
-    - binary    should new connections be set to binary?
     """
     def __init__(self,
-        connCallback,
+        connCallback = nullCallback,
         port = 0,
         binary = False,
+        stateCallback = nullCallback,
+        sockReadCallback = nullCallback,
+        sockStateCallback = nullCallback,
+        name = "",
     ):
+        """Construct a socket server
+        
+        Inputs:
+        - connCallback: function to call when a client connects; it receives the following arguments:
+                    - sock, a Socket
+        - port      port number or name of supported service;
+                    if 0 then a port is automatically chosen
+        - binary    should new connections be set to binary?
+        - stateCallback: function to call when server changes state; it receives one argument: this server
+        - sockReadCallback: function for each server socket to call when it receives data;
+            See BaseSocket.setReadCallback for details
+        - sockStateCallback: function for each server socket to call when it receives data
+            See BaseSocket.addStateCallback for details
+        - name: a string to identify this socket; strictly optional
+        
+        Warning: stateCallback does not get all state changes reliably.
+        It gets Listening as soon as the server is created (even though it is not listening yet)
+        and the only other notice is closure when close is called.
+        """
+        self._port = port
         self._connCallback = connCallback
-        self._binary = binary
+
+        BaseServer.__init__(self,
+            connCallback = connCallback,
+            stateCallback = stateCallback,
+            sockReadCallback = sockReadCallback,
+            sockStateCallback = sockStateCallback,
+            name = name,
+        )
 
         self._tkNewConn = RO.TkUtil.TclFunc(self._newConnection)
         sockArgs = (
             '-server', self._tkNewConn.tclFuncName,
             port,
         )
-        TkBaseSocket.__init__(self,
-            sockArgs = sockArgs,
-            state = self.Connected,
-            port = port,
-        )
-    
+        self._tkSocketWrapper = _TkSocketWrapper(sockArgs=sockArgs, binary=binary, name=name)
+        self._setState(BaseServer.Listening)
+
     def _clearCallbacks(self):
         """Clear any callbacks added by this class.
         Called just after the socket is closed.
         """
-        TkBaseSocket._clearCallbacks(self)
+        BaseServer._clearCallbacks(self)
+        self._tkSocketWrapper.clearCallbacks()
         self._tkNewConn.deregister()
         self._tkNewConn = None
-        self._connCallback = None
     
     def _newConnection(self, tkSock, clientAddr, clientPort):
         """A client has connected. Create a TkSocket
@@ -450,102 +511,33 @@ class TkServerSocket(TkBaseSocket):
             tkSock = tkSock,
             addr = clientAddr,
             port = clientPort,
+            readCallback = self._sockReadCallback,
+            stateCallback = self._sockStateCallback,
+            name = self._name,
         )
-        
-        try:
-            # configure socket
-            configArgs = (
-                '-blocking', 0,
-                '-buffering', 'none',
-                '-encoding', 'binary',
-            )
-            if self._binary:
-                configArgs += ('-translation', 'binary')
-            self._tk.call('fconfigure', self._sock, *configArgs)
-        except Tkinter.TclError, e:
-            raise RuntimeError('Could not configure new connection:', e)
         
         try:
             self._connCallback(newSocket)
         except Exception, e:
-            errMsg = "%s connection callback %s failed: %s" % (self.__class__.__name__, self._connCallback, e)
+            errMsg = "%s connection callback %s failed: %s" % (self, self._connCallback, e)
             sys.stderr.write(errMsg + "\n")
             traceback.print_exc(file=sys.stderr)
-            
 
-class BaseServer:
-    """Simple tcp server class. Subclass to do real work
-    """
-    def __init__(self,
-        port,
-        binary = True,
-        maxConn = None,
-    ):
-        self.servSock = TkServerSocket(
-            connCallback = self.gotConn,
-            port = port,
-            binary = binary,
-        )
-        self.maxConn = maxConn
-        self.sockSet = set()
-    
-    def gotConn(self, tkSock):
-        if self.maxConn != None:
-            if len(self.sockSet) >= self.maxConn:
-                tkSock.write("No free connections")
-                tkSock.close()
-                return
+    def _getArgStr(self):
+        return "name=%r, port=%r" % (self._name, self._port)
 
-        self.sockSet.add(tkSock)
-        tkSock.setReadCallback(self.dataRead)
-        tkSock.setStateCallback(self.stateChanged)
-        
-    def dataRead(self, tkSock):
-        """Called when data is read on the socket.
-        Subclass to do useful work.
-        """
-        pass
-    
-    def stateChanged(self, tkSock):
-        if tkSock.isClosed():
-            self.sockSet.remove(tkSock)
+# the old name, to preserve backward compatibility
+TkServerSocket = TCPServer
 
 
 if __name__ == "__main__":
-    import threading
     root = Tkinter.Tk()
     root.withdraw()
+    from RO.TkUtil import Timer
     
     port = 2150
-    binary = False
-    
-    class TCPEcho(BaseServer):
-        def __init__(self, port, binary=True):
-            print "Starting echo server listener on port", port
-            self.partialLastLine = ""
-            BaseServer.__init__(self, port, binary=binary)
-
-        def dataRead(self, tkSock):
-            readData = tkSock.read()
-            if not readData:
-                print "TCPEcho Warning: got read callback, but no data available"
-                return
-
-            readLines = readData.split("\n")
-            if self.partialLastLine:
-                readLines[0] = self.partialLastLine + readLines[0]
-            if readLines[-1] != "":
-                self.partialLastLine = readLines.pop(-1)
+    binary = True
             
-            tkSock.write(readData)
-            if "quit" in readLines:
-                tkSock.close()
-            
-
-    # start single-user echo server as background thread
-#   serverThread = threading.Thread(target=tcpEcho, args=(port,))
-    echoObj = TCPEcho(port = port, binary = binary)
-    
     if binary:
         testStrings = (
             "foo\nba",
@@ -555,55 +547,87 @@ if __name__ == "__main__":
         )
     else:
         testStrings = (
-            "foo",
             "string with 3 nulls: 1 \0 2 \0 3 \0 end",
             "string with 3 quoted nulls: 1 \\0 2 \\0 3 \\0 end",
             '"quoted string followed by carriage return"\r',
+            '',
             "string with newline: \n end",
             "string with carriage return: \r end",
             "quit",
         )
-
-
-    def statePrt(sock):
-        stateVal, stateStr, reason = sock.getFullState()
-        if reason:
-            print "socket %s: %s" % (stateStr, reason)
-        else:
-            print "socket %s" % (stateStr,)
-        if sock.isClosed():
-            sys.exit(0)
-        if sock.isConnected():
-            runTest()
-            
-        
-    def readPrt(sock):
-        if binary:
-            outStr = sock.read()
-        else:
-            outStr = sock.readLine()
-        print "read   %r" % (outStr,)
-
-    ts = TkSocket(
-        addr = "localhost",
-        port = port,
-        binary = binary,
-        stateCallback = statePrt,
-        readCallback = readPrt,
-    )
     
     strIter = iter(testStrings)
 
     def runTest():
         try:
             testStr = strIter.next()
-            print "writing %r" % (testStr,)
+            print "Client writing %r" % (testStr,)
             if binary:
-                ts.write(testStr)
+                clientSocket.write(testStr)
             else:
-                ts.writeLine(testStr)
-            RO.TkUtil.Timer(0.5, runTest)
+                clientSocket.writeLine(testStr)
+            Timer(0.001, runTest)
         except StopIteration:
             pass
 
+    def clientRead(sock):
+        if False: #  binary:
+            outStr = sock.read()
+        else:
+            outStr = sock.readLine()
+        print "Client read   %r" % (outStr,)
+        if outStr and outStr.strip() == "quit":
+            print "*** Data exhausted; closing the client connection"
+            clientSocket.close()
+
+    def clientState(sock):
+        stateVal, stateStr, reason = sock.getFullState()
+        if reason:
+            print "Client %s: %s" % (stateStr, reason)
+        else:
+            print "Client %s" % (stateStr,)
+        if sock.isDone:
+            print "*** Client closed; now halting Tk event loop (which kills the server)"
+            root.quit()
+        if sock.isReady:
+            print "*** Client connected; now sending test data"
+            runTest()
+
+    def serverState(server):
+        stateVal, stateStr, reason = server.getFullState()
+        if reason:
+            print "Server %s: %s" % (stateStr, reason)
+        else:
+            print "Server %s" % (stateStr,)
+        if server.isReady:
+            print "*** Echo server ready; now starting up a client"
+            startClient()
+    
+    def startClient():
+        global clientSocket
+        clientSocket = TkSocket(
+            addr = "localhost",
+            port = port,
+            stateCallback = clientState,
+            readCallback = clientRead,
+            name = "client",
+        )
+    
+    class EchoServer(TCPServer):
+        def __init__(self, port, stateCallback):
+            TCPServer.__init__(self,
+                port = port,
+                stateCallback = stateCallback,
+                sockReadCallback = self.sockReadCallback,
+                name = "echo",
+            )
+
+        def sockReadCallback(self, sock):
+            readLine = sock.readLine(default=None)
+            if readLine is not None:
+                sock.writeLine(readLine)
+
+    print "*** Starting echo server on port %s; binary=%s" % (port, binary)
+    echoServer = EchoServer(port = port, stateCallback = serverState)
+    
     root.mainloop()

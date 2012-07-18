@@ -1,12 +1,11 @@
 #!/usr/bin/env python -i
-"""TCP specializations of TkSocket.
+"""Reconnectable versions of TCPSocket.
 
-All permit disconnection and reconnection
-and the base class offers support for
+All permit disconnection and reconnection and the base class offers support for
 authorization and line-oriented output.
 
 Requirements:
-- Tkinter (due to the underlying TkSocket library)
+- Tkinter or Twisted framework; see RO.Comm.Generic.
 
 History:
 2002-11-22 R Owen: first version with history. Moved to RO.Comm
@@ -44,50 +43,38 @@ History:
 2008-01-25 ROwen    Tweaked connect to raise RuntimeError if connecting or connected (not just connected).
 2008-02-13 ROwen    Added mayConnect method.
 2010-06-28 ROwen    Removed unused import (thanks to pychecker).
+2012-07-16 ROwen    Added support for Twisted framework.
+                    You must now call RO.Comm.Generic.setFramework before importing this module.
+                    Added name attribute to TCPConnection.
 """
 import sys
-from .TkSocket import TkSocket
-from .BaseSocket import NullSocket
-
-# states
-Connecting = 5
-Authorizing = 4
-Connected = 3
-Disconnecting = 2
-Failing = 1
-Disconnected = 0
-Failed = -1
-
-# a dictionary that describes the various values for the connection state
-_StateDict = {
-    Connecting: "Connecting",
-    Authorizing: "Authorizing",
-    Connected: "Connected",
-    Disconnecting: "Disconnecting",
-    Failing: "Failing",
-    Disconnected: "Disconnected",
-    Failed: "Failed",
-}
+from RO.Comm.BaseSocket import NullSocket
+from RO.Comm.Generic import TCPSocket
 
 class TCPConnection(object):
-    """A TCP TkSocket with the ability to disconnect and reconnect.
+    """A TCP Socket with the ability to disconnect and reconnect.
     Optionally returns read data as lines
     and has hooks for authorization.
-
-    Inputs:
-    - host: initial host (can be changed when connecting)
-    - port: initial port (can be changed when connecting);
-      defaults to 23, the standard telnet port
-    - readCallback: function to call whenever data is read;
-      see addReadCallback for details.
-    - readLines: if True, the read callbacks receive entire lines
-        minus the terminator; otherwise the data is distributed as received
-    - stateCallback: a function to call whenever the state or reason changes;
-      see addStateCallback for details.
-    - authReadCallback: if specified, used as the initial read callback function;
-        if auth succeeds, it must call self._authDone()
-    - authReadLines: if True, the auth read callback receives entire lines
     """
+    # states
+    Connecting = 5
+    Authorizing = 4
+    Connected = 3
+    Disconnecting = 2
+    Failing = 1
+    Disconnected = 0
+    Failed = -1
+
+    # a dictionary that describes the various values for the connection state
+    _StateDict = {
+        Connecting: "Connecting",
+        Authorizing: "Authorizing",
+        Connected: "Connected",
+        Disconnecting: "Disconnecting",
+        Failing: "Failing",
+        Disconnected: "Disconnected",
+        Failed: "Failed",
+    }
     def __init__(self,
         host = None,
         port = 23,
@@ -96,50 +83,69 @@ class TCPConnection(object):
         stateCallback = None,
         authReadCallback = None,
         authReadLines = False,
+        name = "",
     ):
+        """Construct a TCPConnection
+
+        Inputs:
+        - host: initial host (can be changed when connecting)
+        - port: initial port (can be changed when connecting);
+          defaults to 23, the standard telnet port
+        - readCallback: function to call whenever data is read;
+          see addReadCallback for details.
+        - readLines: if True, the read callbacks receive entire lines
+            minus the terminator; otherwise the data is distributed as received
+        - stateCallback: a function to call whenever the state or reason changes;
+          see addStateCallback for details.
+        - authReadCallback: if specified, used as the initial read callback function;
+            if auth succeeds, it must call self._authDone()
+        - authReadLines: if True, the auth read callback receives entire lines
+        - name: a string to identify this object; strictly optional
+        """        
         self.host = host
         self.port = port
-        self._readLines = readLines
+        self._readLines = bool(readLines)
         self._userReadCallbacks = []
         if readCallback:
             self.addReadCallback(readCallback)
         self._stateCallbacks = []
         if stateCallback:
             self.addStateCallback(stateCallback)
-        self._authReadLines = authReadLines
+        self._authReadLines = bool(authReadLines)
         self._authReadCallback = authReadCallback
+        self._name = name
 
         self._state = 0
         self._reason = ""
         self._currReadCallbacks = []
         
-        # translation table from TkSocket states to local states
+        # translation table from TCPSocket states to local states
         # note that the translation of Connected will depend
         # on whether there is authorization; this initial setup
         # assumes no authorization
         if self._authReadCallback:
-            locConnected = Authorizing
+            locConnected = self.Authorizing
         else:
-            locConnected = Connected
-        self._tkLocalStateDict = {
-            TkSocket.Connecting: Connecting,
-            TkSocket.Connected: locConnected,
-            TkSocket.Closing: Disconnecting,
-            TkSocket.Failing: Failing,
-            TkSocket.Closed: Disconnected,
-            TkSocket.Failed: Failed,
+            locConnected = self.Connected
+        self._localSocketStateDict = {
+            TCPSocket.Connecting: self.Connecting,
+            TCPSocket.Connected: locConnected,
+            TCPSocket.Closing: self.Disconnecting,
+            TCPSocket.Failing: self.Failing,
+            TCPSocket.Closed: self.Disconnected,
+            TCPSocket.Failed: self.Failed,
         }
         
         self._sock = NullSocket()
         
     def addReadCallback(self, readCallback):
-        """Add a read function, to be called whenever a line of data is read.
+        """Add a read function, to be called whenever data is read.
         
         Inputs:
         - readCallback: function to call whenever a line of data is read;
           it is sent two arguments:
-          - the socket (a TkSocket object)
-          - the line of data read (without its terminating \r)
+          - the socket (a TCPSocket object)
+          - the data read; in line mode the line terminator is stripped
         """
         assert callable(readCallback), "read callback not callable"
         self._userReadCallbacks.append(readCallback)
@@ -182,17 +188,18 @@ class TCPConnection(object):
         if not self._sock.isClosed():
             self._sock.close()
 
-        self._sock = TkSocket(
+        self._sock = TCPSocket(
             addr = self.host,
             port = self.port,
             stateCallback = self._sockStateCallback,
+            name = self._name,
         )
         
         if self._authReadCallback:
-            self._tkLocalStateDict[TkSocket.Connected] = Authorizing
+            self._localSocketStateDict[TCPSocket.Connected] = self.Authorizing
             self._setRead(True)
         else:
-            self._tkLocalStateDict[TkSocket.Connected] = Connected
+            self._localSocketStateDict[TCPSocket.Connected] = self.Connected
             self._setRead(False)
     
     def disconnect(self, isOK=True, reason=None):
@@ -216,7 +223,7 @@ class TCPConnection(object):
         """
         state, reason = self._state, self._reason
         try:
-            stateStr = _StateDict[state]
+            stateStr = self._StateDict[state]
         except KeyError:
             stateStr = "Unknown (%r)" % (state)
         return (state, stateStr, reason)
@@ -229,16 +236,16 @@ class TCPConnection(object):
     def isConnected(self):
         """Return True if connected, False otherwise.
         """
-        return self._state == Connected
+        return self._state == self.Connected
 
     def isDone(self):
         """Return True if connected, disconnected or failed.
         """
-        return self._state in (Connected, Disconnected, Failed)
+        return self._state in (self.Connected, self.Disconnected, self.Failed)
     
     def mayConnect(self):
         """Return True if one may call connect, false otherwise"""
-        return self._state not in (Connected, Connecting, Authorizing)
+        return self._state not in (self.Connected, self.Connecting, self.Authorizing)
 
     def removeReadCallback(self, readCallback):
         """Attempt to remove the read callback function;
@@ -293,7 +300,7 @@ class TCPConnection(object):
         If authorization fails, call self.disconnect(False, error msg) instead.
         """
         self._setRead(forAuth=False)
-        self._setState(Connected, msg)
+        self._setState(self.Connected, msg)
     
     def _setRead(self, forAuth=False):
         """Set up reads.
@@ -314,8 +321,9 @@ class TCPConnection(object):
         - newState  one of the state constants defined at top of file
         - reason    the reason for the change (a string, or None to leave unchanged)
         """
+        #print "_setState(newState=%s, reason=%s); self._stateCallbacks=%s" % (newState, reason, self._stateCallbacks)
         oldStateReason = (self._state, self._reason)
-        if not _StateDict.has_key(newState):
+        if not self._StateDict.has_key(newState):
             raise RuntimeError, "unknown connection state: %s" % (newState,)
         self._state = newState
         if reason != None:
@@ -327,37 +335,44 @@ class TCPConnection(object):
                 stateCallback(self)
     
     def _sockReadCallback(self, sock):
-        """Read callback for the TkSocket.
+        """Read callback for the socket in binary mode (not line mode).
                 
         When data is received, read it and issues all callbacks.
         """
         dataRead = sock.read()
-        # print "TCPConnection._sockReadCallback called; data=%r" % (dataRead,)
+        #print "%s._sockReadCallback(sock=%r) called; data=%r" % (self, sock, dataRead)
         for subr in self._currReadCallbacks:
             subr(sock, dataRead)
 
     def _sockReadLineCallback(self, sock):
-        """Read callback for the TkSocket that returns whole lines.
+        """Read callback for the socket in line mode.
                 
-        Whenever one or more lines is received, issues all callbacks;
-        strips the line terminator(s).
+        Whenever a line is received, issues all callbacks, first stripping the line terminator.
         """
         dataRead = sock.readLine()
-        if not dataRead:
+        if dataRead is None:
             # only a partial line was available
             return
-        # print "TCPConnection._sockReadLineCallback called with data %r" % (dataRead,)
+        #print "%s._sockReadLineCallback(sock=%r) called with data %r" % (self, sock, dataRead)
         for subr in self._currReadCallbacks:
             subr(sock, dataRead)
     
     def _sockStateCallback(self, sock):
         sockState, descr, reason = sock.getFullState()
         try:
-            locState = self._tkLocalStateDict[sockState]
+            locState = self._localSocketStateDict[sockState]
         except KeyError:
-            sys.stderr.write("unknown TkSocket state %r\n" % sockState)
+            sys.stderr.write("unknown TCPSocket state %r\n" % sockState)
             return
         self._setState(locState, reason)
+
+    def _getArgStr(self):
+        """Return main arguments as a string, for __str__
+        """
+        return "name=%r" % (self._name)
+
+    def __str__(self):
+        return "%s(%s)" % (self.__class__.__name__, self._getArgStr())
         
 
 if __name__ == "__main__":

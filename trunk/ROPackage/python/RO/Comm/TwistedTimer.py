@@ -3,7 +3,7 @@
 Requires a running twisted reactor.
 
 History:
-2010-07-21 ROwen    Timer(...) sec and callFunc arguments may now be specified by name.
+2012-07-13 ROwen    Copied from opscore, but with active() replaced by isActive.
 """
 import twisted.internet.reactor
 
