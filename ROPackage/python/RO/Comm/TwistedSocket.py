@@ -1,68 +1,128 @@
 #!/usr/bin/env python
-"""Socket wrapper that works with the Twisted framework
+"""BasicSocket wrapper that works with the Twisted framework
 
 The intention is to work with TCPConnection and all the infrastructure that uses it.
 
-TO DO: rewrite the test code and try it out.
-Also: try to find out how to query a protocol or transport to see if it is alive.
-
 History:
-2012-07-11 ROwen    First cut, based on TwistedSocket
+2012-07-17 ROwen
 """
-__all__ = ["TwistedSocket", "TwistedServer", "TCP4Server"]
+__all__ = ["Socket", "TCPSocket", "Server", "TCPServer"]
+import re
 import sys
 import traceback
-from BaseSocket import BaseSocket, BaseServer, nullCallback
-from twisted.internet.protocol import Factory
-from twisted.protocols.basic import LineReceiver
-from twisted.internet.endpoints import TCP4ClientEndpoint
+from RO.Comm.BaseSocket import BaseSocket, BaseServer, nullCallback
+from RO.Comm.TwistedTimer import Timer
+from twisted.internet.error import ConnectionDone
+from twisted.internet.protocol import Factory, Protocol
+from twisted.internet.endpoints import TCP4ClientEndpoint, TCP4ServerEndpoint
 from twisted.internet import reactor
 
-class _Socket(LineReceiver):
+class _SocketProtocol(Protocol):
+    """Twisted socket protocol for use with these socket classes
+
+    Based on twisted LineReceiver protocol, but adapted to my needs.
+    
+    @cvar lineEndPattern: line-ending delimiters used by readLine, as a compiled regular expression.
+        By default it uses any of \r\n, \r or \n
+    """
+    lineEndPattern = re.compile("\r\n|\r|\n")
+    
     def __init__(self):
         self._readCallback = nullCallback
         self._connectionLostCallback = nullCallback
+        self.__buffer = ""
     
     def roSetCallbacks(self, readCallback, connectionLostCallback):
-        """Add TwistedSocket-specific callbacks
+        """Add Socket-specific callbacks
         
         Inputs:
         - readCallback: a function that receives one argument: the read data
-        - connectionLostCallback: a function that receives one argument: the reason
-            (a Twisted reason object; defaults to Twisted's connectionDone)
+        - connectionLostCallback: a function that receives one argument: a Twisted error object
         """
         self._readCallback = readCallback
         self._connectionLostCallback = connectionLostCallback
+
+    def clearLineBuffer(self):
+        """
+        Clear buffered data.
+
+        @return: All of the cleared buffered data.
+        @rtype: C{str}
+        """
+        b = self.__buffer
+        self.__buffer = ""
+        return b
     
-    def lineReceived(self, data):
-        self._readCallback(data)
+    def read(self, nChar):
+        """Read at most nChar characters; if nChar=None then get all chars
+        """
+        if nChar is None:
+            data, self.__buffer = self.__buffer, ""
+        else:
+            data, self._buffer = self._buffer[0:nChar], self._buffer[nChar:]
+        #print "%s.read(nChar=%r) returning %r; remaining buffer=%r" % (self, nChar, data, self.__buffer)
+
+        if self.__buffer and self._readCallback:
+            Timer(0.000001, self._readCallback, self)
+        return data
+        
+    def readLine(self, default=None):
+        """Read a line of data; return default if a line is not present
+        """
+        res = self.lineEndPattern.split(self.__buffer, 1)
+        if len(res) == 1:
+            # readDelimiter not found; leave the buffer alone and don't bother to call the callback again
+            #print "%s.readLine(default=%r) returning the default; remaining buffer=%r" % (self, default, self.__buffer)
+            return default
+        self.__buffer = res[1]
+        #print "%s.readLine(default=%r) returning %r; remaining buffer=%r" % (self, default, res[0], self.__buffer)
+
+        if self.__buffer and self._readCallback:
+            Timer(0.000001, self._readCallback, self)
+        return res[0]
+        
+    def dataReceived(self, data):
+        """
+        Protocol.dataReceived.
+        Translates bytes into lines, and calls lineReceived (or
+        rawDataReceived, depending on mode.)
+        """
+        self.__buffer = self.__buffer + data
+        self._readCallback(self)
     
     def connectionMade(self):
-#        print "%s.connectionMade(); self.factory._connectionMadeCallback=%s" % (self, self.factory._connectionMadeCallback)
+        """The connection was successfully made
+        """
+        #print "%s.connectionMade(); self.factory._connectionMadeCallback=%s" % (self, self.factory._connectionMadeCallback)
         self.factory._connectionMadeCallback(self)
     
     def connectionLost(self, reason):
-#         print "%s.connectionLost(%s); self._connectionLostCallback=%s" % (self, reason, self._connectionLostCallback)
+        """The connection was lost (whether by request or error)
+        """
+        #print "%s.connectionLost(%s); self._connectionLostCallback=%s" % (self, reason, self._connectionLostCallback)
         self._connectionLostCallback(reason)
     
     def roAbort(self):
         """Discard callbacks and abort the connection
         """
-#         print "%s.roAbort()" % (self,)
+        #print "%s.roAbort()" % (self,)
         self._readCallback = nullCallback
         self._connectionLostCallback = nullCallback
         if self.transport:
             self.transport.abortConnection()
+
     
-class _SocketFactory(Factory):
-    protocol = _Socket
+class _SocketProtocolFactory(Factory):
+    """Twisted _SocketProtocol factory for use with these socket classes
+    """
+    protocol = _SocketProtocol
     
     def __init__(self, connectionMadeCallback = nullCallback):
         self._connectionMadeCallback = connectionMadeCallback
 
 
-class TwistedSocket(BaseSocket):
-    """A basic TCP/IP socket using Twisted framework.
+class Socket(BaseSocket):
+    """A socket using Twisted framework.
     
     Inputs:
     - endpoint  a Twisted endpoint, e.g. twisted.internet.endpoints.TCP4ClientEndpoint;
@@ -71,6 +131,7 @@ class TwistedSocket(BaseSocket):
     - state     the initial state
     - readCallback: function to call when data read; receives: self
     - stateCallback a state callback function; see addStateCallback for details
+    - name: a string to identify this socket; strictly optional
     """
     def __init__(self,
         endpoint = None,
@@ -80,7 +141,7 @@ class TwistedSocket(BaseSocket):
         stateCallback = nullCallback,
         name = "",
     ):
-#         print "TwistedSocket(name=%r, endpoint=%r, protocol=%r, state=%r, readCallback=%r, stateCallback=%r)" % \
+#         print "Socket(name=%r, endpoint=%r, protocol=%r, state=%r, readCallback=%r, stateCallback=%r)" % \
 #             (name, endpoint, protocol, state, readCallback, stateCallback)
         if bool(endpoint is None) == bool(protocol is None):
             raise RuntimeError("Must provide one of endpoint or protocol")
@@ -98,8 +159,8 @@ class TwistedSocket(BaseSocket):
             self._connectionMade(protocol)
         else:
             self._setState(BaseSocket.Connecting)
-            self._endpointDeferred = self._endpoint.connect(_SocketFactory())
-            self._endpointDeferred.addCallbacks(self._connectionMade, self._connectionFailed)
+            self._endpointDeferred = self._endpoint.connect(_SocketProtocolFactory())
+            self._endpointDeferred.addCallbacks(self._connectionMade, self._connectionLost)
 
     def _clearCallbacks(self):
         """Clear any callbacks added by this class. Called just after the socket is closed.
@@ -111,36 +172,50 @@ class TwistedSocket(BaseSocket):
         if self._protocol is not None:
             self._protocol.roAbort()
 
-    def _connectionFailed(self, err):
-        """Connection failed callback
+    def _connectionLost(self, reason):
+        """Connection lost callback
         """
-#         print "%s._connectionFailed(%s)" % (self, err)
-        reasonStr = str(err) if err is not None else None
+        if reason is None:
+            reasonStr = None
+        elif issubclass(getattr(reason, "type", None), ConnectionDone):
+            # connection closed cleanly; no need for a reason
+            # use getattr in case reason as no type attribute
+            reasonStr = None
+        else:
+            reasonStr = str(reason)
         if self._state == BaseSocket.Closing:
             self._setState(BaseSocket.Closed, reasonStr)
         else:
             self._setState(BaseSocket.Failed, reasonStr)
-        return err
+        return reason
     
     def _connectionMade(self, protocol):
         """Callback when connection made
         """
-#         print "%s._connectionMade(%r); sockStateCallback=%s" % (self, protocol, self._sockStateCallback)
+        #print "%s._connectionMade(%r)" % (self, protocol)
         self._protocol = protocol
         self._protocol.roSetCallbacks(
             readCallback = self._doRead,
-            connectionLostCallback = self._connectionFailed,
+            connectionLostCallback = self._connectionLost,
         )
-#         print "%s: setting state to Connected" % (self,)
         self._setState(BaseSocket.Connected)
 
     def _basicClose(self):
         """Close the socket.
         """
-        self._protocol.transport.loseConnection()
+        if self._protocol is not None:
+            self._protocol.transport.loseConnection()
+    
+    def read(self, nChar=None):
+        """Return up to nChar characters; if nChar is None then return all available characters.
+        """
+        if not self.isReady:
+            raise RuntimeError("%s not connected" % (self,))
+        return self._protocol.read(nChar)
     
     def readLine(self, default=None):
         """Read one line of data.
+        
         Do not return the trailing newline.
         If a full line is not available, return default.
         
@@ -150,14 +225,12 @@ class TwistedSocket(BaseSocket):
         
         Raise RuntimeError if the socket is not connected.
         """
-        if self._data is None:
-            return default
-
-        data, self._data = self._data, None
-        return data
+        if not self.isReady:
+            raise RuntimeError("%s not connected" % (self,))
+        return self._protocol.readLine(default)
     
     def write(self, data):
-        """Write data to the socket. Does not block.
+        """Write data to the socket (without blocking)
         
         Safe to call as soon as you call connect, but of course
         no data is sent until the connection is made.
@@ -175,27 +248,22 @@ class TwistedSocket(BaseSocket):
         Then:
         self._tk.eval('puts -nonewline %s { %s }' % (self._sock, escData))
         """
-#         print "write(%r)" % (data,)
-        if self._state not in (self.Connected, self.Connecting):
+        #print "%s.write(%r)" % (self, data)
+        if not self.isReady:
             raise RuntimeError("%s not connected" % (self,))
-        self.protocol.send(data)
+        self._protocol.transport.write(data)
     
     def writeLine(self, data):
         """Write a line of data terminated by standard newline
-        (which for the net is \r\n, but the socket's auto newline
-        translation takes care of it).
         """
-#         print "writeLine(%r)" % (data,)
-        if self._state != self.Connected:
+        #print "%s.writeLine(data=%r)" % (self, data)
+        if not self.isReady:
             raise RuntimeError("%s not connected" % (self,))
-        self._protocol.sendLine(data)
+        self.write(data + "\r\n")
     
-    def _doRead(self, data):
-        """Called when there is data to read"""
-#         print "%s _doRead" % (self,)
-        if self._data != None:
-            print "%s: Warning: data lost" % (self,)
-        self._data = data
+    def _doRead(self, sock):
+        """Called when there is data to read
+        """
         if self._readCallback:
             try:
                 self._readCallback(self)
@@ -203,13 +271,42 @@ class TwistedSocket(BaseSocket):
                 sys.stderr.write("%s read callback %s failed: %s\n" % (self, self._readCallback, e,))
                 traceback.print_exc(file=sys.stderr)
 
-    def __str__(self):
-        return "TwistedSocket(name=%r)" % (self._name)
 
-class TwistedServer(BaseServer):
-    """A tcp socket server
+class TCPSocket(Socket):
+    """A TCP/IP socket using Twisted framework.
+    """
+    def __init__(self,
+        addr = None,
+        port = None,
+        readCallback = None,
+        stateCallback = None,
+        name = "",
+    ):
+        """Construct a TCPSocket
     
-    Note: this could have state, but presently does not
+        Inputs:
+        - addr      the IP address
+        - port      the port
+        - readCallback  function to call when data read; receives: self
+        - stateCallback a state callback function; see addStateCallback for details
+        - name      a string to identify this socket; strictly optional
+        """
+        self._addr = addr
+        self._port = port
+        endpoint = TCP4ClientEndpoint(reactor, host=addr, port=port)
+        Socket.__init__(self,
+            endpoint = endpoint,
+            readCallback = readCallback,
+            stateCallback = stateCallback,
+            name = name,
+        )
+    
+    def _getArgStr(self):
+        return "name=%r, addr=%r, port=%r" % (self._name, self._addr, self._port)
+
+
+class Server(BaseServer):
+    """A socket server using Twisted framework.
     """
     def __init__(self,
         endpoint,
@@ -224,12 +321,13 @@ class TwistedServer(BaseServer):
         Inputs:
         - endpoint: a Twisted endpoint, e.g. twisted.internet.endpoints.TCP4ClientEndpoint
         - connCallback: function to call when a client connects; it receives the following arguments:
-                    - sock, a TwistedSocket
+                    - sock, a Socket
         - stateCallback: function to call when server changes state; it receives one argument: this server
         - sockReadCallback: function for each server socket to call when it receives data;
             See BaseSocket.addReadCallback for details
         - sockStateCallback: function for each server socket to call when it receives data
             See BaseSocket.addStateCallback for details
+        - name: a string to identify this socket; strictly optional
         """
         self._endpoint = endpoint
         self._protocol = None
@@ -241,8 +339,8 @@ class TwistedServer(BaseServer):
             sockStateCallback = sockStateCallback,
             name = name,
         )            
-        self._endpointDeferred = self._endpoint.listen(_SocketFactory(self._newConnection))
-        self._endpointDeferred.addCallbacks(self._listeningCallback, self._connectionFailed)
+        self._endpointDeferred = self._endpoint.listen(_SocketProtocolFactory(self._newConnection))
+        self._endpointDeferred.addCallbacks(self._listeningCallback, self._connectionLost)
         self._numConn = 0
     
     def _listeningCallback(self, protocol):
@@ -254,7 +352,7 @@ class TwistedServer(BaseServer):
         """
         if self._protocol is not None:
             self._closeDeferred = self._protocol.stopListening()
-            self._closeDeferred.addBoth(self._connectionFailed)
+            self._closeDeferred.addBoth(self._connectionLost)
     
     def _clearCallbacks(self):
         """Clear any callbacks added by this class. Called just after the socket is closed.
@@ -266,23 +364,30 @@ class TwistedServer(BaseServer):
         if self._closeDeferred:
             self._closeDeferred.cancel()
     
-    def _connectionFailed(self, err):
+    def _connectionLost(self, reason):
         """Connection failed callback
         """
-#         print "%s._connectionFailed(%s)" % (self, err)
-        reasonStr = str(err) if err is not None else None
+        #print "%s._connectionLost(%s)" % (self, reason)
+        if reason is None:
+            reasonStr = None
+        elif issubclass(getattr(reason, "type", None), ConnectionDone):
+            # connection closed cleanly; no need for a reason
+            # use getattr in case reason as no type attribute
+            reasonStr = None
+        else:
+            reasonStr = str(reason)
         if self._state == BaseSocket.Closing:
             self._setState(BaseSocket.Closed, reasonStr)
         else:
             self._setState(BaseSocket.Failed, reasonStr)
-        return err
+        return reason
     
     def _newConnection(self, protocol):
-        """A client has connected. Create a TwistedSocket and call the connection callback with it.
+        """A client has connected. Create a Socket and call the connection callback with it.
         """
-#         print "TwistedServer._newConnection(%r)" % (protocol,)
+        #print "Server._newConnection(%r)" % (protocol,)
         self._numConn += 1
-        newSocket = TwistedSocket(
+        newSocket = Socket(
             protocol = protocol,
             readCallback = self._sockReadCallback,
             stateCallback = self._sockStateCallback,
@@ -297,23 +402,70 @@ class TwistedServer(BaseServer):
             traceback.print_exc(file=sys.stderr)
 
 
+class TCPServer(Server):
+    """A TCP/IP socket server using Twisted framework.
+    """
+    def __init__(self,
+        port,
+        connCallback = nullCallback,
+        stateCallback = nullCallback,
+        sockReadCallback = nullCallback,
+        sockStateCallback = nullCallback,
+        name = "",
+    ):
+        """Construct a socket server
+        
+        Inputs:
+        - endpoint: a Twisted endpoint, e.g. twisted.internet.endpoints.TCP4ClientEndpoint
+        - connCallback: function to call when a client connects; it receives the following arguments:
+                    - sock, a Socket
+        - stateCallback: function to call when server changes state; it receives one argument: this server
+        - sockReadCallback: function for each server socket to call when it receives data;
+            See BaseSocket.addReadCallback for details
+        - sockStateCallback: function for each server socket to call when it receives data
+            See BaseSocket.addStateCallback for details
+        - name: a string to identify this socket; strictly optional
+        """
+        self._port = port
+        endpoint = TCP4ServerEndpoint(reactor, port=port)
+        Server.__init__(self,
+            endpoint = endpoint,
+            connCallback = connCallback,
+            stateCallback = stateCallback,
+            sockReadCallback = sockReadCallback,
+            sockStateCallback = sockStateCallback,
+            name = name,
+        )
+    
+    def _getArgStr(self):
+        """Return main arguments as a string, for __str__
+        """
+        return "name=%r, port=%r" % (self._name, self._port)
+
+
 if __name__ == "__main__":
     """Demo using a simple echo server.
     """
-    from twisted.internet.endpoints import TCP4ServerEndpoint
-    from RO.TwistedUtil import Timer
-    
     port = 2150
-
-    testStrings = (
-        "foo",
-        "string with 3 nulls: 1 \0 2 \0 3 \0 end",
-        "string with 3 quoted nulls: 1 \\0 2 \\0 3 \\0 end",
-        '"quoted string followed by carriage return"\r',
-        "string with newline: \n end",
-        "string with carriage return: \r end",
-         "quit",
-    )
+    binary = False
+            
+    if binary:
+        testStrings = (
+            "foo\nba",
+            "r\nfuzzle\nqu",
+            "it",
+            "\n"
+        )
+    else:
+        testStrings = (
+            "string with 3 nulls: 1 \0 2 \0 3 \0 end",
+            "string with 3 quoted nulls: 1 \\0 2 \\0 3 \\0 end",
+            '"quoted string followed by carriage return"\r',
+            '',
+            "string with newline: \n end",
+            "string with carriage return: \r end",
+            "quit",
+        )
     
     strIter = iter(testStrings)
     
@@ -323,15 +475,21 @@ if __name__ == "__main__":
         try:
             testStr = strIter.next()
             print "Client writing %r" % (testStr,)
-            clientSocket.writeLine(testStr)
-            Timer(0.5, runTest)
+            if binary:
+                clientSocket.write(testStr)
+            else:
+                clientSocket.writeLine(testStr)
+            Timer(0.001, runTest)
         except StopIteration:
             pass
 
     def clientRead(sock):
-        outStr = sock.readLine()
-        print "Client read   %r" % (outStr,)
-        if outStr == "quit":
+        if binary:
+            outStr = sock.read()
+        else:
+            outStr = sock.readLine()
+        print "Client read    %r" % (outStr,)
+        if outStr and outStr.strip() == "quit":
             print "*** Data exhausted; closing the client connection"
             clientSocket.close()
 
@@ -358,28 +516,29 @@ if __name__ == "__main__":
         if server.isReady:
             print "*** Echo server ready; now starting up a client"
     
-            endpoint = TCP4ClientEndpoint(reactor, host="localhost", port=port)
-            clientSocket = TwistedSocket(
-                endpoint = endpoint,
+            clientSocket = TCPSocket(
+                addr = "localhost",
+                port = port,
                 stateCallback = clientState,
                 readCallback = clientRead,
                 name = "client",
             )
 
-    class EchoServer(TwistedServer):
+    class EchoServer(TCPServer):
         def __init__(self, port, stateCallback):
-            endpoint = TCP4ServerEndpoint(reactor, port=port)
-            TwistedServer.__init__(self,
-                endpoint = endpoint,
+            TCPServer.__init__(self,
+                port = port,
                 stateCallback = stateCallback,
                 sockReadCallback = self.sockReadCallback,
                 name = "echo",
             )
-        def sockReadCallback(self, sock):
-            readLine = sock.readLine()
-            sock.writeLine(readLine)
 
-    print "*** Starting echo server on port", port
+        def sockReadCallback(self, sock):
+            readLine = sock.readLine(default=None)
+            if readLine is not None:
+                sock.writeLine(readLine)
+
+    print "*** Starting echo server on port %s; binary=%s" % (port, binary)
     echoServer = EchoServer(port = port, stateCallback = serverState)
 
     reactor.run()

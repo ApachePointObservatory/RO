@@ -46,7 +46,6 @@ class Base(object):
         - stateCallback: function to call when socket state changes; it receives one argument: this socket
         - name: a string to identify this object; strictly optional
         """
-        # print "%s(state=%r, stateCallback=%r, name=%r)" % (self.__class__.__name__, state, stateCallback, name)
         self._state = state
         self._reason = ""
         self._stateCallback = stateCallback
@@ -59,7 +58,6 @@ class Base(object):
         - callFunc: the callback function, or nullCallback if none wanted
                     The function is sent one argument: this TkSocket
         """
-        # print "%s.setStateCallback(callFunc=%s)" % (self, callFunc)
         self._stateCallback = callFunc
     
     def setName(self, newName):
@@ -111,7 +109,6 @@ class Base(object):
         - callFunc: the callback function, or nullCallback if none wanted
                     The function is sent one argument: this TkSocket
         """
-        # print "%s.setStateCallback(callFunc=%s)" % (self, callFunc)
         self._stateCallback = callFunc
     
     def setName(self, newName):
@@ -131,7 +128,7 @@ class Base(object):
         - newState: the new state
         - reason: an explanation (None to leave alone)
         """
-#         print "%s._setState(%r, %r); stateCallback=%s" % (self, newState, reason, self._stateCallback)
+#         print "%s._setState(newState=%s, reason=%s)" % (newState, reason)
         if self.isDone:
             raise RuntimeError("Already done; cannot change state")
 
@@ -144,7 +141,7 @@ class Base(object):
             try:
                 self._clearCallbacks()
             except Exception, e:
-                sys.stderr.write("%s failed to clear callbacks: %s\n" % (self, self._stateCallback, e,))
+                sys.stderr.write("%s failed to clear callbacks: %s\n" % (self, e,))
                 traceback.print_exc(file=sys.stderr)
         
         try:
@@ -152,9 +149,14 @@ class Base(object):
         except Exception, e:
             sys.stderr.write("%s state callback %s failed: %s\n" % (self, self._stateCallback, e,))
             traceback.print_exc(file=sys.stderr)
-    
+
+    def _getArgStr(self):
+        """Return main arguments as a string, for __str__
+        """
+        return "name=%r" % (self._name)
+
     def __str__(self):
-        return "%s(name=%r)" % (self.__class__.__name__, self._name)
+        return "%s(%s)" % (self.__class__.__name__, self._getArgStr())
 
 
 class BaseSocket(Base):
@@ -229,7 +231,6 @@ class BaseSocket(Base):
         - callFunc: the callback function, or nullCallback if none wanted.
                     The function is sent one argument: this TkSocket
         """
-        print "%s.setReadCallback(callFunc=%s)" % (self, callFunc)
         self._readCallback = callFunc
     
     def write(self, data):
@@ -262,7 +263,7 @@ class BaseSocket(Base):
         - reason: a string explaining why, or None to leave unchanged;
             please specify if isOK is false.
         """
-        #print "%s.close(isOK=%s, reason=%s)" % (self.__class__.__name__, isOK, reason)
+#         print "%s.close(isOK=%r, reason=%r)" % (self, isOK, reason)
         if self.isDone:
             return
 
@@ -292,6 +293,12 @@ class BaseSocket(Base):
         """Start closing the socket.
         """
         raise NotImplementedError()
+
+    def _clearCallbacks(self):
+        """Clear any callbacks added by this class.
+        """
+        Base._clearCallbacks(self)
+        self._readCallback = nullCallback
 
 
 class BaseServer(Base):
@@ -358,9 +365,8 @@ class BaseServer(Base):
         - reason: a string explaining why, or None to leave unchanged;
             please specify if isOK is false.
         """
-        print "%s.close(isOK=%s, reason=%s)" % (self.__class__.__name__, isOK, reason)
+#         print "%s.close(isOK=%r, reason=%r)" % (self, isOK, reason)
         if self.isDone:
-            print "isDone=True; ignoring"
             return
 
         if isOK:
