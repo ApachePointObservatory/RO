@@ -297,6 +297,14 @@ class TCPSocket(BaseSocket):
         self._setState(self.Connecting)
         self._checkSocket()
 
+    @property
+    def addr(self):
+        return self._addr
+    
+    @property
+    def port(self):
+        return self._port
+
     def read(self, nChar=None):
         """Read data. Do not block.
         
@@ -470,6 +478,10 @@ class TCPServer(BaseServer):
         self._tkSocketWrapper = _TkSocketWrapper(sockArgs=sockArgs, name=name)
         self._setState(BaseServer.Listening)
 
+    @property
+    def port(self):
+        return self._port
+
     def _basicClose(self):
         """Close the Tk socket.
         """
@@ -516,6 +528,8 @@ TkServerSocket = TCPServer
 
 
 if __name__ == "__main__":
+    """Demo using a simple echo server.
+    """
     root = Tkinter.Tk()
     root.withdraw()
     from RO.TkUtil import Timer
@@ -556,11 +570,11 @@ if __name__ == "__main__":
             pass
 
     def clientRead(sock):
-        if False: #  binary:
+        if binary:
             outStr = sock.read()
         else:
             outStr = sock.readLine()
-        print "Client read   %r" % (outStr,)
+        print "Client read    %r" % (outStr,)
         if outStr and outStr.strip() == "quit":
             print "*** Data exhausted; closing the client connection"
             clientSocket.close()
@@ -572,8 +586,8 @@ if __name__ == "__main__":
         else:
             print "Client %s" % (stateStr,)
         if sock.isDone:
-            print "*** Client closed; now halting Tk event loop (which kills the server)"
-            root.quit()
+            print "*** Client closed; now closing the server"
+            echoServer.close()
         if sock.isReady:
             print "*** Client connected; now sending test data"
             runTest()
@@ -587,7 +601,10 @@ if __name__ == "__main__":
         if server.isReady:
             print "*** Echo server ready; now starting up a client"
             startClient()
-    
+        elif server.isDone:
+            print "*** Halting the tcl event loop"
+            root.quit()
+
     def startClient():
         global clientSocket
         clientSocket = TCPSocket(

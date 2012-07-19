@@ -4,18 +4,20 @@
 The intention is to work with TCPConnection and all the infrastructure that uses it.
 
 History:
-2012-07-18 ROwen
+2012-07-19 ROwen
 """
 __all__ = ["Socket", "TCPSocket", "Server", "TCPServer"]
+
 import re
 import sys
 import traceback
-from RO.Comm.BaseSocket import BaseSocket, BaseServer, nullCallback
-from RO.Comm.TwistedTimer import Timer
 from twisted.internet.error import ConnectionDone
 from twisted.internet.protocol import Factory, Protocol
 from twisted.internet.endpoints import TCP4ClientEndpoint, TCP4ServerEndpoint
 from twisted.internet import reactor
+from twisted.python import log
+from RO.Comm.BaseSocket import BaseSocket, BaseServer, nullCallback
+from RO.Comm.TwistedTimer import Timer
 
 class _SocketProtocol(Protocol):
     """Twisted socket protocol for use with these socket classes
@@ -99,7 +101,7 @@ class _SocketProtocol(Protocol):
     def connectionLost(self, reason):
         """The connection was lost (whether by request or error)
         """
-        #print "%s.connectionLost(%s); self._connectionLostCallback=%s" % (self, reason, self._connectionLostCallback)
+        #print "%s.connectionLost(reason=%s)" % (self, reason)
         self._connectionLostCallback(reason)
     
     def roAbort(self):
@@ -110,6 +112,9 @@ class _SocketProtocol(Protocol):
         self._connectionLostCallback = nullCallback
         if self.transport:
             self.transport.abortConnection()
+    
+    def __str__(self):
+        return "%s" % (self.__class__.__name__,)
 
     
 class _SocketProtocolFactory(Factory):
@@ -161,6 +166,23 @@ class Socket(BaseSocket):
             self._setState(BaseSocket.Connecting)
             self._endpointDeferred = self._endpoint.connect(_SocketProtocolFactory())
             self._endpointDeferred.addCallbacks(self._connectionMade, self._connectionLost)
+            self._endpointDeferred.addErrback(log.err)
+    
+    @property
+    def addr(self):
+        """Return the address, or None if not known
+        """
+        if self._protocol:
+            return getattr(self._protocol.transport.getPeer(), "host", None)
+        return None
+
+    @property
+    def port(self):
+        """Return the port, or None if unknown
+        """
+        if self._protocol:
+            return getattr(self._protocol.transport.getPeer(), "port", None)
+        return None
 
     def _clearCallbacks(self):
         """Clear any callbacks added by this class. Called just after the socket is closed.
@@ -169,6 +191,7 @@ class Socket(BaseSocket):
         self._connCallback = None
         if self._endpointDeferred is not None:
             self._endpointDeferred.cancel()
+            self._endpointDeferred = None
         if self._protocol is not None:
             self._protocol.roAbort()
 
@@ -187,7 +210,6 @@ class Socket(BaseSocket):
             self._setState(BaseSocket.Closed, reasonStr)
         else:
             self._setState(BaseSocket.Failed, reasonStr)
-        return reason
     
     def _connectionMade(self, protocol):
         """Callback when connection made
@@ -295,8 +317,6 @@ class TCPSocket(Socket):
         - stateCallback a state callback function; see addStateCallback for details
         - name      a string to identify this socket; strictly optional
         """
-        self._addr = addr
-        self._port = port
         endpoint = TCP4ClientEndpoint(reactor, host=addr, port=port)
         Socket.__init__(self,
             endpoint = endpoint,
@@ -304,9 +324,9 @@ class TCPSocket(Socket):
             stateCallback = stateCallback,
             name = name,
         )
-    
+
     def _getArgStr(self):
-        return "name=%r, addr=%r, port=%r" % (self.name, self._addr, self._port)
+        return "name=%r, addr=%r, port=%r" % (self.name, self.addr, self.port)
 
 
 class Server(BaseServer):
@@ -345,7 +365,14 @@ class Server(BaseServer):
         )            
         self._endpointDeferred = self._endpoint.listen(_SocketProtocolFactory(self._newConnection))
         self._endpointDeferred.addCallbacks(self._listeningCallback, self._connectionLost)
+        self._endpointDeferred.addErrback(log.err) # log errors in _listeningCallback
         self._numConn = 0
+
+    @property
+    def port(self):
+        """Return the port, or None if not known
+        """
+        return getattr(self._endpoint, "_port", None)
     
     def _listeningCallback(self, protocol):
         self._protocol = protocol
@@ -357,6 +384,7 @@ class Server(BaseServer):
         if self._protocol is not None:
             self._closeDeferred = self._protocol.stopListening()
             self._closeDeferred.addBoth(self._connectionLost)
+            self._closeDeferred.addErrback(log.err) # log errors in self._connectionLost
     
     def _clearCallbacks(self):
         """Clear any callbacks added by this class. Called just after the socket is closed.
@@ -365,8 +393,10 @@ class Server(BaseServer):
         self._connCallback = nullCallback
         if self._endpointDeferred:
             self._endpointDeferred.cancel()
+            self._endpointDeferred = None
         if self._closeDeferred:
             self._closeDeferred.cancel()
+            self._closeDeferred = None
     
     def _connectionLost(self, reason):
         """Connection failed callback
@@ -384,7 +414,6 @@ class Server(BaseServer):
             self._setState(BaseSocket.Closed, reasonStr)
         else:
             self._setState(BaseSocket.Failed, reasonStr)
-        return reason
     
     def _newConnection(self, protocol):
         """A client has connected. Create a Socket and call the connection callback with it.
@@ -430,7 +459,6 @@ class TCPServer(Server):
             See BaseSocket.addStateCallback for details
         - name: a string to identify this socket; strictly optional
         """
-        self._port = port
         endpoint = TCP4ServerEndpoint(reactor, port=port)
         Server.__init__(self,
             endpoint = endpoint,
@@ -440,11 +468,11 @@ class TCPServer(Server):
             sockStateCallback = sockStateCallback,
             name = name,
         )
-    
+
     def _getArgStr(self):
         """Return main arguments as a string, for __str__
         """
-        return "name=%r, port=%r" % (self.name, self._port)
+        return "name=%r, port=%r" % (self.name, self.port)
 
 
 if __name__ == "__main__":
@@ -472,8 +500,6 @@ if __name__ == "__main__":
         )
     
     strIter = iter(testStrings)
-    
-    clientSocket = None
 
     def runTest():
         try:
@@ -504,14 +530,13 @@ if __name__ == "__main__":
         else:
             print "Client %s" % (stateStr,)
         if sock.isDone:
-            print "*** Client closed; now halting reactor (which kills the server)"
-            reactor.stop()
+            print "*** Client closed; now closing the server"
+            echoServer.close()
         if sock.isReady:
             print "*** Client connected; now sending test data"
             runTest()
 
     def serverState(server):
-        global clientSocket
         stateVal, stateStr, reason = server.getFullState()
         if reason:
             print "Server %s: %s" % (stateStr, reason)
@@ -519,15 +544,21 @@ if __name__ == "__main__":
             print "Server %s" % (stateStr,)
         if server.isReady:
             print "*** Echo server ready; now starting up a client"
-    
-            clientSocket = TCPSocket(
-                addr = "localhost",
-                port = port,
-                stateCallback = clientState,
-                readCallback = clientRead,
-                name = "client",
-            )
+            startClient()
+        elif server.isDone:
+            print "*** Halting the reactor"
+            reactor.stop()
 
+    def startClient():
+        global clientSocket
+        clientSocket = TCPSocket(
+            addr = "localhost",
+            port = port,
+            stateCallback = clientState,
+            readCallback = clientRead,
+            name = "client",
+        )
+    
     class EchoServer(TCPServer):
         def __init__(self, port, stateCallback):
             TCPServer.__init__(self,
