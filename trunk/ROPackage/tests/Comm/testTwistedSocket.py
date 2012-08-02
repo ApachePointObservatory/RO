@@ -92,7 +92,7 @@ class TestRunner(object):
     
     def makeClient(self):
         self.clientSocket = TCPSocket(
-            addr = "localhost",
+            host = "localhost",
             port = Port,
             stateCallback = self.clientState,
             readCallback = self.clientRead,

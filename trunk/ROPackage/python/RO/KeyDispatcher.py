@@ -83,6 +83,7 @@ History:
 2011-07-27 ROwen    Changed the executeCmd method to not log a message.
 2012-07-18 ROwen    Removed tkWdg argument from constructor.
                     Modified to use RO.Comm.Generic.Timer.
+2012-08-01 ROwen    Updated for RO.Comm.TCPConnection 3.0.
 """
 import sys
 import time
@@ -158,7 +159,7 @@ class KeyDispatcher(object):
             self.connection.addStateCallback(self._connStateCallback)
         else:
             self.connection = RO.Comm.HubConnection.NullConnection()
-        self._isConnected = self.connection.isConnected()
+        self._isConnected = self.connection.isConnected
         self.userCmdIDGen = RO.Alg.IDGen(1, _CmdNumWrap)
         self.refreshCmdIDGen = RO.Alg.IDGen(_CmdNumWrap + 1, 2 * _CmdNumWrap)
         
@@ -589,7 +590,7 @@ class KeyDispatcher(object):
         """If connection state changes, update refresh variables.
         """
         wasConnected = self._isConnected
-        self._isConnected = conn.isConnected()
+        self._isConnected = conn.isConnected
 
         if wasConnected != self._isConnected:
             self._refreshAllTimer.start(_ShortInterval, self.refreshAllVar)

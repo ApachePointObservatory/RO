@@ -135,11 +135,11 @@ if __name__ == "__main__":
             clientSocket.close()
 
     def clientState(sock):
-        stateVal, stateStr, reason = sock.getFullState()
+        state, reason = sock.fullState
         if reason:
-            print "Client %s: %s" % (stateStr, reason)
+            print "Client %s: %s" % (state, reason)
         else:
-            print "Client %s" % (stateStr,)
+            print "Client %s" % (state,)
         if sock.isDone:
             print "*** Client closed; now halting Tk event loop (which kills the server)"
             root.quit()
@@ -148,11 +148,11 @@ if __name__ == "__main__":
             runTest()
 
     def serverState(server):
-        stateVal, stateStr, reason = server.getFullState()
+        state, reason = server.fullState
         if reason:
-            print "Server %s: %s" % (stateStr, reason)
+            print "Server %s: %s" % (state, reason)
         else:
-            print "Server %s" % (stateStr,)
+            print "Server %s" % (state,)
         if server.isReady:
             print "*** Echo server ready; now starting up a client"
             startClient()
@@ -160,7 +160,7 @@ if __name__ == "__main__":
     def startClient():
         global clientSocket
         clientSocket = TCPSocket(
-            addr = "localhost",
+            host = "localhost",
             port = port,
             stateCallback = clientState,
             readCallback = clientRead,

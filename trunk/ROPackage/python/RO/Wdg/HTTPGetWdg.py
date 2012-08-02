@@ -22,7 +22,8 @@ History:
 2005-07-07 ROwen
 2006-04-05 ROwen    Bug fix: _updDetailStatus failed if state was aborting or aborted.
 2009-05-05 ROwen    Modified getFile to return an HTTPGet object.
-2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
+2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code.
+2012-08-01 ROwen    Updated for changes to HTTPGet.
 """
 __all__ = ['HTTPGetWdg']
 
@@ -61,7 +62,7 @@ class HTTPCallback(object):
                 sys.stderr.write(errMsg + "\n")
                 traceback.print_exc(file=sys.stderr)
         
-        if self.httpGet.isDone():
+        if self.httpGet.isDone:
             self.clear()
 
     def clear(self):
@@ -211,7 +212,7 @@ class HTTPGetWdg(Tkinter.Frame):
             #print "HTTPGetWdg.getFile: maxLines=%s, ind=%s, nEntries=%s" % (self.maxLines, ind, len(self.dispList),)
 
             # only erase entries for files that are finished
-            if not self.dispList[ind].isDone():
+            if not self.dispList[ind].isDone:
                 #print "HTTPGetWdg.getFile: file at ind=%s is not done" % (ind,)
                 ind += 1
                 continue
@@ -280,11 +281,11 @@ class HTTPGetWdg(Tkinter.Frame):
         newGetQueue = list()
         nRunning = 0
         for httpGet, stateLabel in self.getQueue:
-            if httpGet.isDone():
+            if httpGet.isDone:
                 continue
 
             newGetQueue.append((httpGet, stateLabel))
-            state = httpGet.getState()
+            state = httpGet.state
             if state == httpGet.Queued:
                 if nRunning < self.maxTransfers:
                     httpGet.start()
@@ -297,31 +298,28 @@ class HTTPGetWdg(Tkinter.Frame):
         
     def _stateCallback(self, stateLabel, httpGet):
         """State callback for running transfers"""
-        state = httpGet.getState()
+        state = httpGet.state
         if state == httpGet.Running:
-            readBytes, totBytes = httpGet.getBytes()
-            
-            if totBytes:
-                pctDone = int(round(100 * readBytes / float(totBytes)))
+            if httpGet.totBytes:
+                pctDone = int(round(100 * httpGet.readBytes / float(httpGet.totBytes)))
                 stateLabel["text"] = "%3d %%" % pctDone
             else:
-                kbRead = readBytes / 1024
+                kbRead = httpGet.readBytes / 1024
                 stateLabel["text"] = "%d kB" % kbRead
         else:
-            # display text description of state
-            stateStr = httpGet.getStateStr(state)
+            # display state
             if state == httpGet.Failed:
                 severity = RO.Constants.sevError
             elif state in (httpGet.Aborting, httpGet.Aborted):
                 severity = RO.Constants.sevWarning
             else:
                 severity = RO.Constants.sevNormal
-            stateLabel.set(stateStr, severity=severity)
+            stateLabel.set(state, severity=severity)
         
         if httpGet == self.selHTTPGet:
             self._updDetailStatus()
         
-        if httpGet.isDone():
+        if httpGet.isDone:
             self._startNew()
 
     def _trackMem(self, obj, objName):
@@ -348,30 +346,28 @@ class HTTPGetWdg(Tkinter.Frame):
             return
 
         httpGet = self.selHTTPGet
-        currState = httpGet.getState()
+        state = httpGet.state
         
         # show or hide abort button, appropriately
-        if currState >= httpGet.Running:
+        if httpGet.isAbortable:
             if not self.abortWdg.winfo_ismapped():
                 self.abortWdg.grid()
         else:
             if self.abortWdg.winfo_ismapped():
                 self.abortWdg.grid_remove()
 
+        stateStr = state
         severity = RO.Constants.sevNormal
-        if currState == httpGet.Running:
-            readBytes, totBytes = httpGet.getBytes()
-            if totBytes:
-                stateStr = "read %s of %s bytes" % (readBytes, totBytes)
+        if state == httpGet.Running:
+            if httpGet.totBytes:
+                stateStr = "read %s of %s bytes" % (httpGet.readBytes, httpGet.totBytes)
             else:
-                stateStr = "read %s bytes" % (readBytes,)
-        elif currState == httpGet.Failed:
-            stateStr = "Failed: %s" % (httpGet.getErrMsg())
+                stateStr = "read %s bytes" % (httpGet.readBytes,)
+        elif state == httpGet.Failed:
+            stateStr = "Failed: %s" % (httpGet.errMsg,)
             severity = RO.Constants.sevError
-        else:
-            stateStr = httpGet.getStateStr()
-            if currState in (httpGet.Aborting, httpGet.Aborted):
-                severity = RO.Constants.sevWarning
+        elif state in (httpGet.Aborting, httpGet.Aborted):
+            severity = RO.Constants.sevWarning
 
         self.stateWdg.set(stateStr, severity=severity)
         self.fromWdg.set(httpGet.dispStr)

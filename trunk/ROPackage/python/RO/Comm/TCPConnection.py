@@ -43,8 +43,9 @@ History:
 2008-01-25 ROwen    Tweaked connect to raise RuntimeError if connecting or connected (not just connected).
 2008-02-13 ROwen    Added mayConnect method.
 2010-06-28 ROwen    Removed unused import (thanks to pychecker).
-2012-07-16 ROwen    Added support for Twisted framework.
+2012-08-01 ROwen    Added support for Twisted framework.
                     You must now call RO.Comm.Generic.setFramework before importing this module.
+                    Many methods are now properties, e.g. isDone->isDone.
                     Added name attribute to TCPConnection.
 """
 import sys
@@ -57,24 +58,26 @@ class TCPConnection(object):
     and has hooks for authorization.
     """
     # states
-    Connecting = 5
-    Authorizing = 4
-    Connected = 3
-    Disconnecting = 2
-    Failing = 1
-    Disconnected = 0
-    Failed = -1
+    Connecting = "Connecting"
+    Authorizing = "Authorizing"
+    Connected = "Connected"
+    Disconnecting = "Disconnecting"
+    Failing = "Failing"
+    Disconnected = "Disconnected"
+    Failed = "Failed"
 
-    # a dictionary that describes the various values for the connection state
-    _StateDict = {
-        Connecting: "Connecting",
-        Authorizing: "Authorizing",
-        Connected: "Connected",
-        Disconnecting: "Disconnecting",
-        Failing: "Failing",
-        Disconnected: "Disconnected",
-        Failed: "Failed",
-    }
+    _AllStates = set((
+        Connecting,
+        Authorizing,
+        Connected,
+        Disconnecting,
+        Failing,
+        Disconnected,
+        Failed,
+    ))
+    _ConnectedStates = set((Connected,))
+    _DoneStates = set((Connected, Disconnected, Failed))
+    
     def __init__(self,
         host = None,
         port = 23,
@@ -176,7 +179,7 @@ class TCPConnection(object):
         - already connecting or connected
         - host omitted and self.host not already set
         """
-        if not self.mayConnect():
+        if not self.mayConnect:
             raise RuntimeError("Cannot connect: already connecting or connected")
         if not (host or self.host):
             raise RuntimeError("Cannot connect: no host specified")
@@ -185,11 +188,11 @@ class TCPConnection(object):
         self.port = port or self.port
         
         self._sock.setStateCallback() # remove socket state callback
-        if not self._sock.isClosed():
+        if not self._sock.isDone:
             self._sock.close()
 
         self._sock = TCPSocket(
-            addr = self.host,
+            host = self.host,
             port = self.port,
             stateCallback = self._sockStateCallback,
             name = self._name,
@@ -215,34 +218,33 @@ class TCPConnection(object):
         """
         self._sock.close(isOK=isOK, reason=reason)
 
-    def getFullState(self):
+    @property
+    def fullState(self):
         """Returns the current state as a tuple:
-        - state: a numeric value; named constants are available
-        - stateStr: a short string describing the state
+        - state: the state, as a string
         - reason: the reason for the state ("" if none)
         """
-        state, reason = self._state, self._reason
-        try:
-            stateStr = self._StateDict[state]
-        except KeyError:
-            stateStr = "Unknown (%r)" % (state)
-        return (state, stateStr, reason)
+        return (self._state, self._reason)
 
-    def getState(self):
-        """Returns the current state as a constant.
+    @property
+    def state(self):
+        """Returns the current state as a string.
         """
         return self._state
     
+    @property
     def isConnected(self):
         """Return True if connected, False otherwise.
         """
-        return self._state == self.Connected
+        return self._state in self._ConnectedStates
 
+    @property
     def isDone(self):
-        """Return True if connected, disconnected or failed.
+        """Return True if the last transition is finished, i.e. connected, disconnected or failed.
         """
-        return self._state in (self.Connected, self.Disconnected, self.Failed)
+        return self._state in self._DoneStates
     
+    @property
     def mayConnect(self):
         """Return True if one may call connect, false otherwise"""
         return self._state not in (self.Connected, self.Connecting, self.Authorizing)
@@ -323,7 +325,7 @@ class TCPConnection(object):
         """
         #print "_setState(newState=%s, reason=%s); self._stateCallbacks=%s" % (newState, reason, self._stateCallbacks)
         oldStateReason = (self._state, self._reason)
-        if not self._StateDict.has_key(newState):
+        if newState not in self._AllStates:
             raise RuntimeError, "unknown connection state: %s" % (newState,)
         self._state = newState
         if reason != None:
@@ -358,7 +360,7 @@ class TCPConnection(object):
             subr(sock, dataRead)
     
     def _sockStateCallback(self, sock):
-        sockState, descr, reason = sock.getFullState()
+        sockState, reason = sock.fullState
         try:
             locState = self._localSocketStateDict[sockState]
         except KeyError:
@@ -381,11 +383,11 @@ if __name__ == "__main__":
     root = Tkinter.Tk()
     
     def statePrt(sock):
-        stateVal, stateStr, reason = sock.getFullState()
+        state, reason = sock.fullState
         if reason:
-            print "socket %s: %s" % (stateStr, reason)
+            print "socket %s: %s" % (state, reason)
         else:
-            print "socket %s" % (stateStr,)
+            print "socket %s" % (state,)
         
     def readPrt(sock, outStr):
         print "read: %r" % (outStr,)
