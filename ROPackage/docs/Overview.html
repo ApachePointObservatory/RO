@@ -45,15 +45,21 @@
 	
 	<li><b>CnvUtil</b>: type conversion utilities, including as asBool (unlike bool, accepts common string representations of True or False) and asIntOrNone and asFloatOrNone (unlike float, these return None for None or "NaN") and variants that allow specifying strings representing unknown values.
 	
-	<li><b>Comm</b>: network communications for Tkinter applications. All of these classes use events and callbacks to avoid blocking the main event loop.
+	<li><b>Comm</b>: event-based network communications and timing using Twisted framework or tcl socket using Tkinter.
 	<ul>
-		<li><b>HTTPGet</b>: retrieve files via http. An associated widget RO.Wdg.HTTPGetWdg offers a graphical display of file transfer.
+	    <li><b>Generic</b>: contains a TCP/IP socket, a socket server and a timer. Call RO.Comm.Generic.setFramework to choose whether these are based on Twisted or Tkinter.
+	    
+		<li><b>HTTPGet</b>: retrieve files via http. Requires Tkinter. An associated widget RO.Wdg.HTTPGetWdg offers a graphical display of file transfer.
 
-		<li><b>TCPConnection</b>: a wrapper around TkSocket that allows repeated disconnection and reconnection and support for authentication.
+		<li><b>TCPConnection</b>: a socket that allows repeated disconnection and reconnection and support for authentication. Requires Twisted framework or Tkinter, as chosen by RO.Comm.Generic.setFramework.
 		
-		<li><b>TkSocket</b>: a basic tcl/tk socket. Written data is automatically queued up and fed out as the connection allows.
+		<li><b>TkSocket</b>: contains a TCP/IP socket and a socket server based on Tcl/Tk. Requires Tkinter.
 		
-		<li><b>TkSerial</b>: a tcl/tk-based RS-232 connection.
+		<li><b>TwistedSocket</b>: contains several sockets and servers based on Twisted framework.
+		
+		<li><b>TwistedTimer</b>: contains a one-shot timer for triggering callbacks based on Twisted framework.
+		
+		<li><b>TkSerial</b>: a Tcl/Tk-based RS-232 connection. Requires Tkinter.
 
         <li><b>BrowseURL</b>: display a URL in the user's browser. Useful for displaying on-line help. This is a thin wrapper around webbrowser module that does not use the Tcl/Tk event loop.
 	</ul>
@@ -119,6 +125,7 @@
         <li><b>EvtNoProp</b>: function wrapper that prevents even propagation.
         <li><b>getWindowingSystem</b>: get the windowing system; one of: WSysAqua, WSysX11 or WSysWin.
         <li><b>TclFunc</b>: register a python function as a tcl callback.
+        <li><b>Timer</b>: an event-based timer that calls a function after a specified delay.
     </ul>
     
 	<li><b>Wdg</b>: extensions of the standard Tkinter widgets and useful additional widgets. Almost all widgets support hot help strings (automatically displayed in a StatusBar, see below), linking to html htlp, a contextual menu, indication of severity level and indication of whether the data is current/defult. RO.Wdg widgets include:

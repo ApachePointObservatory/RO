@@ -27,6 +27,11 @@ History:
 2010-05-26 ROwen    Tweaked to use _removeAllCallbacks() instead of nulling _callbacks.
 2010-11-12 ROwen    Bug fix: timeLim was mishandled.
 2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
+2012-08-01 ROwen    Changed isDone()->isDone, getStateStr()->state, getErrMsg()->errMsg,
+                    getBytes()->readBytes, totBytes;
+                    Deleted getState() (use state, but returns a string, not an int);
+                    Added didFail, isAbortable.
+                    State constants are now strings, not integers.
 """
 __all__ = ['HTTPGet']
 
@@ -131,27 +136,29 @@ class HTTPGet(RO.AddCallback.BaseMixin):
     Callbacks receive one argument: this object.
     """
     # state constants
-    # values <= 0 mean the transaction has finished
-    Queued = 4
-    Connecting = 3
-    Running = 2
-    Aborting = 1
-    Done = 0
-    Aborted = -1
-    Failed = -2
-    StateDict = {
-        Queued: "Queued",
-        Connecting: "Connecting",
-        Running: "Running",
-        Aborting: "Aborting",
-        Done: "Done",
-        Aborted: "Aborted",
-        Failed: "Failed",
-    }
-    DoneStates = [key for key in StateDict.iterkeys() if key <= 0]
-    del(key)
+    Queued = "Queued"
+    Connecting = "Connecting"
+    Running = "Running"
+    Aborting = "Aborting"
+    Done = "Done"
+    Aborted = "Aborted"
+    Failed = "Failed"
+
+    _AllStates = set((
+        Queued,
+        Connecting,
+        Running,
+        Aborting,
+        Done,
+        Aborted,
+        Failed,
+    ))
+    _AbortableStates = set((Queued, Connecting, Running))
+    _DoneStates = set((Done, Aborted, Failed))
+    _FailedStates = set((Aborted, Failed))
+    
     StateStrMaxLen = 0
-    for stateStr in StateDict.itervalues():
+    for stateStr in _AllStates:
         StateStrMaxLen = max(StateStrMaxLen, len(stateStr))
     del(stateStr)
     _tkApp = None
@@ -232,7 +239,7 @@ class HTTPGet(RO.AddCallback.BaseMixin):
         if _Debug:
             print "%s.start()" % (self,)
         if self._state != self.Queued:
-            raise RuntimeError("Cannot start; state = %r not Queued" % (self.getState(),))
+            raise RuntimeError("Cannot start; state = %r not Queued" % (self.state,))
 
         self._setState(self.Connecting)
 
@@ -277,7 +284,7 @@ class HTTPGet(RO.AddCallback.BaseMixin):
         """
         if _Debug:
             print "%s.abort()" % (self,)
-        if self.isDone():
+        if self.isDone:
             return
         elif self._state == self.Queued:
             self._setState(self.Aborted)
@@ -292,41 +299,50 @@ class HTTPGet(RO.AddCallback.BaseMixin):
         if _Debug:
             print "http connection reset"
 
-    def getBytes(self):
-        """Return bytes read and total bytes.
-        Warning: total bytes will be None if unknown.
-        """
-        return (self._readBytes, self._totBytes)
-
-    def getErrMsg(self):
-        """If the state is Failed, return an explanation.
-        Otherwise returns None.
+    @property
+    def errMsg(self):
+        """If the transfer failed, an explanation as a string, else None
         """
         return self._errMsg
     
-    def getState(self):
-        """Returns the current state as an integer.
+    @property
+    def state(self):
+        """Returns the current state as a string.
         """
         return self._state
     
-    def getStateStr(self, state=None):
-        """Returns the state as a descriptive string.
-        
-        Inputs:
-        - state: state in question; if None then the current state is used.
+    @property
+    def isAbortable(self):
+        """True if the transaction can be aborted
         """
-        if state == None:
-            state = self._state
-        try:
-            return self.StateDict[state]
-        except KeyError:
-            return "Unknown (%r)" % (state)
-    
+        return self._state in self._AbortableStates
+
+    @property
     def isDone(self):
-        """Returns True if the transaction is finished
-        (succeeded, aborted or failed), False otherwise.
+        """Return True if the transaction is finished (succeeded, aborted or failed), False otherwise.
         """
-        return self._state <= 0
+        return self._state in self._DoneStates
+    
+    @property
+    def didFail(self):
+        """Return True if the transaction failed or was aborted
+        """
+        return self._state in self._FailedStates
+    
+    @property
+    def readBytes(self):
+        """Bytes read so far
+        """
+        return self._readBytes
+
+    @property
+    def totBytes(self):
+        """Total bytes in file, if known, None otherwise.
+        
+        The value is certain to be unknown until the transfer starts;
+        after that it depends on whether the server sends the info.
+        """
+        return self._totBytes
 
     def _setState(self, newState, errMsg=None):
         """Set a new state and call callbacks.
@@ -338,17 +354,17 @@ class HTTPGet(RO.AddCallback.BaseMixin):
         if _Debug:
             print "%s._setState(newState=%s, errmsg=%r)" % (self, newState, errMsg)
         # if state is not valid, reject
-        if self.isDone():
+        if self.isDone:
             return
     
-        if newState not in self.StateDict:
+        if newState not in self._AllStates:
             raise RuntimeError("Unknown state %r" % (newState,))
         
         self._state = newState
         if newState == self.Failed:
             self._errMsg = errMsg
         
-        isDone = self.isDone()
+        isDone = self.isDone
         if isDone:
             self._cleanup()
 
@@ -502,12 +518,11 @@ if __name__ == "__main__":
     _DebugExit = True
     
     def stateCallback(httpObj):
-        print "state =", httpObj.getStateStr(),
-        print "read %s of %s bytes" % tuple(httpObj.getBytes())
-        if httpObj.isDone():
-            errMsg = httpObj.getErrMsg()
-            if errMsg:
-                print "error message =", errMsg
+        print "state =", httpObj.state,
+        print "read %s of %s bytes" % tuple(httpObj.bytes)
+        if httpObj.isDone:
+            if httpObj.errMsg:
+                print "error message =", httpObj.errMsg
             root.quit()
             
     httpObj = HTTPGet(

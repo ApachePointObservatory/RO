@@ -76,8 +76,9 @@ History:
 2008-03-06 ROwen    Stopped setting instance variable _prevLine; it was not used anywhere.
 2010-06-28 ROwen    Modified to require Python 2.4 by assuming set is a builtin type.
 2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code.
-2012-07-18 ROwen    - Deprecated TkServerSocket; the new name is TCPServer and it is more powerful.
-                    - Deprecated TkSocket; the new name is TCPSocket.
+2012-08-01 ROwen    - Renamed TkServerSocket to TCPServer and added BaseServer functionality.
+                    - Renamed TkSocket to TCPSocket.
+                    - Many methods are now properties, e.g. isDone->isDone.
                     - Eliminated the binary argument to TCLSocket and tcl end-of-line translation;
                       instead writeLine always appends \r\n and readLine breaks on any of \r\n, \n or \r.
                     - Removed BaseServer; use TCPServer instead.
@@ -142,12 +143,12 @@ class _TkSocketWrapper(object):
             raise RuntimeError(e)
     
     def getState(self):
-        """Return isOK, errStr
+        """Return isOK, reason
         
         Returns:
         - True, "" if OK
         - False, errStr if an error
-        - True, errStr if closed without error
+        - True, reason if closed without error; reason may be ""
         """
         #print "%s.getState()" % (self,)
         errStr = self._tk.call('fconfigure', self._tkSocket, '-error')
@@ -254,7 +255,7 @@ class TCPSocket(BaseSocket):
     """
     lineEndPattern = re.compile("\r\n|\r|\n")
     def __init__(self,
-        addr,
+        host,
         port,
         readCallback = nullCallback,
         stateCallback = nullCallback,
@@ -264,14 +265,14 @@ class TCPSocket(BaseSocket):
         """Construct a TCPSocket
     
         Inputs:
-        - addr      IP address as dotted name or dotted numbers
+        - host      IP address as dotted name or dotted numbers
         - port      IP port
         - readCallback  function to call when data read; receives: self
         - stateCallback function to call when state or reason changes; receives: self
         - tkSock    existing tk socket (if missing, one is created and connected)
         - name      a string to identify this socket; strictly optional
         """
-        self._addr = addr
+        self._host = host
         self._port = port
         self.__buffer = ""
         BaseSocket.__init__(self,
@@ -280,7 +281,7 @@ class TCPSocket(BaseSocket):
             name = name,
         )
         if tkSock is None:
-            sockArgs = ('-async', addr, port)
+            sockArgs = ('-async', host, port)
         else:
             sockArgs = None
         self._tkSocketWrapper = _TkSocketWrapper(tkSock=tkSock, sockArgs=sockArgs, name=name)
@@ -298,8 +299,8 @@ class TCPSocket(BaseSocket):
         self._checkSocket()
 
     @property
-    def addr(self):
-        return self._addr
+    def host(self):
+        return self._host
     
     @property
     def port(self):
@@ -392,7 +393,7 @@ class TCPSocket(BaseSocket):
         Return True if OK.
         Close socket and return False if errors found.
         """
-        if self.isClosed():
+        if self.isDone:
             return False
         isOK, errStr = self._tkSocketWrapper.getState()
         if errStr:
@@ -423,7 +424,7 @@ class TCPSocket(BaseSocket):
         self._readCallback(self)
 
     def _getArgStr(self):
-        return "name=%r, addr=%r, port=%r" % (self.name, self._addr, self._port)
+        return "name=%r, host=%r, port=%r" % (self.name, self._host, self._port)
 
 
 class TCPServer(BaseServer):
@@ -503,9 +504,9 @@ class TCPServer(BaseServer):
     def _newConnection(self, tkSock, clientAddr, clientPort):
         """A client has connected. Create a TCPSocket and call the connection callback with it.
         """
-        newSocket = TkSocket(
+        newSocket = TCPSocket(
             tkSock = tkSock,
-            addr = clientAddr,
+            host = clientAddr,
             port = clientPort,
             readCallback = self._sockReadCallback,
             stateCallback = self._sockStateCallback,
@@ -521,10 +522,6 @@ class TCPServer(BaseServer):
 
     def _getArgStr(self):
         return "name=%r, port=%r" % (self.name, self._port)
-
-# the old names, to preserve backward compatibility
-TkSocket = TCPSocket
-TkServerSocket = TCPServer
 
 
 if __name__ == "__main__":
@@ -580,11 +577,11 @@ if __name__ == "__main__":
             clientSocket.close()
 
     def clientState(sock):
-        stateVal, stateStr, reason = sock.getFullState()
+        state, reason = sock.fullState
         if reason:
-            print "Client %s: %s" % (stateStr, reason)
+            print "Client %s: %s" % (state, reason)
         else:
-            print "Client %s" % (stateStr,)
+            print "Client %s" % (state,)
         if sock.isDone:
             print "*** Client closed; now closing the server"
             echoServer.close()
@@ -593,11 +590,11 @@ if __name__ == "__main__":
             runTest()
 
     def serverState(server):
-        stateVal, stateStr, reason = server.getFullState()
+        state, reason = server.fullState
         if reason:
-            print "Server %s: %s" % (stateStr, reason)
+            print "Server %s: %s" % (state, reason)
         else:
-            print "Server %s" % (stateStr,)
+            print "Server %s" % (state,)
         if server.isReady:
             print "*** Echo server ready; now starting up a client"
             startClient()
@@ -608,7 +605,7 @@ if __name__ == "__main__":
     def startClient():
         global clientSocket
         clientSocket = TCPSocket(
-            addr = "localhost",
+            host = "localhost",
             port = port,
             stateCallback = clientState,
             readCallback = clientRead,

@@ -169,7 +169,7 @@ class Socket(BaseSocket):
             self._endpointDeferred.addErrback(log.err)
     
     @property
-    def addr(self):
+    def host(self):
         """Return the address, or None if not known
         """
         if self._protocol:
@@ -302,7 +302,7 @@ class TCPSocket(Socket):
     """A TCP/IP socket using Twisted framework.
     """
     def __init__(self,
-        addr = None,
+        host = None,
         port = None,
         readCallback = None,
         stateCallback = None,
@@ -311,13 +311,13 @@ class TCPSocket(Socket):
         """Construct a TCPSocket
     
         Inputs:
-        - addr      the IP address
+        - host      the IP address
         - port      the port
         - readCallback  function to call when data read; receives: self
         - stateCallback a state callback function; see addStateCallback for details
         - name      a string to identify this socket; strictly optional
         """
-        endpoint = TCP4ClientEndpoint(reactor, host=addr, port=port)
+        endpoint = TCP4ClientEndpoint(reactor, host=host, port=port)
         Socket.__init__(self,
             endpoint = endpoint,
             readCallback = readCallback,
@@ -326,7 +326,7 @@ class TCPSocket(Socket):
         )
 
     def _getArgStr(self):
-        return "name=%r, addr=%r, port=%r" % (self.name, self.addr, self.port)
+        return "name=%r, host=%r, port=%r" % (self.name, self.host, self.port)
 
 
 class Server(BaseServer):
@@ -524,11 +524,11 @@ if __name__ == "__main__":
             clientSocket.close()
 
     def clientState(sock):
-        stateVal, stateStr, reason = sock.getFullState()
+        state, reason = sock.fullState
         if reason:
-            print "Client %s: %s" % (stateStr, reason)
+            print "Client %s: %s" % (state, reason)
         else:
-            print "Client %s" % (stateStr,)
+            print "Client %s" % (state,)
         if sock.isDone:
             print "*** Client closed; now closing the server"
             echoServer.close()
@@ -537,11 +537,11 @@ if __name__ == "__main__":
             runTest()
 
     def serverState(server):
-        stateVal, stateStr, reason = server.getFullState()
+        state, reason = server.fullState
         if reason:
-            print "Server %s: %s" % (stateStr, reason)
+            print "Server %s: %s" % (state, reason)
         else:
-            print "Server %s" % (stateStr,)
+            print "Server %s" % (state,)
         if server.isReady:
             print "*** Echo server ready; now starting up a client"
             startClient()
@@ -552,7 +552,7 @@ if __name__ == "__main__":
     def startClient():
         global clientSocket
         clientSocket = TCPSocket(
-            addr = "localhost",
+            host = "localhost",
             port = port,
             stateCallback = clientState,
             readCallback = clientRead,

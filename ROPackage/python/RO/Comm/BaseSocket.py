@@ -28,7 +28,7 @@ class Base(object):
     """Base class for BaseSocket and BaseServer
     
     Subclasses must provide class variables:
-    - _StateDict: a dict of state: short str description
+    - _AllStates: a set of states (strings)
     - _DoneStates: a set of states indicating the object is done (e.g. Closed or Failed)
     - _ReadyStates: a set of states indicating the object is ready for use (e.g. Connected)
     """
@@ -51,39 +51,19 @@ class Base(object):
         self._stateCallback = stateCallback
         self.name = name
 
-    def setStateCallback(self, callFunc=nullCallback):
-        """Set the state callback function (replacing the current one).
-        
-        Inputs:
-        - callFunc: the callback function, or nullCallback if none wanted
-                    The function is sent one argument: this TkSocket
-        """
-        self._stateCallback = callFunc
-    
-    def getFullState(self):
+    @property
+    def fullState(self):
         """Returns the current state as a tuple:
-        - state: a numeric value; named constants are available
-        - stateStr: a short string describing the state
+        - state: as a string
         - reason: the reason for the state ("" if none)
         """
-        state, reason = self._state, self._reason
-        return (state, self.getStateStr(state), reason)
+        return (self._state, self._reason)
     
-    def getState(self):
-        """Returns the current state as a constant.
+    @property
+    def state(self):
+        """Returns the current state as a string.
         """
         return self._state
-
-    def getStateStr(self, state=None):
-        """Return the string description of a state.
-        If state is omitted, return description of current state.
-        """
-        if state is None:
-            state = self._state
-        try:
-            return self._StateDict[state]
-        except KeyError:
-            return "Unknown (%r)" % (state,)
     
     @property
     def isDone(self):
@@ -157,26 +137,26 @@ class Base(object):
 class BaseSocket(Base):
     """Base class for event-driven communication sockets.
     """
-    Connecting = 4
-    Connected = 3
-    Closing = 2
-    Failing = 1
-    Closed = 0
-    Failed = -1
+    Connecting = "Connecting"
+    Connected = "Connected"
+    Closing = "Closing"
+    Failing = "Failing"
+    Closed = "Closed"
+    Failed = "Failed"
     
-    _StateDict = {
-        Connecting: "Connecting",
-        Connected: "Connected",
-        Closing: "Closing",
-        Failing: "Failing",
-        Closed: "Closed",
-        Failed: "Failed",
-    }
+    _AllStates = set((
+        Connecting,
+        Connected,
+        Closing,
+        Failing,
+        Closed,
+        Failed,
+    ))
     _DoneStates = set((Closed, Failed))
     _ReadyStates = set((Connected,))
         
     StateStrMaxLen = 0
-    for _stateStr in _StateDict.itervalues():
+    for _stateStr in _AllStates:
         StateStrMaxLen = max(StateStrMaxLen, len(_stateStr))
     del(_stateStr)
     
@@ -269,21 +249,6 @@ class BaseSocket(Base):
 
         self._basicClose()
     
-    def isClosed(self):
-        """Return True if socket no longer connected.
-        Return False if connecting or connected.
-        
-        This is deprecated. Typically you can use isDone, though it is slightly different.
-        """
-        return (self._state < self.Connected)
-    
-    def isConnected(self):
-        """Return True if socket is connected.
-        
-        This is a deprecated version of the isReady property.
-        """
-        return self.isReady
-    
     def _basicClose(self):
         """Start closing the socket.
         """
@@ -299,21 +264,21 @@ class BaseSocket(Base):
 class BaseServer(Base):
     """Base class for a socket server
     """
-    Starting = 4
-    Listening = 3
-    Closing = 2
-    Failing = 1
-    Closed = 0
-    Failed = -1
+    Starting = "Starting"
+    Listening = "Listening"
+    Closing = "Closing"
+    Failing = "Failing"
+    Closed = "Closed"
+    Failed = "Failed"
     
-    _StateDict = {
-        Starting: "Starting",
-        Listening: "Listening",
-        Closing: "Closing",
-        Failing: "Failing",
-        Closed: "Closed",
-        Failed: "Failed",
-    }
+    _AllStates = set((
+        Starting,
+        Listening,
+        Closing,
+        Failing,
+        Closed,
+        Failed,
+    ))
     _DoneStates = set((Closed, Failed))
     _ReadyStates = set((Listening,))
 
@@ -371,12 +336,6 @@ class BaseServer(Base):
 
         self._basicClose()
 
-    def isClosed(self):
-        """Return True if server no longer listening.
-        Return False if starting or listening.
-        """
-        return (self._state < self.Listening)
-    
     def _basicClose(self):
         """Start closing the socket.
         """

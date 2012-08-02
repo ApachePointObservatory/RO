@@ -246,11 +246,11 @@ if __name__ == "__main__":
         print "read: %r" % (astr,)
 
     def stateCallback (sock):
-        state, stateStr, reason = sock.getFullState()
+        state, reason = sock.fullState
         if reason:
-            print "%s: %s" % (stateStr, reason)
+            print "%s: %s" % (state, reason)
         else:
-            print stateStr
+            print state
 
     myConn = HubConnection(
         readCallback = readCallback,

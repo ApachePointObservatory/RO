@@ -45,6 +45,7 @@ History:
 2005-06-14 ROwen    Rewritten for new FTPGet that no longer supports callbacks.
 2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
 2012-07-09 ROwen    Modified to use RO.TkUtil.Timer.
+2012-08-01 ROwen    Updated for changes to FTPGet.
 """
 __all__ = ['FTPLogWdg']
 
@@ -60,7 +61,7 @@ import RO.AddCallback
 import RO.Constants
 import RO.MathUtil
 from RO.TkUtil import Timer
-import RO.Comm.FTPGet as FTPGet
+from RO.Comm.FTPGet import FTPGet
 import RO.Wdg
 import CtxMenu
 
@@ -86,7 +87,7 @@ class FTPCallback(object):
                 sys.stderr.write(errMsg + "\n")
                 traceback.print_exc(file=sys.stderr)
         
-        if self.ftpGet.isDone():
+        if self.ftpGet.isDone:
             self.clear()
 
     def clear(self):
@@ -233,7 +234,7 @@ class FTPLogWdg(Tkinter.Frame):
 #       print "getFile(%r, %r, %r)" % (host, fromPath, toPath)
         stateLabel = RO.Wdg.StrLabel(self, anchor="w", width=FTPGet.StateStrMaxLen)
         
-        ftpGet = FTPGet.FTPGet(
+        ftpGet = FTPGet(
             host = host,
             fromPath = fromPath,
             toPath = toPath,
@@ -272,7 +273,7 @@ class FTPLogWdg(Tkinter.Frame):
             #print "FTPLogWdg.getFile: maxLines=%s, ind=%s, nEntries=%s" % (self.maxLines, ind, len(self.dispList),)
 
             # only erase entries for files that are finished
-            if not self.dispList[ind].isDone():
+            if not self.dispList[ind].isDone:
                 #print "FTPLogWdg.getFile: file at ind=%s is not done" % (ind,)
                 ind += 1
                 continue
@@ -308,7 +309,7 @@ class FTPLogWdg(Tkinter.Frame):
         """Abort all transactions (for use at exit).
         """
         for ftpGet, stateLabel, callFunc in self.getQueue:
-            if not ftpGet.isDone():
+            if not ftpGet.isDone:
                 ftpGet.abort()
 
     def _selectEvt(self, evt):
@@ -361,17 +362,17 @@ class FTPLogWdg(Tkinter.Frame):
         newGetQueue = list()
         nRunning = 0
         for ftpGet, stateLabel, ftpCallback in self.getQueue:
-            if ftpGet.isDone():
+            if ftpGet.isDone:
                 ftpCallback()
             else:
                 newGetQueue.append((ftpGet, stateLabel, ftpCallback))
-                state = ftpGet.getState()
-                if state == FTPGet.Queued:
+                state = ftpGet.state
+                if state == ftpGet.Queued:
                     if nRunning < self.maxTransfers:
                         ftpGet.start()
                         nRunning += 1
                         ftpCallback()
-                elif state in (FTPGet.Running, FTPGet.Connecting):
+                elif state in (ftpGet.Running, ftpGet.Connecting):
                     nRunning += 1
             self._updOneStatus(ftpGet, stateLabel)
         self.getQueue = newGetQueue
@@ -382,22 +383,21 @@ class FTPLogWdg(Tkinter.Frame):
         
     def _updOneStatus(self, ftpGet, stateLabel):
         """Update the status of one transfer"""
-        state = ftpGet.getState()
-        if state == FTPGet.Running:
-            if ftpGet.getTotBytes():
-                pctDone = 100 * ftpGet.getReadBytes() / ftpGet.getTotBytes()
+        state = ftpGet.state
+        if state == ftpGet.Running:
+            if ftpGet.totBytes:
+                pctDone = int(round(100 * ftpGet.readBytes / float(ftpGet.totBytes)))
                 stateLabel["text"] = "%3d %%" % pctDone
             else:
-                kbRead = ftpGet.getReadBytes() / 1024
+                kbRead = ftpGet.readBytes / 1024
                 stateLabel["text"] = "%d kB" % kbRead
         else:
-            # display text description of state
-            stateStr = ftpGet.getStateStr(state)
-            if state == FTPGet.Failed:
+            # display state
+            if state == ftpGet.Failed:
                 severity = RO.Constants.sevError
             else:
                 severity = RO.Constants.sevNormal
-            stateLabel.set(stateStr, severity=severity)
+            stateLabel.set(state, severity=severity)
     
     def _updDetailStatus(self):
         """Update the detail status for self.selFTPGet"""
@@ -410,30 +410,31 @@ class FTPLogWdg(Tkinter.Frame):
             return
 
         ftpGet = self.selFTPGet
-        currState = ftpGet.getState()
+        currState = ftpGet.state
         
         # show or hide abort button, appropriately
-        if currState >= FTPGet.Running:
+        if ftpGet.isAbortable:
             if not self.abortWdg.winfo_ismapped():
                 self.abortWdg.grid()
         else:
             if self.abortWdg.winfo_ismapped():
                 self.abortWdg.grid_remove()
 
-        if currState == FTPGet.Running:
-            readBytes = ftpGet.getReadBytes()
-            totBytes = ftpGet.getTotBytes()
-            if totBytes:
-                stateStr = "read %s of %s bytes" % (readBytes, totBytes)
+        stateStr = currState
+        severity = RO.Constants.sevNormal
+        if currState == ftpGet.Running:
+            if ftpGet.totBytes:
+                stateStr = "read %s of %s bytes" % (ftpGet.readBytes, ftpGet.totBytes)
             else:
-                stateStr = "read %s bytes" % (readBytes,)
+                stateStr = "read %s bytes" % (ftpGet.readBytes,)
         else:
-            if currState == FTPGet.Failed:
+            if currState == ftpGet.Failed:
                 stateStr = "Failed: %s" % (ftpGet.getException())
-            else:
-                stateStr = ftpGet.getStateStr()
+                severity = RO.Constants.sevError
+            elif currState in (ftpGet.Aborting, ftpGet.Aborted):
+                severity = RO.Constants.sevWarning
 
-        self.stateWdg.set(stateStr)
+        self.stateWdg.set(stateStr, severity=severity)
         self.fromWdg.set(ftpGet.dispStr)
         self.toWdg.set(ftpGet.toPath)
 

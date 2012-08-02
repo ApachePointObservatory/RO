@@ -30,8 +30,13 @@ History:
                     from a background thread, and so were not Tk-safe.
 2005-07-07 ROwen    Bug fix: if overwrite false, the transfer would fail
                     but the existing file would still be deleted.
+2012-08-01 ROwen    Changed getStateStr() -> state, isDone()->isDone, getReadBytes()->readBytes, getTotBytes()->totBytes.
+                    Removed getState.
+                    Added isAbortable.
+                    State constants are now FTPGet class variables instead of module globals.
+                    State constants are now strings instead of integers.
 """
-__all__ = ['FTPGet'] # state constants added below
+__all__ = ['FTPGet']
 
 import os
 import sys
@@ -40,36 +45,7 @@ import threading
 import ftplib
 import RO.AddCallback
 
-# state constants
-# values <= 0 mean the transaction has finished
-Queued = 4
-Connecting = 3
-Running = 2
-Aborting = 1
-Done = 0
-Aborted = -1
-Failed = -2
-
-_StateDict = {
-    Queued: "Queued",
-    Connecting: "Connecting",
-    Running: "Running",
-    Aborting: "Aborting",
-    Done: "Done",
-    Aborted: "Aborted",
-    Failed: "Failed",
-}
-
-_DoneStates = [key for key in _StateDict.iterkeys() if key <= 0]
-
-__all__ += _StateDict.keys()
-
 _Debug = False
-
-StateStrMaxLen = 0
-for _stateStr in _StateDict.itervalues():
-    StateStrMaxLen = max(StateStrMaxLen, len(_stateStr))
-del(_stateStr)
 
 class FTPGet:
     """Retrieves the specified url to a file.
@@ -91,6 +67,32 @@ class FTPGet:
     - username  the usual; *NOT SECURE*
     - password  the usual; *NOT SECURE*
     """
+
+    # state constants
+    Queued = "Queued"
+    Connecting = "Connecting"
+    Running = "Running"
+    Aborting = "Aborting"
+    Done = "Done"
+    Aborted = "Aborted"
+    Failed = "Failed"
+    
+    _AllStates = set((
+        Queued,
+        Connecting,
+        Running,
+        Aborting,
+        Done,
+        Aborted,
+        Failed,
+    ))
+    _AbortableStates = set((Queued, Connecting, Running))
+    _DoneStates = set((Done, Aborted, Failed))
+
+    StateStrMaxLen = 0
+    for _stateStr in _AllStates:
+        StateStrMaxLen = max(StateStrMaxLen, len(_stateStr))
+    del(_stateStr)
     def __init__(self,
         host,
         fromPath,
@@ -140,7 +142,7 @@ class FTPGet:
         self._stateLock.acquire()
         try:
             if self._state != Queued:
-                raise RuntimeError, "state = %r not Queued" % self.getState()
+                raise RuntimeError, "state = %r not Queued" % (self._state,)
             self._state = Connecting
         finally:
             self._stateLock.release()
@@ -167,57 +169,54 @@ class FTPGet:
         """
         return self._exception
     
-    def getReadBytes(self):
-        """Returns bytes read so far
+    @property
+    def isAbortable(self):
+        """True if the transaction can be aborted
+        """
+        return self._state in self._AbortableStates
+    
+    @property
+    def isDone(self):
+        """True if the transaction is finished (succeeded, aborted or failed), False otherwise.
+        """
+        return self._state in self._DoneStates
+    
+    @property
+    def readBytes(self):
+        """bytes read so far
         """
         return self._readBytes
-    
-    def getState(self):
-        """Returns the current state as an integer.
-        """
-        return self._state
-    
-    def getStateStr(self, state=None):
-        """Returns the state as a descriptive string.
-        
-        Inputs:
-        - state: state in question; if None then the current state is used.
-        """
-        if state == None:
-            state = self._state
-        try:
-            return _StateDict[state]
-        except KeyError:
-            return "Unknown (%r)" % (state)
 
-    def getTotBytes(self):
-        """Return total bytes in file, if known, None otherwise.
+    @property
+    def totBytes(self):
+        """total bytes in file, if known, None otherwise.
+        
         The value is certain to be unknown until the transfer starts;
         after that it depends on whether the server sends the info.
         """
         return self._totBytes
     
-    def isDone(self):
-        """Returns True if the transaction is finished
-        (succeeded, aborted or failed), False otherwise.
+    @property
+    def state(self):
+        """Current state, as a string
         """
-        return self._state <= 0
+        return self._state
     
     def _cleanup(self, newState, exception=None):
         """Clean up everything. Must only be called from the _getTask thread.
         
         Close the input and output files.
-        If not isDone() (transfer not finished) then updates the state
-        If newState in (Aborted, Failed) and not isDone(), deletes the file
-        If newState == Failed and not isDone(), sets the exception
+        If not isDone (transfer not finished) then updates the state
+        If newState in (Aborted, Failed) and not isDone, deletes the file
+        If newState == Failed and not isDone, sets the exception
         
         Inputs:
-        - newState: new state; ignored if isDone()
+        - newState: new state; ignored if isDone
         - exception: exception that is the reason for failure;
-            ignored unless newState = Failed and not isDone()
+            ignored unless newState = Failed and not isDone
         """
         if _Debug:
-            print "_cleanup(%r, %r=%s)" % (_StateDict[newState], exception, exception)
+            print "_cleanup(%r, %r)" % (newState, exception)
         didOpen = (self._toFile != None)
         if self._toFile:
             self._toFile.close()
@@ -237,7 +236,7 @@ class FTPGet:
         
         self._stateLock.acquire()   
         try:
-            if self.isDone():
+            if self.isDone:
                 # already finished; do nothing
                 return
             else:

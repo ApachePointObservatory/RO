@@ -23,6 +23,7 @@ History:
                     Now the connection is automatically closed on error (note: the only cross-platform way
                     to detect a port error is to catch a read or write error).
 2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
+2012-08-01 ROwen    Changed getState() to state and isOpen() to isOpen.
 """
 __all__ = ["TkSerial", "NullSerial"]
 import sys
@@ -62,14 +63,16 @@ class TkBaseSerial(object):
         self._reason = ""
         self._stateCallback = stateCallback
         self._tkCallbackDict = dict()
-        
-    def getState(self):
+    
+    @property
+    def state(self):
         """Returns the current state as a tuple:
         - state: state (as a string)
         - reason: the reason for the state ("" if none)
         """
         return (self._state, self._reason)
 
+    @property
     def isOpen(self):
         """Return True if serial connection is open"
         """
@@ -114,7 +117,7 @@ class TkBaseSerial(object):
             self._reason = str(reason)
 
         stateCallback = self._stateCallback
-        if not self.isOpen():
+        if not self.isOpen:
             self._clearCallbacks()
         
         if stateCallback:
