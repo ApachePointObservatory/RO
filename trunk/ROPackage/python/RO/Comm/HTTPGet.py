@@ -239,7 +239,7 @@ class HTTPGet(RO.AddCallback.BaseMixin):
         if _Debug:
             print "%s.start()" % (self,)
         if self._state != self.Queued:
-            raise RuntimeError("Cannot start; state = %r not Queued" % (self.state,))
+            raise RuntimeError("Cannot start; state = %r not Queued" % (self._state,))
 
         self._setState(self.Connecting)
 

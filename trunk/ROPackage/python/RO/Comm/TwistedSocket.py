@@ -146,8 +146,8 @@ class Socket(BaseSocket):
         stateCallback = nullCallback,
         name = "",
     ):
-#         print "Socket(name=%r, endpoint=%r, protocol=%r, state=%r, readCallback=%r, stateCallback=%r)" % \
-#             (name, endpoint, protocol, state, readCallback, stateCallback)
+        #print "Socket(name=%r, endpoint=%r, protocol=%r, state=%r, readCallback=%r, stateCallback=%r)" % \
+        #    (name, endpoint, protocol, state, readCallback, stateCallback)
         if bool(endpoint is None) == bool(protocol is None):
             raise RuntimeError("Must provide one of endpoint or protocol")
         self._endpoint = endpoint
@@ -165,8 +165,7 @@ class Socket(BaseSocket):
         else:
             self._setState(BaseSocket.Connecting)
             self._endpointDeferred = self._endpoint.connect(_SocketProtocolFactory())
-            self._endpointDeferred.addCallbacks(self._connectionMade, self._connectionLost)
-            self._endpointDeferred.addErrback(log.err)
+            setCallbacks(self._endpointDeferred, self._connectionMade, self._connectionLost)
     
     @property
     def host(self):
@@ -198,6 +197,7 @@ class Socket(BaseSocket):
     def _connectionLost(self, reason):
         """Connection lost callback
         """
+        #print "%s._connectionLost(reason=%r)" % (self, reason)
         if reason is None:
             reasonStr = None
         elif issubclass(getattr(reason, "type", None), ConnectionDone):
@@ -214,7 +214,7 @@ class Socket(BaseSocket):
     def _connectionMade(self, protocol):
         """Callback when connection made
         """
-        #print "%s._connectionMade(%r)" % (self, protocol)
+        #print "%s._connectionMade(protocol=%r)" % (self, protocol)
         self._protocol = protocol
         self._protocol.roSetCallbacks(
             readCallback = self._doRead,
@@ -362,10 +362,9 @@ class Server(BaseServer):
             sockReadCallback = sockReadCallback,
             sockStateCallback = sockStateCallback,
             name = name,
-        )            
+        )
         self._endpointDeferred = self._endpoint.listen(_SocketProtocolFactory(self._newConnection))
-        self._endpointDeferred.addCallbacks(self._listeningCallback, self._connectionLost)
-        self._endpointDeferred.addErrback(log.err) # log errors in _listeningCallback
+        setCallbacks(self._endpointDeferred, self._listeningCallback, self._connectionLost)
         self._numConn = 0
 
     @property
@@ -383,8 +382,7 @@ class Server(BaseServer):
         """
         if self._protocol is not None:
             self._closeDeferred = self._protocol.stopListening()
-            self._closeDeferred.addBoth(self._connectionLost)
-            self._closeDeferred.addErrback(log.err) # log errors in self._connectionLost
+            setCallbacks(self._closeDeferred, self._connectionLost, self._connectionLost)
     
     def _clearCallbacks(self):
         """Clear any callbacks added by this class. Called just after the socket is closed.
@@ -473,6 +471,21 @@ class TCPServer(Server):
         """Return main arguments as a string, for __str__
         """
         return "name=%r, port=%r" % (self.name, self.port)
+
+def setCallbacks(deferred, callback, errback):
+    """Convenience function to add callbacks to a deferred
+    
+    Also adds a final logging errback.
+    
+    This exists due to an obscure error in the pattern I was using:
+        self.deferred = ... (create the deferred somehow)
+        self.deferred.addCallbacks(callfunc, errfunc)
+        # the previous statement may fire errfunc immediately,
+        # which sets self.deferred=None and makes the next step illegal
+        self.deferred.addErrback(log.err)
+    """
+    deferred.addCallbacks(callback, errback)
+    deferred.addErrback(log.err)
 
 
 if __name__ == "__main__":
