@@ -54,7 +54,7 @@ RO.Comm.Generic.setFramework("twisted")
 reactor.run()
 
 History:
-2012-07-17 ROwen
+2012-08-10 ROwen
 """
 _Framework = None
 
@@ -74,17 +74,11 @@ def setFramework(framework):
         raise ValueError("framework=%r; must be one of %s" % (frameworkList,))
 
     if framework == "tk":
-        import RO.Comm.TkSocket
-        import RO.TkUtil
-        TCPSocket = RO.Comm.TkSocket.TkSocket
-        TCPServer = RO.Comm.TkSocket.TkServerSocket
-        Timer = RO.TkUtil.Timer
+        from RO.Comm.TkSocket import TCPSocket, TCPServer
+        from RO.TkUtil import Timer
     elif framework == "twisted":
-        import RO.Comm.TwistedSocket
-        import RO.Comm.TwistedTimer
-        TCPSocket = RO.Comm.TwistedSocket.TCPSocket
-        TCPServer = RO.Comm.TwistedSocket.TCPServer
-        Timer = RO.Comm.TwistedTimer.Timer
+        from RO.Comm.TwistedSocket import TCPSocket, TCPServer
+        from RO.Comm.TwistedTimer import Timer
     else:
         raise ValueError("Bug! Unrecognized framework=%r" % (framework,))
     _Framework = framework

@@ -141,8 +141,9 @@ class _TkSocketWrapper(object):
             self._tk.call('fconfigure', self._tkSocket, *configArgs)
         except Tkinter.TclError, e:
             raise RuntimeError(e)
-    
-    def getState(self):
+
+    @property
+    def isOKReason(self):
         """Return isOK, reason
         
         Returns:
@@ -150,7 +151,7 @@ class _TkSocketWrapper(object):
         - False, errStr if an error
         - True, reason if closed without error; reason may be ""
         """
-        #print "%s.getState()" % (self,)
+        #print "%s.isOKReason()" % (self,)
         errStr = self._tk.call('fconfigure', self._tkSocket, '-error')
         if errStr:
             return False, errStr
@@ -395,7 +396,7 @@ class TCPSocket(BaseSocket):
         """
         if self.isDone:
             return False
-        isOK, errStr = self._tkSocketWrapper.getState()
+        isOK, errStr = self._tkSocketWrapper.isOKReason
         if errStr:
             self.close(isOK=isOK, reason=errStr)
             return False

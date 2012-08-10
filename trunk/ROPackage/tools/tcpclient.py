@@ -1,11 +1,13 @@
 #!/usr/bin/env python
-"""Example trivial telnet client using TkSocket
+"""Example trivial telnet client using RO.Comm.TCPConnection
 
 History:
 2009-07-10 ROwen    Removed an inline conditional statement to be Python 2.4 compatible.
 """
 import sys
 import Tkinter
+import RO.Comm.Generic
+RO.Comm.Generic.setFramework("tk")
 import RO.Comm.TCPConnection
 import RO.Wdg
 
@@ -40,17 +42,17 @@ class TCPClient(Tkinter.Frame):
         self.grid_columnconfigure(0, weight=1)
     
     def connState(self, sock):
-        stateVal, stateStr, reason = sock.getFullState()
+        state, reason = sock.fullState
         if reason:
-            self.logMsg("*** Socket %s: %s" % (stateStr, reason))
+            self.logMsg("*** Socket %s: %s" % (state, reason))
         else:
-            self.logMsg("*** Socket %s" % (stateStr,))
+            self.logMsg("*** Socket %s" % (state,))
     
     def connRead(self, sock, readStr):
         self.logMsg(repr(readStr))
 
     def doCmd(self, cmd):
-        if not self.conn.isConnected():
+        if not self.conn.isConnected:
             self.logMsg("*** Not connected")
         self.conn.writeLine(cmd)
     
