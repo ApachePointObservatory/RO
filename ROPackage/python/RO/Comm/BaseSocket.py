@@ -11,7 +11,7 @@ These sockets allow nonblocking event-driven operation:
   and a state callback, which is called when the connection state changed.
 
 History:
-2012-07-12 ROwen    Based on TkSocket.
+2012-08-10 ROwen    Based on TkSocket.
 """
 __all__ = ["BaseSocket", "BaseServer", "NullSocket", "nullCallback"]
 
@@ -82,7 +82,7 @@ class Base(object):
         
         Inputs:
         - callFunc: the callback function, or nullCallback if none wanted
-                    The function is sent one argument: this TkSocket
+                    The function is sent one argument: this Socket
         """
         self._stateCallback = callFunc
     
@@ -204,7 +204,7 @@ class BaseSocket(Base):
         
         Inputs:
         - callFunc: the callback function, or nullCallback if none wanted.
-                    The function is sent one argument: this TkSocket
+                    The function is sent one argument: this Socket
         """
         self._readCallback = callFunc
     
