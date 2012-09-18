@@ -69,6 +69,7 @@ History:
 2012-05-31 ROwen    Add a clear method to StripChartWdg and _Line.
 2012-06-04 ROwen    Reduce CPU usage by doing less work if not visible (not mapped).
 2012-07-09 ROwen    Modified to use RO.TkUtil.Timer.
+2012-09-18 ROwen    Explicitly import matplotlib.dates to avoid a problem with matplotlib 1.2.0rc1
 """
 import bisect
 import datetime
@@ -77,6 +78,7 @@ import time
 import numpy
 import Tkinter
 import matplotlib
+import matplotlib.dates
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from RO.TkUtil import Timer
 
