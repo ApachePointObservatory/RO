@@ -7,30 +7,31 @@
 
 <h2>Version history for the <a href="Overview.html">RO Python Package</a></h2>
 
-<h3>3.0.0b1 2012-08-01</h3>
+<h3>3.0.0 2012-09-28</h3>
 <ul>
     <li>RO.Comm
     <ul>
         <li>This is a major overhaul. The big news is the addition of support for communicating using Twisted instead of Tkinter. Backward-incompatible changes include:
         <li>
+            <li>You must call RO.Comm.Generic.setFramework before using RO.ScriptRunner, RO.KeyDispatcher, RO.KeyVariable or anything in the new sub-package RO.Comm.Generic.
             <li>Many methods are now attributes, for example: isDone() is now isDone and getState() is now state.
             <li>State constants are now always strings, not integers. As a result getFullState() is now fullState and only returns two items, not three.
             <li>RO.Comm.FTPGet: state constants are now class constants, like all other RO.Comm classes.
         </ul>
-        <li>RO.Comm.Generic: event-based TCP/IP connections and event-based timers using Tcl/Tk or Twisted. <b>Note</b>: you must call RO.Comm.Generic.setFramework before using.
+        <li>RO.Comm.Generic: event-based TCP/IP connections and event-based timers using Tcl/Tk or Twisted.
         <li>RO.Comm.TkSocket:
         <ul>
             <li>Renamed TkSocket to TCPSocket.
             <li>Renamed TkSocket addr argument to host for consistency with TCPConnection and Twisted framework.
             <li>Renamed TkServerSocket to TCPServer and expanded its capabilities.
             <li>Removed BaseServer; use TCPServer instead.
-            <li>Eliminated the binary argument to TCPSocket and eliminated tcl end-of-line translation; instead writeLine always appends \r\n and readLine breaks on any of \r\n, \n or \r. This provides more predictable behavior and an matches the behavior of TwistedSocket.TCPSocket.
+            <li>Eliminated the binary argument to TCPSocket and eliminated tcl end-of-line translation; instead writeLine always appends \r\n and readLine breaks on any of \r\n, \n or \r. This provides more predictable behavior and matches the behavior of TwistedSocket.TCPSocket.
         </ul>
         <li>RO.Comm.TwistedSocket: event-based TCP/IP communications using Twisted framework.
         <li>RO.Comm.TwistedTimer: event-based timers using Twisted framework.
         <li>Added some unit tests in ROPackage/tests; these must be run using Twisted Trial.
     </ul>
-    <li>Eliminated the dependency on Tkinter in the following modules; you may use Twisted for the event loop, instead. <b>Warning</b>: you must call RO.Comm.Generic.setFramework before using these:
+    <li>Eliminated the dependency on Tkinter in the following modules; you may use Twisted for the event loop, instead. As noted above, you must call RO.Comm.Generic.setFramework before using these:
     <ul>
         <li>RO.ScriptRunner. Note that the "master" argument is now optional and moved to later in the argument list.
         <li>RO.KeyDispatcher
