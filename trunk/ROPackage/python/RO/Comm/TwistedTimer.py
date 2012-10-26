@@ -4,6 +4,7 @@ Requires a running twisted reactor.
 
 History:
 2012-07-13 ROwen    Copied from opscore, but with active() replaced by isActive.
+2012-10-25 ROwen    Timer.start treats negative values as 0.
 """
 import twisted.internet.reactor
 
@@ -30,11 +31,12 @@ class Timer(object):
         """Start or restart the timer, cancelling a pending timer if present
         
         Inputs:
-        - sec: interval, in seconds (float)
+        - sec: interval, in seconds (float); negative values are treated as 0
         - callFunc: function to call when timer fires
         *args: arguments for callFunc
         **keyArgs: keyword arguments for callFunc; must not include "sec" or "callFunc"
         """
+        sec = max(0.0, float(sec))
         self.cancel()
         self._timer = _reactor.callLater(sec, callFunc, *args, **keyArgs)
 

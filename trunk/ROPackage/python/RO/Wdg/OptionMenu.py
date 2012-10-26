@@ -90,6 +90,7 @@ History:
                     formerly it would return the default if the current value was noneDisplay,
                     which caused surprising behavior if noneDisplay was a valid value.
                     Added method isValid.
+2012-10-25 ROwen    If width is specified, increase it on aqua to work around a Tk bug.
 """
 __all__ = ['OptionMenu']
 
@@ -97,6 +98,7 @@ import Tkinter
 import RO.AddCallback
 import RO.Alg
 import RO.SeqUtil
+import RO.TkUtil
 from CtxMenu import CtxMenuMixin
 from IsCurrentMixin import AutoIsCurrentMixin, IsCurrentActiveMixin
 from SeverityMixin import SeverityActiveMixin
@@ -185,6 +187,10 @@ class OptionMenu (Tkinter.Menubutton, RO.AddCallback.TkVarMixin,
         if trackDefault == None:
             trackDefault = bool(autoIsCurrent)
         self.trackDefault = trackDefault
+        
+        width = kargs.get("width")
+        if width is not None and RO.TkUtil.getWindowingSystem() == RO.TkUtil.WSysAqua:
+            kargs["width"] = width + 3
 
         # handle keyword arguments for the Menubutton
         # start with defaults, update with user-specified values, if any
