@@ -57,6 +57,7 @@ History:
 2007-01-11 ROwen    Added isDefault method.
 2010-05-21 ROwen    Added trackDefault parameter. By default this is set to autoIsCurrent,
                     so this may alter existing code.
+2012-10-25 ROwen    If width is specified, increase it on aqua to work around a Tk bug (indicatoron is ignored).
 """
 __all__ = ['Checkbutton']
 
@@ -144,6 +145,11 @@ class Checkbutton (Tkinter.Checkbutton, RO.AddCallback.TkVarMixin,
             trackDefault = bool(autoIsCurrent)
         self._trackDefault = trackDefault
         self.helpText = helpText
+
+        hideIndicator = not kargs.get("indicatoron", True)
+        width = kargs.get("width")
+        if hideIndicator and width is not None and RO.TkUtil.getWindowingSystem() == RO.TkUtil.WSysAqua:
+            kargs["width"] = width + 1
         
         # if a command is supplied in kargs, remove it now and set it later
         # so it is not called during init
