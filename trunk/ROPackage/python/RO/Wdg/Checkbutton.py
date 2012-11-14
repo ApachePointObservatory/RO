@@ -92,7 +92,7 @@ class Checkbutton (Tkinter.Checkbutton, RO.AddCallback.TkVarMixin,
     - autoIsCurrent controls automatic isCurrent mode
         - if false (manual mode), then is/isn't current if set, setBool
             or setIsCurrent is called with isCurrent true/false
-        - if true (auto mode), then is currently only when all these are so:
+        - if true (auto mode), then isCurrent is true only when all these are so:
             - set, setBool or setIsCurrent is called with isCurrent true
             - setDefValue is called with isCurrent true
             - current value == default value
