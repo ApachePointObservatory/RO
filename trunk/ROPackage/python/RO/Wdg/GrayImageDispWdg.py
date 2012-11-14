@@ -160,6 +160,7 @@ History:
                     Simplified the code for reusing scaledArr.
 2011-08-29 ROwen    Bug fix: display was incorrect unless data array was 32-bit float.
 2012-07-09 ROwen    Modified to use RO.TkUtil.Timer.
+2012-11-13 ROwen    Stop using Checkbutton indicatoron=False because it is no longer supported on MacOS X.
 """
 import weakref
 import Tkinter
@@ -551,7 +552,6 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
             for mInfo in self.maskInfo:
                 maskWdg = RO.Wdg.Checkbutton(
                     master = toolFrame,
-                    indicatoron = False,
                     text = mInfo.btext,
                     defValue = mInfo.doShow,
                     callFunc = self.doShowHideMask,
