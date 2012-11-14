@@ -21,6 +21,7 @@ History:
 2007-08-09 ROwen    OptionPanelControl: added setBool method.
                     _WdgButton: renamed doClick to _updVisible.
 2012-07-10 ROwen    Removed use of update_idletasks.
+2012-11-13 ROwen    Stop using Checkbutton indicatoron=False because it is no longer supported on MacOS X.
 """
 __all__ = ['OptionPanelControl']
 
@@ -58,7 +59,6 @@ class _WdgButton(Checkbutton):
             helpText = helpText,
             helpURL = helpURL,
             takefocus = takefocus,
-            indicatoron = False,
             var = var,
             callFunc = self._updVisible,
         )
