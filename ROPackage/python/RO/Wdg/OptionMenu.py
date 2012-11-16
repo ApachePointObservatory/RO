@@ -1,16 +1,18 @@
 #!/usr/bin/env python
-"""A variant of Tkinter.OptionMenu that adds help, default handling,
-the ability to change menu items and the ability to configure the menu.
+"""A variant of Tkinter.OptionMenu that adds many features.
+
+Extra features include: help, default handling, the ability to change menu items
+and the ability to configure the menu.
+
 OptionMenu is essentially an RO.Wdg.Entry widget (though I don't promise
 that *all* methods are implemented).
 
 Note: I had to go mucking with internals, so some of this code is based on
 Tkinter's implementation of OptionMenu.
 
-To do:
-- Color menu items in autoIsCurrent mode.
-
 Warnings:
+- Do not change the width of the menubutton after creating the OptionMenu; that will conflict
+  with workarounds for Tcl/Tk bugs.
 - If "" is a valid option then be sure to set noneDisplay to something other than "".
   Otherwise getString will return the default value when the "" is selected.
 - As of Tk 8.4.19, MacOS X has poor visual support for background color (isCurrent)
@@ -90,7 +92,8 @@ History:
                     formerly it would return the default if the current value was noneDisplay,
                     which caused surprising behavior if noneDisplay was a valid value.
                     Added method isValid.
-2012-10-25 ROwen    If width is specified, increase it on aqua to work around a Tk bug.
+2012-10-25 ROwen    If width is nonzero on aqua, increase it to work around Tk bug #3580194.
+2012-11-16 ROwen    If width is 0 on aqua, set it manually based on content to work around Tk bug #3587262.
 """
 __all__ = ['OptionMenu']
 
@@ -188,9 +191,16 @@ class OptionMenu (Tkinter.Menubutton, RO.AddCallback.TkVarMixin,
             trackDefault = bool(autoIsCurrent)
         self.trackDefault = trackDefault
         
-        width = kargs.get("width")
-        if width is not None and RO.TkUtil.getWindowingSystem() == RO.TkUtil.WSysAqua:
-            kargs["width"] = width + 3
+        width = kargs.get("width", 0)
+        doPatchMacAutoWidth = False
+        if (RO.TkUtil.getWindowingSystem() == RO.TkUtil.WSysAqua) \
+            and RO.TkUtil.getTclVersion().startswith("8.5"):
+            if width == 0:
+                # set flag indicating need for workaround for Tcl/Tk bug #3587262
+                doPatchMacAutoWidth = True
+            else:
+                # work around Tcl/Tk bug #3580194
+                kargs["width"] = width + 3
 
         # handle keyword arguments for the Menubutton
         # start with defaults, update with user-specified values, if any
@@ -228,11 +238,29 @@ class OptionMenu (Tkinter.Menubutton, RO.AddCallback.TkVarMixin,
         
         self.setItems(items, helpText=helpText, checkCurrent = False, checkDefault = False)
         self.setDefault(defValue, isCurrent = isCurrent, doCheck = True, showDefault = showDefault)
+        
+        if doPatchMacAutoWidth:
+            self.addCallback(self._patchMacAutoWidth, callNow=True)
 
         # add callback function after setting default
         # to avoid having the callback called right away
         if callFunc:
-            self.addCallback(callFunc, False)
+            self.addCallback(callFunc, callNow=False)
+    
+    def _patchMacAutoWidth(self, wdg=None):
+        """Callback function that manually sets width to work around Tcl/Tk bug #3587262
+        
+        The effect of this bug is that the displayed width may be too narrow in auto mode (width=0)
+        on MacOS using Tcl/Tk 8.5. Thus you must only register this
+        
+        Only register this callback function on aqua Tcl/Tk 8.5
+        """
+        currVal = self._var.get()
+        newWidth = len(currVal) + 2
+        if self["indicatoron"]:
+            newWidth += 1
+        if self["width"] != newWidth:    
+            self["width"] = newWidth
 
     def _doCallbacks(self):
         self._basicDoCallbacks(self)

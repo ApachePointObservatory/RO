@@ -7,12 +7,22 @@
 
 <h2>Version history for the <a href="Overview.html">RO Python Package</a></h2>
 
-<h3>3.0.1b1 2012-10-25</h3>
+<h3>3.0.1b1+ 2012-11-16</h3>
+
+<p>Work around more display bugs in Tk on MacOS X
+
 <ul>
-<li>Work around some display bugs in Tk on MacOS X
+    <li>RO.TkUtil: added getTclVersion function.
+    <li>RO.Wdg.OptionMenu: work around Tck/Tk bug #3587262: menubutton is sometimes too narrow on MacOS if width=0.
+</ul>
+
+<h3>3.0.1b1 2012-10-25</h3>
+
+<p>Work around some display bugs in Tk on MacOS X
+
 <ul>
     <li>RO.Wdg.Checkbutton: the indicatoron option is ignored on MacOS X due to a Tk bug or misfeature. So to make sure there is room for the label, but only on MacOS X: if width is specified and indicatoron is false then increase the width by a bit.
-    <li>RO.Wdg.OptionMenu: the width is too narrow on MacOS X due to a Tk bug. So, only on MacOS X: if width is specified then increase it by a bit.
+    <li>RO.Wdg.OptionMenu: work around Tcl/Tk bug #3580194: menubutton is too narrow on MacOS if width is nonzero.
 </ul>
     
 
