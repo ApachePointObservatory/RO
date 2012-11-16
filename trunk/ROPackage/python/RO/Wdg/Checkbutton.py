@@ -58,6 +58,7 @@ History:
 2010-05-21 ROwen    Added trackDefault parameter. By default this is set to autoIsCurrent,
                     so this may alter existing code.
 2012-10-25 ROwen    If width is specified, increase it on aqua to work around a Tk bug (indicatoron is ignored).
+2012-11-16 ROwen    Refine bug workaround to only occur if Tcl version starts with "8.5".
 """
 __all__ = ['Checkbutton']
 
@@ -147,8 +148,11 @@ class Checkbutton (Tkinter.Checkbutton, RO.AddCallback.TkVarMixin,
         self.helpText = helpText
 
         hideIndicator = not kargs.get("indicatoron", True)
-        width = kargs.get("width")
-        if hideIndicator and width is not None and RO.TkUtil.getWindowingSystem() == RO.TkUtil.WSysAqua:
+        width = kargs.get("width", 0)
+        if hideIndicator and width != 0 \
+            and RO.TkUtil.getWindowingSystem() == RO.TkUtil.WSysAqua \
+            and RO.TkUtil.getTclVersion().startswith("8.5"):
+            # work around Tcl/Tk bug #3580159: indicator always shown on MacOS and text width too narrow
             kargs["width"] = width + 1
         
         # if a command is supplied in kargs, remove it now and set it later

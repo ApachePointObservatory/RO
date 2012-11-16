@@ -16,9 +16,10 @@ History:
 2010-07-20 ROwen    Added Timer class.
 2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
 2012-07-09 ROwen    Added Timer to __all__.
+2012-11-16 ROwen    Added getTclVersion function.
 """
-__all__ = ['addColors', 'colorOK', 'EvtNoProp', 'getWindowingSystem', 'TclFunc', 'Geometry', 'Timer',
-    'WSysAqua', 'WSysX11', 'WSysWin']
+__all__ = ['addColors', 'colorOK', 'EvtNoProp', 'getWindowingSystem', 'getTclVersion', 'TclFunc',
+    'Geometry', 'Timer', 'WSysAqua', 'WSysX11', 'WSysWin']
 
 import re
 import sys
@@ -34,6 +35,7 @@ WSysWin = "win32"
 # internal globals
 g_tkWdg = None
 g_winSys = None
+g_tkVersion = None
 
 def addColors(*colorMultPairs):
     """Add colors or scale a color.
@@ -83,6 +85,21 @@ def getButtonNumbers():
         return (1, 3, 2)
     else:
         return (1, 2, 3)
+
+def getTclVersion():
+    """Return the Tcl/Tk version as a string
+    
+    Returns the result of tcl command "info patchlevel". Some representative return values
+    (from tcl documentation for tcl_patchLevel):
+    8.4.16
+    8.5b3
+    """
+    global g_tkVersion
+    
+    if g_tkVersion is None:
+        tkWdg = _getTkWdg()
+        g_tkVersion = tkWdg.tk.call("info", "patchlevel")
+    return g_tkVersion
 
 def getWindowingSystem():
     """Return the Tk window system.
