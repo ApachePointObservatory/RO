@@ -7,31 +7,28 @@
 
 <h2>Version history for the <a href="Overview.html">RO Python Package</a></h2>
 
-<h3>3.0.1b1+ 2012-11-16</h3>
-
-<p>Work around more display bugs in Tk on MacOS X
+<h3>3.0.1 2012-11-19</h3>
 
 <ul>
     <li>RO.TkUtil: added getTclVersion function.
-    <li>RO.Wdg.OptionMenu: work around Tck/Tk bug #3587262: menubutton is sometimes too narrow on MacOS if width=0.
+    <li>Work around more display bugs in Tk on MacOS X
+    <ul>
+        <li>RO.Wdg.OptionMenu
+        <ul>
+            <li>Work around Tck/Tk bug #3587262: menubutton is sometimes too narrow on MacOS if width=0.
+            <li>Work around Tcl/Tk bug or misfeature #3580194: menubutton is too narrow on MacOS if width is nonzero.
+        </ul>
+        <li>RO.Wdg.Checkbutton: work around bug #3580159: indicatoron=0 is ignored on MacOS, except that it messes up the width.
+    </ul>
 </ul>
-
-<h3>3.0.1b1 2012-10-25</h3>
-
-<p>Work around some display bugs in Tk on MacOS X
-
-<ul>
-    <li>RO.Wdg.Checkbutton: the indicatoron option is ignored on MacOS X due to a Tk bug or misfeature. So to make sure there is room for the label, but only on MacOS X: if width is specified and indicatoron is false then increase the width by a bit.
-    <li>RO.Wdg.OptionMenu: work around Tcl/Tk bug #3580194: menubutton is too narrow on MacOS if width is nonzero.
-</ul>
-    
 
 <h3>3.0.0 2012-09-28</h3>
+
 <ul>
     <li>RO.Comm
     <ul>
         <li>This is a major overhaul. The big news is the addition of support for communicating using Twisted instead of Tkinter. Backward-incompatible changes include:
-        <li>
+        <ul>
             <li>You must call RO.Comm.Generic.setFramework before using RO.ScriptRunner, RO.KeyDispatcher, RO.KeyVariable or anything in the new sub-package RO.Comm.Generic.
             <li>Many methods are now attributes, for example: isDone() is now isDone and getState() is now state.
             <li>State constants are now always strings, not integers. As a result getFullState() is now fullState and only returns two items, not three.
