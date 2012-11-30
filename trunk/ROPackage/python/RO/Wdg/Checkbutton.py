@@ -62,6 +62,8 @@ History:
 2012-11-29 ROwen    Further refined bug workaround to make it work like unix as much as possible
                     using default fonts, without getting fancy with font metrics.
                     Fixed and enhanced the demo code, demo of fixed width.
+2012-11-30 ROwen    Bug fix: width patch was not applied if width changed after the widget was created.
+                    Now it is applied by overridden method configure.
 """
 __all__ = ['Checkbutton']
 
@@ -156,17 +158,6 @@ class Checkbutton (Tkinter.Checkbutton, RO.AddCallback.TkVarMixin,
         self._trackDefault = trackDefault
         self.helpText = helpText
 
-        showIndicator = kargs.get("indicatoron", True)
-        width = kargs.get("width", 0)
-        if width != 0 \
-            and RO.TkUtil.getWindowingSystem() == RO.TkUtil.WSysAqua \
-            and RO.TkUtil.getTclVersion().startswith("8.5"):
-            # width is wrong on Aqua in Tcl/Tk 8.5 and possibly 8.6
-            if showIndicator:
-                kargs["width"] = width + 3
-            else:
-                kargs["width"] = width + 2
-        
         # if a command is supplied in kargs, remove it now and set it later
         # so it is not called during init
         cmd = kargs.pop("command", None)
@@ -193,7 +184,8 @@ class Checkbutton (Tkinter.Checkbutton, RO.AddCallback.TkVarMixin,
         Tkinter.Checkbutton.__init__(self,
             master = master,
             variable = self._var,
-        **kargs)
+        )
+        self.configure(kargs) # call overridden configure to fix width, if necessary
 
         RO.AddCallback.TkVarMixin.__init__(self, self._var)
         
@@ -368,6 +360,38 @@ class Checkbutton (Tkinter.Checkbutton, RO.AddCallback.TkVarMixin,
             self.configure(state="disabled")
             if self._defIfDisabled:
                 self.restoreDefault()
+    
+    def configure(self, argDict=None, **kargs):
+        """Overridden version of configure that applies a width correction, if necessary
+
+        Notes:
+        - configure is called by wdg[item] = value
+        - sometimes configure is called with a single positional argument: a dict of items,
+            and sometimes it is called with a set of keyword arguments. This code handles both cases.
+        - configure is NOT called by the widget's constructor, so you must call configure with your desired width
+            after constructing the widget, rather than passing width to the widget's constructor
+        """
+        if argDict is not None:
+            kargs.update(argDict)
+        if "width" in kargs:
+            kargs["width"] = self._computeCorrectedWidth(
+                width = kargs["width"], 
+                showIndicator = kargs.get("indicatoron", self["indicatoron"]),
+            )
+        Tkinter.Checkbutton.configure(self, **kargs)
+    
+    def _computeCorrectedWidth(self, width, showIndicator):
+        """Compute corrected width to overcome Tcl/Tk bugs
+        """
+        if (width != 0) \
+            and (RO.TkUtil.getWindowingSystem() == RO.TkUtil.WSysAqua) \
+            and RO.TkUtil.getTclVersion().startswith("8.5"):
+            if showIndicator:
+                corrWidth = width + 3
+            else:
+                corrWidth = width + 2
+            return corrWidth
+        return width
 
 
 if __name__ == "__main__":

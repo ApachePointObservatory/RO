@@ -95,6 +95,8 @@ History:
 2012-10-25 ROwen    If width is nonzero on aqua, increase it to work around Tk bug #3580194.
 2012-11-16 ROwen    If width is 0 on aqua, set it manually based on content to work around Tk bug #3587262.
 2012-11-29 ROwen    Fix demo and add demonstration of fixed width.
+2012-11-30 ROwen    Bug fix: width patch was not applied if width changed after the widget was created.
+                    Now it is applied by overridden method configure.
 """
 __all__ = ['OptionMenu']
 
@@ -195,21 +197,6 @@ class OptionMenu (Tkinter.Menubutton, RO.AddCallback.TkVarMixin,
             trackDefault = bool(autoIsCurrent)
         self.trackDefault = trackDefault
         
-        showIndicator = kargs.get("indicatoron", True)
-        width = kargs.get("width", 0)
-        doPatchMacAutoWidth = False
-        if (RO.TkUtil.getWindowingSystem() == RO.TkUtil.WSysAqua) \
-            and RO.TkUtil.getTclVersion().startswith("8.5"):
-            if width == 0:
-                # set flag indicating need for workaround for Tcl/Tk bug #3587262
-                doPatchMacAutoWidth = True
-            else:
-                # work around Tcl/Tk bug #3580194
-                if showIndicator:
-                    kargs["width"] = width + 3
-                else:
-                    kargs["width"] = width + 2
-
         # handle keyword arguments for the Menubutton
         # start with defaults, update with user-specified values, if any
         # then set text or textvariable
@@ -229,7 +216,8 @@ class OptionMenu (Tkinter.Menubutton, RO.AddCallback.TkVarMixin,
         else:
             wdgKArgs["textvariable"] = var
         self.label = label
-        Tkinter.Menubutton.__init__(self, master, **wdgKArgs)
+        Tkinter.Menubutton.__init__(self, master)
+        self.configure(**wdgKArgs) # call overridden configure to fix width, if necessary
         self._menu = Tkinter.Menu(self, tearoff=False) # name="menu", tearoff=False)
         self["menu"] = self._menu
         # self.menuname = self._menu._w
@@ -247,7 +235,10 @@ class OptionMenu (Tkinter.Menubutton, RO.AddCallback.TkVarMixin,
         self.setItems(items, helpText=helpText, checkCurrent = False, checkDefault = False)
         self.setDefault(defValue, isCurrent = isCurrent, doCheck = True, showDefault = showDefault)
         
-        if doPatchMacAutoWidth:
+        # work around Tcl/Tk bug #3587262
+        if (RO.TkUtil.getWindowingSystem() == RO.TkUtil.WSysAqua) \
+            and RO.TkUtil.getTclVersion().startswith("8.5") \
+            and (kargs.get("width", 0) == 0):
             self.addCallback(self._patchMacAutoWidth, callNow=True)
 
         # add callback function after setting default
@@ -255,39 +246,24 @@ class OptionMenu (Tkinter.Menubutton, RO.AddCallback.TkVarMixin,
         if callFunc:
             self.addCallback(callFunc, callNow=False)
     
-    def _patchMacAutoWidth(self, wdg=None):
-        """Callback function that manually sets width to work around Tcl/Tk bug #3587262
-        
-        The effect of this bug is that the displayed width may be too narrow in auto mode (width=0)
-        on MacOS using Tcl/Tk 8.5. Thus you must only register this
-        
-        Only register this callback function on aqua Tcl/Tk 8.5
-        """
-        currVal = self._var.get()
-        newWidth = len(currVal) + 2
-        if self["indicatoron"]:
-            newWidth += 1
-        if self["width"] != newWidth:    
-            self["width"] = newWidth
+    def configure(self, argDict=None, **kargs):
+        """Overridden version of configure that applies a width correction, if necessary
 
-    def _doCallbacks(self):
-        self._basicDoCallbacks(self)
-        if self._helpTextDict:
-            self.helpText = self._helpTextDict.get(self._var.get())
-
-    def _addItems(self):
-        """Adds the list of items to the menu;
-        must only be called when the menu is empty
-        and self._items has been set
+        Notes:
+        - configure is called by wdg[item] = value
+        - sometimes configure is called with a single positional argument: a dict of items,
+            and sometimes it is called with a set of keyword arguments. This code handles both cases.
+        - configure is NOT called by the widget's constructor, so you must call configure with your desired width
+            after constructing the widget, rather than passing width to the widget's constructor
         """
-        for item in self._items:
-            if item == None:
-                self._menu.add_separator()
-            else:
-                self._menu.add_command(
-                    label=item,
-                    command=_DoItem(self._var, item),
-                )
+        if argDict is not None:
+            kargs.update(argDict)
+        if "width" in kargs:
+            kargs["width"] = self._computeCorrectedWidth(
+                width = kargs["width"], 
+                showIndicator = kargs.get("indicatoron", self["indicatoron"]),
+            )
+        Tkinter.Menubutton.configure(self, **kargs)
     
     def asString(self, val):
         """Return display string associated with specified value:
@@ -571,6 +547,49 @@ class OptionMenu (Tkinter.Menubutton, RO.AddCallback.TkVarMixin,
         if self._helpTextDict:
             self.helpText = self._helpTextDict.get(self._var.get())
 
+    def _addItems(self):
+        """Adds the list of items to the menu;
+        must only be called when the menu is empty
+        and self._items has been set
+        """
+        for item in self._items:
+            if item == None:
+                self._menu.add_separator()
+            else:
+                self._menu.add_command(
+                    label=item,
+                    command=_DoItem(self._var, item),
+                )
+
+    def _doCallbacks(self):
+        self._basicDoCallbacks(self)
+        if self._helpTextDict:
+            self.helpText = self._helpTextDict.get(self._var.get())
+    
+    def _computeCorrectedWidth(self, width, showIndicator):
+        """Compute corrected width to overcome Tcl/Tk bugs
+        """
+        if (width != 0) \
+            and (RO.TkUtil.getWindowingSystem() == RO.TkUtil.WSysAqua) \
+            and RO.TkUtil.getTclVersion().startswith("8.5"):
+            if showIndicator:
+                corrWidth = width + 3
+            else:
+                corrWidth = width + 2
+            return corrWidth
+        return width
+    
+    def _patchMacAutoWidth(self, wdg=None):
+        """Callback function that manually sets width to work around Tcl/Tk bug #3587262
+        
+        The effect of this bug is that the displayed width may be too narrow in auto mode (width=0)
+        on MacOS using Tcl/Tk 8.5. Thus you must only register this
+        
+        Only register this callback function on aqua Tcl/Tk 8.5
+        """
+        currVal = self._var.get()
+        self["width"] = len(currVal)
+
 
 if __name__ == "__main__":
     import Label
@@ -608,9 +627,9 @@ if __name__ == "__main__":
         defValue = "MmmmmNnnnn A",
         callFunc = callFunc,
         defMenu = "Default",
-        width = 12,
-        helpText = "width=12",
+        helpText = "width=12 via configure",
     )
+    menu3.configure(width=12)
     menu3.grid(row=1, column=1, sticky="w")
 
     menu4 = OptionMenu(root,
@@ -628,12 +647,11 @@ if __name__ == "__main__":
         defValue = "MmmmmNnnnn A",
         callFunc = callFunc,
         defMenu = "Default",
-        width = 12,
         indicatoron = False,
-        helpText = "width=12, indicatoron=False",
+        helpText = "width=12 via ['width'], indicatoron=False",
     )
+    menu5["width"] = 12
     menu5.grid(row=1, column=2, sticky="w")
-
 
     label = Label.Label(root, width=20, anchor="w", helpText="most recently selected value")
     label.grid(row=2, column=0, columnspan=4, sticky="w")

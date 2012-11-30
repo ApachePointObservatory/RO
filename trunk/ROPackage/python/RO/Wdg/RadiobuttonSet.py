@@ -37,6 +37,8 @@ History:
 2012-11-29 ROwen    Work around Aqua Tk 8.5 bug: if width specified it is too narrow
                     (the fix will need modification if this bug is also present on Aqua Tk 8.6)
                     Fixed and enhanced the demo code.
+2012-11-30 ROwen    Removed __getitem__ and __len__ methods because they confuse InputCont.
+                    Moved fix for Aqua Tk 8.5 width bug to RO.Wdg.Radiobutton.
 """
 __all__ = ['RadiobuttonSet']
 
@@ -154,13 +156,6 @@ class RadiobuttonSet (RO.AddCallback.TkVarMixin,
         )
         RO.AddCallback.TkVarMixin.__init__(self, self._var)
 
-        width = kargs.get("width", 0)
-        if width != 0 \
-            and RO.TkUtil.getWindowingSystem() == RO.TkUtil.WSysAqua \
-            and RO.TkUtil.getTclVersion().startswith("8.5"):
-            # width is wrong on Aqua in Tcl/Tk 8.5 and possibly 8.6
-            kargs["width"] = width + 4
-        
         helpTextList = RO.SeqUtil.oneOrNAsList(helpText, nButtons, "helpText list")
         helpURLList = RO.SeqUtil.oneOrNAsList(helpURL, nButtons, "helpURL list")
         self.wdgSet = []
@@ -310,14 +305,6 @@ class RadiobuttonSet (RO.AddCallback.TkVarMixin,
             for wdg in self.wdgSet:
                 wdg.configure(state="disabled")
     
-    def __getitem__(self, ind):
-        """Get specified widget
-        """
-        return self.wdgSet[ind]
-    
-    def __len__(self):
-        return len(self.wdgSet)
-    
     def winfo_ismapped(self):
         """Needed by RO.InputCont
         """
@@ -339,7 +326,7 @@ if __name__ == "__main__":
         autoIsCurrent = True,
         helpText = "width=0, defValue=\"Foo's value\"",
     )
-    for wdg in rbs1:
+    for wdg in rbs1.wdgSet:
         wdg.pack(side="left")
     rbFrame1.pack(side="top")
 
@@ -350,10 +337,10 @@ if __name__ == "__main__":
         valueList = ("A's value", "B's value", "C's value"),
         abbrevOK = True,
         ignoreCase = True,
-        width = 12,
-        helpText = "width=12",
+        helpText = "width=12 via ['width']",
     )
-    for wdg in rbs2:
+    rbs2.configure(width = 12)
+    for wdg in rbs2.wdgSet:
         wdg.pack(side="left")
     rbFrame2.pack(side="top")
 
@@ -364,11 +351,11 @@ if __name__ == "__main__":
         valueList = ("A's value", "B's value", "C's value"),
         abbrevOK = True,
         ignoreCase = True,
-        width = 12,
         indicatoron = False,
-        helpText = "width=12, indicatoron=False",
+        width = 12,
+        helpText = "width=12 via ['width'], indicatoron=False",
     )
-    for wdg in rbs3:
+    for wdg in rbs3.wdgSet:
         wdg.pack(side="left")
     rbFrame3.pack(side="top")
     
