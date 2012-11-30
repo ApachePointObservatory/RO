@@ -64,6 +64,7 @@ History:
                     Fixed and enhanced the demo code, demo of fixed width.
 2012-11-30 ROwen    Bug fix: width patch was not applied if width changed after the widget was created.
                     Now it is applied by overridden method configure.
+2012-11-30 ROwen    Does no width correction if bitmap is shown.
 """
 __all__ = ['Checkbutton']
 
@@ -72,9 +73,6 @@ import RO.AddCallback
 import RO.CnvUtil
 import RO.MathUtil
 import RO.TkUtil
-if __name__ == "__main__":
-    import RO.Comm.Generic
-    RO.Comm.Generic.setFramework("tk")
 from CtxMenu import CtxMenuMixin
 from IsCurrentMixin import AutoIsCurrentMixin, IsCurrentCheckbuttonMixin
 from SeverityMixin import SeverityActiveMixin
@@ -375,15 +373,17 @@ class Checkbutton (Tkinter.Checkbutton, RO.AddCallback.TkVarMixin,
             kargs.update(argDict)
         if "width" in kargs:
             kargs["width"] = self._computeCorrectedWidth(
-                width = kargs["width"], 
+                width = kargs["width"],
+                hasBitmap = bool(kargs.get("bitmap", self["bitmap"])),
                 showIndicator = kargs.get("indicatoron", self["indicatoron"]),
             )
         Tkinter.Checkbutton.configure(self, **kargs)
     
-    def _computeCorrectedWidth(self, width, showIndicator):
+    def _computeCorrectedWidth(self, width, hasBitmap, showIndicator):
         """Compute corrected width to overcome Tcl/Tk bugs
         """
         if (width != 0) \
+            and not hasBitmap \
             and (RO.TkUtil.getWindowingSystem() == RO.TkUtil.WSysAqua) \
             and RO.TkUtil.getTclVersion().startswith("8.5"):
             if showIndicator:
