@@ -7,6 +7,20 @@
 
 <h2>Version history for the <a href="Overview.html">RO Python Package</a></h2>
 
+<h3>3.0.2 2012-11-29</h3>
+
+<ul>
+    <li>RO.Comm.TwistedSocket: socket now tries to convert text to ASCII before sending. This works around a Twisted Framework misfeature that unicode strings containing only ASCII are rejected (one that shows up often when using Tkinter with Tk 8.5 because many strings now always come back as unicode).
+    <li>RO.Wdg: more workarounds for Aqua Tk issues:
+    <ul>
+        <li>RO.Wdg.RadioButton: workaround the fact that the widget is too narrow if width is nonzero. Fix demo code and demo nonzero width.
+        <li>RO.Wdg.CheckButton: improve workaround for widget too narrow if width is nonzero;
+        it now acts very similar to unix if using default fonts. I could get fancier and use font metrics,
+        but at this point I think it's good enough. Fix demo code and demo nonzero width.
+        <li>RO.Wdg.OptionMenu: improved workaround for widget too narrow if width is nonzero. Fix demo code and demo nonzero width.
+    </ul>
+</ul>
+
 <h3>3.0.1 2012-11-19</h3>
 
 <ul>
@@ -18,7 +32,7 @@
             <li>Work around Tck/Tk bug #3587262: menubutton is sometimes too narrow on MacOS if width=0.
             <li>Work around Tcl/Tk bug or misfeature #3580194: menubutton is too narrow on MacOS if width is nonzero.
         </ul>
-        <li>RO.Wdg.Checkbutton: work around bug #3580159: indicatoron=0 is ignored on MacOS, except that it messes up the width.
+        <li>RO.Wdg.Checkbutton: work around a Tcl/Tk bug: the width is too narrow on MacOS X if width is nonzero.
     </ul>
 </ul>
 

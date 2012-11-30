@@ -34,14 +34,21 @@ History:
 2006-05-26 ROwen    Added trackDefault argument.
                     Bug fix: added isCurrent argument to set and setDefault.
 2008-04-29 ROwen    Fixed reporting of exceptions that contain unicode arguments.
+2012-11-29 ROwen    Work around Aqua Tk 8.5 bug: if width specified it is too narrow
+                    (the fix will need modification if this bug is also present on Aqua Tk 8.6)
+                    Fixed and enhanced the demo code.
 """
 __all__ = ['RadiobuttonSet']
 
 import Tkinter
+if __name__ == "__main__":
+    import RO.Comm.Generic
+    RO.Comm.Generic.setFramework("tk")
 import RO.AddCallback
 import RO.Alg
 import RO.SeqUtil
 import RO.StringUtil
+import RO.TkUtil
 import Button
 from IsCurrentMixin import AutoIsCurrentMixin, IsCurrentActiveMixin
 
@@ -146,6 +153,13 @@ class RadiobuttonSet (RO.AddCallback.TkVarMixin,
             ignoreCase = ignoreCase,
         )
         RO.AddCallback.TkVarMixin.__init__(self, self._var)
+
+        width = kargs.get("width", 0)
+        if width != 0 \
+            and RO.TkUtil.getWindowingSystem() == RO.TkUtil.WSysAqua \
+            and RO.TkUtil.getTclVersion().startswith("8.5"):
+            # width is wrong on Aqua in Tcl/Tk 8.5 and possibly 8.6
+            kargs["width"] = width + 4
         
         helpTextList = RO.SeqUtil.oneOrNAsList(helpText, nButtons, "helpText list")
         helpURLList = RO.SeqUtil.oneOrNAsList(helpURL, nButtons, "helpURL list")
@@ -296,11 +310,13 @@ class RadiobuttonSet (RO.AddCallback.TkVarMixin,
             for wdg in self.wdgSet:
                 wdg.configure(state="disabled")
     
-    def __getitem__(self, itemName):
-        """Allow detection of state and visibility in the usual fashion,
-        as required by RO.InputCont
+    def __getitem__(self, ind):
+        """Get specified widget
         """
-        return self.wdgSet[0][itemName]
+        return self.wdgSet[ind]
+    
+    def __len__(self):
+        return len(self.wdgSet)
     
     def winfo_ismapped(self):
         """Needed by RO.InputCont
@@ -309,28 +325,66 @@ class RadiobuttonSet (RO.AddCallback.TkVarMixin,
 
 if __name__ == "__main__":
     import PythonTk
+    from StatusBar import StatusBar
     root = PythonTk.PythonTk()
 
-    rbFrame = Tkinter.Frame()
-    rbs = RadiobuttonSet(
-        master = rbFrame,
+    rbFrame1 = Tkinter.Frame()
+    rbs1 = RadiobuttonSet(
+        master = rbFrame1,
         textList = ("Foo", "Bar", "Baz"),
         valueList = ("Foo's value", "Bar's value", "Baz's value"),
+        defValue = "Foo's value",
         abbrevOK = True,
         ignoreCase = True,
         autoIsCurrent = True,
+        helpText = "width=0, defValue=\"Foo's value\"",
     )
-    for wdg in rbs:
+    for wdg in rbs1:
         wdg.pack(side="left")
-    rbFrame.pack(side="top")
+    rbFrame1.pack(side="top")
+
+    rbFrame2 = Tkinter.Frame()
+    rbs2 = RadiobuttonSet(
+        master = rbFrame2,
+        textList = ("MmmmmNnnnn A", "MmmmmNnnnn B", "MmmmmNnnnn C"),
+        valueList = ("A's value", "B's value", "C's value"),
+        abbrevOK = True,
+        ignoreCase = True,
+        width = 12,
+        helpText = "width=12",
+    )
+    for wdg in rbs2:
+        wdg.pack(side="left")
+    rbFrame2.pack(side="top")
+
+    rbFrame3 = Tkinter.Frame()
+    rbs3 = RadiobuttonSet(
+        master = rbFrame3,
+        textList = ("MmmmmNnnnn A", "MmmmmNnnnn B", "MmmmmNnnnn C"),
+        valueList = ("A's value", "B's value", "C's value"),
+        abbrevOK = True,
+        ignoreCase = True,
+        width = 12,
+        indicatoron = False,
+        helpText = "width=12, indicatoron=False",
+    )
+    for wdg in rbs3:
+        wdg.pack(side="left")
+    rbFrame3.pack(side="top")
     
     def doPrint():
-        print "value = %r; default = %r" % (rbs.getString(), rbs.getDefault())
+        print "1 value = %r; default = %r" % (rbs1.getString(), rbs1.getDefault())
+        print "2 value = %r; default = %r" % (rbs2.getString(), rbs2.getDefault())
+        print "3 value = %r; default = %r" % (rbs3.getString(), rbs3.getDefault())
     
     enableVar = Tkinter.IntVar()
     enableVar.set(True)
     def setEnable():
-        rbs.setEnable(enableVar.get())
+        rbs1.setEnable(enableVar.get())
+        rbs2.setEnable(enableVar.get())
+        rbs3.setEnable(enableVar.get())
+
+    StatusBar(root).pack(side="top", fill="x", expand=True)
     
     cmdFrame = Tkinter.Frame()
     Tkinter.Button(cmdFrame, text="Print Value", command=doPrint).pack(side="left")

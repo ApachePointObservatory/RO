@@ -1,4 +1,4 @@
-#!/usr/bin/env python -i
+#!/usr/bin/env python
 """Reconnectable versions of TCPSocket.
 
 All permit disconnection and reconnection and the base class offers support for
@@ -47,8 +47,12 @@ History:
                     You must now call RO.Comm.Generic.setFramework before importing this module.
                     Many methods are now properties, e.g. isDone->isDone.
                     Added name attribute to TCPConnection.
+2012-11-29 ROwen    Overhauled demo code.
 """
 import sys
+if __name__ == "__main__":
+    import RO.Comm.Generic
+    RO.Comm.Generic.setFramework("tk")
 from RO.Comm.BaseSocket import NullSocket
 from RO.Comm.Generic import TCPSocket
 
@@ -375,30 +379,108 @@ class TCPConnection(object):
 
     def __str__(self):
         return "%s(%s)" % (self.__class__.__name__, self._getArgStr())
-        
+
 
 if __name__ == "__main__":
+    """Demo using a simple echo server.
+    """
     import Tkinter
-    
     root = Tkinter.Tk()
+    root.withdraw()
+    from RO.Comm.Generic import TCPServer
+    from RO.TkUtil import Timer
     
-    def statePrt(sock):
-        state, reason = sock.fullState
-        if reason:
-            print "socket %s: %s" % (state, reason)
-        else:
-            print "socket %s" % (state,)
-        
-    def readPrt(sock, outStr):
-        print "read: %r" % (outStr,)
-
-    ts = TCPConnection(
-        readLines = True,
-        host = "localhost",
-        port = 7,
-        stateCallback = statePrt,
-        readCallback = readPrt,
+    clientConn = None
+    echoServer = None
+    didConnect = False
+    
+    port = 2150
+            
+    testStrings = (
+        "string with 3 nulls: 1 \0 2 \0 3 \0 end",
+        "string with 3 quoted nulls: 1 \\0 2 \\0 3 \\0 end",
+        '"quoted string followed by carriage return"\r',
+        '',
+        u"unicode string",
+        "string with newline: \n end",
+        "string with carriage return: \r end",
+        "quit",
     )
-    ts.connect()
+    
+    strIter = iter(testStrings)
+
+    def runTest():
+        global clientConn
+        try:
+            testStr = strIter.next()
+            print "Client writing %r" % (testStr,)
+            clientConn.writeLine(testStr)
+            Timer(0.001, runTest)
+        except StopIteration:
+            pass
+
+    def clientRead(sock, outStr):
+        global clientConn
+        print "Client read    %r" % (outStr,)
+        if outStr and outStr.strip() == "quit":
+            print "*** Data exhausted; disconnecting client connection"
+            clientConn.disconnect()
+            
+
+    def clientState(conn):
+        global didConnect, echoServer
+        state, reason = conn.fullState
+        if reason:
+            print "Client %s: %s" % (state, reason)
+        else:
+            print "Client %s" % (state,)
+        if conn.isConnected:
+            print "*** Client connected; now sending test data"
+            didConnect = True
+            runTest()
+        elif didConnect is conn.isDone:
+            print "*** Client disconnected; closing echo server ***"
+            echoServer.close()
+
+    def serverState(server):
+        state, reason = server.fullState
+        if reason:
+            print "Server %s: %s" % (state, reason)
+        else:
+            print "Server %s" % (state,)
+        if server.isReady:
+            print "*** Echo server ready; now starting up a client"
+            startClient()
+        elif server.isDone:
+            print "*** Halting the tcl event loop"
+            root.quit()
+
+    def startClient():
+        global clientConn
+        clientConn = TCPConnection(
+            host = "localhost",
+            port = port,
+            stateCallback = clientState,
+            readCallback = clientRead,
+            name = "client",
+        )
+        clientConn.connect()
+    
+    class EchoServer(TCPServer):
+        def __init__(self, port, stateCallback):
+            TCPServer.__init__(self,
+                port = port,
+                stateCallback = stateCallback,
+                sockReadCallback = self.sockReadCallback,
+                name = "echo",
+            )
+
+        def sockReadCallback(self, sock):
+            readLine = sock.readLine(default=None)
+            if readLine is not None:
+                sock.writeLine(readLine)
+
+    print "*** Starting echo server on port %s" % (port,)
+    echoServer = EchoServer(port = port, stateCallback = serverState)
     
     root.mainloop()
