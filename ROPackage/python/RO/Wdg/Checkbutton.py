@@ -57,8 +57,11 @@ History:
 2007-01-11 ROwen    Added isDefault method.
 2010-05-21 ROwen    Added trackDefault parameter. By default this is set to autoIsCurrent,
                     so this may alter existing code.
-2012-10-25 ROwen    If width is specified, increase it on aqua to work around a Tk bug (indicatoron is ignored).
+2012-10-25 ROwen    If width is specified, increase it on aqua to work around a Tk bug.
 2012-11-16 ROwen    Refine bug workaround to only occur if Tcl version starts with "8.5".
+2012-11-29 ROwen    Further refined bug workaround to make it work like unix as much as possible
+                    using default fonts, without getting fancy with font metrics.
+                    Fixed and enhanced the demo code, demo of fixed width.
 """
 __all__ = ['Checkbutton']
 
@@ -67,6 +70,9 @@ import RO.AddCallback
 import RO.CnvUtil
 import RO.MathUtil
 import RO.TkUtil
+if __name__ == "__main__":
+    import RO.Comm.Generic
+    RO.Comm.Generic.setFramework("tk")
 from CtxMenu import CtxMenuMixin
 from IsCurrentMixin import AutoIsCurrentMixin, IsCurrentCheckbuttonMixin
 from SeverityMixin import SeverityActiveMixin
@@ -115,6 +121,9 @@ class Checkbutton (Tkinter.Checkbutton, RO.AddCallback.TkVarMixin,
       - text and textvariable are forbidden if showValue is true
       - selectcolor is ignored and forced equal to background if indicatoron false
         (i.e. if no checkbox is shown)
+        
+    Warning: as of Tcl/Tk 8.5 the indicatoron option is ignored on MacOS X (Aqua);
+    the checkbox is always displayed.
 
     Inherited methods include:
     addCallback, removeCallback
@@ -147,13 +156,16 @@ class Checkbutton (Tkinter.Checkbutton, RO.AddCallback.TkVarMixin,
         self._trackDefault = trackDefault
         self.helpText = helpText
 
-        hideIndicator = not kargs.get("indicatoron", True)
+        showIndicator = kargs.get("indicatoron", True)
         width = kargs.get("width", 0)
-        if hideIndicator and width != 0 \
+        if width != 0 \
             and RO.TkUtil.getWindowingSystem() == RO.TkUtil.WSysAqua \
             and RO.TkUtil.getTclVersion().startswith("8.5"):
-            # work around Tcl/Tk bug #3580159: indicator always shown on MacOS and text width too narrow
-            kargs["width"] = width + 1
+            # width is wrong on Aqua in Tcl/Tk 8.5 and possibly 8.6
+            if showIndicator:
+                kargs["width"] = width + 3
+            else:
+                kargs["width"] = width + 2
         
         # if a command is supplied in kargs, remove it now and set it later
         # so it is not called during init
@@ -171,6 +183,7 @@ class Checkbutton (Tkinter.Checkbutton, RO.AddCallback.TkVarMixin,
         if not RO.CnvUtil.asBool(kargs.get("indicatoron", True)):
             # user wants text, not a checkbox;
             # on Aqua adjust default padding so text can be read
+            # also indicatoron is ignored on Aqua, except that it affects label width
             if RO.TkUtil.getWindowingSystem() == RO.TkUtil.WSysAqua:
                 kargs.setdefault("padx", 6)
                 kargs.setdefault("pady", 5)
@@ -359,39 +372,67 @@ class Checkbutton (Tkinter.Checkbutton, RO.AddCallback.TkVarMixin,
 
 if __name__ == "__main__":
     import PythonTk
+    from StatusBar import StatusBar
     root = PythonTk.PythonTk()
     
     def btnCallback(btn):
         print "%s state=%s" % (btn["text"], btn.getBool())
 
+    row = 0
+    col = 0
     Checkbutton(root,
-        text = "Auto Bgnd",
+        text = "Auto Bgnd A",
         defValue = False,
         callFunc = btnCallback,
-        helpText = "Help for checkbox 'Auto Bgnd', default off",
+        helpText = "defValue=False, autoIsCurrent=True",
         autoIsCurrent = True,
-    ).pack()
+    ).grid(row=row, column=col, sticky="w")
+    row += 1
     Checkbutton(root,
-        text = "Manual",
+        text = "Auto Bgnd B",
         defValue = True,
         callFunc = btnCallback,
-        helpText = "Help for checkbox 'Manual', default on",
-    ).pack()
-    var = Tkinter.StringVar()
-    Checkbutton(root,
-        text = "Auto Bgnd 2",
-        defValue = True,
-        callFunc = btnCallback,
-        helpText = "Help for checkbox 'Auto Bgnd 2', default on",
+        helpText = "defValue=True, autoIsCurrent=True, indicatoron=False",
         indicatoron = False,
         autoIsCurrent = True,
-    ).pack()
+    ).grid(row=row, column=col, sticky="w")
+    row = 0
+    col += 1
     Checkbutton(root,
-        text = "Manual 2",
+        text = "MmmmmNnnnn A",
+        width = 12,
         defValue = True,
         callFunc = btnCallback,
-        helpText = "Help for checkbox 'Manual 2', default on",
+        helpText = "width=12, defValue=True",
+    ).grid(row=row, column=col, sticky="w")
+    row += 1
+    Checkbutton(root,
+        text = "MmmmmNnnnn B",
         indicatoron = False,
-    ).pack()
+        width = 12,
+        defValue = True,
+        callFunc = btnCallback,
+        helpText = "width=12, defValue=True, indicatoron=False",
+    ).grid(row=row, column=col, sticky="w")
+    row = 0
+    col += 1
+    Checkbutton(root,
+        text = "MmmmmNnnnn C",
+        width = 12,
+        defValue = True,
+        callFunc = btnCallback,
+        helpText = "defValue=True",
+    ).grid(row=row, column=col, sticky="w")
+    row += 1
+    Checkbutton(root,
+        text = "MmmmmNnnnn D",
+        indicatoron = False,
+        width = 12,
+        defValue = True,
+        callFunc = btnCallback,
+        helpText = "defValue=True, indicatoron=False",
+    ).grid(row=row, column=col, sticky="w")
+    row += 1
+    StatusBar(root).grid(row=row, column=0, columnspan=3, sticky="ew")
 
     root.mainloop()

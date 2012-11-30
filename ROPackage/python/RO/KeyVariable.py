@@ -119,6 +119,7 @@ History:
                     - Use best effort to remove callbacks (do not raise an exception)
 2012-07-09 ROwen    Removed unused import in demo section.
 2012-07-18 ROwen    Modified to use RO.Comm.Generic.Timer.
+2012-11/29 ROwen    In CmdVar cast actor, cmdStr and abortStr to str to avoid unicode.
 """
 import sys
 import time
@@ -752,14 +753,14 @@ class CmdVar(object):
         Also the time limit is a lower limit. The command is guaranteed to
         expire no sooner than this 
         """
-        self.cmdStr = cmdStr
-        self.actor = actor
+        self.cmdStr = str(cmdStr)
+        self.actor = str(actor)
         self.cmdID = None
         self.timeLim = timeLim
         self.description = description
         self.isRefresh = isRefresh
         self.timeLimKeyword = timeLimKeyword
-        self.abortCmdStr = abortCmdStr
+        self.abortCmdStr = str(abortCmdStr)
         self.keyVarDict = dict()
         if keyVars == None:
             keyVars = ()

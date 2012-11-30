@@ -94,10 +94,14 @@ History:
                     Added method isValid.
 2012-10-25 ROwen    If width is nonzero on aqua, increase it to work around Tk bug #3580194.
 2012-11-16 ROwen    If width is 0 on aqua, set it manually based on content to work around Tk bug #3587262.
+2012-11-29 ROwen    Fix demo and add demonstration of fixed width.
 """
 __all__ = ['OptionMenu']
 
 import Tkinter
+if __name__ == "__main__":
+    import RO.Comm.Generic
+    RO.Comm.Generic.setFramework("tk")
 import RO.AddCallback
 import RO.Alg
 import RO.SeqUtil
@@ -191,6 +195,7 @@ class OptionMenu (Tkinter.Menubutton, RO.AddCallback.TkVarMixin,
             trackDefault = bool(autoIsCurrent)
         self.trackDefault = trackDefault
         
+        showIndicator = kargs.get("indicatoron", True)
         width = kargs.get("width", 0)
         doPatchMacAutoWidth = False
         if (RO.TkUtil.getWindowingSystem() == RO.TkUtil.WSysAqua) \
@@ -200,7 +205,10 @@ class OptionMenu (Tkinter.Menubutton, RO.AddCallback.TkVarMixin,
                 doPatchMacAutoWidth = True
             else:
                 # work around Tcl/Tk bug #3580194
-                kargs["width"] = width + 3
+                if showIndicator:
+                    kargs["width"] = width + 3
+                else:
+                    kargs["width"] = width + 2
 
         # handle keyword arguments for the Menubutton
         # start with defaults, update with user-specified values, if any
@@ -575,7 +583,7 @@ if __name__ == "__main__":
 
     items = ("Earlier", "Now", "Later", None, "Never")
     helpTexts = ("Help for Earlier", "Help for Now", "help for Later", "", "Help for Never")
-    menu = OptionMenu(root,
+    menu1 = OptionMenu(root,
         items = items,
         defValue = "Now",
         callFunc = callFunc,
@@ -583,12 +591,54 @@ if __name__ == "__main__":
         helpText = helpTexts,
         autoIsCurrent = True,
     )
-    menu.grid(row=0, column=0, sticky="w")
+    menu1.grid(row=0, column=0, sticky="w")
 
-    label = Label.Label(root, width=20, anchor="w", helpText="current value")
-    label.grid(row=1, column=0, sticky="w")
+    items = ("MmmmmNnnnn A", "MmmmmNnnnn B", "MmmmmNnnnn C")
+    menu2 = OptionMenu(root,
+        items = items,
+        defValue = "MmmmmNnnnn A",
+        callFunc = callFunc,
+        defMenu = "Default",
+        helpText = "width=0",
+    )
+    menu2.grid(row=0, column=1, sticky="w")
+
+    menu3 = OptionMenu(root,
+        items = items,
+        defValue = "MmmmmNnnnn A",
+        callFunc = callFunc,
+        defMenu = "Default",
+        width = 12,
+        helpText = "width=12",
+    )
+    menu3.grid(row=1, column=1, sticky="w")
+
+    menu4 = OptionMenu(root,
+        items = items,
+        defValue = "MmmmmNnnnn A",
+        callFunc = callFunc,
+        defMenu = "Default",
+        indicatoron = False,
+        helpText = "indicatoron=False",
+    )
+    menu4.grid(row=0, column=2, sticky="w")
+
+    menu5 = OptionMenu(root,
+        items = items,
+        defValue = "MmmmmNnnnn A",
+        callFunc = callFunc,
+        defMenu = "Default",
+        width = 12,
+        indicatoron = False,
+        helpText = "width=12, indicatoron=False",
+    )
+    menu5.grid(row=1, column=2, sticky="w")
+
+
+    label = Label.Label(root, width=20, anchor="w", helpText="most recently selected value")
+    label.grid(row=2, column=0, columnspan=4, sticky="w")
     
     statusBar = StatusBar.StatusBar(root, width=20)
-    statusBar.grid(row=2, column=0, sticky="ew")
+    statusBar.grid(row=3, column=0, columnspan=4, sticky="ew")
 
     root.mainloop()

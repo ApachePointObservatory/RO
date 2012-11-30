@@ -5,6 +5,8 @@ The intention is to work with TCPConnection and all the infrastructure that uses
 
 History:
 2012-07-19 ROwen
+2012-11-29 ROwen    Misfeature fix: write and writeLine failed on unicode strings that could be converted to ASCII
+                    (a "feature" of Twisted Framework).
 """
 __all__ = ["Socket", "TCPSocket", "Server", "TCPServer"]
 
@@ -261,8 +263,8 @@ class Socket(BaseSocket):
         Safe to call as soon as you call connect, but of course
         no data is sent until the connection is made.
         
-        Raises UnicodeError if the data cannot be expressed as ascii.
-        Raises RuntimeError if the socket is not connecting or connected.
+        Raise UnicodeError if the data cannot be expressed as ascii.
+        Raise RuntimeError if the socket is not connecting or connected.
         If an error occurs while sending the data, the socket is closed,
         the state is set to Failed and _reason is set.
         
@@ -277,7 +279,7 @@ class Socket(BaseSocket):
         #print "%s.write(%r)" % (self, data)
         if not self.isReady:
             raise RuntimeError("%s not connected" % (self,))
-        self._protocol.transport.write(data)
+        self._protocol.transport.write(str(data))
     
     def writeLine(self, data):
         """Write a line of data terminated by standard newline
