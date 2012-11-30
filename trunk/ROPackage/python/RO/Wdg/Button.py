@@ -11,6 +11,8 @@ History:
                     it has no visible effect on MacOS X Aqua.
 2012-11-30 ROwen    Work around Aqua Tk 8.5 bug for Radiobutton: if width specified it is too narrow
                     (the fix will need modification if this bug is also present on Aqua Tk 8.6)
+2012-11-30 ROwen    Radiobutton bug fix: if using bitmaps the active button was not highlighted, at least on Aqua Tk 8.5.
+                    Does no width correction if bitmap is shown.
 """
 __all__ = ['Button', 'Radiobutton']
 
@@ -80,7 +82,9 @@ class Radiobutton (Tkinter.Radiobutton, CtxMenu.CtxMenuMixin, SeverityActiveMixi
         """
         self.helpText = helpText
 
-        Tkinter.Radiobutton.__init__(self, master = master)
+        # if bitmap is not a constructor parameter then the active button is not highlighted on Aqua Tk 8.5
+        bitmap = kargs.pop("bitmap", None)
+        Tkinter.Radiobutton.__init__(self, master = master, bitmap = bitmap)
         self.configure(kargs) # call overridden configure to fix width, if necessary
         CtxMenu.CtxMenuMixin.__init__(self,
             helpURL = helpURL,
@@ -102,15 +106,16 @@ class Radiobutton (Tkinter.Radiobutton, CtxMenu.CtxMenuMixin, SeverityActiveMixi
         if "width" in kargs:
             initialWidth = kargs["width"]
             kargs["width"] = self._computeCorrectedWidth(
-                width = kargs["width"], 
-                showIndicator = kargs.get("indicatoron", self["indicatoron"]),
+                width = kargs["width"],
+                hasBitmap = bool(kargs.get("bitmap", self["bitmap"])),
             )
         Tkinter.Radiobutton.configure(self, **kargs)
     
-    def _computeCorrectedWidth(self, width, showIndicator):
+    def _computeCorrectedWidth(self, width, hasBitmap):
         """Compute corrected width to overcome Tcl/Tk bug
         """
         if (width != 0) \
+            and not hasBitmap \
             and (RO.TkUtil.getWindowingSystem() == RO.TkUtil.WSysAqua) \
             and RO.TkUtil.getTclVersion().startswith("8.5"):
             return width + 4

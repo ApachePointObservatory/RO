@@ -161,6 +161,7 @@ History:
 2011-08-29 ROwen    Bug fix: display was incorrect unless data array was 32-bit float.
 2012-07-09 ROwen    Modified to use RO.TkUtil.Timer.
 2012-11-13 ROwen    Stop using Checkbutton indicatoron=False because it is no longer supported on MacOS X.
+2012-11-30 ROwen    Fix demo code by setting framework in RO.Comm.Generic
 """
 import weakref
 import Tkinter
@@ -521,8 +522,8 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
             valueList = modeList,
             helpText = (
                 "Default mode",
-                "Drag to adjust black and white levels",
-                "Drag to zoom",
+                "Drag to adjust black and white levels (or middle-click & drag)",
+                "Drag to zoom (or right-click and drag)",
             ),
             helpURL =  helpURL,
             height = 18,

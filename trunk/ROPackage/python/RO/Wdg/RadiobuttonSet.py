@@ -43,9 +43,6 @@ History:
 __all__ = ['RadiobuttonSet']
 
 import Tkinter
-if __name__ == "__main__":
-    import RO.Comm.Generic
-    RO.Comm.Generic.setFramework("tk")
 import RO.AddCallback
 import RO.Alg
 import RO.SeqUtil

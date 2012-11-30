@@ -97,13 +97,11 @@ History:
 2012-11-29 ROwen    Fix demo and add demonstration of fixed width.
 2012-11-30 ROwen    Bug fix: width patch was not applied if width changed after the widget was created.
                     Now it is applied by overridden method configure.
+2012-11-30 ROwen    Does no width correction if bitmap is shown.
 """
 __all__ = ['OptionMenu']
 
 import Tkinter
-if __name__ == "__main__":
-    import RO.Comm.Generic
-    RO.Comm.Generic.setFramework("tk")
 import RO.AddCallback
 import RO.Alg
 import RO.SeqUtil
@@ -260,7 +258,8 @@ class OptionMenu (Tkinter.Menubutton, RO.AddCallback.TkVarMixin,
             kargs.update(argDict)
         if "width" in kargs:
             kargs["width"] = self._computeCorrectedWidth(
-                width = kargs["width"], 
+                width = kargs["width"],
+                hasBitmap = bool(kargs.get("bitmap", self["bitmap"])),
                 showIndicator = kargs.get("indicatoron", self["indicatoron"]),
             )
         Tkinter.Menubutton.configure(self, **kargs)
@@ -566,10 +565,11 @@ class OptionMenu (Tkinter.Menubutton, RO.AddCallback.TkVarMixin,
         if self._helpTextDict:
             self.helpText = self._helpTextDict.get(self._var.get())
     
-    def _computeCorrectedWidth(self, width, showIndicator):
+    def _computeCorrectedWidth(self, width, hasBitmap, showIndicator):
         """Compute corrected width to overcome Tcl/Tk bugs
         """
         if (width != 0) \
+            and not hasBitmap \
             and (RO.TkUtil.getWindowingSystem() == RO.TkUtil.WSysAqua) \
             and RO.TkUtil.getTclVersion().startswith("8.5"):
             if showIndicator:

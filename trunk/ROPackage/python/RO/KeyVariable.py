@@ -132,6 +132,10 @@ import RO.LangUtil
 import RO.PVT
 import RO.StringUtil
 import RO.SeqUtil
+import RO.Comm.Generic
+if RO.Comm.Generic.getFramework() is None:
+    print "Warning: RO.Comm.Generic framework not set; setting to tk"
+    RO.Comm.Generic.setFramework("tk")
 from RO.Comm.Generic import Timer
 
 # TypeDict translates message type characters to message categories
