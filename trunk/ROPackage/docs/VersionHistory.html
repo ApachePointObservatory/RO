@@ -7,11 +7,12 @@
 
 <h2>Version history for the <a href="Overview.html">RO Python Package</a></h2>
 
-<h3>3.0.3+ 2012-11-30</h3>
+<h3>3.0.4 2012-12-06</h3>
 
 <ul>
     <li>RO.Wdg.Checkbutton, OptionMenu and Radiobutton: yet another refinement to the width workaround for Aqua Tk 8.5: apply no correction if the widget has a bitmap (in which case width is in pixels, not characters).
     <li>RO.Wdg.Radiobutton fix: if using bitmaps the active button was not highlighted, at least on Aqua Tk 8.5.
+    <li>Fixed much demo code by setting RO.Comm.Generic framework to Tk by default in some cases. You should still call RO.Comm.Generic.setFramework if you want to use objects in RO.Comm.Generic.
 </ul>
 
 <h3>3.0.3 2012-11-30</h3>
