@@ -334,7 +334,7 @@ if __name__ == "__main__":
         valueList = ("A's value", "B's value", "C's value"),
         abbrevOK = True,
         ignoreCase = True,
-        helpText = "width=12 via ['width']",
+        helpText = "width=12 (via configure)",
     )
     rbs2.configure(width = 12)
     for wdg in rbs2.wdgSet:
@@ -350,7 +350,7 @@ if __name__ == "__main__":
         ignoreCase = True,
         indicatoron = False,
         width = 12,
-        helpText = "width=12 via ['width'], indicatoron=False",
+        helpText = "width=12, indicatoron=False",
     )
     for wdg in rbs3.wdgSet:
         wdg.pack(side="left")

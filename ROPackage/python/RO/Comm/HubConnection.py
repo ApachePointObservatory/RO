@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """A version of RO.TCPConnection that can negotiate a connection with the APO Hub.
+
 This is a good example of the sort of connection used by KeyDispatcher.
 
 History:
@@ -24,6 +25,7 @@ History:
 2011-06-17 ROwen    Changed "type" to "msgType" in parsed message dictionaries to avoid conflict with builtin.
 2012-07-16 ROwen    Added support for Twisted framework.
                     You must now call RO.Comm.Generic.setFramework before importing this module.
+2012-12-06 ROwen    Fixed a bug in the demo code; it once again requires Tkinter.
 """
 try:
     import hashlib
@@ -32,14 +34,6 @@ except ImportError:
     import sha
     shaClass = sha.sha
 import sys
-
-if __name__ == "__main__":
-    import RO.Comm.Generic
-    _UseTwistedForDemo = True
-    if _UseTwistedForDemo:
-        RO.Comm.Generic.setFramework("twisted")
-    else:
-        RO.Comm.Generic.setFramework("tk")
 
 from TCPConnection import TCPConnection
 import RO.ParseMsg
@@ -234,10 +228,6 @@ if __name__ == "__main__":
     import Tkinter
     import RO.Wdg
     root = Tkinter.Tk()
-    if _UseTwistedForDemo:
-        import twisted.internet.tksupport
-        twisted.internet.tksupport.install(root)
-        reactor = twisted.internet.reactor
 
     host = "hub35m.apo.nmsu.edu"
     port = 9877
@@ -304,7 +294,4 @@ if __name__ == "__main__":
 
     doConnect(host, port)
 
-    if _UseTwistedForDemo:
-        reactor.run()
-    else:
-        root.mainloop()
+    root.mainloop()

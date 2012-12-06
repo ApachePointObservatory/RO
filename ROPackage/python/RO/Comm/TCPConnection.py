@@ -48,12 +48,14 @@ History:
                     Many methods are now properties, e.g. isDone->isDone.
                     Added name attribute to TCPConnection.
 2012-11-29 ROwen    Overhauled demo code.
+2012-12-06 ROwen    Set tk as RO.Comm.Generic framework if not already set.
 """
 import sys
-if __name__ == "__main__":
-    import RO.Comm.Generic
-    RO.Comm.Generic.setFramework("tk")
 from RO.Comm.BaseSocket import NullSocket
+import RO.Comm.Generic
+if RO.Comm.Generic.getFramework() is None:
+    print "Warning: RO.Comm.Generic framework not set; setting to tk"
+    RO.Comm.Generic.setFramework("tk")
 from RO.Comm.Generic import TCPSocket
 
 class TCPConnection(object):
