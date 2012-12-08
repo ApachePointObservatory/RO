@@ -4,6 +4,8 @@ import RO.MathUtil
 from RO.Astro import llv
 from LMSTFromUT1 import *
 
+__all__ = ["lastFromUT1"]
+
 def lastFromUT1(ut1, longitude):
     """Convert from universal time (MJD)
     to local apparent sidereal time (deg).

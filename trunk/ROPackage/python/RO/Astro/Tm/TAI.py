@@ -2,9 +2,11 @@
 import RO.PhysConst
 from UTCFromPySec import *
 
+__all__ = ["getUTCMinusTAI", "setUTCMinusTAI", "taiFromPySec", "utcFromTAI", "taiFromPySec", "pySecFromTAI"]
+
 # global variable UTC-TAI (since leap seconds are unpredictable)
 # set to some initial plausible value and update with setUTCMinusTAI
-_UTCMinusTAIDays = -34 / float(RO.PhysConst.SecPerDay) # a reasonable value correct as of 2009-01
+_UTCMinusTAIDays = -35 / float(RO.PhysConst.SecPerDay) # a reasonable value correct as of 2012-12
 
 def getUTCMinusTAI():
     """Return UTC - TAI (in seconds).

@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 from RO.Astro import llv
 
+__all__ = ["mjdFromEpJ"]
+
 def mjdFromEpJ (epj):
     """
     Converts Julian epoch to Modified Julian Date.

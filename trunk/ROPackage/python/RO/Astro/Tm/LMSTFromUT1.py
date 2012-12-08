@@ -2,6 +2,8 @@
 import RO.MathUtil
 from GMSTFromUT1 import *
 
+__all__ = ["lmstFromUT1"]
+
 def lmstFromUT1(ut1, longitude):
     """Convert from universal time (MJD) to local apparent sidereal time (deg).
     
