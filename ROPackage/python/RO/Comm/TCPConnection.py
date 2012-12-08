@@ -49,6 +49,7 @@ History:
                     Added name attribute to TCPConnection.
 2012-11-29 ROwen    Overhauled demo code.
 2012-12-06 ROwen    Set tk as RO.Comm.Generic framework if not already set.
+2012-12-17 ROwen    Initial state was 0, should have been Disconnected.
 """
 import sys
 from RO.Comm.BaseSocket import NullSocket
@@ -124,7 +125,7 @@ class TCPConnection(object):
         self._authReadCallback = authReadCallback
         self._name = name
 
-        self._state = 0
+        self._state = self.Disconnected
         self._reason = ""
         self._currReadCallbacks = []
         

@@ -2,6 +2,8 @@
 import math
 import RO.PhysConst
 
+__all__ = ["mjdFromPyTuple"]
+
 def mjdFromPyTuple(timeTuple):
     """Converts a python time tuple to Modified Julian Date.
     Only the first six elements of the time tuple are used:

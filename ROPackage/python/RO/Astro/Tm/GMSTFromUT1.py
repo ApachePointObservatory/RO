@@ -3,6 +3,8 @@ import math
 import RO.PhysConst
 import RO.MathUtil
 
+__all__ = ["gmstFromUT1"]
+
 def gmstFromUT1(ut1):
     """Convert from universal time (MJD)
     to Greenwich mean sidereal time, in degrees
