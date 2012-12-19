@@ -84,6 +84,7 @@ History:
 2008-04-29 ROwen    Fixed reporting of exceptions that contain unicode arguments.
 2009-07-20 ROwen    Updated the documentation strings.
 2009-09-23 ROwen    Updated SoundPrefVar documentation to remove explicit mention of snack.
+2012-12-19 ROwen    Added FontSizePrefVar.
 """
 import os.path
 import re
@@ -800,13 +801,13 @@ class FontPrefVar(PrefVar):
     - defValue: defaults for one or more widget characteristics; see note on value below.
     - optionPatterns: entries to add to the option database.
     
-    The default value is obtained by starting with a set of internal defaults
-    and then applying inputs in the following order: font, defValue, defWdg
-    
     The value of a prefFont is a dictionary containing one or more of the following keys:
         "family", "overstrike", "size", "slant", "underline", "weight"
     Warning: unlike many PrefVars, a string representation of a dictionary is NOT acceptable.
     It must actually be a dictionary.
+    
+    The default value dict is obtained by starting with a set of internal defaults
+    and then updating it with the following inputs, in order: font, defWdg and defValue.
     
     Option patterns:
     - Each listed entry is added to the option database using option_add(ptn, font).
@@ -931,6 +932,98 @@ class FontPrefVar(PrefVar):
             if value[charName] == "1":
                 charList.append(charName)
         return " ".join(charList)
+
+class FontSizePrefVar(PrefVar):
+    """Tk Font preference variable that controls only the size.
+    
+    This is useful for graphical elements that you want to display using the default font
+    (for a standard appearance) while allowing sight-impaired people to use a larger font size.
+
+    Inputs: same as PrefVar, plus:
+    - font: a tkFont.Font object.
+    - defWdg: a widget whose font is used for the default value.
+    - defValue: defaults for one or more widget characteristics; see note on value below.
+    - optionPatterns: entries to add to the option database.
+    
+    The default value is obtained by applying inputs in the following order
+    (the last one wins): font, defWdg, defValue
+    
+    The value is an integer.
+    
+    Option patterns:
+    - Each listed entry is added to the option database using option_add(ptn, font).
+    - The FontPref then controls all widgets matching any of these patterns, so long as the widgets
+      were created after the entry was added, and without specifying a font.
+    - Example patterns:
+        - fonts for all widgets: ("*font",)
+        - fonts for menu widgets: ("*Menu.font", "*Menubutton.font", "*OptionMenu.font")
+    - Always put the more general patterns into the database first. This applies both to
+      the order of creation of WdgFontSizePrefVars and to the order of entries in optionPatterns.
+    
+    Notes:
+    - the formatStr and cnvFunc arguments are set internally; your values will be ignored.
+    """
+    def __init__(self,
+        name,
+        category = "",
+        font = None,
+        defWdg = None,
+        defValue = None,
+        optionPatterns = (),
+        **kargs
+    ):
+        kargs = kargs.copy()    # prevent modifying a passed-in dictionary
+
+        self.font = tkFont.Font()
+        kargs["formatStr"] = "%s"
+        kargs["cnvFunc"] = int
+        
+        # apply defaults in the correct order
+        netDefValue = None
+        if font:
+            netDefValue = font.cget("size")
+        if defWdg:
+            # the following is the only way I know to obtain a font dictionary from a widget
+            netDefValue = tkFont.Font(font=defWdg.cget("font")).cget("size")
+        if defValue:
+            # defValue is the only one likely to have a bogus value; check it before applying it
+            self.locCheckValue(defValue)
+            netDefValue = defValue
+
+        PrefVar.__init__(self,
+            name = name,
+            category = category,
+            defValue = netDefValue,
+            **kargs
+        )
+
+        # if optionPatterns supplied, add font to option database
+        for ptn in optionPatterns:
+            Tkinter.Label().option_add(ptn, self.font)
+    
+    def locCheckValue(self, value):
+        """Test that the value is valid.
+        """
+        try:
+            int(value)
+        except Exception:
+            raise ValueError("Invalid font size %r" % (value,))
+
+    def setValue (self, rawValue):
+        """Updates the internal font information from the font dictionary provided
+        (as a dictionary or a string representation). Any unspecified fields are left unchanged.
+        """
+        self.checkValue(rawValue)
+        self.value = int(rawValue)
+        self.font.configure(size=self.value)
+
+        # print to stderr, if requested
+        if self.doPrint:
+            sys.stderr.write ("%s=%r\n" % (self.name, self.value))
+
+        # apply callbacks, if any
+        for callFunc in self._callbackList:
+            callFunc(self.value, self)
 
 class PrefSet(object):
     """A set of PrefVars that supports easy retrieval and file I/O.
