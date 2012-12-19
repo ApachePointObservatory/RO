@@ -29,6 +29,7 @@ History:
 2005-09-15 ROwen    Added getCategories and showCategory methods.
                     Renamed internal method selectCategory to _showSelectedCategory.
 2012-07-10 ROwen    Removed use of update_idletasks.
+2012-12-19 ROwen    Added a FontSizePrefVar to the demo.
 """
 import Tkinter
 import PrefVar
@@ -241,15 +242,10 @@ if __name__ == "__main__":
     root = PythonTk()
     
     defMainWdg = Tkinter.Label()
-    defDataWdg = Tkinter.Entry()
+    entryWdg = Tkinter.Entry()
+    menuWdg = Tkinter.Menu()
     
     pvList = (
-        PrefVar.FontPrefVar(
-            name = "Font1",
-            category = "fonts",
-            defValue = {"family":"helvetica", "size":"12"},
-            helpText = "a font",
-        ),
         PrefVar.FontPrefVar(
             name = "Main Font",
             category = "fonts",
@@ -257,12 +253,19 @@ if __name__ == "__main__":
             optionPatterns = ("*font",),
             helpText = "font for labels, menus, etc.",
         ),
-        PrefVar.FontPrefVar(
-            name = "Data Font",
+        PrefVar.FontSizePrefVar(
+            name = "Entry Font",
             category = "fonts",
-            defWdg = defDataWdg,
-            optionPatterns = ("*Entry.font", "*Text.font",),
-            helpText = "font for Entry and Text widgets",
+            defWdg = entryWdg,
+            optionPatterns = ("*Entry.font",),
+            helpText = "font for entry widgets",
+        ),
+        PrefVar.FontSizePrefVar(
+            name = "Menu Font",
+            category = "fonts",
+            defWdg = menuWdg,
+            optionPatterns = ("*Menu.font",),
+            helpText = "font for menu items",
         ),
         PrefVar.ColorPrefVar(
             name = "Background Color",

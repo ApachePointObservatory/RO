@@ -56,6 +56,7 @@ History:
                     - Use a StringVar for the font size, since OptionMenu prefers that.
                     - The options menu button now has text Options.
 2012-07-09 ROwen    Modified to use RO.TkUtil.Timer.
+2012-12-19 ROwen    Added a FontSizePrefVar to the demo.
 """
 import sys
 import PrefVar
@@ -651,6 +652,12 @@ if __name__ == "__main__":
             category = "fonts",
             defValue = {"family":"times", "size":"14", "weight":"bold"},
             helpText = "another font",
+        ),
+        PrefVar.FontSizePrefVar(
+            name = "fontSize1",
+            category = "fonts",
+            defValue = 13,
+            helpText = "a font size",
         ),
         PrefVar.ColorPrefVar(
             name = "color1",
