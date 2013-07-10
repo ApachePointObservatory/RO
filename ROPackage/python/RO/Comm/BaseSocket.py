@@ -296,8 +296,8 @@ class BaseServer(Base):
         - connCallback: function to call when a client connects; it receives the following arguments:
                     - sock, a BaseSocket
         - stateCallback: a function to call when the server changes state
-        - sockReadCallback: function for each server socket to call when it receives data
-        - sockStateCallback: function for each server socket to call when it receives data
+        - sockReadCallback: function to call when a socket receives data
+        - sockStateCallback: function to call when a socket changes state
         - name: a string to identify this server; strictly optional
         - state: initial state
         """
