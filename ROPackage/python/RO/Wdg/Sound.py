@@ -10,9 +10,12 @@ History:
 2005-06-08 ROwen    Changed BellPlay, SoundPlayer, NoPLay to new-style classes.
 2009-10-22 ROwen    Modified to use pygame instead of snack to play sound files.
 2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
+2013-09-03 ROwen    Sound: if fileName specified and does not exist, raise RuntimeError
+                    (I am surprised pygame.mixer.Sound doesn't complain).
 """
 __all__ = ['bell', 'BellPlay', 'SoundPlayer', 'NoPlay']
 
+import os
 import sys
 import Tkinter
 import RO.StringUtil
@@ -83,8 +86,8 @@ class SoundPlayer(object):
     - bellNum   number of times to ring the bell (<1 is treated as 1)
     - bellDelay delay (ms) between each ring
     
-    The bell data is used if pygame is not available or the file
-    is not a valid sound file.
+    The bell data is used if pygame is not available or of pygame
+    recognizes that the file is not a valid sound file.
     """
     def __init__(self,
         fileName = None,
@@ -105,12 +108,15 @@ class SoundPlayer(object):
         self._bell = BellPlay(bellNum, bellDelay)
         self._fileName = fileName
 
-        if _PyGameReady and fileName:
-            try:
-                self._snd = pygame.mixer.Sound(fileName)
-            except Exception, e:
-                sys.stderr.write("Could not load sound file %r; using beep instead: %s\n" % \
-                    (fileName, RO.StringUtil.strFromException(e),))
+        if fileName:
+            if not os.path.isfile(fileName):
+                raise RuntimeError("fileName=%r is not a file" % (fileName,))
+            if _PyGameReady:
+                try:
+                    self._snd = pygame.mixer.Sound(fileName)
+                except Exception, e:
+                    sys.stderr.write("Could not load sound file %r; using beep instead: %s\n" % \
+                        (fileName, RO.StringUtil.strFromException(e),))
         
         if not self._snd:
             self._snd = BellPlay(num=bellNum, delay=bellDelay)
