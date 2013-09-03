@@ -7,6 +7,13 @@
 
 <h2>Version history for the <a href="Overview.html">RO Python Package</a></h2>
 
+<h3>3.2.1 2013-09-03</h3>
+
+<ul>
+    <li>Changed RO.Wdg.Sound to raise RuntimeError if the specified sound file does not exist.
+    Unfortunately there is no warning if the file exists but is not in a usable format (I don't know how to get pygame.mixer.Sound to check; at one time I think it raised an exception but it certainly does not do so now).
+</ul>
+
 <h3>3.2.0 2012-12-19</h3>
 
 <ul>
