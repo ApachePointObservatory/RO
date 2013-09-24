@@ -30,11 +30,22 @@ History:
 2010-06-07 ROwen    Added a few commented-out print statements.
 2010-08-26 ROwen    Tweaked commented-out print statements.
 2011-02-18 ROwen    Added callbacksEnabled method.
-2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
+2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code.
+2013-09-24 ROwen    Added safeCall.
 """
-import re
 import sys
 import traceback
+
+__all__ = ["safeCall", "BaseMixin", "TkButtonMixin", "TkVarMixin"]
+
+def safeCall(func, *args, **kwargs):
+    """Call a function; print a traceback and continue if it fails
+    """
+    try:
+        func(*args, **kwargs)
+    except Exception, e:
+        sys.stderr.write("%s(*%s, **%s) failed: %s\n" % (func, args, kwargs, e,))
+        traceback.print_exc(file=sys.stderr)
 
 class _DisableCallbacksContext(object):
     """Context object to temporarily disable callbacks
@@ -50,7 +61,7 @@ class _DisableCallbacksContext(object):
 #        print "%s.__enter__; _enableCallbacks %s -> %s" % (self.callbackObj, self.initialCallbacksEnabled, self.callbackObj._enableCallbacks)
     
     def __exit__(self, type, value, traceback):
-        temp = self.callbackObj._enableCallbacks
+#        temp = self.callbackObj._enableCallbacks
         self.callbackObj._enableCallbacks = self.initialCallbacksEnabled
 #        print "%s.__exit__; _enableCallbacks %s -> %s" % (self.callbackObj, temp, self.callbackObj._enableCallbacks)
 
@@ -146,8 +157,8 @@ class BaseMixin(object):
                 raise ValueError("Callback %r not found" % callFunc)
             return False
     
-    def _basicDoCallbacks(self, *args, **kargs):
-        """Execute the callbacks, passing *args and **kargs to the callback functions.
+    def _basicDoCallbacks(self, *args, **kwargs):
+        """Execute the callbacks, passing *args and **kwargs to the callback functions.
 
         If callbacks are already being executed then this function is a no-op
         """
@@ -158,11 +169,7 @@ class BaseMixin(object):
         self._enableCallbacks = False
         try:
             for func in self._callbacks[:]:
-                try:
-                    func(*args, **kargs)
-                except Exception, e:
-                    sys.stderr.write("Callback of %s by %s failed: %s\n" % (func, self, e,))
-                    traceback.print_exc(file=sys.stderr)
+                safeCall(func, *args, **kwargs)
         finally:
             self._enableCallbacks = True
     
@@ -214,7 +221,7 @@ class TkButtonMixin(BaseMixin):
         callNow = None,
         command = None,
         defCallNow = False,
-    **kargs):
+    **kwargs):
         self["command"] = self._doCallbacks
         BaseMixin.__init__(self,
             callFunc = callFunc,
