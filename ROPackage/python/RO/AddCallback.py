@@ -40,9 +40,14 @@ __all__ = ["safeCall", "BaseMixin", "TkButtonMixin", "TkVarMixin"]
 
 def safeCall(func, *args, **kwargs):
     """Call a function; print a traceback and continue if it fails
+
+    @warning: be sure to provide the function and its arguments as separate arguments,
+        result = safeCall(myFunc, arg1, arg2, kwarg1=foo, kwarg2=bar) # correct
+    a common mistake is to call the function when passing it to safeCall:
+        restult = safeCall(myFunc(...)) # wrong; safeCall tries to call the result of calling myFuc
     """
     try:
-        func(*args, **kwargs)
+        return func(*args, **kwargs)
     except Exception, e:
         sys.stderr.write("%s(*%s, **%s) failed: %s\n" % (func, args, kwargs, e,))
         traceback.print_exc(file=sys.stderr)
