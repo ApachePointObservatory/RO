@@ -17,6 +17,7 @@ History:
 2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
 2012-07-09 ROwen    Added Timer to __all__.
 2012-11-16 ROwen    Added getTclVersion function.
+2013-10-07 ROwen    Timer.start accepts keyword arguments for the callback function.
 """
 __all__ = ['addColors', 'colorOK', 'EvtNoProp', 'getWindowingSystem', 'getTclVersion', 'TclFunc',
     'Geometry', 'Timer', 'WSysAqua', 'WSysX11', 'WSysWin']
@@ -435,19 +436,20 @@ class Timer(object):
         if sec != None:
             self.start(sec, callFunc, *args)
     
-    def start(self, sec, callFunc, *args):
+    def start(self, sec, callFunc, *args, **kwargs):
         """Start or restart the timer, cancelling a pending timer if present
         
         Inputs:
         - sec: interval, in seconds (float)
         - callFunc: function to call when timer fires
-        *args: arguments for callFunc
+        *args: positional arguments for callFunc
+        **kwargs: keyword arguments for callFunc; must not include "sec" or "callFunc"
         """
         self.cancel()
         
-        def doit():
+        def doit(args=args, kwargs=kwargs):
             self._timerID = None
-            callFunc(*args)
+            callFunc(*args, **kwargs)
 
         self._timerID = self._tkWdg.after(int(0.5 + (1000.0 * sec)), doit)
 
