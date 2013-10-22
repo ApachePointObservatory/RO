@@ -27,7 +27,7 @@ def nullCallback(*args, **kwargs):
 class Base(object):
     """Base class for BaseSocket and BaseServer
     
-    Subclasses must provide class variables:
+    Subclasses may wish to override class variables:
     - _AllStates: a set of states (strings)
     - _DoneStates: a set of states indicating the object is done (e.g. Closed or Failed)
     - _ReadyStates: a set of states indicating the object is ready for use (e.g. Connected)
@@ -39,12 +39,9 @@ class Base(object):
     ):
         """Construct a Base
         
-        Arguments:
-        - state: initial state
-        - stateDict: a dict of state: descriptive string
-        - doneStates: a set of states indicating isDone
-        - stateCallback: function to call when socket state changes; it receives one argument: this socket
-        - name: a string to identify this object; strictly optional
+        @param[in] state: initial state
+        @param[in] stateCallback: function to call when socket state changes; it receives one argument: this socket
+        @param[in] name: a string to identify this object; strictly optional
         """
         self._state = state
         self._reason = ""
