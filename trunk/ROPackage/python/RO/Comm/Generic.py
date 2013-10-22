@@ -56,6 +56,9 @@ reactor.run()
 History:
 2012-08-10 ROwen
 """
+import time
+from RO.AddCallback import safeCall
+
 _Framework = None
 
 def setFramework(framework):
@@ -92,6 +95,68 @@ def getFrameworkSet():
     """Return the set of supported frameworks
     """
     return set(("tk", "twisted"))
+
+
+class WaitForTCPServer(object):
+    """Wait for a TCP server to accept a connection
+    """
+    def __init__(self, host, port, callFunc, timeLim=5, pollInterval=0.2):
+        """Start waiting for a TCP server to accept a connection
+        
+        @param[in] host: host address of server
+        @param[in] port: port number of server
+        @param[in] callFunc: function to call when server ready or wait times out;
+            receives one parameter: this object
+        @param[in] timeLim: approximate maximum wait time (sec);
+            the actual wait time may be up to pollInterval longer
+        @param[in] pollInterval: interval at which to poll (sec)
+        
+        Useful attributes:
+        - isDone: the wait is over
+        - didFail: the wait failed
+        """
+        self.host = host
+        self.port = port
+        self.isDone = False
+        self.didFail = False
+        self._callFunc = callFunc
+        self._pollInterval = float(pollInterval)
+        self._timeLim = float(timeLim)
+        self._pollTimer = Timer()
+        self._startTime = time.time()
+        self._tryConnection()
+        self._timeoutTimer = Timer(timeLim, self._finish)
+    
+    def _tryConnection(self):
+        """Attempt a connection
+        """
+        self._sock = TCPSocket(host=self.host, port=self.port, stateCallback=self._sockStateCallback)
+    
+    def _sockStateCallback(self, sock):
+        """Socket state callback
+        """
+        if sock.isReady:
+            # success
+            self._finish()
+        elif sock.isDone:
+            # connection failed; try again
+            self._pollTimer.start(self._pollInterval, self._tryConnection)
+        
+    def _finish(self):
+        """Set _isReady and call the callback function
+        """
+        self._pollTimer.cancel()
+        self._timeoutTimer.cancel()
+        self.didFail = not self._sock.isReady
+        self.isDone = True
+        if not self._sock.isDone:
+            self._sock.setStateCallback()
+            self._sock.close()
+            self._sock = None
+        if self._callFunc:
+            callFunc = self._callFunc
+            self._callFunc = None
+            safeCall(callFunc, self)
 
 if __name__ == "__main__":
     import Tkinter
