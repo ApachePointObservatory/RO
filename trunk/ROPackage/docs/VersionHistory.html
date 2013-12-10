@@ -7,20 +7,14 @@
 
 <h2>Version history for the <a href="Overview.html">RO Python Package</a></h2>
 
-<h3>3.3.0b3 3013-10-22
-<ul>
-    <li>Added RO.Generic.WaitForTCPServer.
-</ul>
-
-<h3>3.3.0b2 2013-10-07</h3>
-<ul>
-    <li>TkUtil.Timer.start accepts keyword arguments for the callback function.
-    <li>RO.AddCallback.safeCall returns the result of the call.
-</ul>
-
-<h3>3.3.0b1 2013-10-01</h3>
+<h3>3.3.0 2013-12-10</h3>
 <ul>
     <li>Added RO.AddCallback.safeCall: a function that calls another function and logs any errors without raising an exception.
+    <li>Added RO.Generic.WaitForTCPServer: a functor that calls a callback function when a TCP server is available.
+    <li>Updated tools/fitsinfo.py to handle multiple fits HDUs.
+    <li>TkUtil.Timer.start accepts keyword arguments for the callback function.
+    <li>Updated tools/fitsinfo.py to handle multiple HDUs and to only compute stats for image HDUs.
+    <li>Added numpy to the ups table (for those who use eups to manage RO).
 </ul>
 
 <h3>3.2.2 2013-09-05</h3>
