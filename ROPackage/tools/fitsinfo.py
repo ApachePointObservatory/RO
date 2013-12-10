@@ -1,29 +1,44 @@
 #!/usr/bin/env python
-import optparse
-import sys
+import argparse
 import numpy
 import pyfits
     
 
-def fitsInfo(filePath, showHeader=True, showStats=True):
-    """Print information about a FITS file"""
+def fitsInfo(filePath, hduList=None, showHeader=True, showStats=True):
+    """Print information about a FITS file
+
+    @param[in] filePath: path to FITS file
+    @param[in] hduList: list of HDU indices, starting at 0; all if None
+    @param[in] showHeader: if True then show the header contents
+    @param[in] showStats: if True then show basic image statistics
+    """
     fitsFile = pyfits.open(filePath)
-    if showHeader:
-        print "%s header:" % (filePath,)
-        hdr = fitsFile[0].header
-        for key, value in hdr.items():
-            if key.upper() == "COMMENT":
-                print "%s %s" % (key, value)
-            elif isinstance(value, bool):
-                if value:
-                    valueStr = "T"
+    print "*** FITS file %r:" % (filePath,)
+    if hduList is None:
+        hduList = range(len(fitsFile))
+
+    for hduInd in hduList:
+        print "*** HDU %s header:" % (hduInd,)
+        fitsExt = fitsFile[hduInd]
+        hdr = fitsExt.header
+        if showHeader:
+            for key, value in hdr.items():
+                if key.upper() == "COMMENT":
+                    print "%s %s" % (key, value)
+                elif isinstance(value, bool):
+                    if value:
+                        valueStr = "T"
+                    else:
+                        valueStr = "F"
+                    print "%-8s= %s" % (key, valueStr)
                 else:
-                    valueStr = "F"
-                print "%-8s= %s" % (key, valueStr)
+                    print "%-8s= %r" % (key, value)
+        if showStats:
+            if hdr["NAXIS"] != 2 and fitsExt.header.get("XTENSION") == "BINTABLE":
+                print "*** HDU %s statistics:" % (hduInd,)
+                printArrayStats(filePath, fitsExt.data)
             else:
-                print "%-8s= %r" % (key, value)
-    if showStats:
-        printArrayStats(filePath, fitsFile[0].data)
+                print "*** HDU %s no statistics: not an image" % (hduInd,)
 
 def printArrayStats(descr, arr):
     arr = numpy.array(arr)
@@ -32,22 +47,19 @@ def printArrayStats(descr, arr):
 
 
 if __name__ == "__main__":
-    usageStr = """usage: %%prog [options]
+    usageStr = """Print information about FITS images
+By default prints both the image header and statistics for FITS extention 0."""
+    parser = argparse.ArgumentParser(usageStr)
+    parser.add_argument("files", nargs="+", help="FITS file path(s)")
+    parser.add_argument("--header", action="store_true", help="show header")
+    parser.add_argument("--stats", action="store_true", help="show statistics")
+    parser.add_argument("--hdus", type=int,  nargs="+", default=(0,), help="which HDU(s) to process; 0 by default")
+    parsedCmd = parser.parse_args()
 
-Print information about FITS images (HDU 0 only).
-By default prints both the image header and statistics."""
-    parser = optparse.OptionParser(usageStr, conflict_handler="resolve")
-    parser.add_option("-h", "--header", action="store_true", help="show header")
-    parser.add_option("-s", "--stats", action="store_true", help="show statistics")
-    (options, args) = parser.parse_args()
-    if len(args) == 0:
-        parser.print_help()
-        sys.exit(0)
-
-    showHeader = options.header
-    showStats = options.stats
+    showHeader = parsedCmd.header
+    showStats = parsedCmd.stats
     if not (showHeader or showStats):
         showHeader = True
         showStats = True
-    for filePath in args:
-        fitsInfo(filePath, showHeader=showHeader, showStats=showStats)
+    for filePath in parsedCmd.files:
+        fitsInfo(filePath, showHeader=showHeader, showStats=showStats, hduList=parsedCmd.hdus)
