@@ -336,10 +336,10 @@ class Server(BaseServer):
     """
     def __init__(self,
         endpoint,
-        connCallback = nullCallback,
-        stateCallback = nullCallback,
-        sockReadCallback = nullCallback,
-        sockStateCallback = nullCallback,
+        connCallback = None,
+        stateCallback = None,
+        sockReadCallback = None,
+        sockStateCallback = None,
         name = "",
     ):
         """Construct a socket server
@@ -373,7 +373,10 @@ class Server(BaseServer):
     def port(self):
         """Return the port, or None if not known
         """
-        return getattr(self._endpoint, "_port", None)
+        port = getattr(self._protocol, "port", None)
+        if port == 0: # try an undocumented interface
+            port = getattr(self._protocol, "_realPortNumber", None)
+        return port
     
     def _listeningCallback(self, protocol):
         self._protocol = protocol
@@ -440,10 +443,10 @@ class TCPServer(Server):
     """
     def __init__(self,
         port,
-        connCallback = nullCallback,
-        stateCallback = nullCallback,
-        sockReadCallback = nullCallback,
-        sockStateCallback = nullCallback,
+        connCallback = None,
+        stateCallback = None,
+        sockReadCallback = None,
+        sockStateCallback = None,
         name = "",
     ):
         """Construct a socket server

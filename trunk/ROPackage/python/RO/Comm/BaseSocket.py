@@ -34,18 +34,19 @@ class Base(object):
     """
     def __init__(self,
         state,
-        stateCallback = nullCallback,
+        stateCallback = None,
         name = "",
     ):
         """Construct a Base
         
         @param[in] state: initial state
-        @param[in] stateCallback: function to call when socket state changes; it receives one argument: this socket
+        @param[in] stateCallback: function to call when socket state changes; it receives one argument: this socket;
+            if None then no callback
         @param[in] name: a string to identify this object; strictly optional
         """
         self._state = state
         self._reason = ""
-        self._stateCallback = stateCallback
+        self._stateCallback = stateCallback or nullCallback
         self.name = name
 
     @property
@@ -74,14 +75,20 @@ class Base(object):
         """
         return self._state in self._ReadyStates
     
+    @property
+    def didFail(self):
+        """Return True if object failed, e.g. connection failed
+        """
+        return self._state in self._FailedStates
+    
     def setStateCallback(self, callFunc=nullCallback):
         """Set the state callback function (replacing the current one).
         
         Inputs:
-        - callFunc: the callback function, or nullCallback if none wanted
+        - callFunc: the callback function, or None if none wanted
                     The function is sent one argument: this Socket
         """
-        self._stateCallback = callFunc
+        self._stateCallback = callFunc or nullCallback
     
     def setName(self, newName):
         """Set socket name
@@ -108,7 +115,7 @@ class Base(object):
         if reason is not None:
             self._reason = str(reason)
         
-        stateCallback = self._stateCallback
+        stateCallback = self._stateCallback # make a temporary copy to run after clearing other callbacks
         if self.isDone:
             try:
                 self._clearCallbacks()
@@ -151,6 +158,7 @@ class BaseSocket(Base):
     ))
     _DoneStates = set((Closed, Failed))
     _ReadyStates = set((Connected,))
+    _FailedStates = set((Failed,))
         
     StateStrMaxLen = 0
     for _stateStr in _AllStates:
@@ -159,8 +167,8 @@ class BaseSocket(Base):
     
     def __init__(self,
         state = Connected,
-        readCallback = nullCallback,
-        stateCallback = nullCallback,
+        readCallback = None,
+        stateCallback = None,
         name = "",
     ):
         """Construct a BaseSocket
@@ -171,10 +179,10 @@ class BaseSocket(Base):
         - stateCallback: function to call when socket state changes; it receives one argument: this socket
         - name: a string to identify this socket; strictly optional
         """
-        self._readCallback = readCallback
+        self._readCallback = readCallback or nullCallback
         Base.__init__(self,
             state = state,
-            stateCallback = stateCallback,
+            stateCallback = stateCallback or nullCallback,
             name = name,
         )
 
@@ -196,14 +204,14 @@ class BaseSocket(Base):
         """
         raise NotImplementedError()
     
-    def setReadCallback(self, callFunc=nullCallback):
+    def setReadCallback(self, callFunc=None):
         """Set the read callback function (replacing the current one).
         
         Inputs:
         - callFunc: the callback function, or nullCallback if none wanted.
                     The function is sent one argument: this Socket
         """
-        self._readCallback = callFunc
+        self._readCallback = callFunc or nullCallback
     
     def write(self, data):
         """Write data to the socket. Does not block.
@@ -278,13 +286,14 @@ class BaseServer(Base):
     ))
     _DoneStates = set((Closed, Failed))
     _ReadyStates = set((Listening,))
+    _FailedStates = set((Failed,))
 
     def __init__(self,
         connCallback,
         state = Starting,
-        stateCallback = nullCallback,
-        sockReadCallback = nullCallback,
-        sockStateCallback = nullCallback,
+        stateCallback = None,
+        sockReadCallback = None,
+        sockStateCallback = None,
         name = "",
     ):
         """Construct a socket server
@@ -298,12 +307,12 @@ class BaseServer(Base):
         - name: a string to identify this server; strictly optional
         - state: initial state
         """
-        self._connCallback = connCallback
-        self._sockReadCallback = sockReadCallback
-        self._sockStateCallback = sockStateCallback
+        self._connCallback = connCallback or nullCallback
+        self._sockReadCallback = sockReadCallback or nullCallback
+        self._sockStateCallback = sockStateCallback or nullCallback
         Base.__init__(self,
             state = state,
-            stateCallback = stateCallback,
+            stateCallback = stateCallback or nullCallback,
             name = name,
         )        
 

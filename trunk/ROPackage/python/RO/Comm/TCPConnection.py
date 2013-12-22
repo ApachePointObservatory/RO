@@ -84,6 +84,7 @@ class TCPConnection(object):
     ))
     _ConnectedStates = set((Connected,))
     _DoneStates = set((Connected, Disconnected, Failed))
+    _FailedStates = set((Failed,))
     
     def __init__(self,
         host = None,
@@ -250,6 +251,12 @@ class TCPConnection(object):
         """Return True if the last transition is finished, i.e. connected, disconnected or failed.
         """
         return self._state in self._DoneStates
+    
+    @property
+    def didFail(self):
+        """Return True if the connection failed
+        """
+        return self._state in self._FailedStates
     
     @property
     def mayConnect(self):
