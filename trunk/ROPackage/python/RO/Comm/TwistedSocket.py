@@ -13,7 +13,6 @@ __all__ = ["Socket", "TCPSocket", "Server", "TCPServer"]
 import re
 import sys
 import traceback
-from twisted.internet.defer import Deferred
 from twisted.internet.error import ConnectionDone
 from twisted.internet.protocol import Factory, Protocol
 from twisted.internet.endpoints import TCP4ClientEndpoint, TCP4ServerEndpoint
@@ -168,7 +167,6 @@ class Socket(BaseSocket):
         )
         if protocol is not None:
             self._connectionMade(protocol)
-            self._readyDeferred = Deferred()
         else:
             self._setState(BaseSocket.Connecting)
             self._readyDeferred = self._endpoint.connect(_SocketProtocolFactory())
