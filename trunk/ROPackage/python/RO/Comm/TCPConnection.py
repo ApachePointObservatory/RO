@@ -183,6 +183,9 @@ class TCPConnection(object):
         - host: IP address (name or numeric) of host; if omitted, the default is used
         - port: port number; if omitted, the default is used
         
+        If using twisted framework then returns Socket.readyDeferred, which is either
+        a Deferred or None if there is nothing to defer. Otherwise returns None.
+        
         Raise RuntimeError if:
         - already connecting or connected
         - host omitted and self.host not already set
@@ -212,6 +215,8 @@ class TCPConnection(object):
         else:
             self._localSocketStateDict[TCPSocket.Connected] = self.Connected
             self._setRead(False)
+        
+        return getattr(self._sock, "readyDeferred", None)
     
     def disconnect(self, isOK=True, reason=None):
         """Close the connection.
@@ -224,7 +229,7 @@ class TCPConnection(object):
         - reason: a string explaining why, or None to leave unchanged;
             please specify a reason if isOK is false!   
         """
-        self._sock.close(isOK=isOK, reason=reason)
+        return self._sock.close(isOK=isOK, reason=reason)
 
     @property
     def fullState(self):

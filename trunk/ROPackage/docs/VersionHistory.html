@@ -13,8 +13,9 @@
     <li>RO.Comm.TwistedSocket enhancements:
     <ul>
         <li>close() returns a twisted Deferred if the socket is not yet closed, else None.
-        <li>readyDeferred is a twisted Deferred if the socket is not yet ready, else None.
+        <li>readyDeferred is a twisted Deferred if the socket is not yet ready (or failed), else None.
         <li>server port is the port actually used if constructed with port=0
+        <li>TCPConnection.connect returns readyDeferred if using twisted framework.
     </ul>
 </ul>
 
