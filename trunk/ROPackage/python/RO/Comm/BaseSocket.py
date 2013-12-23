@@ -242,6 +242,8 @@ class BaseSocket(Base):
         - isOK: if True, mark state as Closed, else Failed
         - reason: a string explaining why, or None to leave unchanged;
             please specify if isOK is false.
+
+        The twisted version returns a Deferred if the socket is not already closed, else None
         """
 #         print "%s.close(isOK=%r, reason=%r)" % (self, isOK, reason)
         if self.isDone:
@@ -252,7 +254,7 @@ class BaseSocket(Base):
         else:
             self._setState(self.Failing, reason)
 
-        self._basicClose()
+        return self._basicClose()
     
     def _basicClose(self):
         """Start closing the socket.
@@ -330,6 +332,8 @@ class BaseServer(Base):
         - isOK: if True, mark state as Closed, else Failed
         - reason: a string explaining why, or None to leave unchanged;
             please specify if isOK is false.
+            
+        The twisted version returns a Deferred if the socket is not already closed, else None
         """
 #         print "%s.close(isOK=%r, reason=%r)" % (self, isOK, reason)
         if self.isDone:
@@ -340,7 +344,7 @@ class BaseServer(Base):
         else:
             self._setState(self.Failing, reason)
 
-        self._basicClose()
+        return self._basicClose()
 
     def _basicClose(self):
         """Start closing the socket.

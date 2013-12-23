@@ -7,10 +7,15 @@
 
 <h2>Version history for the <a href="Overview.html">RO Python Package</a></h2>
 
-<h3>3.4.0b1 2013-12-21</h3>
+<h3>3.4.0b1 2013-12-23</h3>
 <ul>
     <li>Added didFail method to RO.Comm sockets, server sockets and TCPConnection.
-    <li>RO.Comm twisted sockets report the port actually used if constructed with port=0.
+    <li>RO.Comm.TwistedSocket enhancements:
+    <ul>
+        <li>close() returns a twisted Deferred if the socket is not yet closed, else None.
+        <li>readyDeferred is a twisted Deferred if the socket is not yet ready, else None.
+        <li>server port is the port actually used if constructed with port=0
+    </ul>
 </ul>
 
 <h3>3.3.0 2013-12-10</h3>
