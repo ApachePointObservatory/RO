@@ -436,6 +436,7 @@ class Server(BaseServer):
         """
         self._endpoint = endpoint
         self._protocol = None
+        self._readyDeferredList = []
         self._closeDeferred = None
         BaseServer.__init__(self,
             connCallback = connCallback,
@@ -444,10 +445,14 @@ class Server(BaseServer):
             sockStateCallback = sockStateCallback,
             name = name,
         )
+        Timer(0, self._startListening) # let device be fully constructed before listening
+        self._numConn = 0
+    
+    def _startListening(self):
         d = self._endpoint.listen(_SocketProtocolFactory(self._newConnection))
         self._readyDeferredList = [d]
         setCallbacks(d, self._listeningCallback, self._connectionLost)
-        self._numConn = 0
+    
 
     @property
     def port(self):
