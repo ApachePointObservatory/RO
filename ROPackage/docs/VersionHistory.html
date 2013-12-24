@@ -10,12 +10,18 @@
 <h3>3.4.0b1 2013-12-23</h3>
 <ul>
     <li>Added didFail method to RO.Comm sockets, server sockets and TCPConnection.
-    <li>RO.Comm.TwistedSocket enhancements:
+    <li>RO.Comm enhancements:
     <ul>
-        <li>close() returns a twisted Deferred if the socket is not yet closed, else None.
-        <li>readyDeferred is a twisted Deferred if the socket is not yet ready (or failed), else None.
-        <li>server port is the port actually used if constructed with port=0
-        <li>TCPConnection.connect returns readyDeferred if using twisted framework.
+        <li>Twisted sockets:
+        <ul>
+            <li>TCPSocket and TCPServer.close() returns a twisted Deferred if the socket is not yet closed, else None.
+            <li>TCPSocket and TCPServer.getReadyDeferred() returns a twisted Deferred if the socket is not yet ready, else None. One use case is with twisted's trial testing framework.
+            <li>TCPServer.port is the port actually used if constructed with port=0
+            <li>TCPSocket.__init__(...) has new timeLim argument.
+        </ul>
+        <li>TkSocket.__init__(...) accepts a new "timeLim" argument.
+    <li>TCPConnection.connect(...) accepts a new "timeLim" argument.
+    <li>TCPConnection.connect(...) returns a twisted Deferred if using twisted framework and not connected.
     </ul>
 </ul>
 
