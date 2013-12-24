@@ -46,7 +46,10 @@ class Base(object):
         """
         self._state = state
         self._reason = ""
-        self._stateCallback = stateCallback or nullCallback
+        if stateCallback:
+            self._stateCallbackList = [stateCallback]
+        else:
+            self._stateCallbackList = []
         self.name = name
 
     @property
@@ -81,14 +84,44 @@ class Base(object):
         """
         return self._state in self._FailedStates
     
-    def setStateCallback(self, callFunc=nullCallback):
-        """Set the state callback function (replacing the current one).
+    def addStateCallback(self, callFunc):
+        """Add a state callback function
+        """
+        self._stateCallbackList.append(callFunc)
+
+    def removeCallback(self, callFunc, doRaise=True):
+        """Delete the callback function.
+
+        Inputs:
+        - callFunc  callback function to remove
+        - doRaise   raise an exception if unsuccessful? True by default.
+
+        Return:
+        - True if successful, raise error or return False otherwise.
+        
+        If doRaise true and callback not found then raise ValueError.
+        """
+        try:
+            self._stateCallbackList.remove(callFunc)
+            return True
+        except ValueError:
+            if doRaise:
+                raise ValueError("Callback %r not found" % callFunc)
+            return False
+    
+    def setStateCallback(self, callFunc=None):
+        """Set the state callback function (replacing all current ones).
+        
+        Deprecated; please use addStateCallback instead.
         
         Inputs:
         - callFunc: the callback function, or None if none wanted
                     The function is sent one argument: this Socket
         """
-        self._stateCallback = callFunc or nullCallback
+        if callFunc:
+            self._stateCallbackList = [callFunc]
+        else:
+            self._stateCallbackList = []
     
     def setName(self, newName):
         """Set socket name
@@ -98,7 +131,7 @@ class Base(object):
     def _clearCallbacks(self):
         """Clear any callbacks added by this class.
         """
-        self._stateCallback = nullCallback
+        self._stateCallbackList = []
 
     def _setState(self, newState, reason=None):
         """Change the state.
@@ -115,19 +148,19 @@ class Base(object):
         if reason is not None:
             self._reason = str(reason)
         
-        stateCallback = self._stateCallback # make a temporary copy to run after clearing other callbacks
+        for stateCallback in self._stateCallbackList:
+            try:
+                stateCallback(self)
+            except Exception, e:
+                sys.stderr.write("%s state stateCallback %s failed: %s\n" % (self, stateCallback, e,))
+                traceback.print_exc(file=sys.stderr)
+
         if self.isDone:
             try:
                 self._clearCallbacks()
             except Exception, e:
                 sys.stderr.write("%s failed to clear callbacks: %s\n" % (self, e,))
                 traceback.print_exc(file=sys.stderr)
-        
-        try:
-            stateCallback(self)
-        except Exception, e:
-            sys.stderr.write("%s state callback %s failed: %s\n" % (self, self._stateCallback, e,))
-            traceback.print_exc(file=sys.stderr)
 
     def _getArgStr(self):
         """Return main arguments as a string, for __str__

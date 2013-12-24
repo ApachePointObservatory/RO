@@ -12,6 +12,7 @@
     <li>Added didFail method to RO.Comm sockets, server sockets and TCPConnection.
     <li>RO.Comm enhancements:
     <li>Sockets and TCPConnection accept a timeLim argument in their constructor to limit the time spent trying to make a connection.
+    <li>Sockets accept addStateCallback and removeStateCallback; setStateCallback is deprecated.
     <li>The twisted version of TCPServer.port is the port actually used if constructed with port=0
     <li>Experimental support for deferreds in twisted sockets (the code is ugly so I may take it back out again):
     <ul>
