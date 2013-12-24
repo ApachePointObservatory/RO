@@ -85,6 +85,7 @@ History:
                     - Modified to use base classes from the BaseSocket module.
                     - Modified example code to use RO.TkUtil.Timer.
                     - Improved the behavior of readLine and writeLine when binary=True.
+2013-12-23 ROwen    Added timeLim argument to TkSocket.__init__.
 """
 __all__ = ["TCPSocket", "TCPServer", "TkSocket", "TkServerSocket"]
 
@@ -261,6 +262,7 @@ class TCPSocket(BaseSocket):
         readCallback = nullCallback,
         stateCallback = nullCallback,
         tkSock = None,
+        timeLim = None,
         name = "",
     ):
         """Construct a TCPSocket
@@ -271,10 +273,12 @@ class TCPSocket(BaseSocket):
         - readCallback  function to call when data read; receives: self
         - stateCallback function to call when state or reason changes; receives: self
         - tkSock    existing tk socket (if missing, one is created and connected)
+        - timeLim   time limit to make connection (sec); no limit if None or 0
         - name      a string to identify this socket; strictly optional
         """
         self._host = host
         self._port = port
+        self._connectTimer = RO.TkUtil.Timer()
         self.__buffer = ""
         BaseSocket.__init__(self,
             readCallback = readCallback,
@@ -286,7 +290,6 @@ class TCPSocket(BaseSocket):
         else:
             sockArgs = None
         self._tkSocketWrapper = _TkSocketWrapper(tkSock=tkSock, sockArgs=sockArgs, name=name)
-        self._tkSocketWrapper.setCallback(self._doRead, doWrite=False)
 
         try:
             # add callbacks; the write callback indicates the socket is connected
@@ -295,8 +298,11 @@ class TCPSocket(BaseSocket):
             self._tkSocketWrapper.setCallback(self._doConnect, doWrite=True)
         except Tkinter.TclError, e:
             raise RuntimeError(e)
-        
+
         self._setState(self.Connecting)
+        if timeLim:
+            self._connectTimer.start(timeLim, self._connectTimeout)
+
         self._checkSocket()
 
     @property
@@ -402,12 +408,22 @@ class TCPSocket(BaseSocket):
             return False
         return True
     
+    def _setState(self, *args, **kwargs):
+        BaseSocket._setState(self, *args, **kwargs)
+        if self.isReady or self.isDone:
+            self._connectTimer.cancel()
+    
     def _clearCallbacks(self):
         """Clear any callbacks added by this class.
         Called just after the socket is closed.
         """
         BaseSocket._clearCallbacks(self)
         self._tkSocketWrapper.clearCallbacks()
+    
+    def _connectTimeout(self):
+        """Call if connection timed out
+        """
+        self.close(isOK=False, reason="timeout")
     
     def _doConnect(self):
         """Called when connection made.
