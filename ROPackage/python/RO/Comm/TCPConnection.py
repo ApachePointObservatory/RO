@@ -236,10 +236,7 @@ class TCPConnection(object):
         - reason: a string explaining why, or None to leave unchanged;
             please specify a reason if isOK is false!   
         """
-        print "close the socket"
-        a = self._sock.close(isOK=isOK, reason=reason)
-        print "close returned a=", a
-        return a
+        return self._sock.close(isOK=isOK, reason=reason)
 
     @property
     def fullState(self):
