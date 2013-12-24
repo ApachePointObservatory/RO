@@ -7,21 +7,17 @@
 
 <h2>Version history for the <a href="Overview.html">RO Python Package</a></h2>
 
-<h3>3.4.0b1 2013-12-23</h3>
+<h3>3.4.0b1 2013-12-24</h3>
 <ul>
     <li>Added didFail method to RO.Comm sockets, server sockets and TCPConnection.
     <li>RO.Comm enhancements:
+    <li>Sockets and TCPConnection accept a timeLim argument in their constructor to limit the time spent trying to make a connection.
+    <li>The twisted version of TCPServer.port is the port actually used if constructed with port=0
+    <li>Experimental support for deferreds in twisted sockets (the code is ugly so I may take it back out again):
     <ul>
-        <li>Twisted sockets:
-        <ul>
-            <li>TCPSocket and TCPServer.close() returns a twisted Deferred if the socket is not yet closed, else None.
-            <li>TCPSocket and TCPServer.getReadyDeferred() returns a twisted Deferred if the socket is not yet ready, else None. One use case is with twisted's trial testing framework.
-            <li>TCPServer.port is the port actually used if constructed with port=0
-            <li>TCPSocket.__init__(...) has new timeLim argument.
-        </ul>
-        <li>TkSocket.__init__(...) accepts a new "timeLim" argument.
-    <li>TCPConnection.connect(...) accepts a new "timeLim" argument.
-    <li>TCPConnection.connect(...) returns a twisted Deferred if using twisted framework and not connected.
+        <li>TCPSocket and TCPServer.close() returns a twisted Deferred if the socket is not yet closed, else None.
+        <li>TCPSocket and TCPServer.getReadyDeferred() returns a twisted Deferred if the socket is not yet ready, else None. One use case is with twisted's trial testing framework.
+        <li>TCPConnection.connect(...) returns a twisted Deferred if using twisted framework and not connected.
     </ul>
 </ul>
 
