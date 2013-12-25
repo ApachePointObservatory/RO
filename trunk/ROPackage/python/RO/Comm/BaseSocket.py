@@ -89,7 +89,7 @@ class Base(object):
         """
         self._stateCallbackList.append(callFunc)
 
-    def removeCallback(self, callFunc, doRaise=True):
+    def removeStateCallback(self, callFunc, doRaise=False):
         """Delete the callback function.
 
         Inputs:
