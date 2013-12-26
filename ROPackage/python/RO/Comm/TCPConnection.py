@@ -83,6 +83,7 @@ class TCPConnection(object):
         Failed,
     ))
     _ConnectedStates = set((Connected,))
+    _DisconnectedStates = set((Disconnected, Failed))
     _DoneStates = set((Connected, Disconnected, Failed))
     _FailedStates = set((Failed,))
     
@@ -257,6 +258,12 @@ class TCPConnection(object):
         """Return True if connected, False otherwise.
         """
         return self._state in self._ConnectedStates
+    
+    @property
+    def isDisconnected(self):
+        """Return True if fully disconnected, False otherwise.
+        """
+        return self._state in self._DisconnectedStates
 
     @property
     def isDone(self):
