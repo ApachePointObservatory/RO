@@ -186,9 +186,6 @@ class TCPConnection(object):
         - port: port number; if omitted, the default is used
         - timeLim: time limit (sec); if None then no time limit
         
-        If using twisted framework then returns Socket.readyDeferred, which is either
-        a Deferred or None if there is nothing to defer. Otherwise returns None.
-        
         Raise RuntimeError if:
         - already connecting or connected
         - host omitted and self.host not already set
@@ -219,25 +216,19 @@ class TCPConnection(object):
         else:
             self._localSocketStateDict[TCPSocket.Connected] = self.Connected
             self._setRead(False)
-        
-        if hasattr(self._sock, "getReadyDeferred"):
-            return self._sock.getReadyDeferred()
-        return None
     
     def disconnect(self, isOK=True, reason=None):
         """Close the connection.
 
         Called disconnect instead of close (the usual counterpoint in the socket library)
         because you can reconnect at any time by calling connect.
-
-        If using twisted framework then returns a Deferred, or None if there is nothing to defer.
         
         Inputs:
         - isOK: if True, final state is Disconnected, else Failed
         - reason: a string explaining why, or None to leave unchanged;
             please specify a reason if isOK is false!   
         """
-        return self._sock.close(isOK=isOK, reason=reason)
+        self._sock.close(isOK=isOK, reason=reason)
 
     @property
     def fullState(self):
@@ -400,7 +391,7 @@ class TCPConnection(object):
             sys.stderr.write("unknown TCPSocket state %r\n" % sockState)
             return
         self._setState(locState, reason)
-    
+
     def _getArgStr(self):
         """Return main arguments as a string, for __str__
         """
