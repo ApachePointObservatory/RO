@@ -7,18 +7,16 @@ History:
 2012-07-19 ROwen
 2012-11-29 ROwen    Misfeature fix: write and writeLine failed on unicode strings that could be converted to ASCII
                     (a "feature" of Twisted Framework).
-2012-12-24 ROwen    Added timeLim argument to socket constructors.
+2013-12-24 ROwen    Added timeLim argument to socket constructors.
                     TCPSocket.port now returns the auto-selected port if constructed with port=0.
-                    Experimental support for deferreds: this is ugly code so I hope to remove it again:
-                    - Added getReadyDeferred method to sockets.
-                    - close returns a deferred.
+                    Added experimental support for Deferreds; it's messy so I plan to remove it again.
+2014-01-01 ROwen    Removed experimental support for Deferreds.
 """
 __all__ = ["Socket", "TCPSocket", "Server", "TCPServer"]
 
 import re
 import sys
 import traceback
-from twisted.internet.defer import Deferred
 from twisted.internet.error import ConnectionDone
 from twisted.internet.protocol import Factory, Protocol
 from twisted.internet.endpoints import TCP4ClientEndpoint, TCP4ServerEndpoint
@@ -163,8 +161,7 @@ class Socket(BaseSocket):
         if bool(endpoint is None) == bool(protocol is None):
             raise RuntimeError("Must provide one of endpoint or protocol")
         self._endpoint = endpoint
-        self._readyDeferredList = []
-        self._closeDeferred = None
+        self._endpointDeferred = None
         self._protocol = None
         self._data = None
         self._connectTimer = Timer()
@@ -180,26 +177,9 @@ class Socket(BaseSocket):
             if timeLim:
                 self._connectTimer.start(timeLim, self._connectTimeout)
             self._setState(BaseSocket.Connecting)
-            d = self._endpoint.connect(_SocketProtocolFactory())
-            self._readyDeferredList = [d]
-            setCallbacks(d, self._connectionMade, self._connectionLost)
+            self._endpointDeferred = self._endpoint.connect(_SocketProtocolFactory())
+            setCallbacks(self._endpointDeferred, self._connectionMade, self._connectionLost)
     
-    def getReadyDeferred(self):
-        """Return a new readyDeferred, if still starting up, else return None
-
-        Return None if fully ready, else a deferred that acts as follows:        
-        - callback(None) is called if the connection attempt succeeds
-        - errback(reason) is called if the connection attempt fails
-        
-        Note: generates a new Deferred for each call. (If users have to share then you have to worry about
-        how previous users propagate callbacks.)
-        """
-        if self._readyDeferredList and not self._readyDeferredList[0].called:
-            newDeferred = Deferred()
-            self._readyDeferredList.append(newDeferred)
-            return newDeferred
-        return None
-
     @property
     def host(self):
         """Return the address, or None if not known
@@ -215,6 +195,53 @@ class Socket(BaseSocket):
         if self._protocol:
             return getattr(self._protocol.transport.getPeer(), "port", None)
         return None
+
+    def _clearCallbacks(self):
+        """Clear any callbacks added by this class. Called just after the socket is closed.
+        """
+        BaseSocket._clearCallbacks(self)
+        self._connCallback = None
+        if self._endpointDeferred is not None:
+            self._endpointDeferred.cancel()
+            self._endpointDeferred = None
+        if self._protocol is not None:
+            self._protocol.roAbort()
+            self._protocol = None
+
+    def _connectionLost(self, reason):
+        """Connection lost callback
+        """
+        #print "%s._connectionLost(reason=%r)" % (self, reason)
+        if reason is None:
+            reasonStrOrNone = None
+        elif isinstance(reason, ConnectionDone):
+            # connection closed cleanly; no need for a reason
+            # use getattr in case reason as no type attribute
+            reasonStrOrNone = None
+        else:
+            reasonStrOrNone = str(reason)
+
+        if self._state == BaseSocket.Closing:
+            self._setState(BaseSocket.Closed, reasonStrOrNone)
+        else:
+            self._setState(BaseSocket.Failed, reasonStrOrNone)
+    
+    def _connectionMade(self, protocol):
+        """Callback when connection made
+        """
+        #print "%s._connectionMade(protocol=%r)" % (self, protocol)
+        self._protocol = protocol
+        self._protocol.roSetCallbacks(
+            readCallback = self._doRead,
+            connectionLostCallback = self._connectionLost,
+        )
+        self._setState(BaseSocket.Connected)
+
+    def _basicClose(self):
+        """Close the socket.
+        """
+        if self._protocol is not None:
+            self._protocol.transport.loseConnection()
     
     def read(self, nChar=None):
         """Read data. Do not block.
@@ -274,90 +301,6 @@ class Socket(BaseSocket):
         if not self.isReady:
             raise RuntimeError("%s not connected" % (self,))
         self.write(data + "\r\n")
-
-    def _clearCallbacks(self):
-        """Clear any callbacks added by this class. Called just after the socket is closed.
-        """
-        BaseSocket._clearCallbacks(self)
-        self._connCallback = None
-        if self._protocol is not None:
-            self._protocol.roAbort()
-            self._protocol = None
-        Timer(0, self._clearDeferreds)
-        
-    def _clearDeferreds(self):
-        """Clean up (cancel) any outstanding deferreds; there should not be any
-
-        Delayed slightly from _clearCallbacks to give _connectionLost a chance
-        to fire the deferreds after the finaly state has been set.
-        """
-        for deferred in self._readyDeferredList:
-            deferred.cancel()
-        self._readyDeferredList = []
-        if self._closeDeferred is not None:
-            self._closeDeferred.cancel()
-            self._closeDeferred = None
-
-    def _connectionLost(self, reason):
-        """Connection lost callback
-        """
-        #print "_connectionLost(reason=%r)" % (reason,)
-        if reason is None:
-            reasonStrOrNone = None
-        elif isinstance(reason, ConnectionDone):
-            # connection closed cleanly; no need for a reason
-            # use getattr in case reason as no type attribute
-            reasonStrOrNone = None
-        else:
-            reasonStrOrNone = str(reason)
-
-        if self._state == BaseSocket.Closing:
-            self._setState(BaseSocket.Closed, reasonStrOrNone)
-        else:
-            self._setState(BaseSocket.Failed, reasonStrOrNone)
-
-        for d in self._readyDeferredList:
-            if not d.called:
-                d.errback(reason)
-        if self._closeDeferred and not self._closeDeferred.called:
-            self._closeDeferred.callback(None)
-    
-    def _connectionMade(self, protocol):
-        """Callback when connection made
-        """
-        #print "%s._connectionMade(protocol=%r)" % (self, protocol)
-        self._protocol = protocol
-        self._protocol.roSetCallbacks(
-            readCallback = self._doRead,
-            connectionLostCallback = self._connectionLost,
-        )
-        
-        self._setState(BaseSocket.Connected)
-
-        for d in self._readyDeferredList:
-            if not d.called:
-                d.callback(None)
-
-    def _basicClose(self):
-        """Close the socket.
-
-        Returns a Deferred if not already closed, else None.
-        """
-        if self._protocol is not None:
-            d = self._protocol.transport.loseConnection()
-            if d is None and not self.isDone: # bug in Twisted; this should not happen
-                d = Deferred()
-            self._closeDeferred = d
-            return self._closeDeferred
-        elif self._readyDeferredList and not self._readyDeferredList[0].called:
-            # closing before connection ready
-            self._readyDeferredList[0].cancel()            
-        return None
-
-    def _setState(self, *args, **kwargs):
-        BaseSocket._setState(self, *args, **kwargs)
-        if self.isReady or self.isDone:
-            self._connectTimer.cancel()
     
     def _connectTimeout(self):
         """Call if connection times out
@@ -374,6 +317,11 @@ class Socket(BaseSocket):
             except Exception, e:
                 sys.stderr.write("%s read callback %s failed: %s\n" % (self, self._readCallback, e,))
                 traceback.print_exc(file=sys.stderr)
+
+    def _setState(self, *args, **kwargs):
+        BaseSocket._setState(self, *args, **kwargs)
+        if self.isReady or self.isDone:
+            self._connectTimer.cancel()
 
 
 class TCPSocket(Socket):
@@ -436,7 +384,6 @@ class Server(BaseServer):
         """
         self._endpoint = endpoint
         self._protocol = None
-        self._readyDeferredList = []
         self._closeDeferred = None
         BaseServer.__init__(self,
             connCallback = connCallback,
@@ -445,14 +392,15 @@ class Server(BaseServer):
             sockStateCallback = sockStateCallback,
             name = name,
         )
-        Timer(0, self._startListening) # let device be fully constructed before listening
         self._numConn = 0
+        Timer(0, self._startListening) # let device be fully constructed before listening
+            # I'm not sure why this is needed, but it seems to help
     
     def _startListening(self):
-        d = self._endpoint.listen(_SocketProtocolFactory(self._newConnection))
-        self._readyDeferredList = [d]
-        setCallbacks(d, self._listeningCallback, self._connectionLost)
-    
+        """Start listening for new connections
+        """
+        self._endpointDeferred = self._endpoint.listen(_SocketProtocolFactory(self._newConnection))
+        setCallbacks(self._endpointDeferred, self._listeningCallback, self._connectionLost)
 
     @property
     def port(self):
@@ -463,61 +411,26 @@ class Server(BaseServer):
             port = getattr(self._protocol, "_realPortNumber", None)
         return port
 
-    def getReadyDeferred(self):
-        """Return a new readyDeferred, if still starting up, else return None
-
-        Return a deferred that acts as follows, if still starting up, else None:
-        - callback(None) is called if the connection attempt succeeds
-        - errback(reason) is called if the connection attempt fails
-        
-        Warning: these will be called before the final state is set,
-        because the code is much simpler that way.
-        
-        Note: generates a new Deferred for each call so that each user can have a fresh Deferred.
-        If users have to share then you have to worry about how previous users propagate callbacks.
-        """
-        if self._readyDeferredList and not self._readyDeferredList[0].called:
-            newDeferred = Deferred()
-            self._readyDeferredList.append(newDeferred)
-            return newDeferred
-        return None
-
     def _listeningCallback(self, protocol):
         self._protocol = protocol
         self._setState(self.Listening)
-        
-        for d in self._readyDeferredList:
-            if not d.called:
-                d.callback(None)
 
     def _basicClose(self):
         """Shut down the server.
-
-        Returns a Deferred if not already closed, else None.
         """
         if self._protocol is not None:
             self._closeDeferred = self._protocol.stopListening()
             setCallbacks(self._closeDeferred, self._connectionLost, self._connectionLost)
-            return self._closeDeferred
-        return None
     
     def _clearCallbacks(self):
         """Clear any callbacks added by this class. Called just after the socket is closed.
         """
         BaseServer._clearCallbacks(self)
         self._connCallback = nullCallback
-        Timer(0, self._clearDeferreds)
-    
-    def _clearDeferreds(self):
-        """Clean up (cancel) any outstanding deferreds; there should not be any
-        
-        Delayed slightly from _clearCallbacks to give _connectionLost a chance
-        to fire the deferreds after the finaly state has been set.
-        """
-        for deferred in self._readyDeferredList:
-            deferred.cancel()
-        self._readyDeferredList = []
-        if self._closeDeferred is not None:
+        if self._endpointDeferred:
+            self._endpointDeferred.cancel()
+            self._endpointDeferred = None
+        if self._closeDeferred:
             self._closeDeferred.cancel()
             self._closeDeferred = None
     
@@ -533,15 +446,11 @@ class Server(BaseServer):
             reasonStrOrNone = None
         else:
             reasonStrOrNone = str(reason)
-            
+
         if self._state == BaseSocket.Closing:
             self._setState(BaseSocket.Closed, reasonStrOrNone)
         else:
             self._setState(BaseSocket.Failed, reasonStrOrNone)
-
-        for d in self._readyDeferredList:
-            if not d.called:
-                d.errback(reason)
     
     def _newConnection(self, protocol):
         """A client has connected. Create a Socket and call the connection callback with it.
@@ -577,7 +486,7 @@ class TCPServer(Server):
         """Construct a socket server
         
         Inputs:
-        - endpoint: a Twisted endpoint, e.g. twisted.internet.endpoints.TCP4ClientEndpoint
+        - port: the port on which to listen for new connections
         - connCallback: function to call when a client connects; it receives the following arguments:
                     - sock, a Socket
         - stateCallback: function to call when server changes state; it receives one argument: this server

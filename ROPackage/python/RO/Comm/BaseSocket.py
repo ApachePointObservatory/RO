@@ -287,7 +287,7 @@ class BaseSocket(Base):
         else:
             self._setState(self.Failing, reason)
 
-        return self._basicClose()
+        self._basicClose()
     
     def _basicClose(self):
         """Start closing the socket.
