@@ -215,7 +215,7 @@ class BaseSocket(Base):
         self._readCallback = readCallback or nullCallback
         Base.__init__(self,
             state = state,
-            stateCallback = stateCallback or nullCallback,
+            stateCallback = stateCallback,
             name = name,
         )
 
@@ -347,7 +347,7 @@ class BaseServer(Base):
         self._sockStateCallback = sockStateCallback or nullCallback
         Base.__init__(self,
             state = state,
-            stateCallback = stateCallback or nullCallback,
+            stateCallback = stateCallback,
             name = name,
         )        
 
