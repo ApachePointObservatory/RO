@@ -71,7 +71,7 @@ class _SocketProtocol(Protocol):
         #print "%s.read(nChar=%r) returning %r; remaining buffer=%r" % (self, nChar, data, self.__buffer)
 
         if self.__buffer and self._readCallback:
-            Timer(0.000001, self._readCallback, self)
+            Timer(0, self._readCallback, self)
         return data
         
     def readLine(self, default=None):
@@ -86,7 +86,7 @@ class _SocketProtocol(Protocol):
         #print "%s.readLine(default=%r) returning %r; remaining buffer=%r" % (self, default, res[0], self.__buffer)
 
         if self.__buffer and self._readCallback:
-            Timer(0.000001, self._readCallback, self)
+            Timer(0, self._readCallback, self)
         return res[0]
         
     def dataReceived(self, data):
@@ -311,6 +311,8 @@ class Socket(BaseSocket):
     def _doRead(self, sock):
         """Called when there is data to read
         """
+        if not self.isReady:
+            return
         if self._readCallback:
             try:
                 self._readCallback(self)
@@ -438,6 +440,9 @@ class Server(BaseServer):
         """Connection failed callback
         """
         #print "%s._connectionLost(%s)" % (self, reason)
+        if self.isDone:
+            return
+
         if reason is None:
             reasonStrOrNone = None
         elif issubclass(getattr(reason, "type", None), ConnectionDone):

@@ -4,4 +4,3 @@ Tkinter-compatible networking.
 
 The docs directory contains installation instructions, an overview, 
 version history and the license.
-
