@@ -7,6 +7,12 @@
 
 <h2>Version history for the <a href="Overview.html">RO Python Package</a></h2>
 
+<h3>3.4.0b2+ 2014-01-14</h3>
+<ul>
+    <li>Made numpy optional in the ups table, so as to work with minimal stacks that use system python and full stacks that use an included python and/or numpy.
+    <li>RO.Comm.TwistedSocket.Socket bug fix: readCallback is not called if the socket is closing.
+</ul>
+
 <h3>3.4.0b2 2014-01-01</h3>
 <ul>
     <li>Added didFail method to RO.Comm sockets, server sockets and TCPConnection.
