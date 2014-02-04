@@ -72,6 +72,10 @@ class Gridder(object):
         self._showHideWdgDict = RO.Alg.SetDict()
         self._showHideCatDict = {}
         self._showHideControlDict = {}
+
+    @property
+    def master(self):
+        return self._master
     
     def addShowHideControl(self, cat, ctrl):
         """Adds A show/hide control (RO.Wdg.Checkbuttons)
