@@ -12,6 +12,7 @@ from Entry import *
 from Gridder import *
 from HistoryMenu import *
 from InputContFrame import *
+from InputContConfigWdg import *
 from InputDialog import *
 from Label import *
 from LogWdg import *

@@ -1,5 +1,5 @@
-#!/usr/bin/env python
-from __future__ import with_statement
+#!/usr/bin/env python2
+from __future__ import absolute_import, division
 """Containers (wrappers) for RO.Wdg input widgets, including Entry,
 Checkbutton and OptionMenu.
 
