@@ -23,8 +23,6 @@ History:
 """
 __all__ = ['StatusConfigGridder']
 
-import Tkinter
-import RO.MathUtil
 import Gridder
 
 ConfigCat = "config"

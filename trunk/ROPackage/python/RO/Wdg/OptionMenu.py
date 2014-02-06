@@ -98,6 +98,8 @@ History:
 2012-11-30 ROwen    Bug fix: width patch was not applied if width changed after the widget was created.
                     Now it is applied by overridden method configure.
 2012-11-30 ROwen    Does no width correction if bitmap is shown.
+2014-02-04 ROwen    Improve label handling: the widget width was affected by the current value,
+                    rather than the width of the label, and label="" was treated as None.
 """
 __all__ = ['OptionMenu']
 
@@ -140,7 +142,8 @@ class OptionMenu (Tkinter.Menubutton, RO.AddCallback.TkVarMixin,
     - callFunc  callback function (not called when added);
                 the callback receives one argument: this object
     - defMenu   name of "restore default" contextual menu item, or None for none
-    - label     label for menu; if omitted then the label is automatically set to the selected value.
+    - label     label for menu; if None then the label is automatically set to the selected value.
+                Use "" to always display an empty menu.
     - abbrevOK  controls the behavior of set and setDefault;
                 if True then unique abbreviations are allowed
     - ignoreCase controls the behavior of set and setDefault;
@@ -209,7 +212,7 @@ class OptionMenu (Tkinter.Menubutton, RO.AddCallback.TkVarMixin,
         for item in ("text", "textvariable"):
             if wdgKArgs.has_key(item):
                 del(wdgKArgs[item])
-        if label:
+        if label is not None:
             wdgKArgs["text"] = label
         else:
             wdgKArgs["textvariable"] = var
@@ -256,7 +259,7 @@ class OptionMenu (Tkinter.Menubutton, RO.AddCallback.TkVarMixin,
         """
         if argDict is not None:
             kargs.update(argDict)
-        if "width" in kargs:
+        if self.label is None and "width" in kargs:
             kargs["width"] = self._computeCorrectedWidth(
                 width = kargs["width"],
                 hasBitmap = bool(kargs.get("bitmap", self["bitmap"])),
@@ -587,8 +590,9 @@ class OptionMenu (Tkinter.Menubutton, RO.AddCallback.TkVarMixin,
         
         Only register this callback function on aqua Tcl/Tk 8.5
         """
-        currVal = self._var.get()
-        self["width"] = len(currVal)
+        if self.label is None:
+            currVal = self._var.get()
+            self["width"] = len(currVal)
 
 
 if __name__ == "__main__":
