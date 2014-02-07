@@ -1,8 +1,9 @@
 #!/usr/bin/env python
-"""Widget to manage named configurations of an input container list
+"""Widget to manage named presets of an input container list
 
 History:
 2014-02-03 ROwen
+2014-02-07 ROwen    Renamed config to preset
 """
 import functools
 import Tkinter
@@ -11,29 +12,34 @@ import Label
 import InputDialog
 import OptionMenu
 
-class InputContConfigWdg(Tkinter.Menubutton):
-    """Widget to manage named configurations of an input container list
+class InputContPresetsWdg(Tkinter.Menubutton):
+    """Widget to manage named presets for an input container list
 
-    Manages a list of named configs, with two categories:
-    - user configs, which can be modified
-    - default configs, which cannot be modified
+    Manages a list of named presets, with two categories:
+    - user presets, which the user can modify and are auto-persisted and reloaded
+    - standard presets, which cannot be modified by the user
     """
-    def __init__(self, master, sysName, userConfigsDict, inputCont, defaultConfigs=None, **kwargs):
-        """Construct a ConfigWdg
+    def __init__(self, master, sysName, userPresetsDict, inputCont, stdPresets=None, **kwargs):
+        """Construct a PresetWdg
 
         Inputs:
         - master: master widget
-        - sysName: name of this system in userConfigsDict
-        - userConfigsDict: a dict of user-specified configs for various systems;
-            only userConfigsDict[sysName] applies to this system (ConfigWdg).
-            The format of userConfigsDict[sysName] is the same as the format of defaultConfigs.
-        - defaultConfigs: default configs for this system. A dict whose entries are:
-            config name: config as a dict of values in the form required by inputCont.setValueDict()
+        - sysName: name of this system in userPresetsDict
+        - userPresetsDict: a dict of user-specified presets for various systems; use an RO.Alg.SavedDict
+            if you want the user presets to be auto-loaded at startup and auto-saved when changed.
+            Only userPresetsDict[sysName] applies to this system (inputCont).
+            The format of the value userPresetsDict[sysName] is the same as the format of stdPresets.
+        - stdPresets: standard presets for this system. A dict whose entries are:
+            preset name: preset as a dict of values in the form required by inputCont.setValueDict()
         - inputCont: input container list being configured (an RO.InputCont.ContList)
+
+        If user presets and standard presets both exist then user presets are listed first,
+        followed by a separator and then the standard presets.
+        Within each group (user and standard), presets are listed alphabetically.
         """
         self._sysName = sysName
-        self._userConfigsDict = userConfigsDict
-        self._defaultConfigs = defaultConfigs or dict()
+        self._userPresetsDict = userPresetsDict
+        self._stdPresets = stdPresets or dict()
         self._inputCont = inputCont
 
         wdgKArgs = {
@@ -79,94 +85,94 @@ class InputContConfigWdg(Tkinter.Menubutton):
         """Update names in option menu
         """
         self._menu.delete(self._begNameIndex, "end")
-        userConfigNames = self._getUserConfigNames()
-        for configName in userConfigNames:
+        userPresetNames = self._getUserPresetNames()
+        for presetName in userPresetNames:
             self._menu.add_command(
-                label = configName,
-                command = functools.partial(self._applyUserConfig, configName),
+                label = presetName,
+                command = functools.partial(self._applyUserPreset, presetName),
             )
 
-        defaultConfigsNames = self._getDefaultConfigNames()
-        if bool(userConfigNames) and bool(defaultConfigsNames):
+        stdPresetsNames = self._getStdPresetNames()
+        if bool(userPresetNames) and bool(stdPresetsNames):
             self._menu.add_separator()
-        for configName in defaultConfigsNames:
+        for presetName in stdPresetsNames:
             self._menu.add_command(
-                label = configName,
-                command = functools.partial(self._applyDefaultConfig, configName),
+                label = presetName,
+                command = functools.partial(self._applyDefaultPreset, presetName),
             )
 
-    def _getDefaultConfigNames(self):
-        """Get a sorted list of default configuration names
+    def _getStdPresetNames(self):
+        """Get a sorted list of default preset names
         """
-        return sorted(self._defaultConfigs.iterkeys())
+        return sorted(self._stdPresets.iterkeys())
 
-    def _getUserConfigNames(self):
-        """Get a sorted list of current configuration names
+    def _getUserPresetNames(self):
+        """Get a sorted list of current preset names
         """
-        config = self._userConfigsDict.get(self._sysName, dict())
-        return sorted(config.iterkeys())
+        preset = self._userPresetsDict.get(self._sysName, dict())
+        return sorted(preset.iterkeys())
 
-    def _applyUserConfig(self, configName):
-        """User selected a config; apply it
+    def _applyUserPreset(self, presetName):
+        """User selected a preset; apply it
         """
-        config = self._userConfigsDict[self._sysName]
-        inputContConfig = config[configName]
-        self._inputCont.setValueDict(inputContConfig)
+        preset = self._userPresetsDict[self._sysName]
+        inputContPreset = preset[presetName]
+        self._inputCont.setValueDict(inputContPreset)
 
-    def _applyDefaultConfig(self, configName):
-        inputContConfig = self._defaultConfigs[configName]
-        self._inputCont.setValueDict(inputContConfig)
+    def _applyDefaultPreset(self, presetName):
+        inputContPreset = self._stdPresets[presetName]
+        self._inputCont.setValueDict(inputContPreset)
 
     def _doSave(self):
-        """Save current configuration
+        """Save current preset
         """
-        dialogBox = SaveDialog(master=self, currNameList=self._getUserConfigNames())
+        dialogBox = SaveDialog(master=self, currNameList=self._getUserPresetNames())
         newName = dialogBox.result
         if not newName:
             return
-        inputContConfig = self._inputCont.getValueDict()
-        config = self._userConfigsDict.get(self._sysName, dict())
-        config[newName] = inputContConfig
-        self._userConfigsDict[self._sysName] = config
+        inputContPreset = self._inputCont.getValueDict()
+        preset = self._userPresetsDict.get(self._sysName, dict())
+        preset[newName] = inputContPreset
+        self._userPresetsDict[self._sysName] = preset
         self._updateNames()
 
     def _doRename(self):
         """Rename an item
         """
-        dialogBox = RenameDialog(master=self, currNameList=self._getUserConfigNames())
+        dialogBox = RenameDialog(master=self, currNameList=self._getUserPresetNames())
         oldNewNames = dialogBox.result
         if not oldNewNames:
             return
         oldName, newName = oldNewNames
-        config = self._userConfigsDict.get(self._sysName, dict())
-        inputContConfig = config[oldName]
-        del config[oldName]
-        config[newName] = inputContConfig
-        self._userConfigsDict[self._sysName] = config
+        preset = self._userPresetsDict.get(self._sysName, dict())
+        inputContPreset = preset[oldName]
+        del preset[oldName]
+        preset[newName] = inputContPreset
+        self._userPresetsDict[self._sysName] = preset
         self._updateNames()
 
     def _doDelete(self):
         """Delete an item
         """
-        dialogBox = DeleteDialog(master=self, currNameList=self._getUserConfigNames())
+        dialogBox = DeleteDialog(master=self, currNameList=self._getUserPresetNames())
         nameToDelete = dialogBox.result
         if not nameToDelete:
             return
-        config = self._userConfigsDict.get(self._sysName, dict())
-        del config[nameToDelete]
-        self._userConfigsDict[self._sysName] = config
+        preset = self._userPresetsDict.get(self._sysName, dict())
+        del preset[nameToDelete]
+        self._userPresetsDict[self._sysName] = preset
         self._updateNames()
 
 
 class SaveDialog(InputDialog.ModalDialogBase):
-    """Dialog box to save the current configuration; result is name for saved config
+    """Dialog box to save the current preset; result is name for saved preset
     """
     def __init__(self, master, currNameList):
         self._currNameList = currNameList
         InputDialog.ModalDialogBase.__init__(self, master=master, title="Save")
 
     def body(self, master):
-        Label.StrLabel(master=master, text="Save This Config As:").grid(row=0, column=0, columnspan=5)
+        Label.StrLabel(master=master, text="Save This Preset As:").grid(row=0, column=0, columnspan=5)
         # Tkinter.Label(master, text="Name:").grid(row=1, column=0)
         self.nameEntry = Entry.StrEntry(master)
         self.currNameWdg = OptionMenu.OptionMenu(
@@ -190,7 +196,7 @@ class SaveDialog(InputDialog.ModalDialogBase):
 
 
 class RenameDialog(InputDialog.ModalDialogBase):
-    """Dialog box to rename a configuration; result is a tuple: (old name, new name) or None
+    """Dialog box to rename a preset; result is a tuple: (old name, new name) or None
 
     Returns None if oldName == newName or one of them is empty
     """
@@ -199,7 +205,7 @@ class RenameDialog(InputDialog.ModalDialogBase):
         InputDialog.ModalDialogBase.__init__(self, master=master, title="Save")
 
     def body(self, master):
-        Label.StrLabel(master=master, text="Rename Config:").grid(row=0, column=0, columnspan=5)
+        Label.StrLabel(master=master, text="Rename Preset:").grid(row=0, column=0, columnspan=5)
         # Tkinter.Label(master, text="Name:").grid(row=1, column=0)
         self.oldNameWdg = OptionMenu.OptionMenu(
             master = master,
@@ -222,14 +228,14 @@ class RenameDialog(InputDialog.ModalDialogBase):
 
 
 class DeleteDialog(InputDialog.ModalDialogBase):
-    """Dialog box to delete one named config; result is name to delete
+    """Dialog box to delete one named preset; result is name to delete
     """
     def __init__(self, master, currNameList):
         self._currNameList = currNameList
         InputDialog.ModalDialogBase.__init__(self, master=master, title="Delete")
 
     def body(self, master):
-        Label.StrLabel(master=master, text="Delete Configuration:").grid(row=0, column=0, columnspan=5)
+        Label.StrLabel(master=master, text="Delete Preseturation:").grid(row=0, column=0, columnspan=5)
         self.currNameWdg = OptionMenu.OptionMenu(
             master = master,
             items = self._currNameList,
@@ -245,7 +251,7 @@ class RestoreDefaultsDialog(InputDialog.ModalDialogBase):
     """Dialog box to confirm restoring defaults; result is True if restore wanted
     """
     def body(self, master):
-        Label.StrLabel(master=master, text="Restore Default Configs?").grid(row=0, column=0)
+        Label.StrLabel(master=master, text="Restore Default Presets?").grid(row=0, column=0)
 
     def setResult(self):
         self.result = True
@@ -259,7 +265,7 @@ if __name__ == '__main__':
 
     root = Tkinter.Tk()
     root.geometry("200x200")
-    userConfigsDict = SavedDict("testConfig.json")
+    userPresetsDict = SavedDict("testPreset.json")
 
     class TestFrame(InputContFrame.InputContFrame):
         def __init__(self, master):
@@ -273,7 +279,7 @@ if __name__ == '__main__':
             self.wdg2 = Entry.StrEntry(self)
             gr.gridWdg("Widget 2", self.wdg2)
 
-            defaultConfigs = dict(
+            stdPresets = dict(
                 default1 = {
                     "Widget 1": "value 1",
                     "Widget 2": 1.1,
@@ -297,15 +303,15 @@ if __name__ == '__main__':
                 ],
             )
 
-            self.configWdg = InputContConfigWdg(
+            self.configWdg = InputContPresetsWdg(
                 master = self,
                 sysName = "test",
-                userConfigsDict = userConfigsDict,
-                defaultConfigs = defaultConfigs,
+                userPresetsDict = userPresetsDict,
+                stdPresets = stdPresets,
                 inputCont = self._inputCont,
-                text = "Configs",
+                text = "Presets",
             )
-            gr.gridWdg("Configs", self.configWdg)
+            gr.gridWdg("Presets", self.configWdg)
 
             gr.allGridded()
 
