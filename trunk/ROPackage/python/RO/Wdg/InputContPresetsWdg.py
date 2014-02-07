@@ -29,7 +29,7 @@ class InputContPresetsWdg(Tkinter.Menubutton):
             if you want the user presets to be auto-loaded at startup and auto-saved when changed.
             Only userPresetsDict[sysName] applies to this system (inputCont).
             The format of the value userPresetsDict[sysName] is the same as the format of stdPresets.
-        - stdPresets: standard presets for this system. A dict whose entries are:
+        - stdPresets: standard presets for this system. None, or a dict whose entries are:
             preset name: preset as a dict of values in the form required by inputCont.setValueDict()
         - inputCont: input container list being configured (an RO.InputCont.ContList)
 
@@ -79,6 +79,16 @@ class InputContPresetsWdg(Tkinter.Menubutton):
 
         self._begNameIndex = 1
 
+        self._updateNames()
+
+    def setStdPresets(self, stdPresets):
+        """Set standard presets, replacing existing standard presets, if any
+
+        Inputs:
+        - stdPresets: standard presets for this system. None, or a dict whose entries are:
+            preset name: preset as a dict of values in the form required by inputCont.setValueDict()
+        """
+        self._stdPresets = stdPresets or dict()
         self._updateNames()
 
     def _updateNames(self):
