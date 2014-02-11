@@ -100,6 +100,7 @@ History:
 2012-11-30 ROwen    Does no width correction if bitmap is shown.
 2014-02-04 ROwen    Improve label handling: the widget width was affected by the current value,
                     rather than the width of the label, and label="" was treated as None.
+2014-02-10 ROwen    Added forceValid argument to set.
 """
 __all__ = ['OptionMenu']
 
@@ -185,6 +186,7 @@ class OptionMenu (Tkinter.Menubutton, RO.AddCallback.TkVarMixin,
         showDefault = not (var and defValue == None)
         if var == None:
             var = Tkinter.StringVar()
+        self._tempValue = None
         self._items = []
         self.defValue = None
         self.noneDisplay = noneDisplay or ''
@@ -297,6 +299,7 @@ class OptionMenu (Tkinter.Menubutton, RO.AddCallback.TkVarMixin,
             if descr and value != None:
                 menuText = "%s (%s)" % (descr, value)
                 def setValue():
+                    self._tempValue = None
                     self.set(value)
                 menu.add_command(label = menuText, command = setValue)
 
@@ -420,7 +423,8 @@ class OptionMenu (Tkinter.Menubutton, RO.AddCallback.TkVarMixin,
     def isValid(self):
         """Return True if the currently displayed value is one of the items set by setItems
         """
-        return self._var.get() in self._items
+        return self._var.get() in self._items \
+            or (self._tempValue is not None and self._var.get() == self._tempValue)
     
     def restoreDefault(self):
         """Restore the default value.
@@ -428,12 +432,24 @@ class OptionMenu (Tkinter.Menubutton, RO.AddCallback.TkVarMixin,
         #print "restoreDefault(); currValue=%r, defValue=%r" % (self._var.get(), self.defValue,)
         self._var.set(self.asString(self.defValue))
 
-    def set(self, newValue, isCurrent=True, doCheck=True, *args, **kargs):
+    def set(self, newValue, isCurrent=True, doCheck=True, forceValid=False, *args, **kargs):
         """Changes the currently selected value.
+
+        Inputs:
+        - newValue: new value to set
+        - isCurrent: is the new value current?
+        - doCheck: test if the new value is one of the allowed items? Ignored if forceValid is true
+        - forceValid: the new value is forced to be valid. The value is cleared
+            when the user selects a menu item or set is called again.
+        *args, **kargs: ignored
         """
+        self._tempValue = None
         newValue, isOK = self.expandValue(newValue)
-        if not isOK and doCheck:
-            raise ValueError("Value %r invalid" % newValue)
+        if not isOK:
+            if forceValid:
+                self._tempValue = str(newValue)
+            elif doCheck:
+                raise ValueError("Value %r invalid" % newValue)
     
         self.setIsCurrent(isCurrent)
         self._var.set(self.asString(newValue))
