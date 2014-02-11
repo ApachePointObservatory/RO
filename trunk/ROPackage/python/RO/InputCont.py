@@ -93,7 +93,6 @@ History:
 2011-02-18 ROwen    Added allCallbacksEnabled method.
 """
 import itertools
-import types
 import RO.AddCallback
 import RO.SeqUtil
 
