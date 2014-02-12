@@ -55,6 +55,7 @@ History:
 2011-08-19 ROwen    Support Python < 2.6 by importing simplejson if json not found.
 2012-07-10 ROwen    Removed used of update_idletasks; used a different technique to fix the problem
                     that windows that are only resizable in one dimension are sometimes drawn incorrectly.
+2014-02-12 ROwen    Added getNamesInGeomFile method to ToplevelSet.
 """
 __all__ = ['tl_CloseDestroys', 'tl_CloseWithdraws', 'tl_CloseDisabled', 'Toplevel', 'ToplevelSet']
 
@@ -122,7 +123,7 @@ class Toplevel(Tkinter.Toplevel):
         Tkinter.Toplevel.__init__(self, master)
         self.wm_withdraw()
         
-        resizable = RO.SeqUtil.oneOrNAsList (resizable, 2, valDescr = "resizable")
+        resizable = RO.SeqUtil.oneOrNAsList(resizable, 2, valDescr = "resizable")
         resizable = tuple([bool(rsz) for rsz in resizable])
         self.__canResize = resizable[0] or resizable[1]
         self.__geometry = ""
@@ -395,13 +396,13 @@ class ToplevelSet(object):
             raise RuntimeError, "toplevel %r already exists" % (name,)
         self.tlDict[name] = toplevel
     
-    def createToplevel (self, 
+    def createToplevel(self, 
         name,
         master=None,
         defGeom="",
         defVisible=None,
         **kargs):
-        """Create a new Toplevel and add it to the set.
+        """Create a new Toplevel, add it to the set and return it.
         
         Inputs are:
         - name: unique identifier for Toplevel.
@@ -419,7 +420,7 @@ class ToplevelSet(object):
             note that visible is ignored unless defVisible is omitted
             and visible exists, in which case defVisible = visible
         
-        Returns the new Toplevel
+        Return the new Toplevel
         """
         if self.getToplevel(name):
             raise RuntimeError, "toplevel %r already exists" % (name,)
@@ -450,10 +451,8 @@ class ToplevelSet(object):
         self.tlDict[name] = newToplevel
         return newToplevel
     
-    def getDesGeom(self,
-        name,
-    ):
-        """Returns the desired geometry for the named toplevel, or "" if none.
+    def getDesGeom(self, name):
+        """Return the desired geometry for the named toplevel, or "" if none.
         
         Inputs:
         - name: name of toplevel
@@ -470,18 +469,16 @@ class ToplevelSet(object):
         desGeom = self.fileGeomDict.get(name, self.defGeomDict.get(name, ""))
         return desGeom
     
-    def getDesVisible(self,
-        name,
-    ):
-        """Returns the desired visiblity for the named toplevel, or True if none.
+    def getDesVisible(self, name):
+        """Return the desired visiblity for the named toplevel, or True if none.
         
         The desired visibility is the entry in the geom/vis file (if any),
         else the entry in the default visibility dictionary.
         """
         return self.fileVisDict.get(name, self.defVisDict.get(name, True))
 
-    def getToplevel (self, name):
-        """Returns the named Toplevel, or None of it does not exist.
+    def getToplevel(self, name):
+        """Return the named Toplevel, or None of it does not exist.
         """
         tl = self.tlDict.get(name, None)
         if not tl:
@@ -491,8 +488,8 @@ class ToplevelSet(object):
             return None
         return tl
     
-    def getNames (self, prefix=""):
-        """Returns all window names that start with the specified prefix
+    def getNames(self, prefix=""):
+        """Return all window names of windows that start with the specified prefix
         (or all names if prefix omitted). The names are in alphabetical order
         (though someday that may change to the order in which windows are added).
         
@@ -504,7 +501,17 @@ class ToplevelSet(object):
             return nameList
         return [name for name in nameList if name.startswith(prefix)]
 
-    def makeVisible (self, name):
+    def getNamesInGeomFile(self, prefix=""):
+        """Return all window names in the geometry file that start with the specified prefix
+        (or all names if prefix omitted). The names are in alphabetical order
+        (though someday that may change to the order in which windows are added).
+        """
+        nameList = sorted(self.fileGeomDict.iterkeys())
+        if not prefix:
+            return nameList
+        return [name for name in nameList if name.startswith(prefix)]
+
+    def makeVisible(self, name):
         tl = self.getToplevel(name)
         if not tl:
             raise RuntimeError, "No such window %r" % (name,)
