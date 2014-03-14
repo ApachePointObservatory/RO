@@ -91,6 +91,7 @@ History:
 2008-04-28 ROwen    Added stripPlusses argument to VMSQualFmt.
 2010-05-26 ROwen    Modified to use AddCallback 2010-05-26.
 2011-02-18 ROwen    Added allCallbacksEnabled method.
+2014-03-13 ROwen    Added omitDef argument to getValueDict and getValueList.
 """
 import itertools
 import RO.AddCallback
@@ -399,24 +400,32 @@ class WdgCont(RO.AddCallback.BaseMixin):
         """
         return [self.getString()]
     
-    def getValueDict(self):
-        """Get the value as a dictionary: {name:value}
-        where value is a list if wdgs was a list
-        
-        If omitDef true and all values are default, then returns {}.
+    def getValueDict(self, omitDef=None):
+        """Get the value as a dictionary: {name:value}, where value is a list if wdgs was a list
+
+        Inputs:
+        - omitDef: If true and all values are default, then return {};
+            if None then the constructor value of omitDef is used.
         """
-        valList = self.getValueList()
-        
-        if self._omitDef and valList == []:
+        if omitDef is None:
+            omitDef = self._omitDef
+        valList = self.getValueList(omitDef)
+        if omitDef and len(valList) == 0:
             return {}
         return {self._name: self._asOneOrList(valList)}
     
-    def getValueList(self):
+    def getValueList(self, omitDef=None):
         """Get the value as a list: [value1, value2, ...].
+
+        Inputs:
+        - omitDef: If true and all values are default, then return [];
+            if None then the constructor value of omitDef is used.
         """
+        if omitDef is None:
+            omitDef = self._omitDef
         valList = [wdg.getString() for wdg in self._wdgList]
         
-        if self._omitDef and valList == self.getDefValueList():
+        if omitDef and valList == self.getDefValueList():
             return []
         return valList
     
@@ -550,18 +559,21 @@ class BoolNegCont(WdgCont):
                 return self._negStr + name
         return [fmtFunc(name, wdg) for name, wdg in self._wdgDict.iteritems()]
 
-    def getValueList(self):
+    def getValueList(self, omitDef=None):
         """Get the value as a list: [name1, negStr + name2, ...].
 
-        If omitIfDef true then widgets with default value are omitted
-        (the remaining values are in order).
+        Inputs:
+        - omitDef: If true then widgets with default value are omitted (the remaining values are in order);
+            if None then the constructor value of omitDef is used.
         """
+        if omitDef is None:
+            omitDef = self._omitDef
         def fmtFunc(name, wdg):
             if wdg.getBool():
                 return name
             else:
                 return self._negStr + name
-        if self._omitDef:
+        if omitDef:
             return [fmtFunc(name, wdg) for name, wdg in self._wdgDict.iteritems() \
                 if wdg.getDefault() != wdg.getString()]
         else:
@@ -662,15 +674,19 @@ class BoolOmitCont(WdgCont):
             if not wdg.getDefBool():
                 raise ValueError, "widget %s does not have default=checked" % (name,)
 
-    def getValueList(self):
+    def getValueList(self, omitDef=None):
         """Get the value as a list: [name1, name3 ...] where only checked values
         are returned and the values are in order.
 
-        If omitIfDef true then [] is returned if all widgets are default (checked).
+        Inputs:
+        - omitDef: If true and all widgets are default (checked) then return [];
+            if None then the constructor value of omitDef is used.
         """
+        if omitDef is None:
+            omitDef = self._omitDef
         valList = [name for name, wdg in self._wdgDict.iteritems()
             if wdg.getBool()]
-        if self._omitDef and len(valList) == len(self._wdgList):
+        if omitDef and len(valList) == len(self._wdgList):
             return []
         return valList
     
@@ -786,8 +802,14 @@ class ContList(WdgCont):
                 retList.append(str)
         return retList
     
-    def getValueDict(self):
+    def getValueDict(self, omitDef=None):
         """Get the widget values as a value dictionary.
+
+        Inputs:
+        - omitDef: omit default values from the dictionary? If None then use the omitDef
+            constructor argument for each input container. Note: the exact meaning of omitDef
+            depends on the type of input container.
+
         The form of the dictionary depends if this list has a name.
         
         If this list has a name (self._name is not blank),
@@ -825,17 +847,22 @@ class ContList(WdgCont):
         """
         valDict = {}
         for cont in self._wdgList:
-            valDict.update(cont.getValueDict())
+            valDict.update(cont.getValueDict(omitDef))
         if self._name:
             valDict = {self._name:valDict}
         return valDict
     
-    def getValueList(self):
+    def getValueList(self, omitDef=None):
         """Get the widget values as a list: [value1, value2...].
+
+        Inputs:
+        - omitDef: omit default values from the dictionary? If None then use omitDef
+            constructor argument for each input container. Note: the exact meaning of omitDef
+            depends on the type of input container.
         """
         dataList = []
         for cont in self._wdgList:
-            dataList.extend(cont.getValueList())
+            dataList.extend(cont.getValueList(omitDef))
         return dataList
     
     def getWdgDict(self):
@@ -880,6 +907,7 @@ class ContList(WdgCont):
     def setValueList(self, valList):
         """Not implemented."""
         raise NotImplementedError("%s does not support setValueList" % self.__class__.__name__)
+
 
 if __name__ == "__main__":
     import Tkinter

@@ -4,6 +4,7 @@
 History:
 2014-02-03 ROwen
 2014-02-07 ROwen    Renamed config to preset
+2014-03-13 ROwen    Bug fix: was not recording default values. The fix required an update to InputCont.
 """
 import functools
 import Tkinter
@@ -140,7 +141,7 @@ class InputContPresetsWdg(Tkinter.Menubutton):
         newName = dialogBox.result
         if not newName:
             return
-        inputContPreset = self._inputCont.getValueDict()
+        inputContPreset = self._inputCont.getValueDict(omitDef=False)
         preset = self._userPresetsDict.get(self._sysName, dict())
         preset[newName] = inputContPreset
         self._userPresetsDict[self._sysName] = preset
