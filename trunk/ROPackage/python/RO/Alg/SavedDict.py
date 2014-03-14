@@ -1,6 +1,9 @@
 """A dictionary that is automatically persisted to a file
 
 Useful for managing saved configurations and similar purposes.
+
+History:
+2014-03-14 ROwen    Pretty-print the saved file.
 """
 import collections
 import json
@@ -48,6 +51,6 @@ class SavedDict(collections.MutableMapping):
     def _dump(self):
         """Write data to file, overwriting the previous file (if any)
         """
-        dataStr = json.dumps(self._data)
+        dataStr = json.dumps(self._data, sort_keys=True, indent=4, separators=(',', ': '))
         with open(self._filePath, "w") as outFile:
             outFile.write(dataStr)

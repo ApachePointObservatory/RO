@@ -5,6 +5,7 @@ History:
 2014-02-03 ROwen
 2014-02-07 ROwen    Renamed config to preset
 2014-03-13 ROwen    Bug fix: was not recording default values. The fix required an update to InputCont.
+2014-03-14 ROwen    Added helpText and helpURL arguments.
 """
 import functools
 import Tkinter
@@ -12,6 +13,7 @@ import Entry
 import Label
 import InputDialog
 import OptionMenu
+import CtxMenu
 
 class InputContPresetsWdg(Tkinter.Menubutton):
     """Widget to manage named presets for an input container list
@@ -20,7 +22,15 @@ class InputContPresetsWdg(Tkinter.Menubutton):
     - user presets, which the user can modify and are auto-persisted and reloaded
     - standard presets, which cannot be modified by the user
     """
-    def __init__(self, master, sysName, userPresetsDict, inputCont, stdPresets=None, **kwargs):
+    def __init__(self,
+        master,
+        sysName,
+        userPresetsDict,
+        inputCont,
+        stdPresets=None,
+        helpText=None,
+        helpURL=None,
+    **kwargs):
         """Construct a PresetWdg
 
         Inputs:
@@ -33,6 +43,9 @@ class InputContPresetsWdg(Tkinter.Menubutton):
         - stdPresets: standard presets for this system. None, or a dict whose entries are:
             preset name: preset as a dict of values in the form required by inputCont.setValueDict()
         - inputCont: input container list being configured (an RO.InputCont.ContList)
+        - helpText: a string that describes the widget
+        - helpURL: URL for on-line help
+        - **kwargs: additional config arguments for Tkinter.Menubutton. 
 
         If user presets and standard presets both exist then user presets are listed first,
         followed by a separator and then the standard presets.
@@ -42,6 +55,7 @@ class InputContPresetsWdg(Tkinter.Menubutton):
         self._userPresetsDict = userPresetsDict
         self._stdPresets = stdPresets or dict()
         self._inputCont = inputCont
+        self.helpText = helpText
 
         wdgKArgs = {
             "borderwidth": 2,
@@ -52,6 +66,7 @@ class InputContPresetsWdg(Tkinter.Menubutton):
         }
         wdgKArgs.update(kwargs)
         Tkinter.Menubutton.__init__(self, master, **wdgKArgs)
+        CtxMenu.addCtxMenu(wdg = self, helpURL = helpURL)
 
         self._menu = Tkinter.Menu(self, tearoff=False)
 
