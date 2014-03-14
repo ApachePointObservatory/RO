@@ -119,7 +119,9 @@ History:
                     - Use best effort to remove callbacks (do not raise an exception)
 2012-07-09 ROwen    Removed unused import in demo section.
 2012-07-18 ROwen    Modified to use RO.Comm.Generic.Timer.
-2012-11/29 ROwen    In CmdVar cast actor, cmdStr and abortStr to str to avoid unicode.
+2012-11-29 ROwen    In CmdVar cast actor, cmdStr and abortCmdStr to str to avoid unicode.
+2014-03-14 ROwen    Bug fix: abortCmdStr was cast to str even if it was None: changed default to "",
+                    but also test for None for backwards compability.
 """
 import sys
 import time
@@ -725,7 +727,7 @@ class CmdVar(object):
         callTypes = DoneTypes,
         isRefresh = False,
         timeLimKeyword = None,
-        abortCmdStr = None,
+        abortCmdStr = "",
         dispatcher = None,
         keyVars = None,
     ):
@@ -741,7 +743,7 @@ class CmdVar(object):
             see addCallback for details.
         - isRefresh: the command was triggered by a refresh request, else is a user command
         - timeLimKeyword: a keyword specifying a delta-time by which the command must finish
-        - abortCmdStr: a command string that will abort the command.
+        - abortCmdStr: a command string that will abort the command, or "" if none.
             Sent to the actor if abort is called and if the command is executing.
         - dispatcher: command dispatcher; if specified, the command is automatically dispatched;
             otherwise you have to dispatch it yourself
@@ -764,7 +766,7 @@ class CmdVar(object):
         self.description = description
         self.isRefresh = isRefresh
         self.timeLimKeyword = timeLimKeyword
-        self.abortCmdStr = str(abortCmdStr)
+        self.abortCmdStr = str(abortCmdStr) if abortCmdStr else None # test None for backwards compatibility
         self.keyVarDict = dict()
         if keyVars == None:
             keyVars = ()
