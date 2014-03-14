@@ -82,6 +82,7 @@ History:
                     and to not try to remove callbacks from CmdVars that are done.
 2012-07-09 ROwen    Made ScriptRunner argument "master" optional and moved later in argument list.
                     Modified to use RO.Comm.Generic.Timer.
+2014-03-14 ROwen    Changed default abortCmdStr from None to "".
 """
 import sys
 import threading
@@ -470,7 +471,7 @@ class ScriptRunner(RO.AddCallback.BaseMixin):
         callFunc = None,
         callTypes = RO.KeyVariable.DoneTypes,
         timeLimKeyword = None,
-        abortCmdStr = None,
+        abortCmdStr = "",
         keyVars = None,
         checkFail = True,
     ):
@@ -507,7 +508,7 @@ class ScriptRunner(RO.AddCallback.BaseMixin):
                 argList.append("callTypes=%r" % (callTypes,))
             if timeLimKeyword != None:
                 argList.append("timeLimKeyword=%r" % (timeLimKeyword,))
-            if abortCmdStr != None:
+            if abortCmdStr:
                 argList.append("abortCmdStr=%r" % (abortCmdStr,))
             if checkFail != True:
                 argList.append("checkFail=%r" % (checkFail,))
@@ -544,7 +545,7 @@ class ScriptRunner(RO.AddCallback.BaseMixin):
         callFunc=None,
         callTypes = RO.KeyVariable.DoneTypes,
         timeLimKeyword = None,
-        abortCmdStr = None,
+        abortCmdStr = "",
         keyVars = None,
         checkFail = True,
     ):

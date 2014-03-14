@@ -7,34 +7,29 @@
 
 <h2>Version history for the <a href="Overview.html">RO Python Package</a></h2>
 
-<h3>3.4.0b4 2014-03-13</h3>
-<ul>
-    <li>RO.InputCont: added omitDef to all getValueDict and getValueList methods.
-    <li>RO.Wdg.InputContPresetsWdg: fixed to not omit defaults when getting values from an input container.
-</ul>
-
-<h3>3.4.0b3 2014-02-12</h3>
+<h3>3.4.0 2014-03-14</h3>
 <ul>
     <li>Added RO.Alg.SavedDict: a dictionary that saves changes to a file (e.g. for user-specified configs).
     <li>Added RO.Wdg.InutContConfigWdg: manage default and user-specified configs for input containers.
+    <li>RO.Comm enhancements:
+    <ul>
+        <li>Added didFail method to sockets, server sockets and TCPConnection.
+        <li>Added isDisconnected method to TCPConnection
+        <li>Sockets and TCPConnection accept a timeLim argument in their constructor to limit the time spent trying to make a connection.
+        <li>Sockets accept addStateCallback and removeStateCallback; setStateCallback is deprecated.
+        <li>The twisted version of TCPServer.port is the port actually used, if constructed with port=0
+        <li>TwistedSocket.Socket bug fix: readCallback is no longer called when the socket is closing.
+    </ul>
     <li>RO.Wdg.OptionMenu:
     <ul>
         <li>Added forceValid argument to set().
         <li>Improve label handling: the widget width was affected by the current value, rather than the width of the label, and label="" was treated as None.
     </ul>
     <li>RO.Wdg.ToplevelSet: added getNamesInGeomFile method.
-    <li>RO.Comm.TwistedSocket.Socket bug fix: readCallback is no longer called if the socket is closing.
+    <li>RO.Wdg.InputContPresetsWdg: fixed to not omit defaults when getting values from an input container.
+    <li>RO.InputCont: added omitDef to all getValueDict and getValueList methods.
+    <li>RO.CmdVar: bug fix: sent the command "None" when cancelled if no abortCmdStr was specified. This bug was introduced in 3.0.2.
     <li>Made numpy optional in the ups table, so as to work with minimal stacks that use system python and full stacks that use an included python and/or numpy.
-</ul>
-
-<h3>3.4.0b2 2014-01-01</h3>
-<ul>
-    <li>Added didFail method to RO.Comm sockets, server sockets and TCPConnection.
-    <li>Added isDisconnected method to RO.Comm.TCPConnection
-    <li>RO.Comm enhancements:
-    <li>Sockets and TCPConnection accept a timeLim argument in their constructor to limit the time spent trying to make a connection.
-    <li>Sockets accept addStateCallback and removeStateCallback; setStateCallback is deprecated.
-    <li>The twisted version of TCPServer.port is the port actually used, if constructed with port=0
 </ul>
 
 <h3>3.3.0 2013-12-10</h3>
