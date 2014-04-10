@@ -86,8 +86,10 @@ History:
                     - Modified example code to use RO.TkUtil.Timer.
                     - Improved the behavior of readLine and writeLine when binary=True.
 2013-12-23 ROwen    Added timeLim argument to TkSocket.__init__.
+2014-04-10 ROwen    TCPSocket: improved the error message if writing while not connected.
+                    Fixed a few issues found by pyflakes.
 """
-__all__ = ["TCPSocket", "TCPServer", "TkSocket", "TkServerSocket"]
+__all__ = ["TCPSocket", "TCPServer"]
 
 import re
 import sys
@@ -369,7 +371,7 @@ class TCPSocket(BaseSocket):
         """
         #print "%s.write(%r)" % (self, data)
         if self._state not in (self.Connected, self.Connecting):
-            raise RuntimeError("%s not connected" % (self,))
+            raise RuntimeError("%s.write(%r) failed: not connected" % (self, data))
         self._tkSocketWrapper.write(data)
         self._assertConn()
 
@@ -550,6 +552,7 @@ if __name__ == "__main__":
     
     port = 2150
     binary = True
+    clientSocket = None
             
     if binary:
         testStrings = (
@@ -572,6 +575,7 @@ if __name__ == "__main__":
     strIter = iter(testStrings)
 
     def runTest():
+        global clientSocket
         try:
             testStr = strIter.next()
             print "Client writing %r" % (testStr,)
@@ -584,6 +588,7 @@ if __name__ == "__main__":
             pass
 
     def clientRead(sock):
+        global clientSocket
         if binary:
             outStr = sock.read()
         else:

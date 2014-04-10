@@ -11,6 +11,8 @@ History:
                     TCPSocket.port now returns the auto-selected port if constructed with port=0.
                     Added experimental support for Deferreds; it's messy so I plan to remove it again.
 2014-01-01 ROwen    Removed experimental support for Deferreds.
+2014-04-10 ROwen    Moved host and port properties from Socket to TCPSocket; this gives better
+                    answers if not connected (e.g. if host is invalid).
 """
 __all__ = ["Socket", "TCPSocket", "Server", "TCPServer"]
 
@@ -179,22 +181,6 @@ class Socket(BaseSocket):
             self._setState(BaseSocket.Connecting)
             self._endpointDeferred = self._endpoint.connect(_SocketProtocolFactory())
             setCallbacks(self._endpointDeferred, self._connectionMade, self._connectionLost)
-    
-    @property
-    def host(self):
-        """Return the address, or None if not known
-        """
-        if self._protocol:
-            return getattr(self._protocol.transport.getPeer(), "host", None)
-        return None
-
-    @property
-    def port(self):
-        """Return the port, or None if unknown
-        """
-        if self._protocol:
-            return getattr(self._protocol.transport.getPeer(), "port", None)
-        return None
 
     def _clearCallbacks(self):
         """Clear any callbacks added by this class. Called just after the socket is closed.
@@ -291,15 +277,13 @@ class Socket(BaseSocket):
         """
         #print "%s.write(%r)" % (self, data)
         if not self.isReady:
-            raise RuntimeError("%s not connected" % (self,))
+            raise RuntimeError("%s.write(%r) failed: not connected" % (self, data))
         self._protocol.transport.write(str(data))
     
     def writeLine(self, data):
         """Write a line of data terminated by standard newline
         """
         #print "%s.writeLine(data=%r)" % (self, data)
-        if not self.isReady:
-            raise RuntimeError("%s not connected" % (self,))
         self.write(data + "\r\n")
     
     def _connectTimeout(self):
@@ -347,6 +331,8 @@ class TCPSocket(Socket):
         - timeLim   time limit to make connection (sec); no limit if None or 0
         - name      a string to identify this socket; strictly optional
         """
+        self._host = host # host
+        self._port = port # requested port; if None then one is assigned
         endpoint = TCP4ClientEndpoint(reactor, host=host, port=port)
         Socket.__init__(self,
             endpoint = endpoint,
@@ -355,6 +341,22 @@ class TCPSocket(Socket):
             timeLim = timeLim,
             name = name,
         )
+    
+    @property
+    def host(self):
+        """Return the address, or None if not known
+        """
+        if self._protocol:
+            return getattr(self._protocol.transport.getPeer(), "host", None)
+        return self._host
+
+    @property
+    def port(self):
+        """Return the port, or None if unknown
+        """
+        if self._protocol:
+            return getattr(self._protocol.transport.getPeer(), "port", None)
+        return self._port
 
     def _getArgStr(self):
         return "name=%r, host=%r, port=%r" % (self.name, self.host, self.port)
@@ -537,6 +539,7 @@ if __name__ == "__main__":
     """
     port = 2150
     binary = False
+    clientSocket = None
             
     if binary:
         testStrings = (
@@ -559,6 +562,7 @@ if __name__ == "__main__":
     strIter = iter(testStrings)
 
     def runTest():
+        global clientSocket
         try:
             testStr = strIter.next()
             print "Client writing %r" % (testStr,)
@@ -571,6 +575,7 @@ if __name__ == "__main__":
             pass
 
     def clientRead(sock):
+        global clientSocket
         if binary:
             outStr = sock.read()
         else:

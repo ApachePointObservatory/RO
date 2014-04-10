@@ -50,14 +50,18 @@ History:
 2012-11-29 ROwen    Overhauled demo code.
 2012-12-06 ROwen    Set tk as RO.Comm.Generic framework if not already set.
 2012-12-17 ROwen    Initial state was 0, should have been Disconnected.
+2014-04-10 ROwen    Use NullTCPSocket instead of NullSocket for better "not connected" error messages.
 """
 import sys
-from RO.Comm.BaseSocket import NullSocket
+from RO.Comm.BaseSocket import NullTCPSocket
 import RO.Comm.Generic
 if RO.Comm.Generic.getFramework() is None:
     print "Warning: RO.Comm.Generic framework not set; setting to tk"
     RO.Comm.Generic.setFramework("tk")
 from RO.Comm.Generic import TCPSocket
+
+__all__ = ["TCPConnection"]
+
 
 class TCPConnection(object):
     """A TCP Socket with the ability to disconnect and reconnect.
@@ -148,7 +152,7 @@ class TCPConnection(object):
             TCPSocket.Failed: self.Failed,
         }
         
-        self._sock = NullSocket()
+        self._sock = NullTCPSocket(name=name, host=host, port=port)
         
     def addReadCallback(self, readCallback):
         """Add a read function, to be called whenever data is read.
