@@ -228,6 +228,22 @@ class Socket(BaseSocket):
         """
         if self._protocol is not None:
             self._protocol.transport.loseConnection()
+
+    @property
+    def host(self):
+        """Return the address, or None if not known
+        """
+        if self._protocol:
+            return getattr(self._protocol.transport.getPeer(), "host", None)
+        return None
+
+    @property
+    def port(self):
+        """Return the port, or None if unknown
+        """
+        if self._protocol:
+            return getattr(self._protocol.transport.getPeer(), "port", None)
+        return None
     
     def read(self, nChar=None):
         """Read data. Do not block.
