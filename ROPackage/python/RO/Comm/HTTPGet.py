@@ -32,6 +32,7 @@ History:
                     Deleted getState() (use state, but returns a string, not an int);
                     Added didFail, isAbortable.
                     State constants are now strings, not integers.
+2014-04-01 ROwen    Bug fix: "unknown state" message used an undefined variable.
 """
 __all__ = ['HTTPGet']
 
@@ -40,8 +41,6 @@ import os
 import sys
 import time
 import traceback
-import urlparse
-import weakref
 import Tkinter
 import RO.AddCallback
 import RO.StringUtil
@@ -452,7 +451,7 @@ class HTTPGet(RO.AddCallback.BaseMixin):
             newState = self.Aborted
         else:
             if httpState != "error":
-                print "HTTPGet warning: unknown state=%s; assuming error" % (state,)
+                print "HTTPGet warning: unknown httpState=%s; assuming error" % (httpState,)
             newState = self.Failed
             errMsg = self._tkApp.call('::http::error', self._tclHTTPConn)
             if not errMsg:

@@ -7,6 +7,16 @@
 
 <h2>Version history for the <a href="Overview.html">RO Python Package</a></h2>
 
+<h3>3.4.2 2014-04-10</h3>
+<ul>
+    <li>RO.Comm minor improvements:
+    <ul>
+        <li>Added NullTCPSocket with host and port.
+        <li>TwistedSocket: moved host and port properties from Socket to TCPSocket and modified them to provide correct answers if the socket is not connected. This improves the error message from trying to write while not connected.
+        <li>TkSocket: improved the error message from trying to write while not connected.
+    </ul>
+</ul>
+
 <h3>3.4.1 2014-03-14</h3>
 <ul>
     <li>RO.Alg.SavedDict: pretty-print the saved dict to make it easier to edit.

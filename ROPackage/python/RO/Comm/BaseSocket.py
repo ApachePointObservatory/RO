@@ -12,8 +12,10 @@ These sockets allow nonblocking event-driven operation:
 
 History:
 2012-08-10 ROwen    Based on TkSocket.
+2014-04-10 ROwen    Added NullTCPSocket and added name argument ot NullSocket.
+                    Removed duplicate definition of BaseServer._basicClose.
 """
-__all__ = ["BaseSocket", "BaseServer", "NullSocket", "nullCallback"]
+__all__ = ["BaseSocket", "BaseServer", "NullSocket", "NullTCPSocket", "nullCallback"]
 
 import sys
 import traceback
@@ -140,7 +142,7 @@ class Base(object):
         - newState: the new state
         - reason: an explanation (None to leave alone)
         """
-#         print "%s._setState(newState=%s, reason=%s)" % (newState, reason)
+        # print "%s._setState(newState=%s, reason=%s)" % (self, newState, reason)
         if self.isDone:
             raise RuntimeError("Already done; cannot change state")
 
@@ -163,11 +165,11 @@ class Base(object):
                 traceback.print_exc(file=sys.stderr)
 
     def _getArgStr(self):
-        """Return main arguments as a string, for __str__
+        """Return main arguments as a string, for __repr__
         """
         return "name=%r" % (self.name)
 
-    def __str__(self):
+    def __repr__(self):
         return "%s(%s)" % (self.__class__.__name__, self._getArgStr())
 
 
@@ -350,11 +352,6 @@ class BaseServer(Base):
             stateCallback = stateCallback,
             name = name,
         )        
-
-    def _basicClose(self):
-        """Shut down the server.
-        """
-        raise NotImplementedError()
     
     def close(self, isOK=True, reason=None):
         """Start closing the server.
@@ -399,8 +396,9 @@ class NullSocket(BaseSocket):
     Forbids read, write and setting a new state callback.
     Close is OK and the state is always Closed.
     """
-    def __init__ (self):
+    def __init__ (self, name=""):
         BaseSocket.__init__(self,
+            name = name,
             state = self.Closed,
         )
         self._reason = "This is an instance of NullSocket"
@@ -416,3 +414,15 @@ class NullSocket(BaseSocket):
 
     def writeLine(self, astr):
         raise RuntimeError("Cannot writeLine %r to null socket" % astr)
+
+
+class NullTCPSocket(NullSocket):
+    def __init__(self, name, host, port):
+        NullSocket.__init__(self, name)
+        self.host = host
+        self.port = port
+
+    def _getArgStr(self):
+        """Return main arguments as a string, for __repr__
+        """
+        return "name=%s, host=%s, port=%s" % (self.name, self.host, self.port)
