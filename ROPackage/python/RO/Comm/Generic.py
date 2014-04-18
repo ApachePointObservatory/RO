@@ -57,7 +57,7 @@ History:
 2012-08-10 ROwen
 """
 import time
-from RO.AddCallback import safeCall
+from RO.AddCallback import safeCall2
 
 _Framework = None
 
@@ -156,13 +156,18 @@ class WaitForTCPServer(object):
         if self._callFunc:
             callFunc = self._callFunc
             self._callFunc = None
-            safeCall(callFunc, self)
+            safeCall2("%s._finish" % (self,), callFunc, self)
+
+    def __repr__(self):
+        return "%s(host=%s, port=%s)" % (type(self).__name__, self.host, self.port)
+
 
 if __name__ == "__main__":
     import Tkinter
     root = Tkinter.Tk()
     root.withdraw()
     setFramework("tk") # since it is almost always installed
+    clientSocket = None
     
     port = 2150
             
@@ -178,6 +183,7 @@ if __name__ == "__main__":
     strIter = iter(testStrings)
 
     def runTest():
+        global clientSocket
         try:
             testStr = strIter.next()
             print "Client writing %r" % (testStr,)
@@ -187,6 +193,7 @@ if __name__ == "__main__":
             pass
 
     def clientRead(sock):
+        global clientSocket
         outStr = sock.readLine(default="")
         print "Client read   %r" % (outStr,)
         if outStr == "quit":

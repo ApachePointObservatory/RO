@@ -87,7 +87,7 @@ class Base(object):
         return self._state in self._FailedStates
     
     def addStateCallback(self, callFunc):
-        """Add a state callback function
+        """Add a state callback function; it receives one argument: this socket
         """
         self._stateCallbackList.append(callFunc)
 

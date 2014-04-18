@@ -32,14 +32,19 @@ History:
 2011-02-18 ROwen    Added callbacksEnabled method.
 2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code.
 2013-09-24 ROwen    Added safeCall.
+2014-04-17 ROwen    Added safeCall2, which gives more feedback than safeCall.
 """
 import sys
 import traceback
 
-__all__ = ["safeCall", "BaseMixin", "TkButtonMixin", "TkVarMixin"]
+__all__ = ["safeCall", "safeCall2", "BaseMixin", "TkButtonMixin", "TkVarMixin"]
 
 def safeCall(func, *args, **kwargs):
     """Call a function; print a traceback and continue if it fails
+
+    Inputs:
+    - func: function to call
+    - *args, **kwargs: arguments for the function
 
     @warning: be sure to provide the function and its arguments as separate arguments,
         result = safeCall(myFunc, arg1, arg2, kwarg1=foo, kwarg2=bar) # correct
@@ -50,6 +55,27 @@ def safeCall(func, *args, **kwargs):
         return func(*args, **kwargs)
     except Exception, e:
         sys.stderr.write("%s(*%s, **%s) failed: %s\n" % (func, args, kwargs, e,))
+        traceback.print_exc(file=sys.stderr)
+
+def safeCall2(descr, func, *args, **kwargs):
+    """Call a function; print a traceback and continue if it fails
+
+    This variant of safeCall gives more information on failure.
+
+    Inputs:
+    - descr: description of why this is being called, for use in error messages
+    - func: function to call
+    - *args, **kwargs: arguments for the function
+
+    @warning: be sure to provide the function and its arguments as separate arguments,
+        result = safeCall2(myFunc, arg1, arg2, kwarg1=foo, kwarg2=bar) # correct
+    a common mistake is to call the function when passing it to safeCall2:
+        restult = safeCall2(myFunc(...)) # wrong; safeCall2 tries to call the result of calling myFuc
+    """
+    try:
+        return func(*args, **kwargs)
+    except Exception, e:
+        sys.stderr.write("%s %s(*%s, **%s) failed: %s\n" % (descr, func, args, kwargs, e,))
         traceback.print_exc(file=sys.stderr)
 
 class _DisableCallbacksContext(object):
@@ -174,7 +200,7 @@ class BaseMixin(object):
         self._enableCallbacks = False
         try:
             for func in self._callbacks[:]:
-                safeCall(func, *args, **kwargs)
+                safeCall2(str(self), func, *args, **kwargs)
         finally:
             self._enableCallbacks = True
     

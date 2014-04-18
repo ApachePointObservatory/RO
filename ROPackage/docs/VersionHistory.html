@@ -7,9 +7,15 @@
 
 <h2>Version history for the <a href="Overview.html">RO Python Package</a></h2>
 
+<h3>3.4.4b1 2014-04-17</h3>
+
+<ul>
+    <li>RO.AddCallback: added safeCall2, which gives more information on error than safeCall and modified current code to use it.
+</ul>
+
 <h3>3.4.3 2014-04-10</h3>
 <ul>
-    <li>RO.Comm.TWistedSocket: restored host and port attributes to Socket
+    <li>RO.Comm.TwistedSocket: restored host and port attributes to Socket
 </ul>
 
 <h3>3.4.2 2014-04-10</h3>
@@ -1187,7 +1193,6 @@
         <li>Removed use of (deprecated) xreadlines in docs.
         <li>bug fix: was setting outPath to "" instead of outDir if outFile="".
     </ul>
-    <p>
     <li>RO.Astro.Cnv.CoordConv: bug fix: conversions requiring a App Topo&lt;-&gt;Observed step were broken (thanks to Emmanouil Angelakis for the report).
     <li>RO.KeyVariable: bug fix: in an error occurred early in instantiation, formatting the exception message failed because there was no self.actor.
 
@@ -1223,7 +1228,6 @@
     </ul>
     <li>RO.ScriptRunner: added a basic debug mode which prints messages as the script runs and prevents commands from going out over the network.
     <li>RO.Wdg.WdgPrefs: added two new prefs to prefDict: "Active Background Color" and "Bad Active Background". These are automatically computed from "Background Color" and "Bad Background"; they should not be set by users.
-    <p>
     <li>RO.Astro.Cnv.coordConv and RO.Astro.Sph.coordConv bug fix: mis-computing proper motion.
     <li>RO.Wdg.GrayImageViewer bug fix; was sorting the input data.
 </ul>

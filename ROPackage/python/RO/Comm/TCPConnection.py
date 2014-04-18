@@ -54,6 +54,7 @@ History:
 """
 import sys
 from RO.Comm.BaseSocket import NullTCPSocket
+from RO.AddCallback import safeCall2
 import RO.Comm.Generic
 if RO.Comm.Generic.getFramework() is None:
     print "Warning: RO.Comm.Generic framework not set; setting to tk"
@@ -345,7 +346,7 @@ class TCPConnection(object):
             self._currReadCallbacks = self._userReadCallbacks
 
     def _setState(self, newState, reason=None):
-        """Set the state and reason. If anything has changed, call the connection function.
+        """Set the state and reason. If anything has changed, call the state callback functions.
 
         Inputs:
         - newState  one of the state constants defined at top of file
@@ -362,7 +363,7 @@ class TCPConnection(object):
         # if the state or reason has changed, call state callbacks
         if oldStateReason != (self._state, self._reason):
             for stateCallback in self._stateCallbacks:
-                stateCallback(self)
+                safeCall2("%s._setState" % (self,), stateCallback, self)
     
     def _sockReadCallback(self, sock):
         """Read callback for the socket in binary mode (not line mode).
