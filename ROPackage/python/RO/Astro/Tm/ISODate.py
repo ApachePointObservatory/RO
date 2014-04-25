@@ -1,11 +1,16 @@
+from __future__ import division, absolute_import
 """Routines to format date and time as ISO date
 
 History:
 2010-06-28 ROwen    Bug fix: isoDateFromPySec was broken.
+2014-04-25 ROwen    Bug fix: isoDateTimeFromPySec returned an extra 0 before the decimal point if nDig>0.
+                    Add from __future__ import division, absolute_import.
 """
 import math
 import time
 import warnings
+
+__all__ = ["isoDateFromPySec", "isoTimeFromPySec", "isoDateTimeFromPySec"]
 
 def isoDateTimeFromPySec(pySec=None, nDig=3, useGMT=True, sepChar="T"):
     """Return the time as an ISO date and time string (without a timezone suffix).
@@ -41,7 +46,7 @@ def isoDateTimeFromPySec(pySec=None, nDig=3, useGMT=True, sepChar="T"):
         fracSec = roundedSec - math.floor(roundedSec)
         fracStr = "%0.*f" % (nDig, fracSec)
         if fracStr[0] == "0":
-            retStrList.append(fracStr)
+            retStrList.append(fracStr[1:])
         else:
             # warn with lots of details
             warnings.warn("isoDateTimeFromPySec bug; invalid fractional seconds omitted: " +

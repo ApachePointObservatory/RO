@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+from __future__ import division, absolute_import
+
 from RO.Astro import llv
 
 __all__ = ["epJFromMJD"]
@@ -14,6 +16,7 @@ def epJFromMJD (mjd):
     - epj   Julian epoch.
     
     History:
-    2002-08-06 R Owen Just a more memorable name for llv.epj.
+    2002-08-06 ROwen    Just a more memorable name for llv.epj.
+    2014-04-25 ROwen    Add from __future__ import division, absolute_import.
     """
     return llv.epj(mjd)

@@ -1,4 +1,9 @@
-#!/usr/bin/env python
+from __future__ import division, absolute_import
+"""Functions to convert python seconds <-> UTC and to compensate for clock error.
+
+History:
+2014-04-25 ROwen    Add from __future__ import division, absolute_import.
+"""
 import time
 import RO.PhysConst
 

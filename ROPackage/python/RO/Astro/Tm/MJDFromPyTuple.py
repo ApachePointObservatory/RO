@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+from __future__ import division, absolute_import
+
 import math
 import RO.PhysConst
 
@@ -15,6 +17,9 @@ def mjdFromPyTuple(timeTuple):
     - sec: seconds (0-59.999...)
     Seconds may be floating point; all other entries must be integers
     or the floating point equivalent (nothing significant after the decimal point).
+
+    History:
+    2014-04-25 ROwen    Add from __future__ import division, absolute_import.
     """
     year, month, day, hour, minute, sec = timeTuple[0:6]
     

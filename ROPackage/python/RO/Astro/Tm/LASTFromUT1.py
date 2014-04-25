@@ -1,8 +1,9 @@
-#!/usr/bin/env python
+from __future__ import division, absolute_import
+
 import RO.PhysConst
 import RO.MathUtil
 from RO.Astro import llv
-from LMSTFromUT1 import *
+from .LMSTFromUT1 import lmstFromUT1
 
 __all__ = ["lastFromUT1"]
 
@@ -18,7 +19,8 @@ def lastFromUT1(ut1, longitude):
     - last      local apparent sideral time (deg)
     
     History:
-    2002-08-05 ROwen  First version, loosely based on the TCC's tut_LAST.
+    2002-08-05 ROwen    First version, loosely based on the TCC's tut_LAST.
+    2014-04-25 ROwen    Add from __future__ import division, absolute_import and use relative import.
     """
     # convert UT1 to local mean sidereal time, in degrees
     lmst = lmstFromUT1(ut1, longitude)

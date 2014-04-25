@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 """Time routines for Astronomy
 
 The heart of these routines is software written by Pat Wallace.
@@ -20,12 +21,12 @@ PO Box 351580
 Seattle, WA 98195
 rowen@u.washington.edu
 """
-from EpJFromMJD import *
-from GMSTFromUT1 import *
-from LASTFromUT1 import *
-from LMSTFromUT1 import *
-from MJDFromEpJ import *
-from MJDFromPyTuple import *
-from TAI import *
-from UTCFromPySec import *
-from ISODate import *
+from .EpJFromMJD import *
+from .GMSTFromUT1 import *
+from .LASTFromUT1 import *
+from .LMSTFromUT1 import *
+from .MJDFromEpJ import *
+from .MJDFromPyTuple import *
+from .TAI import *
+from .UTCFromPySec import *
+from .ISODate import *

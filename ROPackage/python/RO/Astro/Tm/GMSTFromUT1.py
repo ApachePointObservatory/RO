@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+from __future__ import division, absolute_import
+
 import math
 import RO.PhysConst
 import RO.MathUtil
@@ -28,8 +30,8 @@ def gmstFromUT1(ut1):
     P.T.Wallace   Starlink   14 September 1995
     
     History:
-    2002-20-12 ROwen    Removed an extra + sign that was doing nothing.
-                        Thanks to pychecker.
+    2002-20-12 ROwen    Removed an extra + sign that was doing nothing (thanks to pychecker).
+    2014-04-25 ROwen    Add from __future__ import division, absolute_import.
     """
     # convert date to Julian centuries since J2000
     jc= (ut1 - RO.PhysConst.MJDJ2000) / 36525.0
@@ -42,7 +44,6 @@ def gmstFromUT1(ut1):
 
 if __name__ == "__main__":
     # test data is from GMST and is UT days, gmst deg
-    import sys
     print "testing gmstFromUT1"
     testData = (
         (33282.0000000000, 100.075688557397),
