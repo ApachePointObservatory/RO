@@ -120,7 +120,7 @@ class _DoItem:
     def __call__(self):
         self.var.set(self.value)
 
-class OptionMenu (Tkinter.Menubutton, RO.AddCallback.TkVarMixin,
+class OptionMenu(Tkinter.Menubutton, RO.AddCallback.TkVarMixin,
     AutoIsCurrentMixin, IsCurrentActiveMixin, SeverityActiveMixin, CtxMenuMixin):
     """A Tkinter OptionMenu that adds many features.
     
@@ -162,6 +162,8 @@ class OptionMenu (Tkinter.Menubutton, RO.AddCallback.TkVarMixin,
                 - if None then trackDefault = autoIsCurrent (because these normally go together)
     - isCurrent: is the value current?
     - severity: one of: RO.Constants.sevNormal (the default), sevWarning or sevError
+    - postCommand: callback function to call when the menu is posted;
+                this can be used to change the items before the menu is shown.
     - all remaining keyword arguments are used to configure the Menu.
                 text and textvariable are ignored.
     """
@@ -181,6 +183,7 @@ class OptionMenu (Tkinter.Menubutton, RO.AddCallback.TkVarMixin,
         autoIsCurrent = False,
         trackDefault = None,
         isCurrent = True,
+        postCommand = None,
         severity = RO.Constants.sevNormal,
     **kargs):
         showDefault = not (var and defValue == None)
@@ -221,7 +224,7 @@ class OptionMenu (Tkinter.Menubutton, RO.AddCallback.TkVarMixin,
         self.label = label
         Tkinter.Menubutton.__init__(self, master)
         self.configure(**wdgKArgs) # call overridden configure to fix width, if necessary
-        self._menu = Tkinter.Menu(self, tearoff=False) # name="menu", tearoff=False)
+        self._menu = Tkinter.Menu(self, tearoff=False, postcommand=postCommand) # name="menu", tearoff=False)
         self["menu"] = self._menu
         # self.menuname = self._menu._w
         
