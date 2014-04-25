@@ -110,7 +110,7 @@ def isSequence(item):
     """
     try:
         item[0:1]
-    except (AttributeError, TypeError):
+    except Exception:
         return False
     return not isString(item)
 

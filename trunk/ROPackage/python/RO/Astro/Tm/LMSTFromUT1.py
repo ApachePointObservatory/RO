@@ -1,6 +1,7 @@
-#!/usr/bin/env python
+from __future__ import division, absolute_import
+
 import RO.MathUtil
-from GMSTFromUT1 import *
+from .GMSTFromUT1 import gmstFromUT1
 
 __all__ = ["lmstFromUT1"]
 
@@ -16,9 +17,10 @@ def lmstFromUT1(ut1, longitude):
 
     History:
     2002-08-05 R Owen.
+    2014-04-25 ROwen    Add from __future__ import division, absolute_import and use relative import.
     """
     # convert UT1 to Greenwich mean sidereal time (GMST), in degrees
     gmst = gmstFromUT1(ut1)
 
     # find local mean sideral time, in degrees, in range [0, 360)
-    return RO.MathUtil.wrapPos (gmst + longitude)   # degrees
+    return RO.MathUtil.wrapPos(gmst + longitude)   # degrees

@@ -1,6 +1,11 @@
-#!/usr/bin/env python
+from __future__ import division, absolute_import
+"""Functions to convert to/from TAI
+
+History:
+2014-04-25 ROwen    Add from __future__ import division, absolute_import and use relative import.
+"""
 import RO.PhysConst
-from UTCFromPySec import *
+from .UTCFromPySec import utcFromPySec, pySecFromUTC
 
 __all__ = ["getUTCMinusTAI", "setUTCMinusTAI", "taiFromPySec", "utcFromTAI", "taiFromPySec", "pySecFromTAI"]
 
