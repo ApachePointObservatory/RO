@@ -83,6 +83,7 @@ History:
 2012-07-09 ROwen    Made ScriptRunner argument "master" optional and moved later in argument list.
                     Modified to use RO.Comm.Generic.Timer.
 2014-03-14 ROwen    Changed default abortCmdStr from None to "".
+2014-04-29 ROwen    Bug fix: pause followed by resume lost the value returned by whatever was being paused.
 """
 import sys
 import threading
@@ -281,7 +282,7 @@ class ScriptRunner(RO.AddCallback.BaseMixin):
             return
         try:
             print msgStr
-        except (TypeError, ValueError), e:
+        except (TypeError, ValueError):
             print repr(msgStr)
 
     def getFullState(self):
@@ -368,7 +369,7 @@ class ScriptRunner(RO.AddCallback.BaseMixin):
 
         self._setState(Running)
         if not self._waiting:
-            self._continue(self._iterID)
+            self._continue(self._iterID, val=self.value)
 
     def resumeUser(self):
         """Resume execution from waitUser
@@ -527,7 +528,7 @@ class ScriptRunner(RO.AddCallback.BaseMixin):
                 )
                 cmdVar.reply(endMsgDict)
                 msgStr = "%s finished" % cmdVar.cmdStr
-                self._showCmdMsg("%s finished" % cmdVar.cmdStr)
+                self._showCmdMsg(msgStr)
             Timer(1.0, endCmd)
 
         else:
