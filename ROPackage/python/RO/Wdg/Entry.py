@@ -153,6 +153,7 @@ History:
                     - It is less likely to be called multiple times for the same value.
                     Added inMethodCall method.
 2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
+2014-05-07 ROwen    Changed is str test to use basestring.
 """
 __all__ = ['StrEntry', 'ASCIIEntry', 'FloatEntry', 'IntEntry', 'DMSEntry']
 
@@ -955,7 +956,7 @@ class _NumEntry (_BaseEntry):
         If val is "" or None, returns None
         Performs no range checking.
         """
-        if isinstance(val, str):
+        if isinstance(val, basestring):
             return self.numFromStr(val)
         return val
     
@@ -968,7 +969,7 @@ class _NumEntry (_BaseEntry):
         If format is omitted, the default format is used.
         Performs no range checking.
         """
-        if isinstance(val, str):
+        if isinstance(val, basestring):
             return val
         return self.strFromNum(val, format)
 

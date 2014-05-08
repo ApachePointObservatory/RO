@@ -108,10 +108,9 @@ import Tkinter
 import RO.AddCallback
 import RO.Alg
 import RO.SeqUtil
-import RO.TkUtil
-from CtxMenu import CtxMenuMixin
 from IsCurrentMixin import AutoIsCurrentMixin, IsCurrentActiveMixin
 from SeverityMixin import SeverityActiveMixin
+from Menubutton import Menubutton
 
 class _DoItem:
     def __init__(self, var, value):
@@ -120,8 +119,8 @@ class _DoItem:
     def __call__(self):
         self.var.set(self.value)
 
-class OptionMenu(Tkinter.Menubutton, RO.AddCallback.TkVarMixin,
-    AutoIsCurrentMixin, IsCurrentActiveMixin, SeverityActiveMixin, CtxMenuMixin):
+class OptionMenu(Menubutton, RO.AddCallback.TkVarMixin,
+    AutoIsCurrentMixin, IsCurrentActiveMixin, SeverityActiveMixin):
     """A Tkinter OptionMenu that adds many features.
     
     Inputs:
@@ -215,62 +214,30 @@ class OptionMenu(Tkinter.Menubutton, RO.AddCallback.TkVarMixin,
         }
         wdgKArgs.update(kargs)
         for item in ("text", "textvariable"):
-            if wdgKArgs.has_key(item):
-                del(wdgKArgs[item])
+            wdgKArgs.pop(item, None)
         if label is not None:
             wdgKArgs["text"] = label
         else:
             wdgKArgs["textvariable"] = var
         self.label = label
-        Tkinter.Menubutton.__init__(self, master)
-        self.configure(**wdgKArgs) # call overridden configure to fix width, if necessary
-        self._menu = Tkinter.Menu(self, tearoff=False, postcommand=postCommand) # name="menu", tearoff=False)
+        Menubutton.__init__(self, master = master, helpURL = helpURL, **wdgKArgs)
+        self._menu = Tkinter.Menu(self, tearoff = False, postcommand = postCommand)
         self["menu"] = self._menu
-        # self.menuname = self._menu._w
-        
+
         RO.AddCallback.TkVarMixin.__init__(self, var)
-       
-        # do after adding callback support
-        # and before setting default (which triggers a callback)
+
+        # do after adding callback support, but before setting default (which triggers a callback)
         AutoIsCurrentMixin.__init__(self, autoIsCurrent)
         IsCurrentActiveMixin.__init__(self)
         SeverityActiveMixin.__init__(self, severity)
 
-        CtxMenuMixin.__init__(self, helpURL = helpURL)
-        
         self.setItems(items, helpText=helpText, checkCurrent = False, checkDefault = False)
         self.setDefault(defValue, isCurrent = isCurrent, doCheck = True, showDefault = showDefault)
         
-        # work around Tcl/Tk bug #3587262
-        if (RO.TkUtil.getWindowingSystem() == RO.TkUtil.WSysAqua) \
-            and RO.TkUtil.getTclVersion().startswith("8.5") \
-            and (kargs.get("width", 0) == 0):
-            self.addCallback(self._patchMacAutoWidth, callNow=True)
-
         # add callback function after setting default
         # to avoid having the callback called right away
         if callFunc:
             self.addCallback(callFunc, callNow=False)
-    
-    def configure(self, argDict=None, **kargs):
-        """Overridden version of configure that applies a width correction, if necessary
-
-        Notes:
-        - configure is called by wdg[item] = value
-        - sometimes configure is called with a single positional argument: a dict of items,
-            and sometimes it is called with a set of keyword arguments. This code handles both cases.
-        - configure is NOT called by the widget's constructor, so you must call configure with your desired width
-            after constructing the widget, rather than passing width to the widget's constructor
-        """
-        if argDict is not None:
-            kargs.update(argDict)
-        if self.label is None and "width" in kargs:
-            kargs["width"] = self._computeCorrectedWidth(
-                width = kargs["width"],
-                hasBitmap = bool(kargs.get("bitmap", self["bitmap"])),
-                showIndicator = kargs.get("indicatoron", self["indicatoron"]),
-            )
-        Tkinter.Menubutton.configure(self, **kargs)
     
     def asString(self, val):
         """Return display string associated with specified value:
@@ -312,7 +279,7 @@ class OptionMenu(Tkinter.Menubutton, RO.AddCallback.TkVarMixin,
     def destroy(self):
         """Destroy this widget and the associated menu.
         From Tkinter's OptionMenu"""
-        Tkinter.Menubutton.destroy(self)
+        Menubutton.destroy(self)
         self._menu = None
     
     def expandValue(self, value):
@@ -340,13 +307,6 @@ class OptionMenu(Tkinter.Menubutton, RO.AddCallback.TkVarMixin,
         """
         return self.defValue
 
-    def getEnable(self):
-        """Returns True if the button is enabled, False otherwise.
-        
-        Enabled is defined as the state not being 'disabled'.
-        """
-        return self["state"] != "disabled"
-    
     def getIndex(self, item=None):
         """Returns the index of the specified item,
         or the currently selected item if item=None.
@@ -490,14 +450,6 @@ class OptionMenu(Tkinter.Menubutton, RO.AddCallback.TkVarMixin,
             self.restoreDefault()
         else:
             self._doCallbacks()
-
-    def setEnable(self, doEnable):
-        """Changes the enable state.
-        """
-        if doEnable:
-            self.configure(state="normal")
-        else:
-            self.configure(state="disabled")
     
     def setItems(self, items, isCurrent=None, helpText=None, checkCurrent=True, checkDef=False, **kargs):
         """Replaces the current set of items (but only if the new
@@ -586,32 +538,6 @@ class OptionMenu(Tkinter.Menubutton, RO.AddCallback.TkVarMixin,
         self._basicDoCallbacks(self)
         if self._helpTextDict:
             self.helpText = self._helpTextDict.get(self._var.get())
-    
-    def _computeCorrectedWidth(self, width, hasBitmap, showIndicator):
-        """Compute corrected width to overcome Tcl/Tk bugs
-        """
-        if (width != 0) \
-            and not hasBitmap \
-            and (RO.TkUtil.getWindowingSystem() == RO.TkUtil.WSysAqua) \
-            and RO.TkUtil.getTclVersion().startswith("8.5"):
-            if showIndicator:
-                corrWidth = width + 3
-            else:
-                corrWidth = width + 2
-            return corrWidth
-        return width
-    
-    def _patchMacAutoWidth(self, wdg=None):
-        """Callback function that manually sets width to work around Tcl/Tk bug #3587262
-        
-        The effect of this bug is that the displayed width may be too narrow in auto mode (width=0)
-        on MacOS using Tcl/Tk 8.5. Thus you must only register this
-        
-        Only register this callback function on aqua Tcl/Tk 8.5
-        """
-        if self.label is None:
-            currVal = self._var.get()
-            self["width"] = len(currVal)
 
 
 if __name__ == "__main__":
@@ -635,7 +561,7 @@ if __name__ == "__main__":
     )
     menu1.grid(row=0, column=0, sticky="w")
 
-    items = ("MmmmmNnnnn A", "MmmmmNnnnn B", "MmmmmNnnnn C")
+    items = ("MmmmmNnnnn A", "Really long menu item", "abcdef", "C")
     menu2 = OptionMenu(root,
         items = items,
         defValue = "MmmmmNnnnn A",

@@ -85,6 +85,7 @@ History:
 2009-07-20 ROwen    Updated the documentation strings.
 2009-09-23 ROwen    Updated SoundPrefVar documentation to remove explicit mention of snack.
 2012-12-19 ROwen    Added FontSizePrefVar.
+2014-05-07 ROwen    Changed is str test to use basestring.
 """
 import os.path
 import re
@@ -271,7 +272,7 @@ class PrefVar(object):
         
     def setValue (self, rawValue):
         """Accepts values of the correct type or a string representation"""
-        if isinstance(rawValue, str):
+        if isinstance(rawValue, basestring):
             value = self.asValue(rawValue)
         else:
             value = rawValue
