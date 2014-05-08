@@ -43,6 +43,7 @@ History:
 2008-04-29 ROwen    Added strFromException, a unicode-safe replacement for str(exception).
 2008-05-02 ROwen    Made prettyDict unicode-safe by using repr.
 2008-11-14 ROwen    Added unquoteStr.
+2014-05-07 ROwen    Changed is str test to use basestring.
 """
 import re
 
@@ -347,7 +348,7 @@ def splitDMSStr (dmsStr):
     error conditions:
         raises ValueError if the string cannot be parsed
     """
-    assert isinstance(dmsStr, str)
+    assert isinstance(dmsStr, basestring)
     m = _DegRE.match(dmsStr) or _DegMinRE.match(dmsStr) or _DegMinSecRE.match(dmsStr)
     if m == None:
         raise ValueError, "splitDMSStr cannot parse %s as a sexagesimal string" % (dmsStr)

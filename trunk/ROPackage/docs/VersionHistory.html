@@ -7,6 +7,15 @@
 
 <h2>Version history for the <a href="Overview.html">RO Python Package</a></h2>
 
+<h3>3.5.0b1 2014-05-08</h3>
+
+<ul>
+    <li>RO.Wdg.InputContPresetsWdg: added autoUpdate argument to display the current preset value; by default it is automatically determined by whether "text" is specified.
+    <li>Added RO.Wdg.Menubutton to encapsulated my attempt to work around Tk 8.5 MacOS Aqua width bugs and provide basic help functionality.
+    <li>Modified RO.Wdg.OptionMenu and RO.Wdg.InputContPresetsWdg to use RO.Wdg.Menubutton.
+    <li>Changed all uses of isinstance(val, str) to isinstance(val, basestring): RO.StringUtil.splitDMSStr, RO.Wdg.Entry, RO.Prefs.PrefVar.
+</ul>
+
 <h3>3.4.5 2014-05-07</h3>
 
 <ul>
@@ -18,7 +27,7 @@
 <ul>
     <li>RO.AddCallback: added safeCall2, which gives more information on error than safeCall and modified current code to use it.
     <li>RO.SeqUtil.isSequence: bug fix: an unexpected exception was being raised for some values.
-    <li>RO.Astro.Tm: fixed a bug in isoDateTimeFromPySec: an extra 0 before the decimal point if nDig>0.
+    <li>RO.Astro.Tm: fixed a bug in isoDateTimeFromPySec: an extra 0 before the decimal point if nDig&gt;0.
 </ul>
 
 <h3>3.4.3 2014-04-10</h3>
