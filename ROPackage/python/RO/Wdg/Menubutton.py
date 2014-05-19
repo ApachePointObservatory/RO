@@ -57,13 +57,24 @@ class Menubutton(Tkinter.Menubutton, CtxMenu.CtxMenuMixin):
         )
     
     def setEnable(self, doEnable):
+        """Enable or disable widget
+
+        Inputs:
+        - doEnable: if True enable widget (set state to normal); otherwise set state to disabled
+
+        Warning: if you want the state to be "active" you must set that explicitly.
+        """
         if doEnable:
-            self["state"] = "normal"
+            self["state"] = Tkinter.NORMAL
         else:
-            self["state"] = "disabled"
+            self["state"] = Tkinter.DISABLED
     
     def getEnable(self):
-        return self["state"] == "normal"
+        """Return True if widget is enabled, False otherwise
+
+        Enabled is defined as the state is not "disabled" (thus "enabled" or "active").
+        """
+        return self["state"] != Tkinter.DISABLED
 
     def configure(self, argDict=None, **kwArgs):
         """Overridden version of configure that applies a width correction, if necessary
