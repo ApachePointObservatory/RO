@@ -255,9 +255,9 @@ class Checkbutton (Tkinter.Checkbutton, RO.AddCallback.TkVarMixin,
     def getEnable(self):
         """Returns True if the button is enabled, False otherwise.
         
-        Enabled is defined as the state not being 'disabled'.
+        Enabled is defined as the state is not "disabled" (thus "enabled" or "active").
         """
-        return self["state"] != "disabled"
+        return self["state"] != Tkinter.DISABLED
     
     def getVar(self):
         return self._var
@@ -340,17 +340,17 @@ class Checkbutton (Tkinter.Checkbutton, RO.AddCallback.TkVarMixin,
         if isCurrent != None:
             self._isCurrent = isCurrent
         
-        # if disabled and defIfDisabled, update display
-        # (which also triggers a callback)
+        # if disabled and defIfDisabled, update display (which also triggers a callback)
         # otherwise leave the display alone and explicitly trigger a callback
-        if restoreDef or (self._defIfDisabled and self["state"] == "disabled"):
+        if restoreDef or (self._defIfDisabled and self["state"] == Tkinter.DISABLED):
             self.restoreDefault()
         else:
             self._doCallbacks()
 
     def setEnable(self, doEnable):
-        """Changes the enable state and (if the widget is being disabled
-        and defIfDisabled true) displays the default value
+        """Set the enable state and (if the widget is being disabled and defIfDisabled true) display the default value
+
+        Warning: if you want the state to be "active" you must set that explicitly.
         """
         if doEnable:
             self.configure(state="normal")

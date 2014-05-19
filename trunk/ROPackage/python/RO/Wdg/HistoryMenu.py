@@ -102,7 +102,6 @@ class HistoryMenu (Tkinter.Menubutton, CtxMenu.CtxMenuMixin):
             label = name,
             command = RO.Alg.GenericCallback(self.__callFunc, name, data),
         )
-#       self["state"] = "normal"
     
     def nItems(self):
         """Returns the number of items in the history menu.

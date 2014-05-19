@@ -418,7 +418,7 @@ class OptionMenu(Menubutton, RO.AddCallback.TkVarMixin,
         self._var.set(self.asString(newValue))
 
     def setDefault(self, newDefValue, isCurrent=None, doCheck=True, showDefault=None, *args, **kargs):
-        """Changes the default value. If the current value is None, also sets the current value.
+        """Change the default value. If the current value is None, also sets the current value.
 
         Inputs:
         - newDefValue: the new default value
