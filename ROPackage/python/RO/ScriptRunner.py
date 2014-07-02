@@ -21,10 +21,8 @@ Code comments:
   cancel functions) and allows the class to easily keep track
   of private internal data.
 - The wait class is created but is not explicitly kept around.
-  Why doesn't it immediately vanish? Because the wait class
-  registers a method as a completion callback and usual
-  another method as a cancel function. As long as somebody
-  has a pointer to an method then the instance is kept alive.
+  Why doesn't it immediately vanish? Because the wait class registers a method as a completion callback.
+  As long as somebody has a pointer to that method then the instance is kept alive.
 - waitThread originally relied on generating an event when the script ended.
   Unfortunately, that proved unreliable; if the thread was very short,
   it could actually start trying to continue before the current
