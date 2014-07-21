@@ -154,7 +154,7 @@ History:
                     Added inMethodCall method.
 2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
 2014-05-07 ROwen    Changed is str test to use basestring.
-2014-07-19 ROwen    Disabling the widget now makes the widget lose focus, which is what users expect
+2014-07-21 ROwen    Disabling the widget now makes the widget lose focus, which is what users expect
                     and saves unsaved edits.
 """
 __all__ = ['StrEntry', 'ASCIIEntry', 'FloatEntry', 'IntEntry', 'DMSEntry']
@@ -628,6 +628,7 @@ class _BaseEntry (Tkinter.Entry, RO.AddCallback.BaseMixin,
             self.configure(state="disabled")
             if self.focus_get() == self:
                 self.winfo_toplevel().focus()
+            self.neatenDisplay()
     
     def setEntryError(self, errMsg):
         """Call to report or clear the entry error.
