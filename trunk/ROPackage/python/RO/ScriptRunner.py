@@ -82,6 +82,7 @@ History:
                     Modified to use RO.Comm.Generic.Timer.
 2014-03-14 ROwen    Changed default abortCmdStr from None to "".
 2014-04-29 ROwen    Bug fix: pause followed by resume lost the value returned by whatever was being paused.
+2014-07-21 ROwen    Added waitPause and waitSec.
 """
 import sys
 import threading
@@ -656,7 +657,7 @@ class ScriptRunner(RO.AddCallback.BaseMixin):
         )
 
     def waitMS(self, msec):
-        """Waits for msec milliseconds.
+        """Wait for msec milliseconds.
         
         A yield is required.
 
@@ -666,7 +667,27 @@ class ScriptRunner(RO.AddCallback.BaseMixin):
         self.debugPrint("waitMS(msec=%s)" % (msec,))
 
         _WaitMS(self, msec)
-    
+
+    def waitSec(self, sec):
+        """Wait for sec seconds.
+
+        A yield is required.
+
+        Inputs:
+        - sec  number of seconds to pause
+        """
+        self.debugPrint("waitSec(sec=%s)" % (sec,))
+
+        _WaitMS(self, sec * 1000)
+
+    def waitPause(self, msgStr="Paused", severity=RO.Constants.sevNormal):
+        """Pause execution and wait
+
+        A no-op if not running
+        """
+        Timer(0, self.showMsg, msgStr, severity=severity)
+        self.pause()
+
     def waitThread(self, func, *args, **kargs):
         """Run func as a background thread, waits for completion
         and sets self.value = the result of that function call.
@@ -986,7 +1007,7 @@ class _WaitCmdVars(_WaitBase):
             # no need to wait; commands are already done or one has failed
             # schedule a callback for asap
 #            print "_WaitCmdVars: no need to wait"
-            Timer(0.001, self.varCallback)
+            Timer(0, self.varCallback)
         else:
             # need to wait; add self as callback to each cmdVar
             # and remove self.scriptRunner._cmdFailCallback if present
@@ -1077,7 +1098,7 @@ class _WaitKeyVar(_WaitBase):
         if self.keyVar.isCurrent() and not self.waitNext:
             # no need to wait; value already known
             # schedule a wakeup for asap
-            Timer(0.001, self.varCallback)
+            Timer(0, self.varCallback)
         elif self.scriptRunner.debug:
             # display message
             argList = ["keyVar=%s" % (keyVar,)]
@@ -1093,7 +1114,7 @@ class _WaitKeyVar(_WaitBase):
             if self.defVal == Exception:
                 self.defVal = None
 
-            Timer(0.001, self.varCallback)
+            Timer(0, self.varCallback)
         else:
             # need to wait; set self as a callback
 #           print "_WaitKeyVar adding callback"

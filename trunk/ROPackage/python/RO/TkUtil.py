@@ -18,6 +18,7 @@ History:
 2012-07-09 ROwen    Added Timer to __all__.
 2012-11-16 ROwen    Added getTclVersion function.
 2013-10-07 ROwen    Timer.start accepts keyword arguments for the callback function.
+2014-07-21 ROwen    Timer.__init__ accepts keyword arguments for the callback function.
 """
 __all__ = ['addColors', 'colorOK', 'EvtNoProp', 'getWindowingSystem', 'getTclVersion', 'TclFunc',
     'Geometry', 'Timer', 'WSysAqua', 'WSysX11', 'WSysWin']
@@ -423,7 +424,7 @@ class Geometry(object):
 class Timer(object):
     """A restartable one-shot timer
     """
-    def __init__(self, sec=None, callFunc=None, *args):
+    def __init__(self, sec=None, callFunc=None, *args, **kwargs):
         """Start or set up a one-shot timer
 
         Inputs:
@@ -434,7 +435,7 @@ class Timer(object):
         self._tkWdg = _getTkWdg()
         self._timerID = None
         if sec != None:
-            self.start(sec, callFunc, *args)
+            self.start(sec, callFunc, *args, **kwargs)
     
     def start(self, sec, callFunc, *args, **kwargs):
         """Start or restart the timer, cancelling a pending timer if present
@@ -479,7 +480,6 @@ def _getTkWdg():
     return g_tkWdg
 
 if __name__ == "__main__":
-    import Tkinter
     root = Tkinter.Tk()
 
     def setGeometry(geomStrList):
