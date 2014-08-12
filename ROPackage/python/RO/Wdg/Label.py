@@ -56,7 +56,6 @@ import RO.Constants
 import RO.MathUtil
 import RO.StringUtil
 import CtxMenu
-import WdgPrefs
 from SeverityMixin import SeverityMixin
 from IsCurrentMixin import IsCurrentMixin
 

@@ -65,15 +65,12 @@ History:
                     rather than the beginning or end. This offers the user a natural way to specify
                     the start of the search.
 2010-06-28 ROwen    Removed two statements that had no effect (thanks to pychecker).
+2014-08-09 ROwen    Fixed a bug in an error message (misspelled variable) and removed some unused imports.
 """
 __all__ = ['LogWdg']
 
 import Tkinter
 import RO.Alg
-import Button
-import Entry
-import Label
-import OptionMenu
 import Text
 
 _AllTextTag = "__alltext"
@@ -534,7 +531,7 @@ if __name__ == '__main__':
             
             addMsg(msgStr)
         except StandardError, e:
-            sys.stderr.write ("Could not extract or send: %s\n" % (astr))
+            sys.stderr.write ("Could not extract or send: %s\n" % (msgStr))
             sys.stderr.write ("Error: %s\n" % (e))
 
     entry.bind('<KeyPress-Return>', addTolog)
