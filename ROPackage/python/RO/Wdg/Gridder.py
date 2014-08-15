@@ -415,7 +415,7 @@ class _BaseGridSet:
     def __getitem__(self, ind):
         """Implement keyVar[ind] to return the specified value from the wdgSet.
         
-        @raise IndexError if ind is out of range
+        @throw IndexError if ind is out of range
         """
         return self.wdgSet[ind]
 

@@ -21,7 +21,6 @@ History:
 2003-10-24 ROwen    Made J2000 the default date for ICRS (instead of no date).
 2005-08-12 ROwen    Removed unused import of string module.
 """
-import sys
 import RO.Astro.Tm
 import RO.StringUtil
 

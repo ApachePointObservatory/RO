@@ -103,13 +103,13 @@ class WaitForTCPServer(object):
     def __init__(self, host, port, callFunc, timeLim=5, pollInterval=0.2):
         """Start waiting for a TCP server to accept a connection
         
-        @param[in] host: host address of server
-        @param[in] port: port number of server
-        @param[in] callFunc: function to call when server ready or wait times out;
+        @param[in] host  host address of server
+        @param[in] port  port number of server
+        @param[in] callFunc  function to call when server ready or wait times out;
             receives one parameter: this object
-        @param[in] timeLim: approximate maximum wait time (sec);
+        @param[in] timeLim  approximate maximum wait time (sec);
             the actual wait time may be up to pollInterval longer
-        @param[in] pollInterval: interval at which to poll (sec)
+        @param[in] pollInterval  interval at which to poll (sec)
         
         Useful attributes:
         - isDone: the wait is over

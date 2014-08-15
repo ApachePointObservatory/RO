@@ -41,10 +41,10 @@ class Base(object):
     ):
         """Construct a Base
         
-        @param[in] state: initial state
-        @param[in] stateCallback: function to call when socket state changes; it receives one argument: this socket;
+        @param[in] state  initial state
+        @param[in] stateCallback  function to call when socket state changes; it receives one argument: this socket;
             if None then no callback
-        @param[in] name: a string to identify this object; strictly optional
+        @param[in] name  a string to identify this object; strictly optional
         """
         self._state = state
         self._reason = ""
