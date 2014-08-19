@@ -162,6 +162,8 @@ History:
 2012-07-09 ROwen    Modified to use RO.TkUtil.Timer.
 2012-11-13 ROwen    Stop using Checkbutton indicatoron=False because it is no longer supported on MacOS X.
 2013-09-05 ROwen    Change "import Image" to "from PIL import Image" for compatibility with Pillow.
+2014-08-19 ROwen    Bug fix: Annotation.draw would fail if isImSize true and holeRad specified.
+                    Change "import ImageTk" to "from PIL import ImageTk" for better Pillow compatibility.
 """
 import weakref
 import Tkinter
@@ -173,8 +175,7 @@ except ImportError:
     # old versions of numpy had ma buried
     import numpy.core.ma as ma
 import os.path
-from PIL import Image
-import ImageTk
+from PIL import Image, ImageTk
 import RO.AddCallback
 import RO.CanvasUtil
 import RO.Constants
@@ -184,6 +185,8 @@ import Entry
 import Label
 import OptionMenu
 import RadiobuttonSet
+
+__all__ = ["ann_Circle", "ann_Plus", "ann_X", "ann_Line", "ann_Text", "MaskInfo", "GrayImageWdg"]
 
 _AnnTag = "_gs_ann_"
 _DragRectTag = "_gs_dragRect"
@@ -386,7 +389,7 @@ class Annotation(object):
             # radius is in image units; adjust for zoom factor
             rad = int(round(self.rad * self.gim.zoomFac))
             if self.holeRad != None:
-                kargs["holeRad"] = int(round(self.holeRad * self.gim.zoomFac))
+                self.kargs["holeRad"] = int(round(self.holeRad * self.gim.zoomFac))
         else:
             # radius is already in canvas units; leave it alone
             rad = self.rad
@@ -1068,8 +1071,6 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
         self.strMsgWdg.grid_remove()
 
         try:
-            dataShapeXY = self.dataArr.shape[::-1]
-            
             # offset so minimum display value = scaling function minimum input
             # reuse existing scaledArr memory if possible
             if self.scaledArr == None or self.scaledArr.shape != self.dataArr.shape:
