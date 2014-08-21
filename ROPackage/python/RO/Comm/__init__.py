@@ -2,3 +2,4 @@
 
 Generic contains some common classes that can work with either the Tk event loop or Twisted Framework.
 """
+from .isAvailable import *
