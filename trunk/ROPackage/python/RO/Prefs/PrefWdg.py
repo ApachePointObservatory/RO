@@ -30,6 +30,8 @@ History:
                     Renamed internal method selectCategory to _showSelectedCategory.
 2012-07-10 ROwen    Removed use of update_idletasks.
 2012-12-19 ROwen    Added a FontSizePrefVar to the demo.
+2014-08-31 ROwen    Added a contextual menu with Help (if helpURL provided) to all controls;
+                    formerly only the status bar had this.
 """
 import Tkinter
 import PrefVar
@@ -89,10 +91,10 @@ class PrefWdg(Tkinter.Frame):
         # create the button panel
         self.buttonWdg = Tkinter.Frame(self)
         buttonList = (
-            self._getShowMenu(self.buttonWdg),
+            self._getShowMenu(self.buttonWdg, helpURL=helpURL),
             Tkinter.Frame(self.buttonWdg, width=10),
-            Tkinter.Button(self.buttonWdg, text="Apply", command=self.applyPrefs),
-            Tkinter.Button(self.buttonWdg, text="Save", command=self.writeToFile),
+            RO.Wdg.Button(self.buttonWdg, text="Apply", command=self.applyPrefs, helpURL=helpURL),
+            RO.Wdg.Button(self.buttonWdg, text="Save", command=self.writeToFile, helpURL=helpURL),
         )
         for button in buttonList:
             button.pack(side="left")
@@ -220,7 +222,7 @@ class PrefWdg(Tkinter.Frame):
                 break
         return result
 
-    def _getShowMenu(self, master):
+    def _getShowMenu(self, master, helpURL=None):
         mbut = Tkinter.Menubutton(master,
             indicatoron=1,
             direction="below",
@@ -229,6 +231,7 @@ class PrefWdg(Tkinter.Frame):
             highlightthickness=2,
             text="Show",
         )
+        RO.Wdg.addCtxMenu(mbut, helpURL=helpURL)
         mnu = Tkinter.Menu(mbut, tearoff=0)
         mnu.add_command(label="Current", command=self.showCurrentValue)
         mnu.add_command(label="Initial", command=self.showInitialValue)
