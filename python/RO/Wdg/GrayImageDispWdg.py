@@ -164,6 +164,7 @@ History:
 2013-09-05 ROwen    Change "import Image" to "from PIL import Image" for compatibility with Pillow.
 2014-08-19 ROwen    Bug fix: Annotation.draw would fail if isImSize true and holeRad specified.
                     Change "import ImageTk" to "from PIL import ImageTk" for better Pillow compatibility.
+2014-09-16 ROwen    Modified the example to use astropy instead of pyfits, if available.
 """
 import weakref
 import Tkinter
@@ -1498,7 +1499,10 @@ def limitZoomFac(desZoomFac):
 
 
 if __name__ == "__main__":
-    import pyfits
+    try:
+        import astropy.io.fits as pyfits
+    except ImportError:
+        import pyfits
     import RO.DS9
     import PythonTk
     import StatusBar
