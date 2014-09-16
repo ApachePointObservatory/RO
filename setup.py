@@ -51,7 +51,11 @@ setup(
     author_email = "rowen@uw.edu",
     url = "http://www.astro.washington.edu/rowen/",
     license = "GPL except RO.Astro which has more restrictions for commercial use",
-    classifiers = filter(None, classifiers.split("\n")),
+    classifiers = [
+        "Development Status :: 5 - Production/Stable",
+        "Programming Language :: Python :: 2.6",
+        "Programming Language :: Python :: 2.7",
+    ],
     platforms = ["MacOS X", "unix", "Windows"],
     package_dir = {PkgName: PkgDir},
     packages = find_packages(PkgRoot),

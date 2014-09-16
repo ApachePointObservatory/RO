@@ -46,10 +46,10 @@ if not versOK.lower() == "y":
 print "git repository OK"
 
 # warning: do not build from export because the git info is required to get the data files included
-print "Building test build"
+print "Building the distribution package"
 status = subprocess.call(["python", "setup.py", "sdist"])
 if status != 0:
-    print "Test build failed!"
+    print "Build failed!"
 
 # make sure the bitmap files got into the distribution
 # (sometimes they fail to, and it's a silent error unless I check)
@@ -65,13 +65,15 @@ except Exception:
     sys.exit(1)
 
 
-print "Deleting test build %r" % (distDir,)
-shutil.rmtree(distDir)
+# print "Deleting test build %r" % (distDir,)
+# shutil.rmtree(distDir)
 
-print "Building final build and uploading"
-status = subprocess.call(["python", "setup.py", "sdist", "upload", "--show-response"])
+# print "Building final build and uploading"
+# status = subprocess.call(["python", "setup.py", "sdist", "upload", "--show-response"])
+print "Uploading to PyPI"
+status = subprocess.call(["twine", "upload", "dist/*.zip"])
 if status != 0:
-    print "Build and upload failed!"
+    print "Upload failed!"
 
 eggDir = os.path.abspath("RO.egg-info")
 
