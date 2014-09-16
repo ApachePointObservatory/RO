@@ -197,8 +197,8 @@ class BaseMixin(object):
         if not self._enableCallbacks:
             return
 
-        self._enableCallbacks = False
         try:
+            self._enableCallbacks = False
             for func in self._callbacks[:]:
                 safeCall2(str(self), func, *args, **kwargs)
         finally:

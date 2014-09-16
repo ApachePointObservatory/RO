@@ -487,6 +487,8 @@ class WdgCont(RO.AddCallback.BaseMixin):
         return alist[0]
 
     def _doCallbacks(self, dumArg=None):
+        """Call callbacks; this variant accepts and ignores one optional argument
+        """
         RO.AddCallback.BaseMixin._doCallbacks(self)
 
 

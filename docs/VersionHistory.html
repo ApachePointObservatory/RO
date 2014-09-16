@@ -7,10 +7,12 @@
 
 <h2>Version history for the <a href="Overview.html">RO Python Package</a></h2>
 
-<h3>3.5.3+ 2014-08-31</h3>
+<h3>3.5.4 2014-09-16</h3>
 
 <ul>
     <li>RO.Prefs.PrefWdg: Added a contextual menu with Help (if helpURL provided) to all controls; formerly only the status bar had this.
+    <li>RO.Comm.HTTPGet: deregister tcl callbacks before cleaning up the connection (this seems cleaner, though it works either way).
+    <li>Switched to git and updated releaseNewVersion.py and documentation accordingly.
 </ul>
 
 <h3>3.5.3 2014-08-29</h3>

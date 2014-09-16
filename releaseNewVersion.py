@@ -35,17 +35,17 @@ with file(os.path.join("docs", "VersionHistory.html")) as vhist:
                 print "Error: version in VersionHistory.html = %s != %s" % (histVersStr, Version.__version__)
                 sys.exit(0)
 
-print "Status of subversion repository:"
+print "Status of git repository:"
 
-subprocess.call(["svn", "status"])
+subprocess.call(["git", "status"])
 
-versOK = raw_input("Is the subversion repository up to date? (y/[n]) ")
+versOK = raw_input("Is the git repository up to date? (y/[n]) ")
 if not versOK.lower() == "y":
     sys.exit(0)
 
-print "Subversion repository OK"
+print "git repository OK"
 
-# warning: do not build from export because the svn info is required to get the data files included
+# warning: do not build from export because the git info is required to get the data files included
 print "Building test build"
 status = subprocess.call(["python", "setup.py", "sdist"])
 if status != 0:

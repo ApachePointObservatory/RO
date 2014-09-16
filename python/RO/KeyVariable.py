@@ -122,6 +122,8 @@ History:
 2012-11-29 ROwen    In CmdVar cast actor, cmdStr and abortCmdStr to str to avoid unicode.
 2014-03-14 ROwen    Bug fix: abortCmdStr was cast to str even if it was None: changed default to "",
                     but also test for None for backwards compability.
+2014-09-15 ROwen    Bug fix: an error message used a nonexistent variable.
+                    Tweaked PVTVar._doCallbacks to do nothing if callbacks disabled.
 """
 import sys
 import time
@@ -709,10 +711,11 @@ class PVTKeyVar(KeyVar):
     def _doCallbacks(self):
         """Call the callback functions.
         """
-        self._timer.cancel()
-        KeyVar._doCallbacks(self)
-        if self._hasVel:
-            self._timer.start(1.0, self._doCallbacks)
+        if self.callbacksEnabled():
+            self._timer.cancel()
+            KeyVar._doCallbacks(self)
+            if self._hasVel:
+                self._timer.start(1.0, self._doCallbacks)
 
 class CmdVar(object):
     """Issue a command via the dispatcher and receive callbacks
@@ -931,12 +934,12 @@ class CmdVar(object):
         if valueTuple != None:
             if len(valueTuple) != 1:
                 raise ValueError("Invalid value %r for timeout keyword %r for command %d: must be length 1"
-                    % (valueTuple, keywd, self.cmdID))
+                    % (valueTuple, self.timeLimKeyword, self.cmdID))
             try:
                 newTimeLim = float(valueTuple[0])
             except:
                 raise ValueError("Invalid value %r for timeout keyword %r for command %d: must be (number,)"
-                    % (valueTuple, keywd, self.cmdID))
+                    % (valueTuple, self.timeLimKeyword, self.cmdID))
             self.maxEndTime = time.time() + newTimeLim
             if self.timeLim:
                 self.maxEndTime += self.timeLim

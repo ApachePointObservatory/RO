@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 """Retrieve a remote file via http to a local file.
 
-Note: at exit attempts to abort all outsanding transfers
-and delete the output files.
+Note: at exit attempts to abort all outstanding transfers and delete the output files.
 
 To do: try polling while connected instead of using a progress callback.
 The advantages are:
@@ -33,6 +32,9 @@ History:
                     Added didFail, isAbortable.
                     State constants are now strings, not integers.
 2014-04-01 ROwen    Bug fix: "unknown state" message used an undefined variable.
+2014-09-16 ROwen    Modified to use RO.AddCallback.safeCall2.
+                    Modified _cleanup to deregister tcl callbacks before cleaning up the connection.
+                    Modified to print warnings to stderr instead of stdout.
 """
 __all__ = ['HTTPGet']
 
@@ -40,7 +42,6 @@ import atexit
 import os
 import sys
 import time
-import traceback
 import Tkinter
 import RO.AddCallback
 import RO.StringUtil
@@ -290,7 +291,7 @@ class HTTPGet(RO.AddCallback.BaseMixin):
             return
 
         if self._tclHTTPConn == None:
-            sys.stderr.write("HTTPGet cannot abort: isDone false but no http conn\n")
+            sys.stderr.write("HTTPGet cannot abort: isDone false but no http connection\n")
             return
 
         self._setState(self.Aborting)
@@ -370,27 +371,29 @@ class HTTPGet(RO.AddCallback.BaseMixin):
         self._doCallbacks()
         if isDone:
             # call done callbacks
-            # use a copy just in case the callback deregisters itself
+            # use a copy in case a callback deregisters itself
             for func in self._doneCallbacks[:]:
-                try:
-                    func(self)
-                except Exception, e:
-                    sys.stderr.write("Callback of %s by %s failed: %s\n" % (func, self, e,))
-                    traceback.print_exc(file=sys.stderr)
+                RO.AddCallback.safeCall2(str(self), func, self) 
         
             # remove all callbacks
             self._removeAllCallbacks()
             self._doneCallbacks = []
+            self._tclCallbacks = ()
 
     def _cleanup(self):
         """Clean up everything except references to callbacks.
-        Private: call only from _setState!
         
-        Close the input and output files and deregister the callbacks.
+        Warning: this is a private method: call only from _setState!
+        
+        Close the input and output files and deregister the tcl callbacks.
         If state in (Aborted, Failed), delete the output file.
         """
         if _Debug:
             print "%s._cleanup()"
+        for tclFunc in self._tclCallbacks:
+            if _Debug:
+                print "deregister %s" % (tclFunc,)
+            tclFunc.deregister()
         if self._tclHTTPConn != None:
             self._tkApp.call("::http::cleanup", self._tclHTTPConn)
             self._tclHTTPConn = None
@@ -401,11 +404,6 @@ class HTTPGet(RO.AddCallback.BaseMixin):
             self._tclFile = None
             if _Debug:
                 print "output file closed"
-        for tclFunc in self._tclCallbacks:
-            if _Debug:
-                print "deregister %s" % (tclFunc,)
-            tclFunc.deregister()
-        self._tclCallbacks = ()
         
         if self._createdFile and self._state in (self.Aborted, self.Failed):
             try:
@@ -420,7 +418,7 @@ class HTTPGet(RO.AddCallback.BaseMixin):
         """Called when the http transfer is finished.
         """
         if self._tclHTTPConn == None:
-            print "Warning: _httpDoneCallback callback but no http connection!"
+            sys.stderr.write("HTTPGet warning: _httpDoneCallback called but no http connection\n")
             return
         
         if _Debug:
@@ -451,7 +449,7 @@ class HTTPGet(RO.AddCallback.BaseMixin):
             newState = self.Aborted
         else:
             if httpState != "error":
-                print "HTTPGet warning: unknown httpState=%s; assuming error" % (httpState,)
+                sys.stderr.write("HTTPGet warning: unknown httpState=%s; assuming error\n" % (httpState,))
             newState = self.Failed
             errMsg = self._tkApp.call('::http::error', self._tclHTTPConn)
             if not errMsg:

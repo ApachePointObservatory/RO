@@ -5,6 +5,9 @@ support for help.
 Note: to see the menus you must issue a <<CtxMenu>> event,
 e.g. by running RO.Wdg.Bindings.stdBindings(wdg).
 
+Known issues: tk_popup will fail on MacOS with Tkinter.TclError
+if another application's window is in front, at least with ActiveState Tcl/Tk 8.5.11.
+
 History:
 2002-11-26 ROwen    Added helpURL support.
 2003-03-21 ROwen    Fixed getURL to use urlparse.urljoin.
