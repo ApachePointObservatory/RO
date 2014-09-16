@@ -64,14 +64,8 @@ except Exception:
     print "Error: distribution is missing its bitmap files!"
     sys.exit(1)
 
-
-# print "Deleting test build %r" % (distDir,)
-# shutil.rmtree(distDir)
-
-# print "Building final build and uploading"
-# status = subprocess.call(["python", "setup.py", "sdist", "upload", "--show-response"])
 print "Uploading to PyPI"
-status = subprocess.call(["twine", "upload", "dist/*.zip"])
+status = subprocess.call(["twine", "upload", "dist/RO-*.tar.gz"])
 if status != 0:
     print "Upload failed!"
 
