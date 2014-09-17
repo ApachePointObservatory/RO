@@ -65,9 +65,10 @@ except Exception:
     sys.exit(1)
 
 print "Uploading to PyPI"
-status = subprocess.call(["twine", "upload", "dist/RO-*.tar.gz"])
+status = subprocess.call(["twine", "upload", "dist/%s.tar.gz" % (distBaseName,)])
 if status != 0:
     print "Upload failed!"
+    sys.exit(1)
 
 eggDir = os.path.abspath("RO.egg-info")
 
