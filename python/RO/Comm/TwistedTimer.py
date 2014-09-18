@@ -6,6 +6,8 @@ History:
 2012-07-13 ROwen    Copied from opscore, but with active() replaced by isActive.
 2012-10-25 ROwen    Timer.start treats negative values as 0.
 """
+__all__ = ["Timer"]
+
 import twisted.internet.reactor
 
 _reactor = twisted.internet.reactor

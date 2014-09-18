@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """Code to display a grayscale image.
 
 This attempts to emulate some of the more important features of ds9,
@@ -166,6 +167,8 @@ History:
                     Change "import ImageTk" to "from PIL import ImageTk" for better Pillow compatibility.
 2014-09-16 ROwen    Modified the example to use astropy instead of pyfits, if available.
 """
+__all__ = ["ann_Circle", "ann_Plus", "ann_X", "ann_Line", "ann_Text", "MaskInfo", "GrayImageWdg"]
+
 import weakref
 import Tkinter
 import math
@@ -186,8 +189,6 @@ import Entry
 import Label
 import OptionMenu
 import RadiobuttonSet
-
-__all__ = ["ann_Circle", "ann_Plus", "ann_X", "ann_Line", "ann_Text", "MaskInfo", "GrayImageWdg"]
 
 _AnnTag = "_gs_ann_"
 _DragRectTag = "_gs_dragRect"
@@ -894,7 +895,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
         currScroll = numpy.asarray(sbWdg.get())
         visFrac = currScroll[1] - currScroll[0]
         if visFrac > 1.0:
-            print "doScrollBar warning: visFrac = %r >1" % (visFrac,)
+            print("doScrollBar warning: visFrac = %r >1" % (visFrac,))
             
         
         if scrollCmd == "scroll":
@@ -904,7 +905,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
             desMin = float(scrollAmt)
             newScroll = currScroll + (desMin - currScroll[0])
         else:
-            print "doScrollBar error: unknown scroll command=%r" % (scrollCmd,)
+            print("doScrollBar error: unknown scroll command=%r" % (scrollCmd,))
             return
 
         #print "currScroll=%r, newScroll=%r" % (currScroll, newScroll)
@@ -1332,7 +1333,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
             return
         objID = id(obj)
         def refGone(ref=None, objID=objID, objName=objName):
-            print "GrayImage deleting %s" % (objName,)
+            print("GrayImage deleting %s" % (objName,))
             del(self._memDebugDict[objID])
 
         self._memDebugDict[objID] = weakref.ref(obj, refGone)

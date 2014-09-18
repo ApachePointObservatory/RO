@@ -3,36 +3,32 @@
 <head>
 	<title>Installing the RO Python Package</title>
 </head>
+<body>
 
 <h1>Installing the RO Python Package</h1>
 
-See the <a href="Overview.html">Overview</a> for a summary of the RO package.
+<p>See the <a href="Overview.html">Overview</a> for a summary of the RO package.
 
 <h2>Prerequisites</h2>
 
 <ul>
-    <li>Python 2.4 or later (with Tkinter if using timers or widgets)
+    <li>Python 2.6 or later (with Tkinter if using any widget-related components of this package)
     <li>numpy
-    <li>simplejson, if using a Python older than 2.6
     <li>matplotlib (optional: used by RO.Wdg.StripChartWdg)
-    <li>pyfits 1.1 or later (optional: used by RO.DS9)
+    <li>astropy or pyfits (optional: used by RO.DS9)
     <li>PIL or Pillow (optional: used by RO.Wdg.GrayImageWdg)
+    <li>pip (optional, but makes installation easier)
     <li>pygame, including pygame.mixer (optional: used by RO.Sound to play sound files)
-    <li>pip or easy_install (optional, but makes installation easier)
     <li>twisted framework (optional: used by some classes in RO.Comm)
 </ul>
 
 <h2>Installation</h2>
 
-<p>If you have pip or easy_install (you may have to use sudo or run as root):
+<p>If you have pip (you may have to use sudo or run as root):
 <blockquote>
 % pip install RO
 </blockquote>
-<p>or
-<blockquote>
-% easy_install RO
-</blockquote>
-<p>If you prefer, you may manually download it from <a href="http://pypi.python.org/pypi?:action=display&name=RO">PyPI</a> and run:
+<p>If you prefer, you may manually download it from <a href="http://pypi.python.org/pypi?:action=display&amp;name=RO">PyPI</a> or <a href="https://github.com/r-owen/RO">github</a> and run:
 <blockquote>
 % python setup.py install
 </blockquote>
@@ -43,8 +39,7 @@ See the <a href="Overview.html">Overview</a> for a summary of the RO package.
 
 <p>If you are wish to manage RO with the eups package management then install RO as follows (instead of using the above instructions):
 <ul>
-</ul>
-    <li>Download the RO package from <a href="http://pypi.python.org/pypi?:action=display&name=RO">PyPI</a>
+    <li>Download the RO package from <a href="http://pypi.python.org/pypi?:action=display&amp;name=RO">PyPI</a> or <a href="https://github.com/r-owen/RO">github</a>
     <li>Unpack it
     <li>Move the unpacked directory where you wish to leave it
     <li>cd into the main directory of the unpacked package (named ROPackage)
@@ -59,3 +54,5 @@ See the <a href="Overview.html">Overview</a> for a summary of the RO package.
     <li>I cannot provide much technical support but am always happy to receive bug reports and patches.
     <li>The ups directory is for use with a package manager called eups; non-eups users can safely ignore it.
 </ul>
+</body>
+</html>

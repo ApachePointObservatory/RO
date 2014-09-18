@@ -1,8 +1,8 @@
 #!/usr/bin/env python
+from __future__ import absolute_import, division, print_function
 import argparse
 import numpy
 import pyfits
-    
 
 def fitsInfo(filePath, hduList=None, showHeader=True, showStats=True):
     """Print information about a FITS file
@@ -13,37 +13,37 @@ def fitsInfo(filePath, hduList=None, showHeader=True, showStats=True):
     @param[in] showStats: if True then show basic image statistics
     """
     fitsFile = pyfits.open(filePath)
-    print "*** FITS file %r:" % (filePath,)
+    print("*** FITS file %r:" % (filePath,))
     if hduList is None:
         hduList = range(len(fitsFile))
 
     for hduInd in hduList:
-        print "*** HDU %s header:" % (hduInd,)
+        print("*** HDU %s header:" % (hduInd,))
         fitsExt = fitsFile[hduInd]
         hdr = fitsExt.header
         if showHeader:
-            for key, value in hdr.items():
+            for key, value in hdr.iteritems():
                 if key.upper() == "COMMENT":
-                    print "%s %s" % (key, value)
+                    print("%s %s" % (key, value))
                 elif isinstance(value, bool):
                     if value:
                         valueStr = "T"
                     else:
                         valueStr = "F"
-                    print "%-8s= %s" % (key, valueStr)
+                    print("%-8s= %s" % (key, valueStr))
                 else:
-                    print "%-8s= %r" % (key, value)
+                    print("%-8s= %r" % (key, value))
         if showStats:
             if hdr["NAXIS"] != 2 and fitsExt.header.get("XTENSION") == "BINTABLE":
-                print "*** HDU %s statistics:" % (hduInd,)
+                print("*** HDU %s statistics:" % (hduInd,))
                 printArrayStats(filePath, fitsExt.data)
             else:
-                print "*** HDU %s no statistics: not an image" % (hduInd,)
+                print("*** HDU %s no statistics: not an image" % (hduInd,))
 
 def printArrayStats(descr, arr):
     arr = numpy.array(arr)
-    print "%s min=%s, max=%s, mean=%s, stdDev=%s" % \
-        (descr, arr.min(), arr.max(), arr.mean(), arr.std())
+    print("%s min=%s, max=%s, mean=%s, stdDev=%s" % \
+        (descr, arr.min(), arr.max(), arr.mean(), arr.std()))
 
 
 if __name__ == "__main__":

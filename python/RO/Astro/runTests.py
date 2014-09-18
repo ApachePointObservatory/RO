@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import absolute_import, division, print_function
 """
 Run Astro test code in Astro package.
 
@@ -6,13 +7,15 @@ Warning: does not report a summary at the end;
 you'll have to scan the output to see errors!
 Eventually I hope to switch to unittest to solve this.
 """
-import os.path
+import os
+import stat
 import subprocess
 
-thisFile = os.path.basename(__file__)
+thisFileName = os.path.basename(__file__)
+thisDir = os.path.dirname(__file__)
 
 isFirst = True
-for dirpath, dirnames, filenames in os.walk("."):
+for dirpath, dirnames, filenames in os.walk(thisDir):
     # strip invisible directories and files
     newdirnames = [dn for dn in dirnames if not dn.startswith(".")]
     dirnames[:] = newdirnames
@@ -21,13 +24,21 @@ for dirpath, dirnames, filenames in os.walk("."):
     if isFirst:
         isFirst = False
         continue
-    
 
     # test all modules
-    print "Testing modules in", os.path.basename(dirpath)
-    for filename in filenames:
-        if not filename.endswith(".py"):
+    print("Testing modules in", os.path.basename(dirpath))
+    for fileName in filenames:
+        if not fileName.endswith(".py"):
             continue
-        if filename.startswith("."):
+        if fileName.startswith("."):
             continue
-        subprocess.call(["python", os.path.join(dirpath, filename)])
+        if fileName == thisFileName:
+            continue
+
+        filePath = os.path.join(dirpath, fileName)
+
+        if not os.stat(filePath).st_mode & stat.S_IXUSR:
+            continue
+
+        print("Testing", filePath)
+        subprocess.call(["python", filePath])

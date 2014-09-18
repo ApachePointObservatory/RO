@@ -1,19 +1,10 @@
 #!/usr/bin/env python
-"""An OrderedDict is a dictionary in which the order of adding items is preserved.
+from __future__ import absolute_import, division, print_function
+"""A dictionary in which the order of adding items is preserved.
+
 Replacing an existing item replaces it at its current location.
 
-Works by maintaining a list of keys in order, in addition to a regular dictionary.
-Hence retrieval should occur at full speed, but an OrderedDict uses more memory
-than a regular dictionary and insertion and deletion are a bit slower,
-
-Requires Python 2.2 or later.
-
-For an alternative implementation of an ordered dictionary,
-see RBTree <http://newcenturycomputers.net/projects/rbtree.html>
-(thanks to Laura Creighton for the reference).
-
-To do:
-- Rewrite using new UserDict.DictMixin class, as per Python Cookbook.
+Deprecated: use collections.OrderedDict instead
 
 History:
 2002-02-01 ROwen    First release.
@@ -43,9 +34,9 @@ History:
                     Modified __repr__ to return a string that can recreate the dict.
                     Added __str__ to output the traditional dict representation.
 """
-from __future__ import generators
+__all__ = ["OrderedDict", "ReverseOrderedDict"]
 
-class OrderedDict (dict):
+class OrderedDict(dict):
     """A dictionary in which the order of adding items is preserved.
     Replacing an existing item replaces it at its current location.
 
@@ -79,7 +70,7 @@ class OrderedDict (dict):
             yield self[key]
     
     def iteritems(self):
-        for key in self.iterkeys():
+        for key in self:
             yield (key, self[key])
     
     def index(self, key):
@@ -96,7 +87,7 @@ class OrderedDict (dict):
         If the key already exists, it is NOT moved but its value is updated.
         ind >= len appends to the end (like list.index).
         """
-        if not self.has_key(key):
+        if key not in self:
             self.__keyList.insert(ind, key)
         dict.__setitem__(self, key, value)
     
@@ -145,7 +136,7 @@ class OrderedDict (dict):
         assert len(self) == len(self.__keyList), \
             "length of dict %r != length of key list %r" % (len(self), len(self.__keyList))
         for key in self.iterkeys():
-            assert self.has_key(key), \
+            assert key in self, \
                 "key %r in key list missing from dictionary" % (key,)
     
     def __delitem__(self, key):
@@ -167,7 +158,7 @@ class OrderedDict (dict):
         dict.__setitem__(self, key, value)
 
 
-class ReverseOrderedDict (OrderedDict):
+class ReverseOrderedDict(OrderedDict):
     """An ordered dictionary in which each new item is stored at the front.
     Replacing an existing item replaces it at its current location.
 
@@ -186,7 +177,7 @@ class ReverseOrderedDict (OrderedDict):
     in opposite order. str() is generally what you want to see.
     """
     def __setitem__(self, key, value):
-        if not self.has_key(key):
+        if key not in self:
             self._OrderedDict__keyList.insert(0, key)
         dict.__setitem__(self, key, value)
     
@@ -201,7 +192,7 @@ class ReverseOrderedDict (OrderedDict):
         return "%s([%s])" % (self.__class__.__name__, ', '.join(descrList))
 
 if __name__ == "__main__":
-    print "testing OrderedDict"
+    print("testing OrderedDict")
     import copy
     import random
     
@@ -254,7 +245,7 @@ if __name__ == "__main__":
     for key in inKeys:
         oDict[key] = keyToValue(key)
     if showOutput:
-        print "initial dictionary: %r" % (oDict)
+        print(("initial dictionary: %r" % (oDict)))
     testDict(inKeys, inValues, oDict)
 
     # now delete some items
@@ -264,7 +255,7 @@ if __name__ == "__main__":
         del(oDict[delKey])
     inValues = [keyToValue(key) for key in inKeys]
     if showOutput:
-        print "after %r items removed: %r" % (nToDelete, oDict)
+        print(("after %r items removed: %r" % (nToDelete, oDict)))
     testDict(inKeys, inValues, oDict)
 
     # now replace some items; use new values so you can tell the difference
@@ -277,7 +268,7 @@ if __name__ == "__main__":
         oDict[key] = altKeyToValue(key)
     testDict(inKeys, inValues, oDict)
     if showOutput:
-        print "after replacing %r items: %r" % (nToReplace, oDict)
+        print(("after replacing %r items: %r" % (nToReplace, oDict)))
     
     # test copying
     dictCopy = oDict.copy()

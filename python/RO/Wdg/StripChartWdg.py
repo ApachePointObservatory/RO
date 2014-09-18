@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """A widget to display changing values in real time as a strip chart
 
 Known issues:
@@ -71,6 +72,8 @@ History:
 2012-07-09 ROwen    Modified to use RO.TkUtil.Timer.
 2012-09-18 ROwen    Explicitly import matplotlib.dates to avoid a problem with matplotlib 1.2.0rc1
 """
+__all__ = ["StripChartWdg"]
+
 import bisect
 import datetime
 import time
@@ -81,8 +84,6 @@ import matplotlib
 import matplotlib.dates
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from RO.TkUtil import Timer
-
-__all__ = ["StripChartWdg"]
 
 class StripChartWdg(Tkinter.Frame):
     """A widget to changing values in real time as a strip chart
@@ -518,7 +519,7 @@ if __name__ == "__main__":
         - interval: interval between updates (sec)
         """
         var = varDict[line]
-        line.addPoint(var.next())
+        line.addPoint(next(var))
         Timer(interval, addRandomValues, line, interval)
 
     addRandomValues(countsLine, interval=0.5)

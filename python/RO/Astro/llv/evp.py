@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """
 History:
 P.t.Wallace Starlink    21 November 1994
@@ -140,7 +141,7 @@ CCPAM = numpy.array ((4.960906E-3,2.727436E-3,8.392311E-4,1.556861E-3))
 CCIM = 8.978749E-2
 
 
-def evp (tdb, deqx = 0.0):
+def evp(tdb, deqx = 0.0):
     """
     Barycentric and heliocentric velocity and position of the Earth
     
@@ -374,7 +375,7 @@ def evp (tdb, deqx = 0.0):
 
 if __name__ == "__main__":
     import RO.SeqUtil
-    print "testing evp"
+    print("testing evp")
     # test data is formatted as follows:
     # a list of entries, each consisting of:
     # - the input argument
@@ -434,6 +435,6 @@ if __name__ == "__main__":
         actualFlat = RO.SeqUtil.flatten(actualOutput)
         expectedFlat = RO.SeqUtil.flatten(expectedOutput)
         if RO.SeqUtil.matchSequences(actualFlat, expectedFlat, rtol=1.0e-7):
-            print "failed on input:", testInput
-            print "expected output:\n", expectedOutput
-            print "actual output:\n", actualOutput
+            print("failed on input:", testInput)
+            print("expected output:\n", expectedOutput)
+            print("actual output:\n", actualOutput)

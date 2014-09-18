@@ -1,3 +1,4 @@
+from __future__ import absolute_import, division, print_function
 """A ListPlus adds a few methods to a standard list
 to make it more consistent with dict.
 
@@ -5,7 +6,7 @@ History:
 2003-03-13 ROwen    First release
 2005-06-03 ROwen    Fixed indentation quirks (needless spaces before tabs)
 """
-from __future__ import generators
+__all__ = ["ListPlus"]
 
 class ListPlus (list):
     def get(self, key, defValue = None):

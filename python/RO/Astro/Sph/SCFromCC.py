@@ -1,9 +1,13 @@
 #!/usr/bin/env python
+from __future__ import absolute_import, division, print_function
+
+__all__ = ["scFromCC"]
+
 import math
 import RO.MathUtil
 import RO.SysConst
 
-def scFromCC (p):
+def scFromCC(p):
     """
     Converts cartesian position to spherical coordinates.
     
@@ -36,7 +40,7 @@ def scFromCC (p):
     # make sure |p| is large enough
     # one gains margin by testing |p|^2 instead of |p|
     if magPSq < RO.SysConst.FAccuracy:
-        raise ValueError, '|p| too small; p=%r' % (p,)
+        raise ValueError('|p| too small; p=%r' % (p,))
 
     # check to see if too near the pole
     # one gains margin by testing |pxy|^2 instead of |pxy|
@@ -64,7 +68,7 @@ def scFromCC (p):
 
 if __name__ == "__main__":
     import RO.SeqUtil
-    print "testing scFromCC"
+    print("testing scFromCC")
     # test data is formatted as follows:
     # a list of entries, each consisting of:
     # - the input argument
@@ -83,6 +87,6 @@ if __name__ == "__main__":
         actualFlat = RO.SeqUtil.flatten(actualOutput)
         expectedFlat = RO.SeqUtil.flatten(expectedOutput)
         if RO.SeqUtil.matchSequences(actualFlat, expectedFlat, rtol=1.0e-14):
-            print "failed on input:", testInput
-            print "expected output:\n", expectedOutput
-            print "actual output:\n", actualOutput
+            print("failed on input:", testInput)
+            print("expected output:\n", expectedOutput)
+            print("actual output:\n", actualOutput)

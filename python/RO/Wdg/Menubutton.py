@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+from __future__ import division, print_function
 """Variant on Menubutton that adds callback and severity functionality and works around some Tk width bugs
 
 History:

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import absolute_import, division, print_function
 """Sends commands (of type RO.KeyVariable.CmdVar) and dispatches replies
 to key variables (RO.KeyVariable.KeyVar and subclasses).
 
@@ -85,6 +86,8 @@ History:
                     Modified to use RO.Comm.Generic.Timer.
 2012-08-01 ROwen    Updated for RO.Comm.TCPConnection 3.0.
 """
+__all__ = ["logToStdOut", "KeyDispatcher"]
+
 import sys
 import time
 import traceback
@@ -97,8 +100,6 @@ import RO.ParseMsg
 import RO.StringUtil
 from RO.Comm.Generic import Timer
 
-__all__ = ["logToStdOut", "KeyDispatcher"]
-
 # intervals (in milliseconds) for various background tasks
 _RefreshIntervalMS = 1000 # time interval between variable refresh checks (msec)
 _TimeoutInterval = 1.3  # time interval between checks for command timeout checks (sec)
@@ -109,7 +110,7 @@ _CmdNumWrap = 1000 # value at which user command ID numbers wrap
 _RefreshTimeLim = 20 # time limit for refresh commands (sec)
 
 def logToStdOut(msgStr, severity, actor, cmdr):
-    print msgStr
+    print(msgStr)
 
 class KeyDispatcher(object):
     """
@@ -266,7 +267,6 @@ class KeyDispatcher(object):
         cmdr  = msgDict["cmdr"]
         cmdID   = msgDict["cmdID"]
         actor = msgDict["actor"]
-        msgType  = msgDict["msgType"]
         dataDict = msgDict["data"]
 
         # handle keywords
@@ -303,7 +303,7 @@ class KeyDispatcher(object):
         self.readUnixTime = time.time()
         try:
             msgDict = RO.ParseMsg.parseHubMsg(msgStr)
-        except Exception, e:
+        except Exception as e:
             self.logMsg(
                 msgStr = "CouldNotParse; Msg=%r; Text=%r" % (msgStr, RO.StringUtil.strFromException(e)),
                 severity = RO.Constants.sevError,
@@ -316,7 +316,7 @@ class KeyDispatcher(object):
         # dispatch message
         try:
             self.dispatch(msgDict)
-        except Exception, e:
+        except Exception as e:
             sys.stderr.write("Could not dispatch: %r\n" % (msgDict,))
             traceback.print_exc(file=sys.stderr)
                 
@@ -346,10 +346,10 @@ class KeyDispatcher(object):
         
         while True:
             if cmdVar.isRefresh:
-                cmdID = self.refreshCmdIDGen.next()
+                cmdID = next(self.refreshCmdIDGen)
             else:
-                cmdID = self.userCmdIDGen.next()
-            if not self.cmdDict.has_key(cmdID):
+                cmdID = next(self.userCmdIDGen)
+            if cmdID not in self.cmdDict:
                 break
         self.cmdDict[cmdID] = cmdVar
         cmdVar._setStartInfo(self, cmdID)
@@ -363,7 +363,7 @@ class KeyDispatcher(object):
 #                 cmdID = cmdVar.cmdID,
 #             )
 #           print "executing:", fullCmd
-        except Exception, e:
+        except Exception as e:
             errMsgDict = self.makeMsgDict(
                 cmdID = cmdVar.cmdID,
                 dataStr = "WriteFailed; Actor=%r; Cmd=%r; Text=%r" % (
@@ -410,7 +410,7 @@ class KeyDispatcher(object):
                 cmdr = cmdr,
                 cmdID = cmdID,
             )
-        except Exception, e:
+        except Exception:
             sys.stderr.write("Could not log: %r; severity=%r; actor=%r; cmdr=%r\n" % \
                 (msgStr, severity, actor, cmdr))
             traceback.print_exc(file=sys.stderr)
@@ -426,7 +426,7 @@ class KeyDispatcher(object):
                 cmdr = msgDict["cmdr"],
                 cmdID = msgDict["cmdID"],
             )
-        except Exception, e:
+        except Exception:
             sys.stderr.write("Could not log message dict:\n%r\n" % (msgDict,))
             traceback.print_exc(file=sys.stderr)
         
@@ -454,7 +454,7 @@ class KeyDispatcher(object):
         msgStr = " ".join((headerStr, dataStr))
         try:
             return RO.ParseMsg.parseHubMsg(msgStr)
-        except Exception, e:
+        except Exception as e:
             sys.stderr.write("Could not make message dict from %r; error: %s" % (msgStr, e))
             traceback.print_exc(file=sys.stderr)
             msgDict = RO.ParseMsg.parseHubMsg(headerStr)
@@ -552,7 +552,7 @@ class KeyDispatcher(object):
             for cmdVar in cmdVarIter:
                 # if cmd still exits (i.e. has not been deleted for other reasons)
                 # check if it has a time limit and has timed out
-                if not self.cmdDict.has_key(cmdVar.cmdID):
+                if cmdVar.cmdID not in self.cmdDict:
                     continue
                 if not self._isConnected:
                     errMsgDict = self.makeMsgDict (
@@ -612,7 +612,7 @@ class KeyDispatcher(object):
                 cmdID = cmdVar.cmdID,
             )
         elif keyVarSet:
-            aKeyVar = iter(keyVarSet).next()
+            aKeyVar = next(iter(keyVarSet))
             actor = aKeyVar.actor
             missingKeyVarNamesStr = ", ".join(sorted([kv.keyword for kv in keyVarSet if not kv.isCurrent()]))
             if missingKeyVarNamesStr:
@@ -663,7 +663,7 @@ class KeyDispatcher(object):
             refreshCmdItemIter = self.refreshCmdDict.iteritems()
 
         try:
-            refreshCmdInfo, keyVarSet = refreshCmdItemIter.next()
+            refreshCmdInfo, keyVarSet = next(refreshCmdItemIter)
         except StopIteration:
             return
         actor, cmdStr = refreshCmdInfo
@@ -683,15 +683,14 @@ class KeyDispatcher(object):
     
 
 if __name__ == "__main__":
-    print "\nTesting RO.KeyDispatcher\n"
-    import time
+    print("\nTesting RO.KeyDispatcher\n")
     import Tkinter
     root = Tkinter.Tk()
 
     kdb = KeyDispatcher()
 
     def showVal(valueList, isCurrent, keyVar):
-        print "keyVar %s.%s = %r, isCurrent = %s" % (keyVar.actor, keyVar.keyword, valueList, isCurrent)
+        print("keyVar %s.%s = %r, isCurrent = %s" % (keyVar.actor, keyVar.keyword, valueList, isCurrent))
 
     # scalars
     varList = (
@@ -738,7 +737,7 @@ if __name__ == "__main__":
     
     # command callback
     def cmdCall(msgType, msgDict, cmdVar):
-        print "command callback for actor=%s, cmdID=%d, cmdStr=%r called with code '%s'" % (cmdVar.actor, cmdVar.cmdID, cmdVar.cmdStr, msgType)
+        print("command callback for actor=%s, cmdID=%d, cmdStr=%r called with code '%s'" % (cmdVar.actor, cmdVar.cmdID, cmdVar.cmdStr, msgType))
     
     # command
     cmdVar = RO.KeyVariable.CmdVar(
@@ -767,7 +766,7 @@ if __name__ == "__main__":
         "msgType":":",
         "data":dataDict,
     }
-    print "\nDispatching message with wrong actor; nothing should happen"
+    print("\nDispatching message with wrong actor; nothing should happen")
     kdb.dispatch(msgDict)
 
     msgDict = {
@@ -777,7 +776,7 @@ if __name__ == "__main__":
         "msgType":":",
         "data":{},
     }
-    print "\nDispatching message with wrong cmdID and no data; command callback should not be called"
+    print("\nDispatching message with wrong cmdID and no data; command callback should not be called")
     kdb.dispatch(msgDict)
 
     msgDict = {
@@ -787,7 +786,7 @@ if __name__ == "__main__":
         "msgType":":",
         "data":{},
     }
-    print "\nDispatching message with wrong actor and no data; command callback should not be called"
+    print("\nDispatching message with wrong actor and no data; command callback should not be called")
     kdb.dispatch(msgDict)
 
     msgDict = {
@@ -797,7 +796,7 @@ if __name__ == "__main__":
         "msgType":":",
         "data":dataDict,
     }
-    print "\nDispatching message correctly; all should work:"
+    print("\nDispatching message correctly; all should work:")
     kdb.dispatch(msgDict)
 
     root.mainloop()

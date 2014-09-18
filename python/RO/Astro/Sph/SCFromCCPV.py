@@ -1,13 +1,17 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
+
+__all__ = ["scFromCCPV"]
+
 import math
 import RO.PhysConst
-from SCFromCC import *
+from SCFromCC import scFromCC
 
 # Constants
 _ASPerCy_Per_RadPerYear = 100.0 * RO.PhysConst.ArcSecPerDeg / RO.PhysConst.RadPerDeg
 _KMPerSec_Per_AUPerYear = RO.PhysConst.KmPerAU / (RO.PhysConst.DayPerYear * RO.PhysConst.SecPerDay)
 
-def scFromCCPV (p, v):
+def scFromCCPV(p, v):
     """
     Converts cartesian position and velocity to spherical coordinates
     (if you just want to convert position, use sph_CC2SC).
@@ -41,7 +45,7 @@ def scFromCCPV (p, v):
     x, y, z = p
     vX, vY, vZ = v
     
-    pos, magP, atPole = scFromCC (p)
+    pos, magP, atPole = scFromCC(p)
     
     #  warning: test atPole after computing radial velocity and parallax
     #  since they can be correctly computed even at the pole
@@ -86,7 +90,7 @@ def scFromCCPV (p, v):
 
 if __name__ == "__main__":
     import RO.SeqUtil
-    print "testing scFromCCPV"
+    print("testing scFromCCPV")
     # test data is formatted as follows:
     # a list of entries, each consisting of:
     # - the input argument
@@ -207,6 +211,6 @@ if __name__ == "__main__":
         actualFlat = RO.SeqUtil.flatten(actualOutput)
         expectedFlat = RO.SeqUtil.flatten(expectedOutput)
         if RO.SeqUtil.matchSequences(actualFlat, expectedFlat, rtol=1.0e-10, atol=1.0e-10):
-            print "failed on input:", testInput
-            print "expected output:\n", expectedOutput
-            print "actual output:\n", actualOutput
+            print("failed on input:", testInput)
+            print("expected output:\n", expectedOutput)
+            print("actual output:\n", actualOutput)

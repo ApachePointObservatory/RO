@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """Run an application as a droplet (an application onto which you drop file) with a log window.
 
 To build a Mac droplet using py2app, in the PList specify the sorts of files that can be dropped, e.g.:
@@ -40,7 +41,8 @@ History:
 2011-10-07 ROwen    Added doneMsg argument. 
                     Bug fix: the default for recursionDepth was False, which is not a valid value; changed to None.
 """
-import os.path
+__all__ = ["DropletApp"]
+
 import sys
 import traceback
 import Tkinter
@@ -48,8 +50,6 @@ import RO.OS
 import RO.Constants
 from RO.TkUtil import Timer
 import LogWdg
-
-__all__ = ["DropletApp"]
 
 class DropletApp(Tkinter.Frame):
     """Run an application as a droplet (an application onto which you drop files)
@@ -110,7 +110,7 @@ class DropletApp(Tkinter.Frame):
         self.processDirs = bool(processDirs)
         self.doneMsg = doneMsg + "\n"
         
-        self.logWdg = RO.Wdg.LogWdg(
+        self.logWdg = LogWdg.LogWdg(
             master = self,
             width = width,
             height = height,
@@ -139,7 +139,7 @@ class DropletApp(Tkinter.Frame):
             filePath = filePathList[0]
             try:
                 self.processFile(filePath)
-            except Exception, e:
+            except Exception as e:
                 self.logWdg.addOutput("%s failed: %s\n" % (filePath, e), severity=RO.Constants.sevError)
                 if self.printTraceback:
                     traceback.print_exc(file=sys.stderr)

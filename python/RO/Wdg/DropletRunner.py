@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """Run a script as a droplet (an application onto which you drop file) with a log window
 
 Deprecated. use DropletApp instead.
@@ -54,6 +55,8 @@ History:
 2011-10-11 ROwen    Documented as deprecated.
 2012-07-09 ROwen    Modified to use RO.TkUtil.Timer.
 """
+__all__ = ["DropletRunner"]
+
 import sys
 import os.path
 import subprocess
@@ -62,8 +65,6 @@ import RO.OS
 import RO.Constants
 from RO.TkUtil import Timer
 import LogWdg
-
-__all__ = ["DropletRunner"]
 
 class DropletRunner(object):
     """Run a script as a droplet (an application onto which you drop file) with a log window.

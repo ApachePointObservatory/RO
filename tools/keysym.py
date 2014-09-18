@@ -1,4 +1,5 @@
 #!/usr/local/bin/Python
+from __future__ import absolute_import, division, print_function
 """Displays the keysym for each KeyPress event as you type."""
 import Tkinter
 
@@ -6,7 +7,7 @@ root = Tkinter.Tk()
 root.title("Keysym Logger")
 
 def reportEvent(event):
-        print 'keysym=%r, keysym_num=%s' % (event.keysym, event.keysym_num)
+        print('keysym=%r, keysym_num=%s' % (event.keysym, event.keysym_num))
         
 text  = Tkinter.Text(root, width=20, height=5, highlightthickness=2)
 

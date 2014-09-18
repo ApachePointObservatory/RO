@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """A menu showing a history of recent events.
 Saves arbitrary data associated with each event
 and calls a user-specified callback when any item is selected.
@@ -122,7 +123,7 @@ if __name__ == "__main__":
         nameVar.set("")
         
     def doPrint(name, data):
-        print "name=%r, data=%r" % (name, data)
+        print("name=%r, data=%r" % (name, data))
     
     Tkinter.Label(root, text="Name of new entry (type <CR> to accept it):").pack()
     nameVar = Tkinter.StringVar()

@@ -1,7 +1,7 @@
 # -*- test-case-name: tests.Comm.testTwistedSocket -*-
+from __future__ import absolute_import, division, print_function
 from twisted.trial import unittest
 from twisted.internet.defer import Deferred
-from twisted.internet import reactor
 from RO.Comm.TwistedSocket import TCPSocket, TCPServer
 
 Port = 2210
@@ -101,7 +101,7 @@ class TestRunner(object):
 
     def writeNext(self):
         try:
-            writeData, writeLine, self.readData, self.readLine = self.sendRcvListIter.next()
+            writeData, writeLine, self.readData, self.readLine = next(self.sendRcvListIter)
         except StopIteration:
             self.end(isOK=True)
             return

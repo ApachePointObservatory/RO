@@ -1,10 +1,14 @@
 #!/usr/bin/env python
+from __future__ import absolute_import, division, print_function
+
+__all__ = ["airmass"]
+
 import RO.MathUtil
 
 # constants
 _MinAlt = 3.0
 
-def airmass (alt):
+def airmass(alt):
     """Computes the airmass at a given altitude.
     
     Inputs:
@@ -44,7 +48,7 @@ def airmass (alt):
 
 
 if __name__ == "__main__":
-    print "testing airmass"
+    print("testing airmass")
     # test data is formatted as follows:
     # a list of entries, each consisting of:
     # - the input argument
@@ -65,6 +69,6 @@ if __name__ == "__main__":
     for testInput, expectedOutput in testData:
         actualOutput = airmass(testInput)
         if RO.MathUtil.compareFloats(actualOutput, expectedOutput, rtol=1.0e-14):
-            print "failed on input:", testInput
-            print "expected output:\n", expectedOutput
-            print "actual output:\n", actualOutput
+            print("failed on input:", testInput)
+            print("expected output:\n", expectedOutput)
+            print("actual output:\n", actualOutput)

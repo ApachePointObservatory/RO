@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 """
 Astronomical math in spherical coordinates.
 Most coordinate conversions are in the Cnv package,
@@ -30,17 +31,17 @@ PO Box 351580
 Seattle, WA 98195
 rowen@u.washington.edu
 """
-from Airmass import *
-from AngSep import *
-from AngSideAng import *
-from AzAltFromHADec import *
-from CCFromSC import *
-from CCFromSCPV import *
-from CCFromSCPVOff import *
-from CoordConv import *
-from DCFromSC import *
-from HADecFromAzAlt import *
-from SCFromCC import *
-from SCFromCCPV import *
-from SCFromCCPVOff import *
-from SCFromDC import *
+from .Airmass import *
+from .AngSep import *
+from .AngSideAng import *
+from .AzAltFromHADec import *
+from .CCFromSC import *
+from .CCFromSCPV import *
+from .CCFromSCPVOff import *
+from .CoordConv import *
+from .DCFromSC import *
+from .HADecFromAzAlt import *
+from .SCFromCC import *
+from .SCFromCCPV import *
+from .SCFromCCPVOff import *
+from .SCFromDC import *

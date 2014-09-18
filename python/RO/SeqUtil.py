@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """Utilities for non-string-like collections of objects.
 
 The following definitions are used in this module:
@@ -227,13 +228,13 @@ if __name__ == '__main__':
     }
     for func, dataList in dataDict.iteritems():
         funcName = func.__name__
-        print "testing", funcName
+        print("testing", funcName)
         for dataItem, expectTrue in dataList:
             try:
                 assert func(dataItem) == expectTrue
             except AssertionError:
-                print "%s(%r) failed; should be %r" % (funcName, dataItem, expectTrue)
+                print("%s(%r) failed; should be %r" % (funcName, dataItem, expectTrue))
 
-    print "testing flatten"
+    print("testing flatten")
     f = (((),("abc",)), u"abc", ["a", "b", "c"])
     assert flatten(f) == ["abc", u"abc", "a", "b", "c"]

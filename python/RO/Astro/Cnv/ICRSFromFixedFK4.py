@@ -1,15 +1,17 @@
 #!/usr/bin/env python    
+from __future__ import absolute_import, division, print_function
 """
 History:
 2002-07-09 ROwen    Converted to Python from the TCC's cnv_ZPMFK42J 4-1.
 2004-05-18 ROwen    Stopped importing math; it wasn't used.
 2007-04-24 ROwen    Converted from Numeric to numpy.
 """
+__all__ = ["icrsFromFixedFK4"]
+
 import numpy
 import RO.PhysConst
 import RO.MathUtil
-from RO.Astro import llv
-from RO.Astro import Tm
+from RO.Astro import llv, Tm
 
 # Constants
 _MatPP = numpy.array((
@@ -23,7 +25,7 @@ _MatVP = numpy.array((
     (-0.211432713109975E-07, +0.594337564639027E-09, +0.102737391643701E-09),
 ))
 
-def icrsFromFixedFK4 (fk4P, fk4Date):
+def icrsFromFixedFK4(fk4P, fk4Date):
     """
     Converts mean catalog fk4 coordinates to ICRS for a fixed star.
     Uses the approximation that ICRS = FK5 J2000.
@@ -81,7 +83,7 @@ def icrsFromFixedFK4 (fk4P, fk4Date):
 
 if __name__ == "__main__":
     import RO.SeqUtil
-    print "testing icrsFromFixedFK4"
+    print("testing icrsFromFixedFK4")
     # test data is formatted as follows:
     # a list of entries, each consisting of:
     # - the input argument
@@ -97,6 +99,6 @@ if __name__ == "__main__":
     for testInput, expectedOutput in testData:
         actualOutput = icrsFromFixedFK4(*testInput)
         if RO.SeqUtil.matchSequences(actualOutput, expectedOutput, rtol=1.0e-14):
-            print "failed on input:", testInput
-            print "expected output:\n", expectedOutput
-            print "actual output:\n", actualOutput
+            print("failed on input:", testInput)
+            print("expected output:\n", expectedOutput)
+            print("actual output:\n", actualOutput)

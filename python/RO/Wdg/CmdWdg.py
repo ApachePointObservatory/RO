@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """Entry widget for commands, with history.
 
 History:
@@ -138,13 +139,12 @@ class CmdWdg (Entry.StrEntry):
     def _showKeyEvent(self, evt):
         """Show the details of a keystroke; for debugging and development.
         """
-        print "Key event=%r" % (evt.__dict__, )
+        print("Key event=%r" % (evt.__dict__, ))
     
     
 
 if __name__ == "__main__":
     from RO.Wdg.PythonTk import PythonTk
-    import random
     root = PythonTk()
     
     FailCmd = 'fail'
@@ -152,7 +152,7 @@ if __name__ == "__main__":
     def doCmd(cmdStr):
         if cmdStr == FailCmd:
             raise RuntimeError("%r triggers the error test" % cmdStr)
-        print "Cmd = %r" % cmdStr
+        print("Cmd = %r" % cmdStr)
 
     testFrame = CmdWdg (root,
         cmdFunc=doCmd,

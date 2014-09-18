@@ -1,6 +1,8 @@
 #!/usr/bin/env python
+from __future__ import absolute_import, division, print_function
 """Handles the bits set in a word such as a status word
 """
+__all__ = ["getDescr"]
 
 def getDescr(bitInfo, intVal):
     """Return information about the bits in an integer
@@ -27,6 +29,6 @@ if __name__ == "__main__":
         (0, "Bit 0"),
     )
     
-    print "starting test"
+    print("starting test")
     for i in range(17):
-        print i, getDescr(bitInfo, i)
+        print(i, getDescr(bitInfo, i))

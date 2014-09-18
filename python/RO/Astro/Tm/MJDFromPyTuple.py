@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-from __future__ import division, absolute_import
+from __future__ import absolute_import, division, print_function
+
+__all__ = ["mjdFromPyTuple"]
 
 import math
 import RO.PhysConst
-
-__all__ = ["mjdFromPyTuple"]
 
 def mjdFromPyTuple(timeTuple):
     """Converts a python time tuple to Modified Julian Date.
@@ -38,7 +38,7 @@ def mjdFromPyTuple(timeTuple):
 
 if __name__ == "__main__":
     import RO.MathUtil
-    print "testing mjdFromPyTuple"
+    print("testing mjdFromPyTuple")
     # dataList = tuples of year, month, Julian date, where
     # - JD is at noon on the specified year and month
     # - month is a number between 1 (Jan) and 12 (Dec)
@@ -97,6 +97,6 @@ if __name__ == "__main__":
         expectedOutput = jd - RO.PhysConst.JDMinusMJD
         actualOutput = mjdFromPyTuple(testInput)
         if 0 != RO.MathUtil.compareFloats(actualOutput, expectedOutput, rtol=1e-15):
-            print "failed on input:", testInput
-            print "expected output:", expectedOutput
-            print "actual output  :", actualOutput
+            print("failed on input:", testInput)
+            print("expected output:", expectedOutput)
+            print("actual output  :", actualOutput)

@@ -1,10 +1,14 @@
 #!/usr/bin/env python
-import RO.MathUtil
-from AngSideAng import *
-from CCFromSC import *
-from CCFromSCPV import *
+from __future__ import division, print_function
 
-def ccFromSCPVOff (pos, pm, parlax, radVel, offDir, offMag):
+__all__ = ["ccFromSCPVOff"]
+
+import RO.MathUtil
+from AngSideAng import angSideAng
+from CCFromSC import ccFromSC
+from CCFromSCPV import ccFromSCPV
+
+def ccFromSCPVOff(pos, pm, parlax, radVel, offDir, offMag):
     """
     Converts spherical to cartesian coordinates, including position, velocity
     and and a local offset along a great circle from the position vector.
@@ -55,7 +59,7 @@ def ccFromSCPVOff (pos, pm, parlax, radVel, offDir, offMag):
     # (the offset is assumed to be long a great circle,
     # so the magnitude is exactly the same as the un-offset position)
     magP = RO.MathUtil.vecMag(p)
-    offP = ccFromSC (offPos, magP)
+    offP = ccFromSC(offPos, magP)
     
     return (p, v, offP, atInf)
 
@@ -63,7 +67,7 @@ def ccFromSCPVOff (pos, pm, parlax, radVel, offDir, offMag):
 
 if __name__ == "__main__":
     import RO.SeqUtil
-    print "testing ccFromSCPVOff"
+    print("testing ccFromSCPVOff")
     # test data is formatted as follows:
     # a list of entries, each consisting of:
     # - the input argument
@@ -122,7 +126,7 @@ if __name__ == "__main__":
         actualOutput = ccFromSCPVOff(*testInput)
         actualFlat = RO.SeqUtil.flatten(actualOutput)
         expectedFlat = RO.SeqUtil.flatten(expectedOutput)
-        if RO.SeqUtil.matchSequences(actualFlat, expectedFlat, rtol=1.0e-14, atol=1.0e-9):
-            print "failed on input:", testInput
-            print "expected output:\n", expectedOutput
-            print "actual output:\n", actualOutput
+        if RO.SeqUtil.matchSequences(actualFlat, expectedFlat, rtol=1.0e-13, atol=1.0e-9):
+            print("failed on input:", testInput)
+            print("expected output:\n", expectedOutput)
+            print("actual output:\n", actualOutput)

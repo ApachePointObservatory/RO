@@ -1,11 +1,15 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
+
+__all__ = ["eqeqx"]
+
 import math
 import RO.PhysConst
-from nutc import *
+from nutc import nutc
 
 _ArcSecPerRev = RO.PhysConst.ArcSecPerDeg * 360.0
 
-def eqeqx (tdb):
+def eqeqx(tdb):
     """The equation of the equinoxes (IAU 1994).
     
     Inputs:
@@ -39,7 +43,7 @@ def eqeqx (tdb):
 
 if __name__ == "__main__":
     import RO.MathUtil
-    print "testing eqeqx"
+    print("testing eqeqx")
     # test data is formatted as follows:
     # a list of entries, each consisting of:
     # - the input argument
@@ -55,6 +59,6 @@ if __name__ == "__main__":
     for testInput, expectedOutput in testData:
         actualOutput = eqeqx(testInput)
         if RO.MathUtil.compareFloats(actualOutput, expectedOutput, rtol=1e-15):
-            print "failed on input:", testInput
-            print "expected output:\n", expectedOutput
-            print "actual output:\n", actualOutput
+            print("failed on input:", testInput)
+            print("expected output:\n", expectedOutput)
+            print("actual output:\n", actualOutput)

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """Sets up standard key bindings for each platform.
 Supplements Tk's defaults and handles readonly text widgets.
 
@@ -110,21 +111,21 @@ def stdBindings(root, debug=False):
     if winSys == RO.TkUtil.WSysX11:
         # unix
         if debug:
-            print "Unix/x11 key bindings"
+            print("Unix/x11 key bindings")
 #         root.event_add("<<CtxMenu>>", "<Control-Button-1>")
 #         root.event_add("<<CtxMenu>>", "<Control-Button-2>")
 #         root.event_add("<<CtxMenu>>", "<Control-Button-3>")
     else:
         if winSys == RO.TkUtil.WSysAqua:
             if debug:
-                print "Mac Aqua key bindings"
+                print("Mac Aqua key bindings")
             root.bind_class("Entry", "<Key-Up>", _entryGoToLeftEdge)
             root.bind_class("Entry", "<Key-Down>", _entryGoToRightEdge)
             root.bind_class("Entry", "<Command-Key-Left>", _entryGoToLeftEdge)
             root.bind_class("Entry", "<Command-Key-Right>", _entryGoToRightEdge)
         else:
             if debug:
-                print "Windows key bindings"
+                print("Windows key bindings")
         
         """Disable <<Paste-Selection>>
         

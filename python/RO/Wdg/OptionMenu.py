@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """A variant of Tkinter.OptionMenu that adds many features.
 
 Extra features include: help, default handling, the ability to change menu items
@@ -483,8 +484,8 @@ class OptionMenu(Menubutton, RO.AddCallback.TkVarMixin,
             nItems = len(items)
             self._fixedHelpText = None
             if len(helpText) != nItems:
-                raise ValueError, "helpText list has %d entries but %d wanted" % \
-                    (len(helpText), nItems)
+                raise ValueError("helpText list has %d entries but %d wanted" % \
+                    (len(helpText), nItems))
             for ii in range(nItems):
                 self._helpTextDict[items[ii]] = helpText[ii]
         else:

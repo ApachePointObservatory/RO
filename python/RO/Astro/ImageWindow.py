@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import absolute_import, division, print_function
 """Code to handle imager windowing (subimage) and binning.
 
 Note: uses the expansionist or inclusive philosophy.
@@ -12,7 +13,8 @@ whenever binning or unbinning. For example, assuming 1-based and inclusive:
 2009-02-25 ROwen    Added getFullBinWindow method.
 """
 import math
-import RO.CnvUtil
+
+__all__ = ["ImageWindow"]
 
 class ImageWindow(object):
     """Class to handle imager windowing and binning.
@@ -178,4 +180,4 @@ if __name__ == "__main__":
                 if newUnbWin != (1, 1, bfx, bfx):
                     raise RuntimeError("Test failed; newUnbWin=%s != (1, 1, %s, %s), binWin=%s; binFac=%s" % \
                         (newUnbWin, bfx, bfx, binWin, binFac))
-            
+    print ("OK")            

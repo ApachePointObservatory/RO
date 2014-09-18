@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """RO.Wdg.Label widgets are display widgets that store data in its most basic form,
 yet know how to format it for display. These widgets consider their data to be bad
 (and display it with a bad background color) if the value is None or the value is not current.
@@ -179,7 +180,7 @@ class Label(Tkinter.Label, CtxMenu.CtxMenuMixin, IsCurrentMixin, SeverityMixin):
         else:
             try:
                 self["text"] = self._formatFunc(self._value)
-            except Exception, e:
+            except Exception as e:
                 sys.stderr.write("format of value %r failed with error: %s\n" % (self._value, e))
                 self["text"] = "?%r?" % (self._value,)
 
@@ -197,8 +198,8 @@ class BoolLabel(Label):
         isCurrent = True,
         **kargs
     ):
-        assert not kargs.has_key("formatStr"), "formatStr not allowed for %s" % self.__class__.__name__
-        assert not kargs.has_key("formatFunc"), "formatFunc not allowed for %s" % self.__class__.__name__
+        assert "formatStr" not in kargs, "formatStr not allowed for %s" % self.__class__.__name__
+        assert "formatFunc" not in kargs, "formatFunc not allowed for %s" % self.__class__.__name__
 
         def formatFnct(val):
             if val:
@@ -248,7 +249,7 @@ class IntLabel(Label):
         **kargs
     ):
         kargs.setdefault("formatStr", "%d")
-        assert not kargs.has_key("formatFunc"), "formatFunc not allowed for %s" % self.__class__.__name__
+        assert "formatFunc" not in kargs, "formatFunc not allowed for %s" % self.__class__.__name__
         
         Label.__init__(self,
             master,
@@ -278,7 +279,7 @@ class FloatLabel(Label):
         helpURL = None,
         isCurrent = True,
     **kargs):
-        assert not kargs.has_key("formatFunc"), "formatFunc not allowed for %s" % self.__class__.__name__
+        assert "formatFunc" not in kargs, "formatFunc not allowed for %s" % self.__class__.__name__
 
         # handle default format string
         if formatStr == None:
@@ -288,7 +289,7 @@ class FloatLabel(Label):
         try:
             formatStr % (1.1,)
         except:
-            raise ValueError, "Invalid floating point format string %s" % (formatStr,)
+            raise ValueError("Invalid floating point format string %s" % (formatStr,))
 
         Label.__init__(self,
             master,
@@ -319,8 +320,8 @@ class DMSLabel(Label):
         helpURL = None,
         isCurrent = True,
     **kargs):
-        assert not kargs.has_key("formatStr"), "formatStr not allowed for %s" % self.__class__.__name__
-        assert not kargs.has_key("formatFunc"), "formatFunc not allowed for %s" % self.__class__.__name__
+        assert "formatStr" not in kargs, "formatStr not allowed for %s" % self.__class__.__name__
+        assert "formatFunc" not in kargs, "formatFunc not allowed for %s" % self.__class__.__name__
         
         self.precision = precision
         self.nFields = nFields
@@ -412,7 +413,7 @@ if __name__ == "__main__":
     def displayNext():
         global ind, testData
         val = testData[ind]
-        print "\nvalue = %r, isCurrent = %s" % tuple(val)
+        print("\nvalue = %r, isCurrent = %s" % tuple(val))
         for wdg in wdgSet:
             wdg.set(*val)
         ind += 1

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """An interactive Python session and simple script file editor/runner
 that may be used from Tkinter scripts. Before running a script,x=Tk() is replaced with x=Toplevel() and mainloop() is eliminated. Hence some Tk scripts
 may be safely run. Presumably there are limitations. I suspect that mucking about
@@ -39,11 +40,11 @@ __all__ = ['PythonWdg']
 
 import os
 import re
-import Text
 import Tkinter
 import tkFileDialog
 import RO.CnvUtil
 import RO.OS
+import Text
 
 class PythonWdg(Tkinter.Frame):
     """A frame containing text window into which you may enter Python code.

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """Install the RO package. Requires setuptools.
 
 To use:
@@ -22,9 +23,10 @@ Includes:
 * Wdg: extensions of the standard Tkinter widgets and useful additional widgets. The widgets support hot help strings (automatically displayed in an RO.Wdg.StatusBar), a contextual menu and linking to html help.
 """
 
-classifiers = """\
+classifiers = """
 Development Status :: 5 - Production/Stable
-Programming Language :: Python
+Programming Language :: Python 2.6
+Programming Language :: Python 2.7
 Topic :: Software Development :: Libraries :: Python Modules
 """
 
@@ -40,7 +42,7 @@ PkgName = "RO"
 PkgDir = os.path.join(PkgRoot, PkgName)
 sys.path.insert(0, PkgDir)
 import Version
-print "%s version %s" % (PkgName, Version.__version__)
+print(("%s version %s" % (PkgName, Version.__version__)))
 
 setup(
     name = PkgName,
@@ -50,12 +52,8 @@ setup(
     author = "Russell Owen",
     author_email = "rowen@uw.edu",
     url = "http://www.astro.washington.edu/rowen/",
-    license = "GPL except RO.Astro which has more restrictions for commercial use",
-    classifiers = [
-        "Development Status :: 5 - Production/Stable",
-        "Programming Language :: Python :: 2.6",
-        "Programming Language :: Python :: 2.7",
-    ],
+    license = "MIT except RO.Astro which has more restrictions for commercial use",
+    classifiers = [c for c in classifiers.split("\n") if c],
     platforms = ["MacOS X", "unix", "Windows"],
     package_dir = {PkgName: PkgDir},
     packages = find_packages(PkgRoot),

@@ -1,9 +1,12 @@
 #!/usr/bin/env python
+from __future__ import absolute_import, division, print_function
 """
 History:
 2004-05-18 ROwen    Modified test code to use astr instead of str
                     and adict instead of dict.
 """
+__all__ = ["getKeyword"]
+
 import re
 
 ptn = re.compile(r'\s*(?P<key>[a-zA-Z_][a-zA-Z0-9_]*)(?:\s*$|(?:\s*(?P<next>[=;])))')
@@ -27,8 +30,8 @@ def getKeyword(astr, begInd=0):
     """
     mo = ptn.match(astr, begInd)
     if mo == None:
-        raise SyntaxError, "not a keyword starting at %d in :%s:" % \
-            (begInd,astr)
+        raise SyntaxError("not a keyword starting at %d in :%s:" % \
+            (begInd,astr))
 
     keyword = mo.group('key')
     (nextInd, junk) = mo.span('next')
@@ -38,7 +41,7 @@ def getKeyword(astr, begInd=0):
 
 if __name__ == '__main__':
     # perform test
-    print "testing getKeyword\n"
+    print("testing getKeyword\n")
     testList = [
         ("text = 'test'", 0),
         ("text2 = 'test'", 0),
@@ -64,10 +67,10 @@ if __name__ == '__main__':
     for (astr, nextInd) in testList:
         try:
             (adict, nextInd) = getKeyword(astr, nextInd)
-            print "getKeyword('%s') = \"%s\";" % (astr, adict),
+            print("getKeyword('%s') = \"%s\";" % (astr, adict), end=' ')
             if nextInd != None:
-                print "astr[%d] = \"%s\"" % (nextInd, astr[nextInd])
+                print("astr[%d] = \"%s\"" % (nextInd, astr[nextInd]))
             else:
-                print "end of text"
-        except StandardError, e:
-            print "failed with error: %s" % (e)
+                print("end of text")
+        except Exception as e:
+            print("failed with error: %s" % (e))

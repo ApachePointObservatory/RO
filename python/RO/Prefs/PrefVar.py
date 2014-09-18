@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import absolute_import, division, print_function
 """Support for reading and writing preferences and preference files.
 
 Subclasses of PrefVar store preferences of various types and offer:
@@ -87,6 +88,9 @@ History:
 2012-12-19 ROwen    Added FontSizePrefVar.
 2014-05-07 ROwen    Changed is str test to use basestring.
 """
+__all__ = ["PrefVar", "StrPrefVar", "DirectoryPrefVar", "FilePrefVar", "SoundPrefVar", "BoolPrefVar", \
+    "IntPrefVar", "FloatPrefVar", "ColorPrefVar", "FontPrefVar", "FontSizePrefVar", "PrefSet"]
+
 import os.path
 import re
 import sys
@@ -162,7 +166,7 @@ class PrefVar(object):
         
         try:
             self.setDefValue(defValue)
-        except (ValueError, TypeError), e:
+        except (ValueError, TypeError) as e:
             sys.stderr.write("Default rejected for %s %s: %s\n" % \
                 (self.__class__.__name__, name, e))
     
@@ -202,7 +206,7 @@ class PrefVar(object):
         # check that value is in the list of valid values, if present
         if self.validValues:
             if value not in self.validValues:
-                raise ValueError, "value %r not in %r" % (value, self.validValues)
+                raise ValueError("value %r not in %r" % (value, self.validValues))
         
         # apply local checks
         self.locCheckValue(value)
@@ -211,7 +215,7 @@ class PrefVar(object):
         try:
             self.asStr(value)
         except:
-            raise ValueError, "value %r could not be formatted with string %r" % (value, self.formatStr)
+            raise ValueError("value %r could not be formatted with string %r" % (value, self.formatStr))
     
     def getDefValue(self):
         """Return the current default value"""
@@ -353,7 +357,7 @@ class StrPrefVar(PrefVar):
         """
         if self.validRE:
             if self.validRE.match(value) == None:
-                raise ValueError, "%r does not match pattern %r" % (value, self.finalPattern)
+                raise ValueError("%r does not match pattern %r" % (value, self.finalPattern))
     
     def getRangeStr(self):
         """Return a brief description of the variable's range or other restrictions.
@@ -415,8 +419,8 @@ class DirectoryPrefVar(StrPrefVar):
             return
         if not os.path.isdir(value):
             if not os.path.exists(value):
-                raise ValueError, "%r does not exist on this file system" % (value,)
-            raise ValueError, "%r is not a directory" % (value,)
+                raise ValueError("%r does not exist on this file system" % (value,))
+            raise ValueError("%r is not a directory" % (value,))
     
 
 class FilePrefVar(StrPrefVar):
@@ -457,8 +461,8 @@ class FilePrefVar(StrPrefVar):
             return
         if not os.path.isfile(value):
             if not os.path.exists(value):
-                raise ValueError, "%r does not exist on this file system" % (value,)
-            raise ValueError, "%r is not a file" % (value,)
+                raise ValueError("%r does not exist on this file system" % (value,))
+            raise ValueError("%r is not a file" % (value,))
     
 
 class SoundPrefVar(FilePrefVar):
@@ -746,7 +750,7 @@ class ColorUpdate(object):
             colorDict[option] = var.getValue()
 
         # background is required; make sure we have it
-        if not colorDict.has_key("background"):
+        if "background" not in colorDict:
             colorDict["background"] = self.wdg.cget("background")
 
         self.wdg.tk_setPalette(**colorDict)
@@ -790,8 +794,8 @@ class ColorPrefVar(PrefVar):
         """
         try:
             self.colorCheckWdg.winfo_rgb(value)
-        except Tkinter.TclError, e:
-            raise ValueError, RO.StringUtil.strFromException(e)
+        except Tkinter.TclError as e:
+            raise ValueError(RO.StringUtil.strFromException(e))
 
 class FontPrefVar(PrefVar):
     """Tk Font preference variable.
@@ -891,7 +895,7 @@ class FontPrefVar(PrefVar):
         """
         badKeys = [key for key in value.iterkeys() if key not in self._internalDefFontDict]
         if badKeys:
-            raise ValueError, "Invalid key(s) %s in font dictionary %r" % (badKeys, value)
+            raise ValueError("Invalid key(s) %s in font dictionary %r" % (badKeys, value))
 
     def setValue (self, rawValue):
         """Updates the internal font information from the font dictionary provided
@@ -1133,7 +1137,7 @@ class PrefSet(object):
 
         try:
             inFile = file(fileName, 'rU')
-        except StandardError, e:
+        except Exception as e:
             sys.stderr.write("Could not open preference file %r; error: %s\n" % (fileName, e))
             return
             
@@ -1165,7 +1169,7 @@ class PrefSet(object):
                     # because it may include a comment
                     prefValue = eval(prefValueStr)
                     prefVar.setValue(prefValue)
-                except StandardError, e:
+                except Exception as e:
                     sys.stderr.write("Invalid data on line %r of file %r; error: %s\n" % (line, fileName, e))
                     continue
         finally:
@@ -1209,15 +1213,15 @@ class PrefSet(object):
         """
         trueName = fileName or self.defFileName
         if not trueName:
-            raise RuntimeError, "No file specified and no default file"
+            raise RuntimeError("No file specified and no default file")
         return trueName
 
 
 if __name__ == "__main__":
-    print "running PrefVar test"
+    print("running PrefVar test")
 
     def callFunc(value, prefVar):
-        print "callFunc called with value=%r, prefVar='%s'" % (value, prefVar)
+        print("callFunc called with value=%r, prefVar='%s'" % (value, prefVar))
 
     pv = PrefVar(
         name="basicPref",
@@ -1227,10 +1231,10 @@ if __name__ == "__main__":
         callFunc=callFunc,
         callNow=True,
     )
-    print "created a PrefVar with default value 0; value =", pv.getValue()
+    print("created a PrefVar with default value 0; value =", pv.getValue())
     
     pv.setValue("aString")
-    print "set value to 'aString'; value =", pv.getValue()
+    print("set value to 'aString'; value =", pv.getValue())
         
     pv.restoreDefault()
-    print "restored default; value =", pv.getValue()
+    print("restored default; value =", pv.getValue())

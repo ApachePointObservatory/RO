@@ -1,6 +1,9 @@
 #!/usr/bin/env python
+from __future__ import absolute_import, division, print_function
 
-def epb2d (epb):
+__all__ = ["epb2d"]
+
+def epb2d(epb):
     """
     Converts Besselian Epoch to Modified Julian Date
     
@@ -21,7 +24,7 @@ def epb2d (epb):
 
 if __name__ == "__main__":
     import RO.MathUtil
-    print "testing epb2d"
+    print("testing epb2d")
     # testData is a list of duples consisting of:
     # - input data
     # - the expected output
@@ -34,6 +37,6 @@ if __name__ == "__main__":
     for testInput, expectedOutput in testData:
         actualOutput = epb2d(testInput)
         if 0 != RO.MathUtil.compareFloats(actualOutput, expectedOutput, rtol=1e-15):
-            print "failed on input:", testInput
-            print "expected output:\n", expectedOutput
-            print "actual output:\n", actualOutput
+            print("failed on input:", testInput)
+            print("expected output:\n", expectedOutput)
+            print("actual output:\n", actualOutput)

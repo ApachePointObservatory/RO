@@ -1,11 +1,14 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """
 History:
 2002-07-22 ROwen    Converted to Python from the TCC's cnv_AppGeo2AppTopo.
 2007-04-24 ROwen    Changed Numeric to numpy in a doc string.
 """
+__all__ = ["topoFromGeoSimple"]
+
 import RO.MathUtil
-from AzAltFromHADec import *
+from AzAltFromHADec import azAltFromHADec
 
 # needs test code
 

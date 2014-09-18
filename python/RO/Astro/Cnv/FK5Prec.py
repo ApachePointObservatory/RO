@@ -1,13 +1,16 @@
 #!/usr/bin/env python
+from __future__ import absolute_import, division, print_function
 """
 History:
 2002-07-22 ROwen    Converted from the TCC's cnv_FK5Prec 6-1
 2007-04-24 ROwen    Converted from Numeric to numpy.
 """
+__all__ = ["fk5Prec"]
+
 import numpy
 from RO.Astro import llv
 
-def fk5Prec (fromP, fromV, fromDate, toDate):
+def fk5Prec(fromP, fromV, fromDate, toDate):
     """
     Inputs:
     - fromDate  TDB date of initial coordinates (Julian epoch)
@@ -46,7 +49,7 @@ def fk5Prec (fromP, fromV, fromDate, toDate):
 
 if __name__ == "__main__":
     import RO.SeqUtil
-    print "testing fk5Prec"
+    print("testing fk5Prec")
     # test data is formatted as follows:
     # a list of entries, each consisting of:
     # - the input argument
@@ -103,6 +106,6 @@ if __name__ == "__main__":
         expectedFlat = RO.SeqUtil.flatten(expectedOutput)
         actualFlat = RO.SeqUtil.flatten(actualOutput)
         if RO.SeqUtil.matchSequences(actualFlat, expectedFlat, rtol=1.0e-14):
-            print "failed on input:", testInput
-            print "expected output:\n", expectedOutput
-            print "actual output:\n", actualOutput
+            print("failed on input:", testInput)
+            print("expected output:\n", expectedOutput)
+            print("actual output:\n", actualOutput)

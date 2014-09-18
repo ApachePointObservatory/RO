@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+from __future__ import absolute_import, division, print_function
 """
 cheol:  change end of line character
 Copyright (C) 2000-2001 Gordon Worley
@@ -46,7 +46,7 @@ def replaceFile(oldname, newname):
         # POSIX rename does an atomic replace, WIN32 rename does not. :-( 
         try: 
             os.remove(newname) 
-        except OSError, exc: 
+        except OSError as exc: 
             import errno 
             if exc.errno != errno.ENOENT: raise exc 
  
@@ -144,31 +144,31 @@ def convert(fn, mode, is_recv, follow_links, verbose):
     if is_recv:
         if os.path.isdir(fn) and not os.path.islink(fn):
             if verbose:
-                print "%s/:" % fn
+                print("%s/:" % fn)
             os.chdir(fn)
             fns = os.listdir("./")
             for afn in fns:
                 convert(afn, mode, is_recv, follow_links, verbose)
             os.chdir("..")
             if verbose:
-                print "../:"
+                print("../:")
         elif os.path.isdir(fn) and os.path.islink(fn) and os.path.islink(fn) <= follow_links:
             jfn = os.readlink(fn)
             if verbose:
-                print "%s/ (%s/):" % (fn, jfn)
+                print("%s/ (%s/):" % (fn, jfn))
             fns = os.listdir(fn)
             for afn in fns:
                 convert(os.path.join(jfn, afn), mode, is_recv, follow_links, verbose)
             if verbose:
-                print "../:"
+                print("../:")
     if not os.path.isdir(fn):
         if os.path.islink(fn) and os.path.islink(fn) <= follow_links:
             tmp = fn
             fn = os.readlink(fn)
             if verbose:
-                print "converting %s (%s)" % (tmp, fn)
+                print("converting %s (%s)" % (tmp, fn))
         elif verbose:
-            print "converting %s" % fn
+            print("converting %s" % fn)
         f = FileMorpher(fn)
         temp = f.load()
         if mode == 1:
@@ -206,7 +206,7 @@ if __name__ == '__main__':
     try:
         opts, args = getopt.getopt(sys.argv[1:], "hlvmudr", ("help", "mac", "unix", "dos", "version"))
     except:
-        print "That's not an option.  Type -h for help."
+        print("That's not an option.  Type -h for help.")
         sys.exit(1)
     mode = 1 #default is unix, 0 is mac, 2 is dos
     is_recv = 0 #default isn't recursive
@@ -226,12 +226,12 @@ if __name__ == '__main__':
         elif opt[0] == "-d" or opt[0] == "--dos":
             mode = 2;
         elif opt[0] == "-h" or opt[0] == "--help":
-            print help % sys.argv[0]
+            print(help % sys.argv[0])
             sys.exit(0)
         elif opt[0] == "--version":
-            print __version__
+            print(__version__)
             sys.exit(0)
     if not args:
-        print __version__
+        print(__version__)
     for arg in args:
         convert(arg, mode, is_recv, follow_links, verbose)

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+from __future__ import absolute_import, division, print_function
 """Mixing class(es) for adding callback capabilities.
 
 History:
@@ -34,10 +34,10 @@ History:
 2013-09-24 ROwen    Added safeCall.
 2014-04-17 ROwen    Added safeCall2, which gives more feedback than safeCall.
 """
+__all__ = ["safeCall", "safeCall2", "BaseMixin", "TkButtonMixin", "TkVarMixin"]
+
 import sys
 import traceback
-
-__all__ = ["safeCall", "safeCall2", "BaseMixin", "TkButtonMixin", "TkVarMixin"]
 
 def safeCall(func, *args, **kwargs):
     """Call a function; print a traceback and continue if it fails
@@ -53,7 +53,7 @@ def safeCall(func, *args, **kwargs):
     """
     try:
         return func(*args, **kwargs)
-    except Exception, e:
+    except Exception as e:
         sys.stderr.write("%s(*%s, **%s) failed: %s\n" % (func, args, kwargs, e,))
         traceback.print_exc(file=sys.stderr)
 
@@ -74,7 +74,7 @@ def safeCall2(descr, func, *args, **kwargs):
     """
     try:
         return func(*args, **kwargs)
-    except Exception, e:
+    except Exception as e:
         sys.stderr.write("%s %s(*%s, **%s) failed: %s\n" % (descr, func, args, kwargs, e,))
         traceback.print_exc(file=sys.stderr)
 

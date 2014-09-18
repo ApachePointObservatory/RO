@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import absolute_import, division, print_function
 """
 History:
 2002-07-22 ROwen    Converted to Python from the TCC's cnv_UnRefract 2-2.
@@ -7,6 +8,8 @@ History:
 2007-04-24 ROwen    Converted from Numeric to numpy.
 2007-09-19 ROwen    Mis-called numpy.asarray (switched to numpy.array to force copy). Thanks, pychecker!
 """
+__all__ = ["topoFromObs"]
+
 from math import sqrt
 import numpy
 import RO.SysConst
@@ -20,7 +23,7 @@ import RO.MathUtil
 #  and going beyond ~87 requires more iterations to give reversibility
 _MaxZDU = 85.0
 
-def topoFromObs (obsP, refCo):
+def topoFromObs(obsP, refCo):
     """
     Removes correction for refraction,
     i.e. converts observed coordinates to apparent topocentric.
@@ -67,8 +70,7 @@ def topoFromObs (obsP, refCo):
     if rxysq * RO.SysConst.FAccuracy <= RO.SysConst.FSmallNum:
         if rmag * RO.SysConst.FAccuracy <= RO.SysConst.FSmallNum:
             #  |R| is too small to use -- probably a bug in the calling software
-            raise ValueError, \
-                'obsP %r too small' % obsP 
+            raise ValueError('obsP %r too small' % obsP) 
         #  at zenith; set output = input
         appTopoP = numpy.array(obsP, copy=True, dtype=float)
     else:
@@ -112,7 +114,7 @@ def topoFromObs (obsP, refCo):
 
 if __name__ == "__main__":
     import RO.SeqUtil
-    print "testing topoFromObs"
+    print("testing topoFromObs")
     # test data is formatted as follows:
     # a list of entries, each consisting of:
     # - the input argument
@@ -144,6 +146,6 @@ if __name__ == "__main__":
         actualFlat = RO.SeqUtil.flatten(actualOutput)
         expectedFlat = RO.SeqUtil.flatten(expectedOutput)
         if RO.SeqUtil.matchSequences(actualFlat, expectedFlat, rtol=1.0e-14):
-            print "failed on input:", testInput
-            print "expected output:\n", expectedOutput
-            print "actual output:\n", actualOutput
+            print("failed on input:", testInput)
+            print("expected output:\n", expectedOutput)
+            print("actual output:\n", actualOutput)

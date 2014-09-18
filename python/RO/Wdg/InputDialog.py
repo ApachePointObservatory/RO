@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """Basic dialog class(es). The dialog's window is shown when the object is created
 and destroyed when the user exits the dialog. The result is contained in dialog.result
 and is None if the dialog is cancelled.
@@ -26,6 +27,7 @@ History:
 __all__ = ['ModalDialogBase']
 
 import Tkinter
+
 import Button
 
 class ModalDialogBase(Tkinter.Toplevel):
@@ -168,7 +170,7 @@ if __name__ == "__main__":
     def doDialog():
         d = TestDialog(root, "User Info")
         l["text"] = "Result: %s" % (d.result,)
-        print d.result
+        print(d.result)
             
     root = Tkinter.Tk()
     e = Tkinter.Entry(root)

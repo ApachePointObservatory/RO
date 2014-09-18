@@ -1,9 +1,9 @@
 # -*- test-case-name: tests.Comm.testTkSocket -*-
+from __future__ import absolute_import, division, print_function
 import Tkinter
 from twisted.trial import unittest
 from twisted.internet.defer import Deferred
 import twisted.internet.tksupport
-from twisted.internet import reactor
 from RO.Comm.TkSocket import TCPSocket, TCPServer
 
 root = Tkinter.Tk()
@@ -105,7 +105,7 @@ class TestRunner(object):
 
     def writeNext(self):
         try:
-            writeData, writeLine, self.readData, self.readLine = self.sendRcvListIter.next()
+            writeData, writeLine, self.readData, self.readLine = next(self.sendRcvListIter)
         except StopIteration:
             self.end(isOK=True)
             return

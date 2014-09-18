@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+from __future__ import absolute_import, division, print_function
 """Open a URL in the user's default browser.
 
 The URL is opened in a background thread.
@@ -24,7 +24,7 @@ class _BrowseURLThread(threading.Thread):
         try:
             webbrowser.open(url)
             return
-        except Exception, e:
+        except Exception as e:
             pass
 
         # failed! if this is a file URL with an anchor,
@@ -38,11 +38,11 @@ class _BrowseURLThread(threading.Thread):
             try:
                 webbrowser.open(url)
                 return
-            except Exception, e:
+            except Exception as e:
                 pass
 
         # failed!
-        print "could not open URL %r: %s %r" % (url, e, e)
+        print("could not open URL %r: %s %r" % (url, e, e))
 
 def browseURL(url):
     newThread = _BrowseURLThread(url)

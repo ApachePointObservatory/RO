@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """A rectangle that the user can resize or drag around.
 
 Tkinter implementation of Keith Vetter's "PrintBox" with some refinements.
@@ -149,7 +150,7 @@ class ResizableRect(RO.AddCallback.BaseMixin):
         Once deleted, do not attempt to manipulate any further.
         """
         self._removeAllCallbacks()
-        for objID in self.idDict.iterkeys():
+        for objID in self.idDict:
             self.cnv.delete(objID)
         self.cnv.delete(self.rectID)
         self._restoreDefaultCursor()
@@ -341,7 +342,7 @@ if __name__ == "__main__":
     cnv.pack()
         
     def printCoords(rr):
-        print rr.getCoords()
+        print(rr.getCoords())
 
     rr = ResizableRect(cnv, 50, 50, 150, 150,
         grabSize=(5,0),

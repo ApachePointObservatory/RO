@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import absolute_import, division, print_function
 """Sockets optimized for use with Tkinter GUIs.
 
 TkSocket allows nonblocking event-driven operation:
@@ -127,7 +128,7 @@ class _TkSocketWrapper(object):
         elif sockArgs:
             try:
                 self._tkSocket = self._tk.call('socket', *sockArgs)
-            except Tkinter.TclError, e:
+            except Tkinter.TclError as e:
                 raise RuntimeError(e)
         else:
             raise RuntimeError("Must specify tkSock or sockArgs")
@@ -142,7 +143,7 @@ class _TkSocketWrapper(object):
             
             #print "name=%s, configArgs=%s" % (name, configArgs)
             self._tk.call('fconfigure', self._tkSocket, *configArgs)
-        except Tkinter.TclError, e:
+        except Tkinter.TclError as e:
             raise RuntimeError(e)
 
     @property
@@ -205,7 +206,7 @@ class _TkSocketWrapper(object):
         
         try:
             self._tk.call('fileevent', self._tkSocket, typeStr, tkFuncName)
-        except Tkinter.TclError, e:
+        except Tkinter.TclError as e:
             if tclFunc:
                 tclFunc.deregister()
             raise RuntimeError(e)
@@ -298,7 +299,7 @@ class TCPSocket(BaseSocket):
             # and is just used to detect state
             self._tkSocketWrapper.setCallback(self._doRead, doWrite=False)
             self._tkSocketWrapper.setCallback(self._doConnect, doWrite=True)
-        except Tkinter.TclError, e:
+        except Tkinter.TclError as e:
             raise RuntimeError(e)
 
         self._setState(self.Connecting)
@@ -534,7 +535,7 @@ class TCPServer(BaseServer):
         
         try:
             self._connCallback(newSocket)
-        except Exception, e:
+        except Exception as e:
             errMsg = "%s connection callback %s failed: %s" % (self, self._connCallback, e)
             sys.stderr.write(errMsg + "\n")
             traceback.print_exc(file=sys.stderr)
@@ -577,8 +578,8 @@ if __name__ == "__main__":
     def runTest():
         global clientSocket
         try:
-            testStr = strIter.next()
-            print "Client writing %r" % (testStr,)
+            testStr = next(strIter)
+            print("Client writing %r" % (testStr,))
             if binary:
                 clientSocket.write(testStr)
             else:
@@ -593,35 +594,35 @@ if __name__ == "__main__":
             outStr = sock.read()
         else:
             outStr = sock.readLine()
-        print "Client read    %r" % (outStr,)
+        print("Client read    %r" % (outStr,))
         if outStr and outStr.strip() == "quit":
-            print "*** Data exhausted; closing the client connection"
+            print("*** Data exhausted; closing the client connection")
             clientSocket.close()
 
     def clientState(sock):
         state, reason = sock.fullState
         if reason:
-            print "Client %s: %s" % (state, reason)
+            print("Client %s: %s" % (state, reason))
         else:
-            print "Client %s" % (state,)
+            print("Client %s" % (state,))
         if sock.isDone:
-            print "*** Client closed; now closing the server"
+            print("*** Client closed; now closing the server")
             echoServer.close()
         if sock.isReady:
-            print "*** Client connected; now sending test data"
+            print("*** Client connected; now sending test data")
             runTest()
 
     def serverState(server):
         state, reason = server.fullState
         if reason:
-            print "Server %s: %s" % (state, reason)
+            print("Server %s: %s" % (state, reason))
         else:
-            print "Server %s" % (state,)
+            print("Server %s" % (state,))
         if server.isReady:
-            print "*** Echo server ready; now starting up a client"
+            print("*** Echo server ready; now starting up a client")
             startClient()
         elif server.isDone:
-            print "*** Halting the tcl event loop"
+            print("*** Halting the tcl event loop")
             root.quit()
 
     def startClient():
@@ -648,7 +649,7 @@ if __name__ == "__main__":
             if readLine is not None:
                 sock.writeLine(readLine)
 
-    print "*** Starting echo server on port %s; binary=%s" % (port, binary)
+    print("*** Starting echo server on port %s; binary=%s" % (port, binary))
     echoServer = EchoServer(port = port, stateCallback = serverState)
     
     root.mainloop()

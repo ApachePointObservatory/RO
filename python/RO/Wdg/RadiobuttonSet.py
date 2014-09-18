@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """Creates a set of Tkinter Radiobuttons that have help, default handling
 and other niceties. The set can be used in an RO.Wdg input container
 (and it implements just enough of the Tkinter standard widget interface
@@ -138,7 +139,7 @@ class RadiobuttonSet (RO.AddCallback.TkVarMixin,
                     raise ValueError("textList and bitmapList both specified but have different lengths")
         nButtons = len(textList)
         if len(valueList) != nButtons:
-            raise ValueError, "valueList must have one entry per radio button"
+            raise ValueError("valueList must have one entry per radio button")
 
         self._valueList = valueList
         if var == None:
@@ -208,7 +209,7 @@ class RadiobuttonSet (RO.AddCallback.TkVarMixin,
 
         try:
             value = self._matchItem.getUniqueMatch(value)
-        except ValueError, e:
+        except ValueError as e:
             if doCheck:
                 raise ValueError("invalid %s: %s" % (descr, RO.StringUtil.strFromException(e)))
         return value
@@ -250,7 +251,7 @@ class RadiobuttonSet (RO.AddCallback.TkVarMixin,
             return
     
         if self._defValue not in self._valueList:
-            raise ValueError, "invalid default %r not in %r" % (self._defValue, self._valueList)
+            raise ValueError("invalid default %r not in %r" % (self._defValue, self._valueList))
         self._var.set(self._defValue)
 
     def set(self, newValue, isCurrent=True, doCheck=True, *args, **kargs):
@@ -357,9 +358,9 @@ if __name__ == "__main__":
     rbFrame3.pack(side="top")
     
     def doPrint():
-        print "1 value = %r; default = %r" % (rbs1.getString(), rbs1.getDefault())
-        print "2 value = %r; default = %r" % (rbs2.getString(), rbs2.getDefault())
-        print "3 value = %r; default = %r" % (rbs3.getString(), rbs3.getDefault())
+        print("1 value = %r; default = %r" % (rbs1.getString(), rbs1.getDefault()))
+        print("2 value = %r; default = %r" % (rbs2.getString(), rbs2.getDefault()))
+        print("3 value = %r; default = %r" % (rbs3.getString(), rbs3.getDefault()))
     
     enableVar = Tkinter.IntVar()
     enableVar.set(True)

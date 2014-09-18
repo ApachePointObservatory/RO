@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """Generic classes for event-based communication and timing.
 Generic in the sense that it supports both Twisted framework and Tcl sockets.
 
@@ -56,6 +57,8 @@ reactor.run()
 History:
 2012-08-10 ROwen
 """
+__all__ = ["setFramework", "getFramework", "getFrameworkSet", "TCPSocket", "TCPSocket", "Timer", "WaitForTCPServer"]
+
 import time
 from RO.AddCallback import safeCall2
 
@@ -185,8 +188,8 @@ if __name__ == "__main__":
     def runTest():
         global clientSocket
         try:
-            testStr = strIter.next()
-            print "Client writing %r" % (testStr,)
+            testStr = next(strIter)
+            print("Client writing %r" % (testStr,))
             clientSocket.writeLine(testStr)
             Timer(0.5, runTest)
         except StopIteration:
@@ -195,32 +198,32 @@ if __name__ == "__main__":
     def clientRead(sock):
         global clientSocket
         outStr = sock.readLine(default="")
-        print "Client read   %r" % (outStr,)
+        print("Client read   %r" % (outStr,))
         if outStr == "quit":
-            print "*** Data exhausted; closing the client connection"
+            print("*** Data exhausted; closing the client connection")
             clientSocket.close()
 
     def clientState(sock):
         state, reason = sock.fullState
         if reason:
-            print "Client %s: %s" % (state, reason)
+            print("Client %s: %s" % (state, reason))
         else:
-            print "Client %s" % (state,)
+            print("Client %s" % (state,))
         if sock.isDone:
-            print "*** Client closed; now halting Tk event loop (which kills the server)"
+            print("*** Client closed; now halting Tk event loop (which kills the server)")
             root.quit()
         if sock.isReady:
-            print "*** Client connected; now sending test data"
+            print("*** Client connected; now sending test data")
             runTest()
 
     def serverState(server):
         state, reason = server.fullState
         if reason:
-            print "Server %s: %s" % (state, reason)
+            print("Server %s: %s" % (state, reason))
         else:
-            print "Server %s" % (state,)
+            print("Server %s" % (state,))
         if server.isReady:
-            print "*** Echo server ready; now starting up a client"
+            print("*** Echo server ready; now starting up a client")
             startClient()
     
     def startClient():
@@ -246,7 +249,7 @@ if __name__ == "__main__":
             readLine = sock.readLine(default="")
             sock.writeLine(readLine)
 
-    print "*** Starting echo server on port", port
+    print("*** Starting echo server on port", port)
     echoServer = EchoServer(port = port, stateCallback = serverState)
     
     root.mainloop()

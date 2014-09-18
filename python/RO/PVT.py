@@ -1,3 +1,4 @@
+from __future__ import absolute_import, division, print_function
 """PVT implements a class to describe (position, velocity, time) triplets.
 
 History:
@@ -9,8 +10,9 @@ History:
 2005-06-08 ROwen    Changed PVT to a new-style class.
 2007-07-02 ROwen    Added hasVel method.
 """
+__all__ = ["PVT"]
+
 import time
-import types
 import RO.Astro.Tm
 import RO.CnvUtil
 import RO.MathUtil
@@ -85,7 +87,7 @@ class PVT(object):
 
 
 if __name__ == "__main__":
-    print "\nrunning PVT test"
+    print("\nrunning PVT test")
     
     currTAI = RO.Astro.Tm.taiFromPySec() * RO.PhysConst.SecPerDay
 
@@ -100,8 +102,8 @@ if __name__ == "__main__":
 
     for i in range(5):
         t = RO.Astro.Tm.taiFromPySec() * RO.PhysConst.SecPerDay
-        print "\ntime =", t
+        print("\ntime =", t)
         for var in varList:
-            print var, "pos =", var.getPos(t)
+            print(var, "pos =", var.getPos(t))
         if i < 4:
             time.sleep(1)

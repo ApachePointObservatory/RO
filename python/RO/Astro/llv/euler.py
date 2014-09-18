@@ -1,14 +1,17 @@
 #!/usr/bin/env python 
+from __future__ import absolute_import, division, print_function
 """
 History:
 P.T.Wallace   Starlink   November 1988
 2002-07-11 ROwen    Extensively rewritten for Python.
 2007-04-24 ROwen    Converted from Numeric to numpy.
 """
+__all__ = ["euler"]
+
 import math
 import numpy
 
-def euler (axisAngSet):
+def euler(axisAngSet):
     """
     Form a rotation matrix from successive rotations
     about specified Cartesian axes.
@@ -57,7 +60,7 @@ def euler (axisAngSet):
             ])
 
         else:
-            raise RuntimeError, "unknown axis %s; must be one of 0, 1, 2" % (axis,)
+            raise RuntimeError("unknown axis %s; must be one of 0, 1, 2" % (axis,))
         
         # Apply the current rotation (currRotMat x netRotMat)
         netRotMat = numpy.dot(currRotMat, netRotMat)
@@ -65,7 +68,7 @@ def euler (axisAngSet):
     return netRotMat
     
 if __name__ == "__main__":
-    print "testing euler"
+    print("testing euler")
     # test data is formatted as follows:
     # a list of entries, each consisting of:
     # - the input argument for euler
@@ -110,6 +113,6 @@ if __name__ == "__main__":
     for testInput, expectedOutput in testData:
         actualOutput = euler(testInput)
         if not numpy.allclose(actualOutput, expectedOutput, atol=1e-15, rtol=1e-15):
-            print "failed on input:", testInput
-            print "expected output:\n", expectedOutput
-            print "actual output:\n", actualOutput
+            print("failed on input:", testInput)
+            print("expected output:\n", expectedOutput)
+            print("actual output:\n", actualOutput)

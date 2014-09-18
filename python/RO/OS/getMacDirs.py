@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+from __future__ import absolute_import, division, print_function
 """Utilities for finding standard Mac directories.
 
 History:
@@ -106,12 +106,3 @@ def getPrefsDirs(inclNone = False):
                 if False (the default) paths to missing folders are omitted
     """
     return getMacUserSharedDirs(Carbon.Folders.kPreferencesFolderType, inclNone = inclNone)
-    
-
-if __name__ == "__main__":
-    print "Testing"
-    for inclNone in (False, True):
-        print 'getAppDirs(%s)     = %r' % (inclNone, getAppDirs(inclNone))
-        print 'getAppSuppDirs(%s) = %r' % (inclNone, getAppSuppDirs(inclNone))
-        print 'getPrefsDirs(%s)   = %r' % (inclNone, getPrefsDirs(inclNone))
-    print 'getDocsDir()         = %r' % getDocsDir()

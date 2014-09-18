@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import absolute_import, division, print_function
 """Example trivial telnet client using RO.Comm.TCPConnection
 
 History:
@@ -63,7 +64,7 @@ class TCPClient(Tkinter.Frame):
 
 if __name__ == "__main__":
     if len(sys.argv) not in (2,3):
-        print "Usage: tcpclient.py addr [port]"
+        print("Usage: tcpclient.py addr [port]")
         sys.exit(1)
     
     addr = sys.argv[1]

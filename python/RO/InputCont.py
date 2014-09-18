@@ -1,5 +1,5 @@
 #!/usr/bin/env python2
-from __future__ import absolute_import, division
+from __future__ import absolute_import, division, print_function
 """Containers (wrappers) for RO.Wdg input widgets, including Entry,
 Checkbutton and OptionMenu.
 
@@ -154,7 +154,7 @@ class BasicFmt(object):
             valList = [self.valFmt(val) for val in valList]
         if self.rejectBlanks:
             if '' in valList:
-                raise ValueError, 'must specify all values for %r' % (name,)
+                raise ValueError('must specify all values for %r' % (name,))
         
         if self.omitName or name == None:
             nameStr = ''
@@ -201,7 +201,7 @@ class VMSQualFmt(object):
             valList = [self.valFmt(val) for val in valList]
         if self.rejectBlanks:
             if '' in valList:
-                raise ValueError, 'must specify all values for %r' % (name,)
+                raise ValueError('must specify all values for %r' % (name,))
 
         if len(valList) > 1:
             valStr = "(%s)" % ", ".join(valList)
@@ -254,10 +254,10 @@ class BasicContListFmt(object):
 
         if self.rejectBlanks:
             if '' in strList:
-                raise ValueError, 'specify all values for %s' % (name,)
+                raise ValueError('specify all values for %s' % (name,))
 
         if self.omitBlanks:
-            strList = filter(lambda x: x != '', strList)
+            strList = [x for x in strList if x != '']
             if len(strList) == 0:
                 return ''
 
@@ -267,9 +267,9 @@ class BasicContListFmt(object):
             nameStr = name + self.nameSep
         try:
             return self.begStr + nameStr + self.valSep.join(strList) + self.endStr
-        except Exception, e:
-            raise ValueError, 'cannot format name %r with beg/sep/endStr=%r/%r/%r and data=%r; error=%s' % (
-                name, self.begStr, self.valSep, self.endStr, strList, e)
+        except Exception as e:
+            raise ValueError('cannot format name %r with beg/sep/endStr=%r/%r/%r and data=%r; error=%s' % (
+                name, self.begStr, self.valSep, self.endStr, strList, e))
 
 
 # widget containers
@@ -312,7 +312,7 @@ class WdgCont(RO.AddCallback.BaseMixin):
             formatFunc = BasicFmt()
         self._formatFunc = formatFunc
         if not callable(self._formatFunc):
-            raise ValueError, 'format function %r is not callable' % (self._formatFunc,)
+            raise ValueError('format function %r is not callable' % (self._formatFunc,))
 
         if callFunc:
             self.addCallback(callFunc, callNow)
@@ -470,7 +470,7 @@ class WdgCont(RO.AddCallback.BaseMixin):
         """Set the value of each widget.
         """
         if len(valList) != len(self._wdgList):
-            raise ValueError, 'valList has %d elements; %d needed' % (len(valList), len(self._wdgList))
+            raise ValueError('valList has %d elements; %d needed' % (len(valList), len(self._wdgList)))
         
         # we want just one callback instead of one per container, so disable callbacks until finished
         with self._disableCallbacksContext():
@@ -538,14 +538,14 @@ class BoolNegCont(WdgCont):
         else:
             wdgNames = RO.SeqUtil.asList(wdgNames)
             if len(wdgNames) != len(self._wdgList):
-                raise ValueError, 'wdgNames has %d elements; %d needed' % (len(wdgNames), len(self._wdgList))
+                raise ValueError('wdgNames has %d elements; %d needed' % (len(wdgNames), len(self._wdgList)))
         self._wdgNames = wdgNames
 
         # verify that the names are OK      
         lowerNegStr = self._negStr.lower()
         for name in self._wdgNames:
             if name.lower().startswith(lowerNegStr):
-                raise ValueError, 'invalid widget name %r; cannot start with negStr=%r' % (name, self._negStr)
+                raise ValueError('invalid widget name %r; cannot start with negStr=%r' % (name, self._negStr))
         
         # generate widget dict and widget name getter
         self._wdgDict = RO.Alg.OrderedDict(zip(self._wdgNames, self._wdgList))
@@ -664,7 +664,7 @@ class BoolOmitCont(WdgCont):
         else:
             wdgNames = RO.SeqUtil.asList(wdgNames)
             if len(wdgNames) != len(self._wdgList):
-                raise ValueError, 'wdgNames has %d elements; %d needed' % (len(wdgNames), len(self._wdgList))
+                raise ValueError('wdgNames has %d elements; %d needed' % (len(wdgNames), len(self._wdgList)))
         self._wdgNames = wdgNames
 
         # generate widget dict and widget name getter
@@ -674,7 +674,7 @@ class BoolOmitCont(WdgCont):
         # verify that all widgets have default=checked
         for name, wdg in self._wdgDict.iteritems():
             if not wdg.getDefBool():
-                raise ValueError, "widget %s does not have default=checked" % (name,)
+                raise ValueError("widget %s does not have default=checked" % (name,))
 
     def getValueList(self, omitDef=None):
         """Get the value as a list: [name1, name3 ...] where only checked values
@@ -752,7 +752,7 @@ class ContList(WdgCont):
             callNow = callNow,
         )
         if len(RO.SeqUtil.asList(conts)) < 1:
-            raise ValueError, 'must supply at least one input container'
+            raise ValueError('must supply at least one input container')
         self._wdgList = self._wdgList
 
     def allEnabled(self):
@@ -924,21 +924,21 @@ if __name__ == "__main__":
 
     def printOptions():
         valDict = cList.getValueDict()
-        print 'dict:', valDict
+        print('dict:', valDict)
         try:
             fmtStr = cList.getString()
-        except Exception, e:
-            print 'no string, error=', e
+        except Exception as e:
+            print('no string, error=', e)
         else:
-            print 'string:', fmtStr
+            print('string:', fmtStr)
         
     def printCallback(modWdg):
-        print 'modified container', modWdg.getName()
+        print('modified container', modWdg.getName())
         try:
             valDict = cList.getValueDict()
-            print 'new dict:', valDict
-        except ValueError, e:
-            print e
+            print('new dict:', valDict)
+        except ValueError as e:
+            print(e)
         
     def setEnable(*args):
         doEnable = enableVar.get()

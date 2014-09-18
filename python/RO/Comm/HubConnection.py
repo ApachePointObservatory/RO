@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """A version of RO.TCPConnection that can negotiate a connection with the APO Hub.
 
 This is a good example of the sort of connection used by KeyDispatcher.
@@ -26,7 +27,10 @@ History:
 2012-07-16 ROwen    Added support for Twisted framework.
                     You must now call RO.Comm.Generic.setFramework before importing this module.
 2012-12-06 ROwen    Fixed a bug in the demo code; it once again requires Tkinter.
+2014-09-17 ROwen    Bug fix: an error message referenced a mis-typed variable name.
 """
+__all__ = ["HubConnection"]
+
 try:
     import hashlib
     shaClass = hashlib.sha1
@@ -150,9 +154,9 @@ class HubConnection(TCPConnection):
                 nonce = dataDict.get("nonce", (None,))[0]
                 if (msgType != ":"):
                     errMsg = dataDict.get("why", hubMsg)[0]
-                    raise RuntimeError, "knockKnock failed: %s" % (errMsg,)
+                    raise RuntimeError("knockKnock failed: %s" % (errMsg,))
                 elif (nonce == None):
-                    raise RuntimeError, "nonce missing; got: %r" % (hubMsg,)
+                    raise RuntimeError("nonce missing; got: %r" % (hubMsg,))
                 
                 # generate the combined password
                 combPassword = shaClass(nonce+password).hexdigest()
@@ -175,9 +179,9 @@ class HubConnection(TCPConnection):
                 cmdr = dataDict.get("cmdrID", (None,))[0]
                 if (msgType != ":"):
                     errMsg = dataDict.get("why", hubMsg)[0]
-                    raise RuntimeError, "login failed: %s" % (errMsg,)
+                    raise RuntimeError("login failed: %s" % (errMsg,))
                 elif cmdr == None:
-                    raise RuntimeError, "cmdr missing; got: %r" % (hubMsg,)
+                    raise RuntimeError("cmdr missing; got: %r" % (hubMsg,))
                 
                 self.cmdr = cmdr
                     
@@ -187,8 +191,8 @@ class HubConnection(TCPConnection):
             elif self._authState == 2:
                 sys.stderr.write("warning: lost message: %r", hubMsg)
             else:
-                raise RuntimeError, "bug: unknown auth state %r" % (_authState,)        
-        except Exception, e:
+                raise RuntimeError("bug: unknown auth state %r" % (self._authState,))        
+        except Exception as e:
             self._authState = -1
             self.disconnect(False, RO.StringUtil.strFromException(e))
 
@@ -233,14 +237,14 @@ if __name__ == "__main__":
     port = 9877
 
     def readCallback (sock, astr):
-        print "read: %r" % (astr,)
+        print("read: %r" % (astr,))
 
     def stateCallback (sock):
         state, reason = sock.fullState
         if reason:
-            print "%s: %s" % (state, reason)
+            print("%s: %s" % (state, reason))
         else:
-            print state
+            print(state)
 
     myConn = HubConnection(
         readCallback = readCallback,
@@ -287,7 +291,7 @@ if __name__ == "__main__":
             astr = sendText.get()
             sendText.delete(0,Tkinter.END)
             myConn.writeLine(astr)
-        except Exception, e:
+        except Exception as e:
             sys.stderr.write ("Could not extract or send: %s\nError: %s\n" % (astr, e))
 
     sendText.bind('<KeyPress-Return>', sendCmd)

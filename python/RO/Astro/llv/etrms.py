@@ -1,15 +1,18 @@
 #!/usr/bin/env python
+from __future__ import absolute_import, division, print_function
 """
 History:
 P.T.Wallace Starlink    10 April 1990
 2002-07-11 ROwen    Converted to Python.
 2007-04-24 ROwen    Converted from Numeric to numpy.
 """
+__all__ = ["etrms"]
+
 import math
 import numpy
 import RO.PhysConst
 
-def etrms (bep):
+def etrms(bep):
     """
     Compute the e-terms (elliptic component of annual aberration)
     vector (double precision)
@@ -56,7 +59,7 @@ def etrms (bep):
 
 if __name__ == "__main__":
     import RO.SeqUtil
-    print "testing etrms"
+    print("testing etrms")
     # test data is formatted as follows:
     # a list of entries, each consisting of:
     # - the input argument
@@ -71,6 +74,6 @@ if __name__ == "__main__":
     for testInput, expectedOutput in testData:
         actualOutput = etrms(testInput)
         if RO.SeqUtil.matchSequences(actualOutput, expectedOutput, rtol=1e-15):
-            print "failed on input:", testInput
-            print "expected output:\n", expectedOutput
-            print "actual output:\n", actualOutput
+            print("failed on input:", testInput)
+            print("expected output:\n", expectedOutput)
+            print("actual output:\n", actualOutput)

@@ -1,9 +1,10 @@
-#!/usr/bin/env python
 """Python language utilities by Russell Owen
 
 History:
 2003-11-19 ROwen
 """
+__all__ = ["funcName"]
+
 def funcName(func):
     """Returns the name of a function or instance method;
     if the function is a callable object then returns the name of the object's class.

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+from __future__ import division, print_function
 """An indicator that shows if one or more ROEntry widgets
 have been set to nondefault values.
 

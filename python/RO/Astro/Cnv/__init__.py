@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 """
 Astronomical math, including numerous coordinate conversions,
 in cartesian coordinates.
@@ -24,21 +25,21 @@ PO Box 351580
 Seattle, WA 98195
 rowen@u.washington.edu
 """
-from AppGeoData import *
-from AzAltFromHADec import *
-from CoordConv import *
-from FK4FromICRS import *
-from FK5Prec import *
-from GalFromICRS import *
-from GeoFromICRS import *
-from GeoFromTopo import *
-from HADecFromAzAlt import *
-from ICRSFromFixedFK4 import *
-from ICRSFromFK4 import *
-from ICRSFromGal import *
-from ICRSFromGeo import *
-from ObserverData import *
-from ObsFromTopo import *
-from TopoFromGeo import *
-from TopoFromGeoSimple import *
-from TopoFromObs import *
+from .AppGeoData import *
+from .AzAltFromHADec import *
+from .CoordConv import *
+from .FK4FromICRS import *
+from .FK5Prec import *
+from .GalFromICRS import *
+from .GeoFromICRS import *
+from .GeoFromTopo import *
+from .HADecFromAzAlt import *
+from .ICRSFromFixedFK4 import *
+from .ICRSFromFK4 import *
+from .ICRSFromGal import *
+from .ICRSFromGeo import *
+from .ObserverData import *
+from .ObsFromTopo import *
+from .TopoFromGeo import *
+from .TopoFromGeoSimple import *
+from .TopoFromObs import *

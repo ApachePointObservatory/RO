@@ -7,6 +7,21 @@
 
 <h2>Version history for the <a href="Overview.html">RO Python Package</a></h2>
 
+<h3>3.6.0 2014-09-19</h3>
+
+<ul>
+    <li>This version requires Python 2.6 or 2.7. Earlier versions of Python are no longer supported.
+    <li>Removed RO.Future.subprocess and RO.Future. The subprocess module has been available for a long time.
+    <li>Many internal cleanups, based on work by Madison Stemm, including:
+    <ul>
+        <li>Changed StandardError to Exception and always raise exceptions with <i>Exception</i>(arguments)
+        <li>Changed iterator.next() to next(iterator)
+        <li>Use the print function instead of the print statement (using <code>from __future__ import print_function</code>)
+        <li>Removed the #! line from modules and unset the "x" mode bit on modules that do not contain executable code
+        <li>Defined __all__ in most modules
+    </ul>
+</ul>
+
 <h3>3.5.4 2014-09-16</h3>
 
 <ul>

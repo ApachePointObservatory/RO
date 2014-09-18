@@ -1,3 +1,4 @@
+from __future__ import division, print_function
 """Displays hot help, error messages and monitors the progress of commands
 of the class RO.KeyVariable.cmdVar
 
@@ -117,7 +118,7 @@ class StatusBar(Tkinter.Frame):
         self.summaryLen = int(summaryLen)
         self.cmdDoneSound = _getSound(playCmdSounds, prefs, "Command Done")
         self.cmdFailedSound = _getSound(playCmdSounds, prefs, "Command Failed")
-        self.tempIDGen = RO.Alg.IDGen(1, sys.maxint)
+        self.tempIDGen = RO.Alg.IDGen(1, sys.maxsize)
         
         Tkinter.Frame.__init__(self, master, **kargs)
         self.displayWdg = Entry.StrEntry(
@@ -255,7 +256,7 @@ class StatusBar(Tkinter.Frame):
         """
         self.displayWdg.set(msgStr, severity=severity)
         if isTemp:
-            self.currID = self.tempIDGen.next()
+            self.currID = next(self.tempIDGen)
             if duration != None:
                 Timer(duration / 1000.0, self.clearTempMsg, self.currID)
         else:

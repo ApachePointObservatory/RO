@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import absolute_import, division, print_function
 """Parses the header from a keyword/variable string in various formats
 
 History:
@@ -12,6 +13,8 @@ History:
                     Modified test code to use astr instead of str.
 2011-06-17 ROwen    Changed "type" to "msgType" in parsed message dictionaries to avoid conflict with builtin.
 """
+__all__ = ["getHubHeader", "getMidRidHeader", "getMidRidAsHubHeader"]
+
 import re
 
 _HubPattern = re.compile(r'^\s*(?P<cmdr>[_.a-zA-Z][-_.a-zA-Z0-9]*)\s+(?P<cmdID>-?\d+)\s+(?P<actor>[_a-zA-Z][-_.a-zA-Z0-9]*)\s+(?P<msgType>\S)(?:\s*$|(?:\s+(\S)))')
@@ -38,7 +41,7 @@ def getHubHeader(astr):
     """
     matchObj = _HubPattern.match(astr)
     if matchObj == None:
-        raise SyntaxError, "could not parse standard header in :%s:" % (astr)
+        raise SyntaxError("could not parse standard header in :%s:" % (astr))
 
     dataStart = matchObj.start(5)
     if dataStart < 0:
@@ -48,8 +51,8 @@ def getHubHeader(astr):
     # convert cmdID to an integer
     try:
         headerDict['cmdID'] = int(headerDict['cmdID'])
-    except StandardError:
-        raise SyntaxError, "bug! could not convert cmdID %r to integer in :%s:" % (headerDict['cmdID'], astr)
+    except Exception:
+        raise SyntaxError("bug! could not convert cmdID %r to integer in :%s:" % (headerDict['cmdID'], astr))
     return (headerDict, dataStart)
 
 
@@ -72,7 +75,7 @@ def getMidRidHeader(astr):
     """
     matchObj = _MidRidPattern.match(astr)
     if matchObj == None:
-        raise SyntaxError, "could not parse mid/rid header in :%s:" % (astr)
+        raise SyntaxError("could not parse mid/rid header in :%s:" % (astr))
 
     dataStart = matchObj.start(4)
     if dataStart < 0:
@@ -83,8 +86,8 @@ def getMidRidHeader(astr):
     try:
         headerDict['mid'] = int(headerDict['mid'])
         headerDict['rid'] = int(headerDict['rid'])
-    except StandardError:
-        raise SyntaxError, "bug! could not convert mid or rid to integer in :%s:" % (astr)
+    except Exception:
+        raise SyntaxError("bug! could not convert mid or rid to integer in :%s:" % (astr))
     return (headerDict, dataStart)
 
 
@@ -121,7 +124,7 @@ def getMidRidAsHubHeader(astr, cmdr="", actor=""):
 
 if __name__ == '__main__':
     # perform tests
-    print "testing getHubHeader\n"
+    print("testing getHubHeader\n")
     testList = [
         "me  456 TCC > keyword",
         "me.hub -90 spicam i",
@@ -131,12 +134,12 @@ if __name__ == '__main__':
     for astr in testList:
         try:
             (headerDict, dataStart) = getHubHeader(astr)
-            print "GetHeader('%s') = %s;" % (astr, headerDict),
-            print "astr[%d:] = %r" % (dataStart, astr[dataStart:])
-        except StandardError, e:
-            print "failed with error: %s" % (e)
+            print("GetHeader('%s') = %s;" % (astr, headerDict), end=' ')
+            print("astr[%d:] = %r" % (dataStart, astr[dataStart:]))
+        except Exception as e:
+            print("failed with error: %s" % (e))
     
-    print "testing getMidRidHeader\n"
+    print("testing getMidRidHeader\n")
     testList = [
         "123  456 > keyword",
         "-78  -90 i",
@@ -146,13 +149,13 @@ if __name__ == '__main__':
     for astr in testList:
         try:
             (headerDict,dataStart) = getMidRidHeader(astr)
-            print "GetHeader('%s') = %s;" % (astr, headerDict),
-            print "astr[%d:] = %r" % (dataStart, astr[dataStart:])
-        except StandardError, e:
-            print "failed with error: %s" % (e)
+            print("GetHeader('%s') = %s;" % (astr, headerDict), end=' ')
+            print("astr[%d:] = %r" % (dataStart, astr[dataStart:]))
+        except Exception as e:
+            print("failed with error: %s" % (e))
 
 
-    print "testing getMidRidAsHubHeader\n"
+    print("testing getMidRidAsHubHeader\n")
     testList = [
         "123  456 > keyword",
         "-78  -90 i",
@@ -162,7 +165,7 @@ if __name__ == '__main__':
     for astr in testList:
         try:
             (headerDict, dataStart) = getMidRidAsHubHeader(astr, cmdr="me", actor="tcc")
-            print "GetHeader('%s') = %s;" % (astr, headerDict),
-            print "astr[%d:] = %r" % (dataStart, astr[dataStart:])
-        except StandardError, e:
-            print "failed with error: %s" % (e)
+            print("GetHeader('%s') = %s;" % (astr, headerDict), end=' ')
+            print("astr[%d:] = %r" % (dataStart, astr[dataStart:]))
+        except Exception as e:
+            print("failed with error: %s" % (e))

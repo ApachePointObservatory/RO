@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import absolute_import, division, print_function
 """KeyVar and its cousins are used monitor data from the keyword dispatcher.
 Keyword data may trigger callbacks or automatically update RO.Wdg widgets.
 
@@ -125,6 +126,8 @@ History:
 2014-09-15 ROwen    Bug fix: an error message used a nonexistent variable.
                     Tweaked PVTVar._doCallbacks to do nothing if callbacks disabled.
 """
+__all__ = ["TypeDict", "AllTypes", "DoneTypes", "FailTypes", "KeyVar", "PVTKeyVar", "CmdVar", "KeyVarFactory"]
+
 import sys
 import time
 import traceback
@@ -138,7 +141,7 @@ import RO.StringUtil
 import RO.SeqUtil
 import RO.Comm.Generic
 if RO.Comm.Generic.getFramework() is None:
-    print "Warning: RO.Comm.Generic framework not set; setting to tk"
+    print("Warning: RO.Comm.Generic framework not set; setting to tk")
     RO.Comm.Generic.setFramework("tk")
 from RO.Comm.Generic import Timer
 
@@ -494,7 +497,7 @@ class KeyVar(RO.AddCallback.BaseMixin):
             except KeyError:
                 sys.stderr.write("%s.set warning: 'msgType' missing in msgDict %r" % (self, msgDict))
                 self.lastType = "w"
-            if not TypeDict.has_key(self.lastType):
+            if self.lastType not in TypeDict:
                 sys.stderr.write("%s.set warning: invalid 'msgType'=%r in msgDict %r" % (self, self.lastType, msgDict))
                 self.lastType = "w"
 
@@ -533,11 +536,11 @@ class KeyVar(RO.AddCallback.BaseMixin):
             return None
         try:
             return self._getCnvFunc(ind)(rawValue)
-        except (ValueError, TypeError), e:
+        except (ValueError, TypeError) as e:
             # value could not be converted
             sys.stderr.write("invalid value %r for ind %s of %s\n" % (rawValue, ind, self))
             return None
-        except Exception, e:
+        except Exception as e:
             # unknown error; this should not happen
             sys.stderr.write("could not convert %r for ind %d of %s: %s\n" % (rawValue, ind, self, e))
             return None
@@ -691,7 +694,7 @@ class PVTKeyVar(KeyVar):
             # value does not exist (or converter does not exist, but that's much less likely)
             # a message should already have been printed
             return RO.PVT.PVT()
-        except Exception, e:
+        except Exception as e:
             # unknown error; this should not happen
             sys.stderr.write("could not convert %r at index %d for %s: %s\n" % (rawValue, ind, self, e))
             return RO.PVT.PVT()
@@ -1066,7 +1069,7 @@ class KeyVarFactory(object):
                 raise RuntimeError("%s: isLocal prohibited if allowRefresh true" % (keyVar,))
             keyArgs["refreshCmd"] = None
         
-        if allowRefresh and (not isLocal) and (not netKeyArgs.has_key("refreshCmd")):
+        if allowRefresh and (not isLocal) and ("refreshCmd" not in netKeyArgs):
             if refreshOptional:
                 self._actorOptKeywordsRefreshDict[keyVar.actor] = keyword
             else:
@@ -1113,7 +1116,7 @@ if __name__ == "__main__":
     root = Tkinter.Tk()
 
     if doBasic:
-        print "\nrunning basic variables test"
+        print("\nrunning basic variables test")
         varList = (
             KeyVar("Str0-?",       nval=(0,None), converters=str, doPrint=True),
             KeyVar("Empty",        nval=0, doPrint=True),
@@ -1140,15 +1143,15 @@ if __name__ == "__main__":
         )
 
         for data in dataList:
-            print "\ndata: ", data
+            print("\ndata: ", data)
             for var in varList:
                 try:
                     var.set(data)
-                except (ValueError, IndexError), e:
-                    print "failed with %s: %s" % (e.__class__.__name__, e)
+                except (ValueError, IndexError) as e:
+                    print("failed with %s: %s" % (e.__class__.__name__, e))
 
     if doFmt:
-        print "\nrunning format test"
+        print("\nrunning format test")
         afl = KeyVar("FloatVar", 1, RO.CnvUtil.asFloat)
         fmtSet = ("%.2f", "%10.5f", "%.0f")
         dictList = []
@@ -1165,22 +1168,22 @@ if __name__ == "__main__":
         # create a set of values and apply them one at a time, showing the results each time
         valSet = (0, 3.14159, -98.7654321)
         for val in valSet:
-            print "\nval=", val
+            print("\nval=", val)
             try:
                 afl.set((val,))
                 for dict in dictList:
-                    print repr(dict["text"])
-            except Exception, e:
-                    print e
+                    print(repr(dict["text"]))
+            except Exception as e:
+                    print(e)
     
     # test PVT callback
-    print "\nrunning pvt callback test; hit ctrl-C to end"
+    print("\nrunning pvt callback test; hit ctrl-C to end")
     
     def pvtCallback(valList, isCurrent, keyVar):
         if valList == None:
             return
         pvt = valList[0]
-        print "%s pos = %s" % (pvt, pvt.getPos())
+        print("%s pos = %s" % (pvt, pvt.getPos()))
     pvtVar = PVTKeyVar("PVT")
     pvtVar.addCallback(pvtCallback)
     currTAI = RO.Astro.Tm.TAI.taiFromPySec()

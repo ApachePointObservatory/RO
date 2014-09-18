@@ -1,9 +1,12 @@
 #!/usr/bin/env python
+from __future__ import absolute_import, division, print_function
 """
 History:
 2002-07-22 ROwen    Converted to Python from the TCC's cnv_J2FK4 4-1.
 2007-04-24 ROwen    Converted from Numeric to numpy.
 """
+__all__ = ["fk4FromICRS"]
+
 import numpy
 import RO.PhysConst
 import RO.MathUtil
@@ -32,7 +35,7 @@ _MatVV = numpy.array((
     (-0.485851960868600E-02, -0.271626143550000E-04, +0.999966838131419E+00),
 ))
 
-def fk4FromICRS (icrsP, icrsV, fk4Epoch):
+def fk4FromICRS(icrsP, icrsV, fk4Epoch):
     """
     Converts mean fk4 equatorial coordinates to ICRS coordinates.
     Uses the approximation that ICRS is FK5 J2000.
@@ -91,7 +94,7 @@ def fk4FromICRS (icrsP, icrsV, fk4Epoch):
 
 if __name__ == "__main__":
     import RO.SeqUtil
-    print "testing fk4FromICRS"
+    print("testing fk4FromICRS")
     # test data is formatted as follows:
     # a list of entries, each consisting of:
     # - the input argument
@@ -148,6 +151,6 @@ if __name__ == "__main__":
         expectedFlat = RO.SeqUtil.flatten(expectedOutput)
         actualFlat = RO.SeqUtil.flatten(actualOutput)
         if RO.SeqUtil.matchSequences(actualFlat, expectedFlat, rtol=1.0e-14):
-            print "failed on input:", testInput
-            print "expected output:\n", expectedOutput
-            print "actual output:\n", actualOutput
+            print("failed on input:", testInput)
+            print("expected output:\n", expectedOutput)
+            print("actual output:\n", actualOutput)

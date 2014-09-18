@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """Widgets for floating point, integer and sexagesimal input using Tkinter.
 These widgets have many useful features, including:
 - default values
@@ -298,7 +299,7 @@ class _BaseEntry (Tkinter.Entry, RO.AddCallback.BaseMixin,
         
         # set default widget configuration
         kargs.setdefault("width", self.getDefaultWidth())
-        if kargs.has_key("text"):
+        if "text" in kargs:
             del(kargs["text"])
         kargs["textvariable"] = self.var  # overrides user attempt to set
         
@@ -521,7 +522,7 @@ class _BaseEntry (Tkinter.Entry, RO.AddCallback.BaseMixin,
         try:
             self.checkValue(self.var.get())
             self.neatenDisplay()
-        except (ValueError, TypeError), e:
+        except (ValueError, TypeError) as e:
             self.setEntryError(RO.StringUtil.strFromException(e))
             self.focus_set()
             return False
@@ -684,14 +685,14 @@ class _BaseEntry (Tkinter.Entry, RO.AddCallback.BaseMixin,
             self.currStrVal = newStrVal
             if self._entryError:
                 self.setEntryError(None)
-        except (ValueError, TypeError), e:
+        except (ValueError, TypeError) as e:
             self.setEntryError(RO.StringUtil.strFromException(e))
             try:
                 # verify that the previous value works, else clear field
                 # this test should rarely fail!
                 self.checkPartialValue(self.currStrVal)
                 self.var.set(self.currStrVal)
-            except (ValueError, TypeError), e:
+            except (ValueError, TypeError) as e:
                 self.var.set("")
     
         self._doCallbacks()
@@ -713,7 +714,7 @@ class _BaseEntry (Tkinter.Entry, RO.AddCallback.BaseMixin,
             try:
                 self.checkValue(currVal)
                 self.neatenDisplay()
-            except (ValueError, TypeError), e:
+            except (ValueError, TypeError) as e:
                 self.setEntryError(RO.StringUtil.strFromException(e))
                 self.focus_set()
                 return "break"
@@ -1412,7 +1413,7 @@ class DMSEntry (_NumEntry):
                     precision = precision,
                     omitExtraFields = self.omitExtraFields,
                 )
-        except ValueError, e:
+        except ValueError as e:
             raise ValueError("%s cannot format data %r with format=(nFields=%r, precision=%r): error=%s" % \
                 (self._getErrorPrefix(), numVal, nFields, precision, e))
     
@@ -1538,10 +1539,10 @@ if __name__ == "__main__":
         entryList.append((descr, entry))
         
         def callFunc(wdg, descr=descr):
-            print "%s callFunc; value=%s; inMethodCall=%s" % (descr, fmtEntry(entry), entry.inMethodCall())
+            print("%s callFunc; value=%s; inMethodCall=%s" % (descr, fmtEntry(entry), entry.inMethodCall()))
             
         def doneFunc(wdg, descr=descr):
-            print "%s doneFunc; value=%s; inMethodCall=%s" % (descr, fmtEntry(entry), entry.inMethodCall())
+            print("%s doneFunc; value=%s; inMethodCall=%s" % (descr, fmtEntry(entry), entry.inMethodCall()))
             
         entry.addCallback(callFunc)
         if not entry._doneFunc:
@@ -1551,7 +1552,7 @@ if __name__ == "__main__":
     
     def doPrint(*args):
         for (descr, entry) in entryList:
-            print "%s value=%s" % (descr, fmtEntry(entry))
+            print("%s value=%s" % (descr, fmtEntry(entry)))
     
     def doDefault(*args):
         for (descr, entry) in entryList:
@@ -1616,7 +1617,7 @@ if __name__ == "__main__":
     )
     
     def doneFunc(wdg):
-        print "doneFunc(%r)" % (wdg,)
+        print("doneFunc(%r)" % (wdg,))
 
     addEntry (
         "FloatEntry, exp OK 1-90",

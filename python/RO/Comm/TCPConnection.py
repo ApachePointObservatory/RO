@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """Reconnectable versions of TCPSocket.
 
 All permit disconnection and reconnection and the base class offers support for
@@ -51,18 +52,18 @@ History:
 2012-12-06 ROwen    Set tk as RO.Comm.Generic framework if not already set.
 2012-12-17 ROwen    Initial state was 0, should have been Disconnected.
 2014-04-10 ROwen    Use NullTCPSocket instead of NullSocket for better "not connected" error messages.
+2014-09-18 ROwen    Fixed a bug in the unit test.
 """
+__all__ = ["TCPConnection"]
+
 import sys
 from RO.Comm.BaseSocket import NullTCPSocket
 from RO.AddCallback import safeCall2
 import RO.Comm.Generic
 if RO.Comm.Generic.getFramework() is None:
-    print "Warning: RO.Comm.Generic framework not set; setting to tk"
+    print("Warning: RO.Comm.Generic framework not set; setting to tk")
     RO.Comm.Generic.setFramework("tk")
 from RO.Comm.Generic import TCPSocket
-
-__all__ = ["TCPConnection"]
-
 
 class TCPConnection(object):
     """A TCP Socket with the ability to disconnect and reconnect.
@@ -355,7 +356,7 @@ class TCPConnection(object):
         #print "_setState(newState=%s, reason=%s); self._stateCallbacks=%s" % (newState, reason, self._stateCallbacks)
         oldStateReason = (self._state, self._reason)
         if newState not in self._AllStates:
-            raise RuntimeError, "unknown connection state: %s" % (newState,)
+            raise RuntimeError("unknown connection state: %s" % (newState,))
         self._state = newState
         if reason != None:
             self._reason = str(reason)
@@ -437,8 +438,8 @@ if __name__ == "__main__":
     def runTest():
         global clientConn
         try:
-            testStr = strIter.next()
-            print "Client writing %r" % (testStr,)
+            testStr = next(strIter)
+            print("Client writing %r" % (testStr,))
             clientConn.writeLine(testStr)
             Timer(0.001, runTest)
         except StopIteration:
@@ -446,9 +447,9 @@ if __name__ == "__main__":
 
     def clientRead(sock, outStr):
         global clientConn
-        print "Client read    %r" % (outStr,)
+        print("Client read    %r" % (outStr,))
         if outStr and outStr.strip() == "quit":
-            print "*** Data exhausted; disconnecting client connection"
+            print("*** Data exhausted; disconnecting client connection")
             clientConn.disconnect()
             
 
@@ -456,28 +457,28 @@ if __name__ == "__main__":
         global didConnect, echoServer
         state, reason = conn.fullState
         if reason:
-            print "Client %s: %s" % (state, reason)
+            print("Client %s: %s" % (state, reason))
         else:
-            print "Client %s" % (state,)
+            print("Client %s" % (state,))
         if conn.isConnected:
-            print "*** Client connected; now sending test data"
+            print("*** Client connected; now sending test data")
             didConnect = True
             runTest()
-        elif didConnect is conn.isDone:
-            print "*** Client disconnected; closing echo server ***"
+        elif didConnect and conn.isDone:
+            print("*** Client disconnected; closing echo server ***")
             echoServer.close()
 
     def serverState(server):
         state, reason = server.fullState
         if reason:
-            print "Server %s: %s" % (state, reason)
+            print("Server %s: %s" % (state, reason))
         else:
-            print "Server %s" % (state,)
+            print("Server %s" % (state,))
         if server.isReady:
-            print "*** Echo server ready; now starting up a client"
+            print("*** Echo server ready; now starting up a client")
             startClient()
         elif server.isDone:
-            print "*** Halting the tcl event loop"
+            print("*** Halting the tcl event loop")
             root.quit()
 
     def startClient():
@@ -505,7 +506,7 @@ if __name__ == "__main__":
             if readLine is not None:
                 sock.writeLine(readLine)
 
-    print "*** Starting echo server on port %s" % (port,)
+    print("*** Starting echo server on port %s" % (port,))
     echoServer = EchoServer(port = port, stateCallback = serverState)
     
     root.mainloop()

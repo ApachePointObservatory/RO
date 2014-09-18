@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """Value conversion functions.
 
 These are mostly used for converting string representations of values
@@ -59,7 +60,7 @@ def asBool(val):
     try:
         return _BoolDict[val]
     except (KeyError, TypeError):
-        raise ValueError, "%r is not a valid boolean" % (val,)
+        raise ValueError("%r is not a valid boolean" % (val,))
 
 def asBoolOrNone(val):
     """Converts typical human-readable boolean values to True, False
@@ -81,7 +82,7 @@ def asBoolOrNone(val):
     try:
         return _BoolOrNoneDict[val]
     except (KeyError, TypeError):
-        raise ValueError, "%r is not a valid boolean" % (val,)
+        raise ValueError("%r is not a valid boolean" % (val,))
 
 class BoolOrNoneFromStr(object):
     """Convert a string to a boolean or None
@@ -317,7 +318,7 @@ if __name__ == "__main__":
     import sys
     import RO.SysConst
     import RO.MathUtil
-    print "running CnvUtil test"
+    print("running CnvUtil test")
     
     def tryFunc(func, arg, desVal):
         try:
@@ -326,21 +327,21 @@ if __name__ == "__main__":
             else:
                 isOK = (func(arg) == desVal)
             if not isOK:
-                print "error: %s(%r) != %r" % (funcName(func), arg, desVal)
-        except StandardError, e:
-            print "error: %s(%r) failed with: %s" % (funcName(func), arg, e)
+                print("error: %s(%r) != %r" % (funcName(func), arg, desVal))
+        except Exception as e:
+            print("error: %s(%r) failed with: %s" % (funcName(func), arg, e))
             
     def failFunc(func, arg):
         """Call to test arguments that should fail"""
         try:
             junk = func(arg)
-            print "error: %s(%r) = %r but should raise ValueError" % \
-                (funcName(func), arg, junk)
+            print("error: %s(%r) = %r but should raise ValueError" % \
+                (funcName(func), arg, junk))
         except (ValueError, TypeError):
             pass
-        except StandardError, e:
-            print "%s(%r) should have raised ValueError or TypeError, but raised %s = %s" % \
-                (funcName(func), arg, e.__class__.__name__, e)
+        except Exception as e:
+            print("%s(%r) should have raised ValueError or TypeError, but raised %s = %s" % \
+                (funcName(func), arg, e.__class__.__name__, e))
     
     def funcName(func):
         """Returns the name of a function or class"""
@@ -350,7 +351,7 @@ if __name__ == "__main__":
             return func.__class__.__name__
             
     func = asBool
-    print "testing %s" % (funcName(func),)
+    print("testing %s" % (funcName(func),))
 
     for val in _FalseValues:
         tryFunc(func, val, False)
@@ -367,7 +368,7 @@ if __name__ == "__main__":
 
     BadBoolStrs = ["?!?!", "Help!", "1", "0"] # include some overlap with standard true/false values
     func = BoolOrNoneFromStr(BadBoolStrs)
-    print "testing %s" % (funcName(func),)
+    print("testing %s" % (funcName(func),))
 
     for val in _FalseValues:
         if val in BadBoolStrs:
@@ -392,7 +393,7 @@ if __name__ == "__main__":
         failFunc(func, badVal)
 
     func = asFloat
-    print "testing %s" % (funcName(func),)
+    print("testing %s" % (funcName(func),))
 
     for ii in range(1000):
         floatVal = (random.random() - 0.5) * 2.0 * RO.SysConst.FBigNum
@@ -404,7 +405,7 @@ if __name__ == "__main__":
 
     
     func = asFloatOrNone
-    print "testing %s" % (funcName(func),)
+    print("testing %s" % (funcName(func),))
 
     for ii in range(1000):
         floatVal = (random.random() - 0.5) * 2.0 * RO.SysConst.FBigNum
@@ -419,7 +420,7 @@ if __name__ == "__main__":
     
     BadFloatStr = "9999.9"
     func = FloatOrNoneFromStr(["NaN", BadFloatStr])
-    print "testing %s" % (funcName(func),)
+    print("testing %s" % (funcName(func),))
 
     for ii in range(1000):
         floatVal = (random.random() - 0.5) * 2.0 * RO.SysConst.FBigNum
@@ -435,9 +436,9 @@ if __name__ == "__main__":
 
     
     func = asInt
-    print "testing %s" % (funcName(func),)
+    print("testing %s" % (funcName(func),))
     for ii in range(1000):
-        intVal = random.randint(-sys.maxint+1, sys.maxint-1)
+        intVal = random.randint(-sys.maxsize+1, sys.maxsize-1)
         tryFunc(func, intVal, intVal)
         tryFunc(func, str(intVal), intVal)
 
@@ -446,9 +447,9 @@ if __name__ == "__main__":
 
     
     func = asIntOrNone
-    print "testing %s" % (funcName(func),)
+    print("testing %s" % (funcName(func),))
     for ii in range(1000):
-        intVal = random.randint(-sys.maxint+1, sys.maxint-1)
+        intVal = random.randint(-sys.maxsize+1, sys.maxsize-1)
         tryFunc(func, intVal, intVal)
         tryFunc(func, str(intVal), intVal)
     tryFunc(func, "NaN", None)
@@ -460,9 +461,9 @@ if __name__ == "__main__":
     
     BadIntStr = "9999"
     func = IntOrNoneFromStr(["NaN", BadIntStr])
-    print "testing %s" % (funcName(func),)
+    print("testing %s" % (funcName(func),))
     for ii in range(1000):
-        intVal = random.randint(-sys.maxint+1, sys.maxint-1)
+        intVal = random.randint(-sys.maxsize+1, sys.maxsize-1)
         tryFunc(func, str(intVal), intVal)
     tryFunc(func, "NaN", None)
     tryFunc(func, "NAN", None)

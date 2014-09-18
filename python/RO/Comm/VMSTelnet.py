@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """VMS telnet connection. May work with other operating systems.
 
 Note: not very well tested, since I no longer use it.
@@ -24,12 +25,15 @@ History:
     improved doc strings (including adding a doc string to NullConnection).
 2003-10-10 ROwen    Modified to use new TCPConnection.
 2005-01-12 ROwen    Modified for new RO.Wdg.ModalDialogBase.
+2014-09-18 ROwen    Bug fix: some states needed self. prefix.
 """
+__all__ = ["VMSTelnet"]
+
 import sys
 import RO.Wdg
-from TCPConnection import *
+from TCPConnection import TCPConnection
 
-class VMSTelnet (TCPConnection):
+class VMSTelnet(TCPConnection):
     """A telnet connection that negotiates the telnet protocol
     and handles password login. The only thing specific to VMS
     is the details of the username/password negotiation; presumably
@@ -118,7 +122,7 @@ class VMSTelnet (TCPConnection):
         pwdDialog = PasswordDialog(master, title="%s@%s" % (username, self.host))
         passwd = pwdDialog.result
         if passwd:
-            print "calling connect"
+            print("calling connect")
             self.connect (
                 username = username,
                 password = passwd,
@@ -154,12 +158,12 @@ class VMSTelnet (TCPConnection):
             elif c == " ":
                 self._partialData += c
                 if self._authState == 0 and self._partialData.find("Username:") >= 0:
-                    self._setState(Authorizing, "Sending username")
+                    self._setState(self.Authorizing, "Sending username")
                     self._partialData = ""
                     self._authState = 1
                     self.writeLine (self._username)
                 elif self._authState == 1 and self._partialData.find("Password:") >= 0:
-                    self._setState(Authorizing, "Sending password")
+                    self._setState(self.Authorizing, "Sending password")
                     self._partialData = ""
                     self._authState = 2
                     self.writeLine (self._password)
@@ -172,7 +176,7 @@ class VMSTelnet (TCPConnection):
                     self._partialData = ""
                     self._authDone()
                 else:
-                    print self._partialData
+                    print(self._partialData)
                     self._partialData = ""
             else:
                 self._partialData += c
@@ -184,7 +188,7 @@ class NullConnection(TCPConnection):
     but done to make it clear to users that it is a fake).
     """
     def connect(self):
-        raise RuntimeError, "NullConnection cannot connect"
+        raise RuntimeError("NullConnection cannot connect")
 
     def isConnected(self):
         return True
@@ -201,14 +205,14 @@ if __name__ == "__main__":
     username = "TCC"
 
     def readCallback (sock, astr):
-        print "read: %r" % (astr,)
+        print("read: %r" % (astr,))
 
     def stateCallback (sock):
         state, reason = sock.fullState
         if reason:
-            print "%s: %s" % (state, reason)
+            print("%s: %s" % (state, reason))
         else:
-            print state
+            print(state)
 
     myConn = VMSTelnet(
         host = host, 
@@ -225,9 +229,9 @@ if __name__ == "__main__":
     def sendCmd (evt):
         try:
             astr = sendText.get()
-            sendText.delete(0,Tkinter.END)
+            sendText.delete(0, Tkinter.END)
             myConn.writeLine(astr)
-        except Exception, e:
+        except Exception as e:
             sys.stderr.write ("Could not extract or send: %s\n" % (astr))
             sys.stderr.write ("Error: %s\n" % (e))
 

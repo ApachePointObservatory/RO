@@ -1,4 +1,8 @@
 #!/usr/bin/env python
+from __future__ import absolute_import, division, print_function
+
+__all__ = ["geoc"]
+
 from math import sin, cos, sqrt
 
 # Constants
@@ -12,7 +16,7 @@ _B = (1.0-_F)**2
 # Astronomical unit in metres
 _MPerAU = 1.49597870e11
 
-def geoc (lat, ht):
+def geoc(lat, ht):
     """
     Convert geodetic position to geocentric
     
@@ -47,7 +51,7 @@ def geoc (lat, ht):
 
 if __name__ == "__main__":
     import RO.SeqUtil
-    print "testing geoc"
+    print("testing geoc")
     # testData is a list of duples consisting of:
     # - input data
     # - the expected output
@@ -61,7 +65,7 @@ if __name__ == "__main__":
     for testInput, expectedOutput in testData:
         actualOutput = geoc(*testInput)
         if RO.SeqUtil.matchSequences(actualOutput, expectedOutput, rtol = 1.e-10):
-            print "failed on input:", testInput
-            print "expected output:\n", expectedOutput
-            print "actual output:\n", actualOutput
+            print("failed on input:", testInput)
+            print("expected output:\n", expectedOutput)
+            print("actual output:\n", actualOutput)
 

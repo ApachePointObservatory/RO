@@ -1,14 +1,17 @@
 #!/usr/bin/env python
+from __future__ import absolute_import, division, print_function
 """
 History:
 2007-04-24 ROwen    Converted from Numeric to numpy.
 """
+__all__ = ["ObserverData"]
+
 import math
 import numpy
 import RO.PhysConst
 from RO.Astro import llv
 
-class ObserverData (object):
+class ObserverData(object):
     """Observatory-specific (or observer-specific) data.
     
     This data is primarily intended for conversion between apparent geocentric
@@ -40,4 +43,4 @@ class ObserverData (object):
         self.p = numpy.array((polarDist, 0.0, zDist))     
 
 if __name__ == "__main__":
-    print "To test ObserverData, run the tests for topoFromGeo"
+    print("To test ObserverData, run the tests for topoFromGeo")

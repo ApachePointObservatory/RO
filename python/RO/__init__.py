@@ -1,6 +1,7 @@
+from __future__ import absolute_import
 """Various utilities written, adapted or borrowed by Russell Owen
 
 See ../README.txt and ../docs of source code
 for information and license
 """
-from Version import __version__
+from .Version import __version__

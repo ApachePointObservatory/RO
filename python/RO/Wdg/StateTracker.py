@@ -1,12 +1,13 @@
+from __future__ import absolute_import, division, print_function
 """Track the state of a collection of widgets
 
 Intended for use with RO.Wdg.Toplevel in saving and restoring state
 """
+__all__ = ["StateTracker"]
+
 import sys
 import RO.Alg.GenericCallback
 import RO.Constants
-
-__all__ = ["StateTracker"]
 
 class _ItemState(object):
     """Functions for getting and setting item state
@@ -107,6 +108,6 @@ class StateTracker(object):
             if item != None:
                 try:
                     item.setFunc(val)
-                except Exception, e:
+                except Exception as e:
                     self._logFunc("Failed to set %s to %r: %s\n" % (name, val, RO.StringUtil.strFromException(e)), severity=RO.Constants.sevWarning)
  

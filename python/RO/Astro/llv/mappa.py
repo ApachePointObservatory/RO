@@ -1,10 +1,13 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """  
 History:    
 P.T.Wallace Starlink    21 July 1994
 2002-07-11 ROwen    Converted to Python.
 2007-04-24 ROwen    Removed unused import of Numeric
 """
+__all__ = ["mappa"]
+
 from math import sqrt
 from vn import vn
 from evp import evp
@@ -99,7 +102,7 @@ def mappa (eq, tdb):
 
 if __name__ == "__main__":
     import RO.SeqUtil
-    print "testing mappa"
+    print("testing mappa")
     # test data is formatted as follows:
     # a list of entries, each consisting of:
     # - the input argument
@@ -220,7 +223,7 @@ if __name__ == "__main__":
         actualFlat = RO.SeqUtil.flatten(actualOutput)
         expectedFlat = RO.SeqUtil.flatten(expectedOutput)
         if RO.SeqUtil.matchSequences(actualFlat, expectedFlat, rtol=1.0e-8):
-            print "failed on input:", testInput
-            print "expected output:\n", expectedOutput
-            print "actual output:\n", actualOutput
+            print("failed on input:", testInput)
+            print("expected output:\n", expectedOutput)
+            print("actual output:\n", actualOutput)
 

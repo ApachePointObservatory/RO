@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import absolute_import, division, print_function
 """A version of the Canvas class that draws correctly
 on unix, MacOS and MacOS X.
 

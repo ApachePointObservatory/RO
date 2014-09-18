@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """Utilities to help in use of Tk canvasses.
 
 History:
@@ -17,6 +18,8 @@ History:
 2005-06-08 ROwen    Changed Spiral to a new style class.
 2009-08-04 ROwen    Added radialLine.
 """
+__all__ = ["ctrCircle", "ctrPlus", "ctrX", "radialLine", "Spiral"]
+
 import math
 import Tkinter
 import RO.MathUtil
@@ -70,35 +73,6 @@ def ctrPlus(cnv, xpos, ypos, rad, holeRad = 0, width=1, **kargs):
         xpos + rad,     ypos,
         width=width, **kargs)
 
-def radialLine(cnv, xpos, ypos, rad, angle, width=1, **kargs):
-    """Draws a line of specified length and direction
-    
-    Inputs:
-    - cnv: canvas on which to draw
-    - xpos: x starting position
-    - ypos: y starting position
-    - rad: radius of symbol
-    - angle: angle (deg; 0 = x axis, 90 = y axis)
-    - holeRad: radius of hole in center of symbol (0 for none)
-    - width: thickness of line
-    - kargs are arguments for create_line
-    
-    Useful keyword arguments include:
-    - arrow = "last" for arrow at end, "first" for arrow at start
-    - arrowshape = (d1, d2, d3):
-        d1: distance along the line from the neck of the arrowhead to its tip
-        d2: distance along the line from the trailing points of the arrowhead to the tip
-        d3: distance from the outside edge of the line to the trailing points
-        defaults to something reasonable, which may be (8, 10, 3)
-    """
-    angleRadians = angle * RO.MathUtil.RadPerDeg
-    dx = rad * math.cos(angleRadians)
-    dy = rad * math.sin(angleRadians)
-    cnv.create_line(
-        xpos, ypos,
-        xpos + dx, ypos + dy,
-        width=width, **kargs)
-
 def ctrX(cnv, xpos, ypos, rad, holeRad = 0, width=1, **kargs):
     """Draws a centered X on the specified canvas.
     
@@ -129,6 +103,35 @@ def ctrX(cnv, xpos, ypos, rad, holeRad = 0, width=1, **kargs):
     cnv.create_line(
         xpos - holedxy, ypos - holedxy,
         xpos - dxy,     ypos - dxy,
+        width=width, **kargs)
+
+def radialLine(cnv, xpos, ypos, rad, angle, width=1, **kargs):
+    """Draws a line of specified length and direction
+    
+    Inputs:
+    - cnv: canvas on which to draw
+    - xpos: x starting position
+    - ypos: y starting position
+    - rad: radius of symbol
+    - angle: angle (deg; 0 = x axis, 90 = y axis)
+    - holeRad: radius of hole in center of symbol (0 for none)
+    - width: thickness of line
+    - kargs are arguments for create_line
+    
+    Useful keyword arguments include:
+    - arrow = "last" for arrow at end, "first" for arrow at start
+    - arrowshape = (d1, d2, d3):
+        d1: distance along the line from the neck of the arrowhead to its tip
+        d2: distance along the line from the trailing points of the arrowhead to the tip
+        d3: distance from the outside edge of the line to the trailing points
+        defaults to something reasonable, which may be (8, 10, 3)
+    """
+    angleRadians = angle * RO.MathUtil.RadPerDeg
+    dx = rad * math.cos(angleRadians)
+    dy = rad * math.sin(angleRadians)
+    cnv.create_line(
+        xpos, ypos,
+        xpos + dx, ypos + dy,
         width=width, **kargs)
 
 class Spiral(object):
@@ -177,7 +180,7 @@ class Spiral(object):
             "arrow":"both",
             "arrowshape":(0,0,3),
         }
-        if kargs.has_key("capstyle"):
+        if "capstyle" in kargs:
             del(defKArgs["arrow"])
             del(defKArgs["arrowshape"])
         self.drawKArgs = defKArgs
@@ -198,7 +201,7 @@ class Spiral(object):
 
     def setAngLim(self, begAng, endAng, redraw=True):
         if (begAng != None) and (begAng == endAng):
-            raise RuntimeError, "angle range must be nonzero (though it may be None)"
+            raise RuntimeError("angle range must be nonzero (though it may be None)")
         self.begAng = begAng
         self.endAng = endAng
         if redraw:

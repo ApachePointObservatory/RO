@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """Parse a keyword-value message.
 
 History:
@@ -7,7 +8,10 @@ History:
 2003-11-19 ROwen    Modified header: keywords with no values may have an '='.
                     Added "noValKey=" to test cases as it caused an infinite loop.
 2004-05-18 ROwen    Modified test code to use astr instead of str.
+2014-09-17 ROwen    Modified to test for Exception instead of StandardError 
 """
+__all__ = ["parseKeyValueData"]
+
 from GetKeyword import getKeyword
 from GetValues import getValues
 import RO.Alg
@@ -54,7 +58,7 @@ def parseKeyValueData(astr):
 
 if __name__ == '__main__':
     # perform test
-    print "testing parseHubMsg\n"
+    print("testing parseHubMsg\n")
     testList = [
         "keyword",
         "",
@@ -67,9 +71,9 @@ if __name__ == '__main__':
     for astr in testList:
         try:
             dataDict = parseKeyValueData(astr)
-            print "parseHubMsg(%r) = {" % (astr,)
+            print("parseHubMsg(%r) = {" % (astr,))
             for key, value in dataDict.iteritems():
-                print "    %r: %r" % (key, value)
-            print "}"
-        except StandardError, e:
-            print "failed with error: ", e
+                print("    %r: %r" % (key, value))
+            print("}")
+        except Exception as e:
+            print("failed with error: ", e)

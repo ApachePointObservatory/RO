@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-from __future__ import division, absolute_import
+from __future__ import absolute_import, division, print_function
+
+__all__ = ["gmstFromUT1"]
 
 import math
 import RO.PhysConst
 import RO.MathUtil
-
-__all__ = ["gmstFromUT1"]
 
 def gmstFromUT1(ut1):
     """Convert from universal time (MJD)
@@ -44,7 +44,7 @@ def gmstFromUT1(ut1):
 
 if __name__ == "__main__":
     # test data is from GMST and is UT days, gmst deg
-    print "testing gmstFromUT1"
+    print("testing gmstFromUT1")
     testData = (
         (33282.0000000000, 100.075688557397),
         (34490.9775000000, 203.601164908095),
@@ -81,6 +81,6 @@ if __name__ == "__main__":
     for testInput, expectedOutput in testData:
         actualOutput = gmstFromUT1(testInput)
         if RO.MathUtil.compareFloats(actualOutput, expectedOutput, rtol=1e-8):
-            print "failed on input:", testInput
-            print "expected output:\n", expectedOutput
-            print "actual output:\n", actualOutput
+            print("failed on input:", testInput)
+            print("expected output:\n", expectedOutput)
+            print("actual output:\n", actualOutput)

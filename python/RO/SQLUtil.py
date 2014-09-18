@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+from __future__ import division, print_function
 """Utility functions for working with SQL databases
 and with data files in FMPro "merge" format.
 
@@ -61,12 +61,12 @@ class FieldDescr(object):
         if strVal:
             try:
                 return self.cnvFunc(strVal)
-            except Exception, e:
-                raise ValueError, "Could not convert %s: %s" % (strVal, e)
+            except Exception as e:
+                raise ValueError("Could not convert %s: %s" % (strVal, e))
         elif self.blankOK:
             return self.blankVal
         else:
-            raise ValueError, "%s is empty" % (self.fieldName,)
+            raise ValueError("%s is empty" % (self.fieldName,))
     def valFromStr(self, strVal):
         """Convert the string value of this field to the final value.
         If the field is an array, it is split and the conversion function
@@ -85,7 +85,7 @@ def dateToDBFmt(strVal, fromFmt="%m/%d/%Y"):
     try:
         dateTuple = time.strptime(strVal, fromFmt)
     except ValueError:
-        raise ValueError, "%s not in the specified date format: %s" % (strVal, fromFmt)
+        raise ValueError("%s not in the specified date format: %s" % (strVal, fromFmt))
     return time.strftime("%Y-%m-%d", dateTuple)
 
 
@@ -117,8 +117,8 @@ def dataDictFromStr(line, fieldDescrList, fieldSep=_DataSepStr):
             strVal = dataArry[ind]
         except IndexError:
         
-            print "fieldDescrList(%s)=%s" % (len(fieldDescrList), fieldDescrList)
-            print "dataArry(%s)=%s" % (len(dataArry), dataArry)
+            print("fieldDescrList(%s)=%s" % (len(fieldDescrList), fieldDescrList))
+            print("dataArry(%s)=%s" % (len(dataArry), dataArry))
             raise
         dataDict[fieldDescr.fieldName] = fieldDescr.valFromStr(strVal)
     return dataDict
@@ -180,7 +180,7 @@ def insertRow(dbCursor, table, dataDict, fieldsToAdd=None, fieldsToCheck=None):
     """
     # if fieldsToCheck specified, make sure an entry with matching fields does not already exist
     if fieldsToCheck and rowExists(dbCursor, table, dataDict, fieldsToCheck):
-        raise RuntimeError, "a matching entry already exists"
+        raise RuntimeError("a matching entry already exists")
     
     if fieldsToAdd == None:
         fieldsToAdd = dataDict.keys()
@@ -216,7 +216,7 @@ def insertMany(dbCursor, table, dataDict, arrayFields, scalarFields=None):
     for fieldName in arrayFields:
         if numEntries:
             if len(dataDict[fieldName]) != numEntries:
-                raise ValueError, "arrays must have matching length"
+                raise ValueError("arrays must have matching length")
         else:
             numEntries = len(dataDict[fieldName])
     if numEntries == 0:
@@ -232,7 +232,6 @@ def insertMany(dbCursor, table, dataDict, arrayFields, scalarFields=None):
     # set up the query as:
     # insert into <table> (<fieldName1>, <fieldName2>,...) values (%s, %s,...)
     # note: (%s, %s, ...) is just a comma-separated set of "%s"s, one per field
-    sListStr = ", ".join("%%s" * len(allFields)) # "%s, %s, ..." one per field
     fieldListStr = ", ".join(allFields) # "fieldName1, fieldName2, ..."
     sArry = ("%s, " * len(allFields))[:-2]
     sqlCmd = "insert into %s (%s) values (%s)" % (table, fieldListStr, sArry)
@@ -281,7 +280,7 @@ class NullDBCursor (object):
         self.lastrowid = 1
 
     def execute(self, sqlCmd, dataDict=None):
-        print "%s.execute %s" % (self, sqlCmd)
+        print("%s.execute %s" % (self, sqlCmd))
         if dataDict:
             keys = dataDict.keys()
             keys.sort()
@@ -289,15 +288,15 @@ class NullDBCursor (object):
                 valStr = repr(dataDict[key])
                 if len(valStr) > _MaxDiagnosticLen:
                     valStr = valStr[0:_MaxDiagnosticLen-10] + "..." + valStr[-7:]
-                print "* %s = %s" % (key, valStr)
+                print("* %s = %s" % (key, valStr))
     
     def fetchone(self):
         return [1]
     
     def executemany(self, sqlCmd, aList):
-        print "%s.executemany %s" % (self, sqlCmd)
+        print("%s.executemany %s" % (self, sqlCmd))
         for item in aList:
-            print "  %s" % (item,)
+            print("  %s" % (item,))
     
     def __repr__(self):
         return "NullDBCursor(db=%s)" % (self.db,)
@@ -325,20 +324,20 @@ class NullDBConn (object):
         self.kargs = kargs
 
         self.isOpen = True
-        print self
+        print(self)
 
     def cursor(self):
         return NullDBCursor(db = self.db)
     
     def commit(self):
-        print "%s.commit" % (self,)
+        print("%s.commit" % (self,))
     
     def rollback(self):
-        print "%s.rollback" % (self,)
+        print("%s.rollback" % (self,))
     
     def close(self):
         self.isOpen = False
-        print "%s.close" % (self,)
+        print("%s.close" % (self,))
     
     def __str__(self):
         return "NullDBConn(db=%s; user=%s)" % (self.db, self.user)

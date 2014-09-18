@@ -4,10 +4,10 @@ from __future__ import division, absolute_import
 History:
 2014-04-25 ROwen    Add from __future__ import division, absolute_import and use relative import.
 """
+__all__ = ["getUTCMinusTAI", "setUTCMinusTAI", "taiFromPySec", "utcFromTAI", "taiFromPySec", "pySecFromTAI"]
+
 import RO.PhysConst
 from .UTCFromPySec import utcFromPySec, pySecFromUTC
-
-__all__ = ["getUTCMinusTAI", "setUTCMinusTAI", "taiFromPySec", "utcFromTAI", "taiFromPySec", "pySecFromTAI"]
 
 # global variable UTC-TAI (since leap seconds are unpredictable)
 # set to some initial plausible value and update with setUTCMinusTAI

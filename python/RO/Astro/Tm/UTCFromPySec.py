@@ -4,10 +4,10 @@ from __future__ import division, absolute_import
 History:
 2014-04-25 ROwen    Add from __future__ import division, absolute_import.
 """
+__all__ = ["setClockError", "getClockError", "getCurrPySec", "utcFromPySec", "pySecFromUTC"]
+
 import time
 import RO.PhysConst
-
-__all__ = ["setClockError", "getClockError", "getCurrPySec", "utcFromPySec", "pySecFromUTC"]
 
 # Python time tuple for J2000: 2000-01-01 12:00:00 (a Saturday)
 _TimeTupleJ2000 = (2000, 1, 1, 12, 0, 0, 5, 1, 0)

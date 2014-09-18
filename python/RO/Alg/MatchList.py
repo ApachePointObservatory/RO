@@ -1,9 +1,12 @@
+from __future__ import absolute_import, division, print_function
 """
 History:
 2003-10-23 ROwen    Renamed from GetByPrefix and enhanced.
 2005-06-08 ROwen    Changed MatchList to a new style class.
 2008-01-04 ROwen    Bug fix: was not compatible with unicode entries (the match test would fail).
 """
+__all__ = ["MatchList"]
+
 class MatchList(object):
     """Find matches for a string in a list of strings,
     optionally allowing abbreviations and ignoring case.
@@ -42,9 +45,9 @@ class MatchList(object):
         else:
             errList = [val[-1] for val in self.valueList]
             if matchList:
-                raise ValueError, "too many matches for %r in %r" % (prefix, errList)
+                raise ValueError("too many matches for %r in %r" % (prefix, errList))
             else:
-                raise ValueError, "no matches for %r in %r" % (prefix, errList)
+                raise ValueError("no matches for %r in %r" % (prefix, errList))
     
     def matchKeys(self, fromDict):
         """Returns a copy of fromDict with keys replaced by their unique match.
@@ -55,8 +58,8 @@ class MatchList(object):
         toDict = {}
         for fromKey, val in fromDict.iteritems():
             toKey = self.getUniqueMatch(fromKey)
-            if toDict.has_key(toKey):
-                raise ValueError, "%r contains multiple keys that match %s" % (fromDict, toKey,)
+            if toKey in toDict:
+                raise ValueError("%r contains multiple keys that match %s" % (fromDict, toKey,))
             toDict[toKey] = val
         return toDict
     

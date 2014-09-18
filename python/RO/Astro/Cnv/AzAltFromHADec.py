@@ -1,9 +1,12 @@
 #!/usr/bin/env python
+from __future__ import absolute_import, division, print_function
 """
 History:
 2002-07-22 ROwen    Converted to Python from the TCC's cnv_HADec2AzAlt 1-1.
 2007-04-24 ROwen    Converted from Numeric to numpy.
 """
+__all__ = ["azAltFromHADec"]
+
 import numpy
 import RO.MathUtil
 
@@ -34,7 +37,7 @@ def azAltFromHADec (haDec, lat):
 
 if __name__ == "__main__":
     import RO.SeqUtil
-    print "testing azAltFromHADec"
+    print("testing azAltFromHADec")
     # test data is formatted as follows:
     # a list of entries, each consisting of:
     # - the input argument
@@ -54,6 +57,6 @@ if __name__ == "__main__":
     for testInput, expectedOutput in testData:
         actualOutput = azAltFromHADec(*testInput)
         if RO.SeqUtil.matchSequences(actualOutput, expectedOutput, rtol=1.0e-15):
-            print "failed on input:", testInput
-            print "expected output:\n", expectedOutput
-            print "actual output:\n", actualOutput
+            print("failed on input:", testInput)
+            print("expected output:\n", expectedOutput)
+            print("actual output:\n", actualOutput)

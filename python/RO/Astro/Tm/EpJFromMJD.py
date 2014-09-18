@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 from __future__ import division, absolute_import
 
-from RO.Astro import llv
-
 __all__ = ["epJFromMJD"]
+
+from RO.Astro import llv
 
 def epJFromMJD (mjd):
     """

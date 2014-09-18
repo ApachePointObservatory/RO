@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """Add contextual menu to a Tkinter widget, including automatic
 support for help.
 

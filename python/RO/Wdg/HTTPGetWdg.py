@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """HTTP download with Tkinter-based progress reporting
 
 Downloads files given the url and destination path.
@@ -27,7 +28,6 @@ History:
 """
 __all__ = ['HTTPGetWdg']
 
-import os
 import sys
 import traceback
 import weakref
@@ -57,7 +57,7 @@ class HTTPCallback(object):
         if self.callFunc:
             try:
                 self.callFunc(self.httpGet)
-            except Exception, e:
+            except Exception as e:
                 errMsg = "httpGet callback %r failed: %s" % (self.callFunc, e)
                 sys.stderr.write(errMsg + "\n")
                 traceback.print_exc(file=sys.stderr)
@@ -68,7 +68,7 @@ class HTTPCallback(object):
     def clear(self):
         """Clear the callback"""
         if _DebugMem:
-            print "HTTPCallback(%s) clear" % (self.httpGet,)
+            print("HTTPCallback(%s) clear" % (self.httpGet,))
         self.httpGet = None
         self.callFunc = None
     
@@ -329,7 +329,7 @@ class HTTPGetWdg(Tkinter.Frame):
             return
         objID = id(obj)
         def refGone(ref=None, objID=objID, objName=objName):
-            print "%s deleting %s" % (self.__class__.__name__, objName,)
+            print("%s deleting %s" % (self.__class__.__name__, objName,))
             del(self._memDebugDict[objID])
 
         self._memDebugDict[objID] = weakref.ref(obj, refGone)
@@ -375,7 +375,7 @@ class HTTPGetWdg(Tkinter.Frame):
 
 
 if __name__ == "__main__":
-    from PythonTk import *
+    from PythonTk import PythonTk
     root = PythonTk()
 
     row = 0

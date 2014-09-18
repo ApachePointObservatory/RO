@@ -1,13 +1,16 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """    
 History:
 2002-07-12 ROwen    Converted to Python from the TCC's cnv_J2AppGeo 7-3
 2007-04-24 ROwen    Converted from Numeric to numpy.
 """
+__all__ = ["geoFromICRS"]
+
 import numpy
 from RO.Astro import llv
 
-def geoFromICRS (icrsP, icrsV, agData):
+def geoFromICRS(icrsP, icrsV, agData):
     """
     Converts ICRS coordinates to apparent geocentric coordinates.
     
@@ -62,7 +65,7 @@ def geoFromICRS (icrsP, icrsV, agData):
 if __name__ == "__main__":
     import RO.SeqUtil
     from AppGeoData import AppGeoData
-    print "testing geoFromICRS"
+    print("testing geoFromICRS")
     # test data is formatted as follows:
     # a list of entries, each consisting of:
     # - the input argument
@@ -101,6 +104,6 @@ if __name__ == "__main__":
         expectedFlat = RO.SeqUtil.flatten(expectedOutput)
         actualFlat = RO.SeqUtil.flatten(actualOutput)
         if RO.SeqUtil.matchSequences(actualFlat, expectedFlat, rtol=1.0e-10):
-            print "failed on input:", testInput
-            print "expected output:\n", expectedOutput
-            print "actual output:\n", actualOutput
+            print("failed on input:", testInput)
+            print("expected output:\n", expectedOutput)
+            print("actual output:\n", actualOutput)

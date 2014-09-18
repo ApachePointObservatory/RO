@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+from __future__ import division, print_function
 """Constants for the RO package, especially RO.Wdg.
 
 Supplies the following constants:
@@ -22,11 +22,12 @@ History:
 2006-10-24 ROwen    Added sevDebug.
 2009-09-02 ROwen    Added sevCritical.
 2010-03-11 ROwen    Added SevNameDict and NameSevDict.
+2014-09-17 ROwen    Modified to use OrderedDict from collections instead of RO.Alg.
 """
 __all__ = ['sevDebug', 'sevNormal', 'sevWarning', 'sevError', 'sevCritical', 'SevNameDict', 'NameSevDict']
 
 import urlparse
-import RO.Alg
+from collections import OrderedDict
 
 # severity constants; numeric value increases with severity
 sevDebug = -1
@@ -36,7 +37,7 @@ sevError = 2
 sevCritical = 3
 
 # ordered dictionary of severity: name (lowercase); order is least to most severe
-SevNameDict = RO.Alg.OrderedDict((
+SevNameDict = OrderedDict((
     (sevDebug, "debug"),
     (sevNormal, "normal"),
     (sevWarning, "warning"),
@@ -45,7 +46,7 @@ SevNameDict = RO.Alg.OrderedDict((
 ))
 
 # ordered dictionary of severity name (lowercase): severity; order is least to most severe
-NameSevDict = RO.Alg.OrderedDict(zip(SevNameDict.values(), SevNameDict.keys()))
+NameSevDict = OrderedDict(zip(SevNameDict.values(), SevNameDict.keys()))
 
 # Call setHelpURLBase if you want to specify URLs relative to a base
 _HelpURLBase = ""

@@ -1,9 +1,12 @@
 #!/usr/bin/env python
+from __future__ import absolute_import, division, print_function
 """
 History:
 2002-07-22 ROwen    Converted to Python from the TCC's cnv_Gal2J 4-1.
 2007-04-24 ROwen    Converted from Numeric to numpy.
 """
+__all__ = ["icrsFromGal"]
+
 import numpy
 
 # Constants
@@ -16,7 +19,7 @@ _RMat = numpy.transpose(numpy.array ((
     (-0.867666135858,   -0.198076386122,   +0.455983795705),
 )))
 
-def icrsFromGal (galP, galV, galEpoch):
+def icrsFromGal(galP, galV, galEpoch):
     """
     Converts IAU 1958 galactic coordinates to ICRS coordinates.
     Uses the approximation that ICRS = FK5 J2000.
@@ -53,7 +56,7 @@ def icrsFromGal (galP, galV, galEpoch):
 
 if __name__ == "__main__":
     import RO.SeqUtil
-    print "testing icrsFromGal"
+    print("testing icrsFromGal")
     # test data is formatted as follows:
     # a list of entries, each consisting of:
     # - the input argument
@@ -93,6 +96,6 @@ if __name__ == "__main__":
         expectedFlat = RO.SeqUtil.flatten(expectedOutput)
         actualFlat = RO.SeqUtil.flatten(actualOutput)
         if RO.SeqUtil.matchSequences(actualFlat, expectedFlat, rtol=1.0e-14):
-            print "failed on input:", testInput
-            print "expected output:\n", expectedOutput
-            print "actual output:\n", actualOutput
+            print("failed on input:", testInput)
+            print("expected output:\n", expectedOutput)
+            print("actual output:\n", actualOutput)

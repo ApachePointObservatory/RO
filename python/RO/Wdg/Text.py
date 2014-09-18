@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """Variant of Tkinter.Text that includes a few extra features, including:
 - read-only support (can still copy data)
 - contextual menu with cut/copy/paste and URL-based help

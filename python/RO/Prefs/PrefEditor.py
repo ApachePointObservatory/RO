@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """Widgets for editing individual preference variables.
 
 To Do:
@@ -67,6 +68,8 @@ import RO.Alg
 import RO.Wdg
 from RO.TkUtil import Timer
 
+__all__ = ["getPrefEditor"]
+
 def getPrefEditor(
     prefVar,
     master,
@@ -89,7 +92,7 @@ def getPrefEditor(
     elif isinstance(prefVar, PrefVar.PrefVar):
         return PrefEditor(prefVar, master, row, column)
     else:
-        raise ValueError, "prefVar is of unknown type"
+        raise ValueError("prefVar is of unknown type")
 
 class PrefEditor(object):
     """Basic preferences editor. Works for string, numeric and boolean data
@@ -276,7 +279,7 @@ class PrefEditor(object):
         def summaryFromVal(val):
             try:
                 return self.prefVar.asSummary(val)
-            except StandardError, e:
+            except Exception as e:
                 sys.stderr.write("could not get summary of %r for %s: %s\n" % (val, self.prefVar.name, e))
                 return "???"
         
@@ -614,7 +617,7 @@ class FontPrefEditor(PrefEditor):
         """
         # set pop-up menus
         for name, val in valueDict.iteritems():
-            if self.varDict.has_key(name):
+            if name in self.varDict:
                 self.varDict[name].set(val)
 
         # now update the font used for the menu text

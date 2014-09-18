@@ -1,16 +1,19 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """
 History:
 6/01 ROwen  Initial release.
 2002-07-24 ROwen    Simplified by using Numeric.
 2007-04-24 ROwen    Converted from Numeric to numpy.
 """
+__all__ = ["angSep"]
+
 import math
 import numpy
 import RO.MathUtil
-from DCFromSC import *
+from DCFromSC import dcFromSC
 
-def angSep (posA, posB):
+def angSep(posA, posB):
     """Computes the angular separation between two points on a sphere.
 
     Inputs:
@@ -50,7 +53,7 @@ def angSep (posA, posB):
 
 if __name__ == "__main__":
     import RO.PhysConst
-    print "testing angSep"
+    print("testing angSep")
     # testData is a list of duples consisting of:
     # - input data
     # - the expected output
@@ -71,7 +74,7 @@ if __name__ == "__main__":
         # print "(%r, %r)" % (testInput, expectedOutput)
         actualOutput = angSep(*testInput)
         if 0 != RO.MathUtil.compareFloats(actualOutput, expectedOutput, rtol=1e-14):
-            print "failed on input:", testInput
-            print "expected output:\n", expectedOutput
-            print "actual output:\n", actualOutput
+            print("failed on input:", testInput)
+            print("expected output:\n", expectedOutput)
+            print("actual output:\n", actualOutput)
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+from __future__ import absolute_import, division, print_function
 """Serial connections optimized for use with Tkinter GUIs.
 
 Known issues:
@@ -26,6 +26,7 @@ History:
 2012-08-01 ROwen    Changed getState() to state and isOpen() to isOpen.
 """
 __all__ = ["TkSerial", "NullSerial"]
+
 import sys
 import traceback
 import Tkinter
@@ -35,7 +36,6 @@ try:
     set
 except NameError:
     from sets import Set as set
-
 
 class TkBaseSerial(object):
     """Base class for communication via a serial port using the tcl event loop.
@@ -123,7 +123,7 @@ class TkBaseSerial(object):
         if stateCallback:
             try:
                 stateCallback(self)
-            except Exception, e:
+            except Exception as e:
                 sys.stderr.write("%s state callback %s failed: %s\n" % (self, self._stateCallback, e,))
                 traceback.print_exc(file=sys.stderr)
     
@@ -210,7 +210,7 @@ class TkSerial(TkBaseSerial):
             # and is just used to detect state
             self._setSockCallback(self._doRead)
 
-        except Tkinter.TclError, e:
+        except Tkinter.TclError as e:
             raise RuntimeError(e)
 
     def close(self, isOK=True, reason=None):
@@ -251,7 +251,7 @@ class TkSerial(TkBaseSerial):
                 retVal = self._tk.call('read', self._chanID)
             else:
                 retVal = self._tk.call('read', self._chanID, nChar)
-        except Exception, e:
+        except Exception as e:
             self.close(isOK = False, reason = str(e))
             raise
         #print "read returning %r" % retVal
@@ -272,7 +272,7 @@ class TkSerial(TkBaseSerial):
         self._assertConn()
         try:
             readStr = self._tk.call('gets', self._chanID)
-        except Exception, e:
+        except Exception as e:
             self.close(isOK = False, reason = str(e))
             raise
         if not readStr:
@@ -302,7 +302,7 @@ class TkSerial(TkBaseSerial):
         self._assertConn()
         try:
             self._tk.call('puts', '-nonewline', self._chanID, data)
-        except Exception, e:
+        except Exception as e:
             self.close(isOK = False, reason=str(e))
             raise
         self._assertConn()
@@ -316,7 +316,7 @@ class TkSerial(TkBaseSerial):
         self._assertConn()
         try:
             self._tk.call('puts', self._chanID, data)
-        except Exception, e:
+        except Exception as e:
             self.close(isOK = False, reason=str(e))
             raise
         self._assertConn()
@@ -340,7 +340,7 @@ class TkSerial(TkBaseSerial):
         if self._readCallback:
             try:
                 self._readCallback(self)
-            except Exception, e:
+            except Exception as e:
                 sys.stderr.write("%s read callback %s failed: %s\n" % (self, self._readCallback, e,))
                 traceback.print_exc(file=sys.stderr)
 
@@ -366,7 +366,7 @@ class TkSerial(TkBaseSerial):
         
         try:
             self._tk.call('fileevent', self._chanID, typeStr, tkFuncName)
-        except Tkinter.TclError, e:
+        except Tkinter.TclError as e:
             if tclFunc:
                 tclFunc.deregister()
             raise RuntimeError(e)

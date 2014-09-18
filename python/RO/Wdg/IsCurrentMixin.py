@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """Mixin classes that add an "isCurrent" flag
 and adjust the widget background color based on that flag.
 
@@ -19,6 +20,8 @@ History:
                     instead of getString and getDefault.
 2010-05-27 ROwen    Corrected a few document strings.
 """
+__all__ = ["IsCurrentMixin", "IsCurrentActiveMixin", "IsCurrentCheckbuttonMixin", "AutoIsCurrentMixin"]
+
 import WdgPrefs
 
 class IsCurrentMixin(object):
@@ -254,7 +257,7 @@ if __name__ == "__main__":
 
     def setIsCurrent(*args):
         isCurrent = isCurrentVar.get()
-        print "Set isCurrent %r" % (isCurrent,)
+        print("Set isCurrent %r" % (isCurrent,))
         for wdg in wdgSet:
             wdg.setIsCurrent(isCurrent)
     

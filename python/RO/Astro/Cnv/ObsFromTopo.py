@@ -1,10 +1,13 @@
 #!/usr/bin/env python
+from __future__ import absolute_import, division, print_function
 """
 History:
 2002-07-22 ROwen    Converted from the TCC's cnv_Refract 2-2.
 2007-04-24 ROwen    Converted from Numeric to numpy.
 2007-09-19 ROwen    Mis-called numpy.asarray (switched to numpy.array to force copy). Thanks, pychecker!
 """
+__all__ = ["obsFromTopo"]
+
 from math import sqrt
 import numpy
 import RO.SysConst
@@ -14,7 +17,7 @@ import RO.MathUtil
 # Constants
 _MaxZDU = 85.0
 
-def obsFromTopo (appTopoP, refCo):
+def obsFromTopo(appTopoP, refCo):
     """
     Corrects for refraction, i.e. converts apparent topocentric
     coordinates to observed coordinates.
@@ -58,8 +61,7 @@ def obsFromTopo (appTopoP, refCo):
     if uxysq * RO.SysConst.FAccuracy <= RO.SysConst.FSmallNum:
         if umagsq * RO.SysConst.FAccuracy <= RO.SysConst.FSmallNum:
             #  |R| is too small to use -- probably a bug in the calling software
-            raise ValueError, \
-                'appTopoP %r too small' % appTopoP 
+            raise ValueError("appTopoP %r too small" % (appTopoP,))
         #  at zenith; set output = input
         obsP = numpy.array(appTopoP, copy=True, dtype=float)
     else:
@@ -91,7 +93,7 @@ def obsFromTopo (appTopoP, refCo):
 
 if __name__ == "__main__":
     import RO.SeqUtil
-    print "testing obsFromTopo"
+    print("testing obsFromTopo")
     # test data is formatted as follows:
     # a list of entries, each consisting of:
     # - the input argument
@@ -130,6 +132,6 @@ if __name__ == "__main__":
         actualFlat = RO.SeqUtil.flatten(actualOutput)
         expectedFlat = RO.SeqUtil.flatten(expectedOutput)
         if RO.SeqUtil.matchSequences(actualFlat, expectedFlat, rtol=1.0e-15):
-            print "failed on input:", testInput
-            print "expected output:\n", expectedOutput
-            print "actual output:\n", actualOutput
+            print("failed on input:", testInput)
+            print("expected output:\n", expectedOutput)
+            print("actual output:\n", actualOutput)

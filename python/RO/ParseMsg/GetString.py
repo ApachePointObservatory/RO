@@ -1,50 +1,52 @@
 #!/usr/bin/env python
+from __future__ import absolute_import, division, print_function
 import sys
+
+__all__ = ["getString"]
 
 def getString(astr, begInd=0):
     """
-Extracts a delimited string value from an APO format message.
-Strings are delimited with a pair of single or double quotes.
-Embedded singles of whichever delimiter is NOT used are ignored,
-as are the following character pairs: \" \' "" ''
+    Extracts a delimited string value from an APO format message.
+    Strings are delimited with a pair of single or double quotes.
+    Embedded singles of whichever delimiter is NOT used are ignored,
+    as are the following character pairs: \" \' "" ''
 
-Inputs:
-    astr: the string to parse
-    begInd: the starting index; must point to a single or double quote
-        that is the beginning of the string value. Leading white space
-        is NOT ignored.
-Returns a duple consisting of:
-    a single string, excluding delimiters
-    the index of the next comma or semicolon, or None if end-of-string
+    Inputs:
+        astr: the string to parse
+        begInd: the starting index; must point to a single or double quote
+            that is the beginning of the string value. Leading white space
+            is NOT ignored.
+    Returns a duple consisting of:
+        a single string, excluding delimiters
+        the index of the next comma or semicolon, or None if end-of-string
 
-Exceptions:
-    if the initial character is not an allowed string delimiter (single
-        or double quote) raises a SyntaxError
-    if begInd > len(astr) raises an IndexError
+    Exceptions:
+        if the initial character is not an allowed string delimiter (single
+            or double quote) raises a SyntaxError
+        if begInd > len(astr) raises an IndexError
 
-Warnings printed to sys.stederr:
-    if the final string delimiter is found but is not followed
-        by , or ; or end of string, then that delimiter is ignored
-        and considered to be part of the string; the assumption is
-        that the string may contain a another string whose quotes
-        were not appropriate "escaped" using the approved character pairs
-    if the final string delimiter is missing, complains and returns
-        astr[begInd+1:] (all data excluding the initial string delimiter)
+    Warnings printed to sys.stederr:
+        if the final string delimiter is found but is not followed
+            by , or ; or end of string, then that delimiter is ignored
+            and considered to be part of the string; the assumption is
+            that the string may contain a another string whose quotes
+            were not appropriate "escaped" using the approved character pairs
+        if the final string delimiter is missing, complains and returns
+            astr[begInd+1:] (all data excluding the initial string delimiter)
 
-History:
-2003-03-20 ROwen    Added translation of \\->\, \<q> -> <q>
-                    where <q> is the quote character for this particular string
-2004-05-18 ROwen    Modified test code to use astr instead of str.
-"""
-
+    History:
+    2003-03-20 ROwen    Added translation of \\->\, \<q> -> <q>
+                        where <q> is the quote character for this particular string
+    2004-05-18 ROwen    Modified test code to use astr instead of str.
+    """
     quoteChar = astr[begInd]
     if quoteChar not in '\'\"':
-        raise SyntaxError, "invalid string delimiter :%s: starting at index %d in data :%s:" % \
-            (quoteChar, begInd, astr)
+        raise SyntaxError("invalid string delimiter :%s: starting at index %d in data :%s:" % \
+            (quoteChar, begInd, astr))
         return None
     if len(astr) <= begInd + 1:
         if len(astr) <= begInd:
-            raise IndexError, "begInd=%d out of range of data :%s:" % (begInd, astr)
+            raise IndexError("begInd=%d out of range of data :%s:" % (begInd, astr))
         else:
             sys.stderr.write("string starts at end of data :%s:\n" % (astr))
             return ("", None)
@@ -128,6 +130,6 @@ if __name__ == '__main__':
     for astr in testList:
         (data, ind) = getString(astr)
         if ind == None:
-            print "getString(%s) = %s, end of string" % (astr, getString(astr))
+            print("getString(%s) = %s, end of string" % (astr, getString(astr)))
         else:
-            print "getString(%s) = %s, astr[%d] = %s" % (astr, getString(astr), ind, astr[ind])
+            print("getString(%s) = %s, astr[%d] = %s" % (astr, getString(astr), ind, astr[ind]))

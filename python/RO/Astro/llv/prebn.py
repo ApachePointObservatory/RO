@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """
 History:
 P.T.Wallace Starlink    30 December 1992
@@ -6,12 +7,13 @@ P.T.Wallace Starlink    30 December 1992
 2004-05-18 ROwen    Removed import of Numeric from test code.
 2007-04-24 ROwen    Converted from Numeric to numpy.
 """
-import math
+__all__ = ["prebn"]
+
 import numpy
 import RO.PhysConst
-from euler import *
+from euler import euler
 
-def prebn (bep0, bep1):
+def prebn(bep0, bep1):
     """
     Generate the matrix of precession between two epochs,
     using the old, pre-IAU1976, Bessel-Newcomb model,
@@ -52,7 +54,7 @@ def prebn (bep0, bep1):
 
 
 if __name__ == "__main__":
-    print "testing prebn"
+    print("testing prebn")
     # testData is a list of duples consisting of:
     # - a tuple of input data for prebn
     # - the expected output matrix (a numpy.array)
@@ -81,8 +83,8 @@ if __name__ == "__main__":
     for testInput, expectedOutput in testData:
         actualOutput = prebn(*testInput)
         if not numpy.allclose(actualOutput, expectedOutput, rtol=1e-15, atol=1e-15):
-            print "failed on input:", testInput
-            print "expected output:\n", expectedOutput
-            print "actual output:\n", actualOutput
+            print("failed on input:", testInput)
+            print("expected output:\n", expectedOutput)
+            print("actual output:\n", actualOutput)
 
 

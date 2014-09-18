@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+from __future__ import division, print_function
 """Simple sound players.
 
 All sound players are based on Tkinter and some will use
@@ -99,7 +99,7 @@ class SoundPlayer(object):
             try:
                 pygame.mixer.init()
                 _PyGameReady = True
-            except Exception, e:
+            except Exception as e:
                 sys.stderr.write("Could not initialize pygame for sound: %s\n" % \
                     (RO.StringUtil.strFromException(e),))
                 _PyGameAvail = False
@@ -114,7 +114,7 @@ class SoundPlayer(object):
             if _PyGameReady:
                 try:
                     self._snd = pygame.mixer.Sound(fileName)
-                except Exception, e:
+                except Exception as e:
                     sys.stderr.write("Could not load sound file %r; using beep instead: %s\n" % \
                         (fileName, RO.StringUtil.strFromException(e),))
         

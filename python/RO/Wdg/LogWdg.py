@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """A widget to display a scrolling log of information. Log entries
 may be categorized and each category may be displayed in a different color.
 Each category may be individually shown or hidden.
@@ -214,7 +215,7 @@ class LogWdg(Tkinter.Frame):
         try:
             strTagList = [(astr, (_AllTextTag, _SevTagDict[severity]) + tuple(tags))
                 for astr, tags, severity in strTagSevList]
-        except Exception, e:
+        except Exception as e:
             raise RuntimeError("Could not parse strTagSevList: %s" % (RO.StringUtil.strFromException(e),))
 
         doScrollToEnd = self.doAutoScroll and self.isScrolledToEnd()
@@ -530,9 +531,9 @@ if __name__ == '__main__':
             entry.delete(0,"end")
             
             addMsg(msgStr)
-        except StandardError, e:
-            sys.stderr.write ("Could not extract or send: %s\n" % (msgStr))
-            sys.stderr.write ("Error: %s\n" % (e))
+        except Exception as e:
+            sys.stderr.write("Could not extract or send: %r\n" % (msgStr,))
+            sys.stderr.write("Error: %s\n" % (e))
 
     entry.bind('<KeyPress-Return>', addTolog)
 

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """Widgets for selecting files and directories.
 
 To do:
@@ -20,15 +21,15 @@ History:
 2006-06-08 ROwen    FilePathWdg bug fix: initial defPath not shown.
 2012-07-09 ROwen    Modified to treat path="" as path=None. This fixes a problem with file and path prefs.
 """
+__all__ = ["DirWdg", "FileWdg"]
+
 import os
-import tkFileDialog
 import Tkinter
+import tkFileDialog
 import RO.AddCallback
 import RO.Constants
 import CtxMenu
 from SeverityMixin import SeverityActiveMixin
-
-__all__ = ["DirWdg", "FileWdg"]
 
 class BasePathWdg (Tkinter.Button, RO.AddCallback.BaseMixin, CtxMenu.CtxMenuMixin,
     SeverityActiveMixin):
@@ -308,7 +309,7 @@ if __name__ == "__main__":
     modDir = os.path.split(__file__)[0]
     
     def wdgFunc(wdg):
-        print "%s set to %s" % (wdg.__class__.__name__, wdg.getPath())
+        print("%s set to %s" % (wdg.__class__.__name__, wdg.getPath()))
 
     f1 = FileWdg(root, callFunc=wdgFunc)
     f1.pack()

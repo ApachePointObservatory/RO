@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """Parses a message of the form: header keywordValueData
 returning a dictionary.
 
@@ -8,11 +9,10 @@ returning a dictionary.
                     Modified test code to use astr instead of str.
 2011-06-17 ROwen    Changed "type" to "msgType" in parsed message dictionaries to avoid conflict with builtin.
 """
-from GetKeyword import getKeyword
-from GetValues import getValues
+__all__ = ["parseHubMsg"]
+
 from GetHeader import getHubHeader
 from ParseData import parseKeyValueData
-from RO.Alg.OrderedDict import OrderedDict
 
 def parseHubMsg(astr):
     """Parses one message of the form:
@@ -56,7 +56,7 @@ def parseHubMsg(astr):
 
 if __name__ == '__main__':
     # perform test
-    print "testing parseHubMsg\n"
+    print("testing parseHubMsg\n")
     testList = [
         "me 123 tcc > keyword = ; key2 =",
         "me 123 tcc > keyword",
@@ -71,6 +71,6 @@ if __name__ == '__main__':
     for astr in testList:
         try:
             msgDict = parseHubMsg(astr)
-            print "parseHubMsg('%s') = %s" % (astr, repr(msgDict))
-        except StandardError, e:
-            print "failed with error: ", e
+            print("parseHubMsg('%s') = %s" % (astr, repr(msgDict)))
+        except Exception as e:
+            print("failed with error: ", e)

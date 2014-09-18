@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """Retrieve a remote file via http to a local file.
 
 Note: at exit attempts to abort all outstanding transfers and delete the output files.
@@ -35,6 +36,7 @@ History:
 2014-09-16 ROwen    Modified to use RO.AddCallback.safeCall2.
                     Modified _cleanup to deregister tcl callbacks before cleaning up the connection.
                     Modified to print warnings to stderr instead of stdout.
+2014-09-18 ROwen    Fixed a bug in the unit test.
 """
 __all__ = ['HTTPGet']
 
@@ -66,7 +68,7 @@ class _ExitClass:
         """Add one httpGetter.
         """
         if _DebugExit:
-            print "HTTPGet._Exit.addTransfer(%s)" % (httpGetter,)
+            print("HTTPGet._Exit.addTransfer(%s)" % (httpGetter,))
         httpGetter.addDoneCallback(self.removeTransfer) 
         self.transferDict[httpGetter] = None
         if not self.didRegisterExit:
@@ -78,7 +80,7 @@ class _ExitClass:
         Does not verify that the getter is finished.
         """
         if _DebugExit:
-            print "HTTPGet._Exit.removeTransfer(%s)" % (httpGetter,)
+            print("HTTPGet._Exit.removeTransfer(%s)" % (httpGetter,))
         self.transferDict.pop(httpGetter)
     
     def abortAll(self):
@@ -86,14 +88,14 @@ class _ExitClass:
         Meant to be registered with atexit.
         """
         if _DebugExit:
-            print "HTTPGet._Exit.abortAll()"
+            print("HTTPGet._Exit.abortAll()")
         if not self.transferDict:
             return
 
         transferList = self.transferDict.keys()
         for xfer in transferList:
             if _DebugExit:
-                print "HTTGet._Exit: aborting %s" % (xfer,)
+                print("HTTGet._Exit: aborting %s" % (xfer,))
             xfer.abort()
 
         # wait a few seconds for all to end
@@ -104,11 +106,11 @@ class _ExitClass:
             nWaits += 1
             if nWaits > maxWaits:
                 if _DebugExit:
-                    print "HTTGet._Exit: timed out while waiting for aborts to finish"
+                    print("HTTGet._Exit: timed out while waiting for aborts to finish")
                 break
         else:
             if _DebugExit:
-                print "HTTGet._Exit: all aborts finished"
+                print("HTTGet._Exit: all aborts finished")
 _ExitObj = _ExitClass()
 
 
@@ -237,7 +239,7 @@ class HTTPGet(RO.AddCallback.BaseMixin):
         If state is not Queued, raises RuntimeError
         """
         if _Debug:
-            print "%s.start()" % (self,)
+            print("%s.start()" % (self,))
         if self._state != self.Queued:
             raise RuntimeError("Cannot start; state = %r not Queued" % (self._state,))
 
@@ -249,13 +251,13 @@ class HTTPGet(RO.AddCallback.BaseMixin):
     
             # open output file
             if _Debug:
-                print "HTTPGet: opening output file %r" % (self.toPath,)
+                print("HTTPGet: opening output file %r" % (self.toPath,))
             try:
                 self._tclFile = self._tkApp.call('open', self.toPath, "w")
                 self._createdFile = True
                 if self.isBinary:
                     self._tkApp.call('fconfigure', self._tclFile, "-encoding", "binary", "-translation", "binary")
-            except Tkinter.TclError, e:
+            except Tkinter.TclError as e:
                 raise RuntimeError("Could not open %r: %s" % (self.toPath, e))
             
             # start http transfer
@@ -263,7 +265,7 @@ class HTTPGet(RO.AddCallback.BaseMixin):
             progressCallback = RO.TkUtil.TclFunc(self._httpProgressCallback, debug=_Debug)
             self._tclCallbacks = (doneCallback, progressCallback)
             if _Debug:
-                print "HTTPGet: creating http connection"
+                print("HTTPGet: creating http connection")
             self._tclHTTPConn = self._tkApp.call(
                 '::http::geturl', self.fromURL,
                 '-channel', self._tclFile,
@@ -272,7 +274,7 @@ class HTTPGet(RO.AddCallback.BaseMixin):
                 '-binary', self.isBinary,
                 '-timeout', self.timeLimMS
             )
-        except Exception, e:
+        except Exception as e:
             self._setState(self.Failed, RO.StringUtil.strFromException(e))
             return
 
@@ -283,7 +285,7 @@ class HTTPGet(RO.AddCallback.BaseMixin):
         Silently fails if the transaction has already completed
         """
         if _Debug:
-            print "%s.abort()" % (self,)
+            print("%s.abort()" % (self,))
         if self.isDone:
             return
         elif self._state == self.Queued:
@@ -297,7 +299,7 @@ class HTTPGet(RO.AddCallback.BaseMixin):
         self._setState(self.Aborting)
         self._tkApp.call("::http::reset", self._tclHTTPConn)
         if _Debug:
-            print "http connection reset"
+            print("http connection reset")
 
     @property
     def errMsg(self):
@@ -352,7 +354,7 @@ class HTTPGet(RO.AddCallback.BaseMixin):
         Raise RuntimeError if newState unknown.
         """
         if _Debug:
-            print "%s._setState(newState=%s, errmsg=%r)" % (self, newState, errMsg)
+            print("%s._setState(newState=%s, errmsg=%r)" % (self, newState, errMsg))
         # if state is not valid, reject
         if self.isDone:
             return
@@ -389,30 +391,30 @@ class HTTPGet(RO.AddCallback.BaseMixin):
         If state in (Aborted, Failed), delete the output file.
         """
         if _Debug:
-            print "%s._cleanup()"
+            print("%s._cleanup()")
         for tclFunc in self._tclCallbacks:
             if _Debug:
-                print "deregister %s" % (tclFunc,)
+                print("deregister %s" % (tclFunc,))
             tclFunc.deregister()
         if self._tclHTTPConn != None:
             self._tkApp.call("::http::cleanup", self._tclHTTPConn)
             self._tclHTTPConn = None
             if _Debug:
-                print "http connection cleaned up"
+                print("http connection cleaned up")
         if self._tclFile:
             self._tkApp.call("close", self._tclFile)
             self._tclFile = None
             if _Debug:
-                print "output file closed"
+                print("output file closed")
         
         if self._createdFile and self._state in (self.Aborted, self.Failed):
             try:
                 os.remove(self.toPath)
                 if _Debug:
-                    print "deleted output file"
-            except OSError, e:
+                    print("deleted output file")
+            except OSError as e:
                 if _Debug:
-                    print "failed to delete output file: %s" % (e,)
+                    print("failed to delete output file: %s" % (e,))
 
     def _httpDoneCallback(self, token=None):
         """Called when the http transfer is finished.
@@ -422,11 +424,11 @@ class HTTPGet(RO.AddCallback.BaseMixin):
             return
         
         if _Debug:
-            print "%s.httpDoneCallback()" % (self,)
-            print "status=%r" % (self._tkApp.call('::http::status', self._tclHTTPConn),)
-            print "code=%r" % (self._tkApp.call('::http::code', self._tclHTTPConn),)
-            print "ncode=%r" % (self._tkApp.call('::http::ncode', self._tclHTTPConn),)
-            print "error=%r" % (self._tkApp.call('::http::error', self._tclHTTPConn),)
+            print("%s.httpDoneCallback()" % (self,))
+            print("status=%r" % (self._tkApp.call('::http::status', self._tclHTTPConn),))
+            print("code=%r" % (self._tkApp.call('::http::code', self._tclHTTPConn),))
+            print("ncode=%r" % (self._tkApp.call('::http::ncode', self._tclHTTPConn),))
+            print("error=%r" % (self._tkApp.call('::http::error', self._tclHTTPConn),))
         
         httpState = self._tkApp.call('::http::status', self._tclHTTPConn)
         errMsg = None
@@ -436,7 +438,7 @@ class HTTPGet(RO.AddCallback.BaseMixin):
                 newState = self.Done
             else:
                 if _Debug:
-                    print "status ok but code=%s not 200" % (codeNum,)
+                    print("status ok but code=%s not 200" % (codeNum,))
                 newState = self.Failed
                 errMsg = self._tkApp.call('::http::code', self._tclHTTPConn)
         elif httpState == "eof":
@@ -461,13 +463,13 @@ class HTTPGet(RO.AddCallback.BaseMixin):
         """http callback function.
         """
         if _Debug:
-            print "%s._httpProgressCallback(totBytes=%r, readBytes=%r)" % (self, totBytes, readBytes)
+            print("%s._httpProgressCallback(totBytes=%r, readBytes=%r)" % (self, totBytes, readBytes))
 
         self._totBytes = int(totBytes)
         self._lastReadBytes = self._readBytes
         self._readBytes = int(readBytes)
         if _Debug and not self._didPrintBlockSize and self._readBytes:
-            print "%s block size=%s" % (self, self._readBytes - self._lastReadBytes)
+            print("%s block size=%s" % (self, self._readBytes - self._lastReadBytes))
             self._didPrintBlockSize = True
 
         newTime = time.time()
@@ -485,7 +487,7 @@ class HTTPGet(RO.AddCallback.BaseMixin):
         Raise RuntimeError or IOError if anything is wrong.
         """
         if _Debug:
-            print "%s._toPrep()" % (self,)
+            print("%s._toPrep()" % (self,))
         # if output file exists and not overwrite, complain
         if not self.overwrite and os.path.exists(self.toPath):
             raise RuntimeError("toPath %r already exists" % (self.toPath,))
@@ -498,12 +500,12 @@ class HTTPGet(RO.AddCallback.BaseMixin):
                 # create the directory or fail, depending on createDir
                 if self.createDir:
                     if _Debug:
-                        print "%s._toPrep creating directory %r" % (self, toDir)
+                        print("%s._toPrep creating directory %r" % (self, toDir))
                     os.makedirs(toDir)
                 else:
-                    raise RuntimeError, "directory %r does not exist" % (toDir,)
+                    raise RuntimeError("directory %r does not exist" % (toDir,))
             elif not os.path.isdir(toDir):
-                raise RuntimeError, "%r is a file, not a directory" % (toDir,)
+                raise RuntimeError("%r is a file, not a directory" % (toDir,))
 
 if __name__ == "__main__":
     root = Tkinter.Tk()
@@ -515,11 +517,11 @@ if __name__ == "__main__":
     _DebugExit = True
     
     def stateCallback(httpObj):
-        print "state =", httpObj.state,
-        print "read %s of %s bytes" % tuple(httpObj.bytes)
+        print("state =", httpObj.state, end=' ')
+        print("read %s of %s bytes" % (httpObj.readBytes, httpObj.totBytes))
         if httpObj.isDone:
             if httpObj.errMsg:
-                print "error message =", httpObj.errMsg
+                print("error message =", httpObj.errMsg)
             root.quit()
             
     httpObj = HTTPGet(

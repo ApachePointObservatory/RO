@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-from __future__ import generators
+from __future__ import absolute_import, division, print_function
 """Operating system utilities
 
 History:
@@ -22,6 +21,8 @@ History:
 2011-09-09 ROwen    Misfeature fix: findFiles could return paths that start with "./".
 2011-10-11 ROwen    findFiles: document recursionDepth argument.
 """
+__all__ = ["delDir", "expandPath", "findFiles", "getResourceDir", "removeDupPaths", "splitPath", "openUniv"]
+
 import os.path
 import sys
 import fnmatch

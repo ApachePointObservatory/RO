@@ -1,13 +1,16 @@
 #!/usr/bin/env python
+from __future__ import absolute_import, division, print_function
 """
 History:
 2004-05-18 ROwen    Stop importing RO.PhysConst; it wasn't used.
 2007-04-24 ROwen    Converted from Numeric to numpy.
 """
+__all__ = ["AppGeoData"]
+
 from RO.Astro import llv
 from RO.Astro import Tm
 
-class AppGeoData (object):
+class AppGeoData(object):
     """Position-independent data for conversion
     between ICRS and apparent geocentric coordinates.
     

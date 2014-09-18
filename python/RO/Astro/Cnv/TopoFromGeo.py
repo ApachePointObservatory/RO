@@ -1,16 +1,19 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """
 History:
 2002-07-22 ROwen    Converted to Python from the TCC's cnv_AppGeo2AppTopo 7-3.
 2004-05-18 ROwen    Stopped importing math; it wasn't used.
 2007-04-24 ROwen    Converted from Numeric to numpy.
 """
+__all__ = ["topoFromGeo"]
+
 import numpy
 import RO.MathUtil
 from RO.Astro import llv
-from AzAltFromHADec import *
+from AzAltFromHADec import azAltFromHADec
 
-def topoFromGeo (appGeoP, last, obsData):
+def topoFromGeo(appGeoP, last, obsData):
     """
     Converts apparent geocentric coordinates to apparent topocentric coordinates
     (not corrected for refraction).
@@ -60,7 +63,7 @@ def topoFromGeo (appGeoP, last, obsData):
 if __name__ == "__main__":
     import RO.SeqUtil
     from ObserverData import ObserverData
-    print "testing topoFromGeo"
+    print("testing topoFromGeo")
     # test data is formatted as follows:
     # a list of entries, each consisting of:
     # - the input argument
@@ -89,6 +92,6 @@ if __name__ == "__main__":
     for testInput, expectedOutput in testData:
         actualOutput = topoFromGeo(*testInput)
         if RO.SeqUtil.matchSequences(actualOutput, expectedOutput, rtol=1.0e-10):
-            print "failed on input:", testInput
-            print "expected output:\n", expectedOutput
-            print "actual output:\n", actualOutput
+            print("failed on input:", testInput)
+            print("expected output:\n", expectedOutput)
+            print("actual output:\n", actualOutput)

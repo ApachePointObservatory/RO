@@ -1,7 +1,8 @@
-from __future__ import division, absolute_import
-from RO.Astro import llv
+from __future__ import absolute_import, division, print_function
 
 __all__ = ["mjdFromEpJ"]
+
+from RO.Astro import llv
 
 def mjdFromEpJ (epj):
     """

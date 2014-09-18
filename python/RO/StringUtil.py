@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """String utilities, with an emphasis on support for sexagesimal numbers
 (e.g. degrees:minutes:seconds).
 
@@ -44,6 +45,7 @@ History:
 2008-05-02 ROwen    Made prettyDict unicode-safe by using repr.
 2008-11-14 ROwen    Added unquoteStr.
 2014-05-07 ROwen    Changed is str test to use basestring.
+2014-09-17 ROwen    Modified to test for Exception instead of StandardError 
 """
 import re
 
@@ -351,7 +353,7 @@ def splitDMSStr (dmsStr):
     assert isinstance(dmsStr, basestring)
     m = _DegRE.match(dmsStr) or _DegMinRE.match(dmsStr) or _DegMinSecRE.match(dmsStr)
     if m == None:
-        raise ValueError, "splitDMSStr cannot parse %s as a sexagesimal string" % (dmsStr)
+        raise ValueError("splitDMSStr cannot parse %s as a sexagesimal string" % (dmsStr))
     matchSet = list(m.groups())
     if matchSet[-1] == None:
         matchSet[-1] = ''
@@ -374,7 +376,7 @@ def floatFromStr(astr, allowExp=1):
     
     
     if match == None:
-        raise ValueError, "cannot convert :%s: to a float" % (astr)
+        raise ValueError("cannot convert :%s: to a float" % (astr))
         
     try:
         return float(astr)
@@ -391,7 +393,7 @@ def intFromStr(astr):
         raises ValueError if astr cannot be converted
     """
     if _IntRE.match(astr) == None:
-        raise ValueError, "cannot convert :%s: to an integer" % (astr)
+        raise ValueError("cannot convert :%s: to an integer" % (astr))
 
     try:
         return int(astr)
@@ -564,18 +566,18 @@ def _assertTest():
             locAssert("%r", dmsStr02[1], dmsStrFromDeg, degVal, 3, 1)
             locAssert("%r", dmsStr02[2], dmsStrFromDeg, degVal, 3, 2)
             if not isOK:
-                print "unexpected success on %r" % testStr
+                print("unexpected success on %r" % testStr)
                 nErrors += 1
-        except StandardError, e:
+        except Exception as e:
             if isOK:
                 raise
-                print "unexpected failure on %r\n\t%s\nskipping other tests on this value" % (testStr, e)
+                print("unexpected failure on %r\n\t%s\nskipping other tests on this value" % (testStr, e))
                 nErrors += 1
     
     if nErrors == 0:
-        print "RO.StringUtil passed"
+        print("RO.StringUtil passed")
     else:
-        print "RO.StringUtil failed with %d errors" % nErrors
+        print("RO.StringUtil failed with %d errors" % nErrors)
             
 
 def _printTest(dmsSet = None):
@@ -586,7 +588,7 @@ def _printTest(dmsSet = None):
     The output is in the format used by _assertTest, but please use this with great caution.
     You must examine the output very carefully to confirm it is correct before updating _assertTest!
     """
-    print "Exercising RO string utilities"
+    print("Exercising RO string utilities")
     if not dmsSet:
         dmsSet = (
             ("::", ""),
@@ -627,11 +629,11 @@ def _printTest(dmsSet = None):
                 outDMSStr = []
                 for prec in range(3):
                     outDMSStr.append(dmsStrFromDeg(deg, precision=prec))
-                print "[%r, %r, True, %r, %r, %r, %r, %r]," % (testStr, commentStr, itemList, deg, sec, neatStr, outDMSStr)
-            except StandardError, e:
-                print "unexpected failure on %r (%s); error = %s" % (testStr, commentStr, e)
+                print("[%r, %r, True, %r, %r, %r, %r, %r]," % (testStr, commentStr, itemList, deg, sec, neatStr, outDMSStr))
+            except Exception as e:
+                print("unexpected failure on %r (%s); error = %s" % (testStr, commentStr, e))
         else:
-            print "[%r, %r, False, %r, %r, %r, %r, %r]," % tuple([testStr, commentStr] + [None]*5)
+            print("[%r, %r, False, %r, %r, %r, %r, %r]," % tuple([testStr, commentStr] + [None]*5))
 
 if __name__ == "__main__":
     doPrint = False

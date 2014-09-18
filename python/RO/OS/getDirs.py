@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """Get useful directories for Mac (X or Classic), unix
 or modern versions of Windows. Defines:
 
@@ -71,10 +72,13 @@ History:
 2005-10-05 ROwen    Added inclNone argument to getXXXDirs functions.
                     Documented getAppDirs.
                     Improved test code.
-2005-10-06 ROwen    Make sure unix getHomeDirs can never return [None]
+2005-10-06 ROwen    Make sure unix getHomeDir can never return [None]
                     (which could happen on Windows with missing required modules).
 2006-02-28 ROwen    Bug fix: getHomeDir did not work on Windows.
 """
+__all__ = ["PlatformName", "getAppDirs", "getAppSuppDirs", "getDocsDir", "getHomeDir",
+    "getPrefsDirs", "getPrefsPrefix"]
+
 import os
 
 PlatformName = None
@@ -140,13 +144,13 @@ def getPrefsPrefix():
 
 
 if __name__ == '__main__':
-    print 'PlatformName     = %r' % PlatformName
-    print 'getHomeDir()     = %r' % getHomeDir()
-    print 'getPrefsPrefix() = %r' % getPrefsPrefix()
-    print
+    print('PlatformName     = %r' % PlatformName)
+    print('getHomeDir()     = %r' % getHomeDir())
+    print('getPrefsPrefix() = %r' % getPrefsPrefix())
+    print()
     for inclNone in (False, True):
-        print 'getAppDirs(%s)     = %r' % (inclNone, getAppDirs(inclNone))
-        print 'getAppSuppDirs(%s) = %r' % (inclNone, getAppSuppDirs(inclNone))
-        print 'getPrefsDirs(%s)   = %r' % (inclNone, getPrefsDirs(inclNone))
-    print 'getDocsDir()         = %r' % getDocsDir()
+        print('getAppDirs(%s)     = %r' % (inclNone, getAppDirs(inclNone)))
+        print('getAppSuppDirs(%s) = %r' % (inclNone, getAppSuppDirs(inclNone)))
+        print('getPrefsDirs(%s)   = %r' % (inclNone, getPrefsDirs(inclNone)))
+    print('getDocsDir()         = %r' % getDocsDir())
 

@@ -1,3 +1,4 @@
+from __future__ import absolute_import, division, print_function
 """From Scott David Daniels <http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/52549>.
 My changes include:
 - Used a name suggested by Eric Brunel
@@ -8,6 +9,8 @@ History:
 2002-12-20 ROwen    Bug fix: due to a typo, _GC would fail if keyword arguments were used
                     both initially and in the final call. Thanks to pychecker for finding this.
 """
+__all__ = ["GenericCallback"]
+
 def GenericCallback(callback, *firstArgs, **firstKWArgs):
     """Returns a callable object that when called with (*args, **kwArgs),
     calls a callback function with arguments: (*(firstArgs + args), **allKWArgs),

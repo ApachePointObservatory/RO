@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """Convert astronomical positions between various coordinate systems.
 
 The CnvObj code is getting ugly enough (I had to add ICRS<->ICRS2000 cases
@@ -25,23 +26,24 @@ History:
                     (thanks to Emmanouil Angelakis for the report).
 2007-04-24 ROwen    Converted from Numeric to numpy.
 """
+__all__ = ["coordConv"]
+
 import numpy
 import RO.CoordSys
 from RO.Astro import Tm
-from AppGeoData import *
-from FK4FromICRS import *
-from FK5Prec import *
-from GalFromICRS import *
-from GeoFromICRS import *
-from GeoFromTopo import *
-from ICRSFromFK4 import *
-from ICRSFromFixedFK4 import *
-from ICRSFromGal import *
-from ICRSFromGeo import *
-from ObserverData import *
-from ObsFromTopo import *
-from TopoFromGeo import *
-from TopoFromObs import *
+from AppGeoData import AppGeoData
+from FK4FromICRS import fk4FromICRS
+from FK5Prec import fk5Prec
+from GalFromICRS import galFromICRS
+from GeoFromICRS import geoFromICRS
+from GeoFromTopo import geoFromTopo
+from ICRSFromFK4 import icrsFromFK4
+from ICRSFromFixedFK4 import icrsFromFixedFK4
+from ICRSFromGal import icrsFromGal
+from ICRSFromGeo import icrsFromGeo
+from ObsFromTopo import obsFromTopo
+from TopoFromGeo import topoFromGeo
+from TopoFromObs import topoFromObs
 
 _CSysList = (RO.CoordSys.ICRS, RO.CoordSys.FK5, RO.CoordSys.FK4, RO.CoordSys.Galactic,
     RO.CoordSys.Geocentric, RO.CoordSys.Topocentric, RO.CoordSys.Observed,
@@ -95,7 +97,7 @@ class _CnvObj (object):
             for toSys in _CSysList:
                 if toSys == fromSys:
                     continue
-                if methDict.has_key(toSys):
+                if toSys in methDict:
                     continue
                 funcName = "%sFrom%s" % (toSys, fromSys)
                 if hasattr(_CnvObj, funcName):
@@ -208,7 +210,7 @@ class _CnvObj (object):
     
     def TopocentricFromGeocentric(self, fromP, dumV):
         if self.obsData == None:
-            raise ValueError, "must specify obsData to cnvert to Topocentric from Geocentric"
+            raise ValueError("must specify obsData to cnvert to Topocentric from Geocentric")
         return (
             topoFromGeo(fromP, Tm.lastFromUT1(self.toDate, self.obsData.longitude), self.obsData),
             _CnvObj.ZeroV,
@@ -216,7 +218,7 @@ class _CnvObj (object):
     
     def GeocentricFromTopocentric(self, fromP, dumV):
         if self.obsData == None:
-            raise ValueError, "must specify obsData to convert to Geocentric from Topocentric"
+            raise ValueError("must specify obsData to convert to Geocentric from Topocentric")
         return (
             geoFromTopo(fromP, Tm.lastFromUT1(self.fromDate, self.obsData.longitude), self.obsData),
             _CnvObj.ZeroV,
@@ -224,13 +226,13 @@ class _CnvObj (object):
     
     def ObservedFromTopocentric(self, fromP, dumV):
         if self.refCo == None:
-            raise ValueError, "must specify refCo to convert to Observed from Topocentric"
+            raise ValueError("must specify refCo to convert to Observed from Topocentric")
         pos, tooLow = obsFromTopo(fromP, self.refCo)
         return (pos, _CnvObj.ZeroV)
     
     def TopocentricFromObserved(self, fromP, dumV):
         if self.refCo == None:
-            raise ValueError, "must specify refCo to convert to Topocentric from Observed"
+            raise ValueError("must specify refCo to convert to Topocentric from Observed")
         pos, tooLow = topoFromObs(fromP, self.refCo)
         return (pos, _CnvObj.ZeroV)
 

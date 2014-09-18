@@ -1,3 +1,4 @@
+from __future__ import absolute_import, division, print_function
 """Generate a series of ID numbers.
 
 Note: this would be a bit simpler as a generator instead of a class,
@@ -8,8 +9,9 @@ History:
 2005-06-08 ROwen    Added error checking for inconsistent inputs.
                     Added method __repr__.
                     Changed to a new style class.
-                    
 """
+__all__ = ["IDGen"]
+
 class IDGen(object):
     """generate a sequence of integer ID numbers, wrapping around if desired.
     
@@ -32,6 +34,9 @@ class IDGen(object):
             self.nSteps = (wrapVal - startVal) // incr
             if self.nSteps < 1:
                 raise ValueError("no id numbers in range %s:%s:%s" % (startVal, wrapVal, incr))
+
+    def __iter__(self):
+        return self
     
     def next(self):
         """Return the next ID number."""

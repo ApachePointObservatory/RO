@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """
 A widget showing a set of options as checkbuttons.
 
@@ -179,7 +180,7 @@ if __name__ == "__main__":
     root = PythonTk.PythonTk()
 
     def doPrint():
-        print "getString() = %r" % (optFrame.getString(),)
+        print("getString() = %r" % (optFrame.getString(),))
     
     def setEnable(wdg=None):
         optFrame.setEnable(enableButton.getBool())

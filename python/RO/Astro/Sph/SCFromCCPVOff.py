@@ -1,9 +1,13 @@
 #!/usr/bin/env python
-from AngSideAng import *
-from SCFromCCPV import *
-from SCFromCC import *
+from __future__ import division, print_function
 
-def scFromCCPVOff (p, v, offP):
+__all__ = ["scFromCCPVOff"]
+
+from AngSideAng import angSideAng
+from SCFromCCPV import scFromCCPV
+from SCFromCC import scFromCC
+
+def scFromCCPVOff(p, v, offP):
     """
     Converts cartesian position, velocity and offset to spherical coordinates
     (see also SCFromCC and SCFromCCPV).
@@ -39,13 +43,13 @@ def scFromCCPVOff (p, v, offP):
     2002-08-22 ROwen  Converted to Python from the TCC's sph_CCPVOff2SC 6-1.
     """
     #  convert p and v from cartesian to spherical
-    pos, pm, parlax, radVel, atPole = scFromCCPV (p, v)
+    pos, pm, parlax, radVel, atPole = scFromCCPV(p, v)
     
     #  convert offP from cartesian to spherical
-    offPos, magOffP, offAtPole = scFromCC (offP)
+    offPos, magOffP, offAtPole = scFromCC(offP)
     
     #  compute offset direction and magnitude
-    ang_A, side_bb, ang_C, offAtPole2 = angSideAng (
+    ang_A, side_bb, ang_C, offAtPole2 = angSideAng(
         90.0 - pos[1], offPos[0] - pos[0], 90.0 - offPos[1],
     )
     offMag = side_bb
@@ -60,7 +64,7 @@ def scFromCCPVOff (p, v, offP):
 
 if __name__ == "__main__":
     import RO.SeqUtil
-    print "testing scFromCCPVOff"
+    print("testing scFromCCPVOff")
     # test data is formatted as follows:
     # a list of entries, each consisting of:
     # - the input argument
@@ -96,6 +100,6 @@ if __name__ == "__main__":
         actualFlat = RO.SeqUtil.flatten(actualOutput)
         expectedFlat = RO.SeqUtil.flatten(expectedOutput)
         if RO.SeqUtil.matchSequences(actualFlat, expectedFlat, rtol=1.0e-10, atol=1.0e-10):
-            print "failed on input:", testInput
-            print "expected output:\n", expectedOutput
-            print "actual output:\n", actualOutput
+            print("failed on input:", testInput)
+            print("expected output:\n", expectedOutput)
+            print("actual output:\n", actualOutput)

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """FTP download with Tkinter-based progress reporting
 
 Downloads files given the url and destination path.
@@ -50,10 +51,8 @@ History:
 __all__ = ['FTPLogWdg']
 
 import atexit
-import os
 import sys
 import traceback
-import urllib
 import weakref
 import Bindings
 import Tkinter
@@ -82,7 +81,7 @@ class FTPCallback(object):
         if self.callFunc:
             try:
                 self.callFunc(self.ftpGet)
-            except Exception, e:
+            except Exception as e:
                 errMsg = "ftpGet callback %r failed: %s" % (self.callFunc, e)
                 sys.stderr.write(errMsg + "\n")
                 traceback.print_exc(file=sys.stderr)
@@ -93,7 +92,7 @@ class FTPCallback(object):
     def clear(self):
         """Clear the callback"""
         if _DebugMem:
-            print "FTPCallback(%s) clear" % (self.ftpGet,)
+            print("FTPCallback(%s) clear" % (self.ftpGet,))
         self.ftpGet = None
         self.callFunc = None
     
@@ -128,6 +127,8 @@ class FTPLogWdg(Tkinter.Frame):
         
         self.dispList = []  # list of displayed ftpGets
         self.getQueue = []  # list of unfinished (ftpGet, stateLabel, ftpCallback) triples
+
+        self._timer = Timer()
         
         self.yscroll = Tkinter.Scrollbar (
             master = self,
@@ -260,7 +261,7 @@ class FTPLogWdg(Tkinter.Frame):
         self.text.insert("end", ftpGet.dispStr)
         self.dispList.append(ftpGet)
         
-        self._timer = Timer()
+        self._timer.cancel()
 
         # append ftpGet to the queue
         ftpCallback = FTPCallback(ftpGet, callFunc)
@@ -349,7 +350,7 @@ class FTPLogWdg(Tkinter.Frame):
             return
         objID = id(obj)
         def refGone(ref=None, objID=objID, objName=objName):
-            print "%s deleting %s" % (self.__class__.__name__, objName,)
+            print("%s deleting %s" % (self.__class__.__name__, objName,))
             del(self._memDebugDict[objID])
 
         self._memDebugDict[objID] = weakref.ref(obj, refGone)
@@ -440,7 +441,7 @@ class FTPLogWdg(Tkinter.Frame):
 
 
 if __name__ == "__main__":
-    from PythonTk import *
+    from PythonTk import PythonTk
     root = PythonTk()
 
     row = 0

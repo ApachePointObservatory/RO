@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """Widget to manage named presets of an input container list
 
 History:
@@ -8,16 +9,17 @@ History:
 2014-03-14 ROwen    Added helpText and helpURL arguments.
 2014-05-07 ROwen    Added autoUpdate argument and modified to use RO.Wdg.Menubutton
 """
+__all__ = ["InputContPresetsWdg"]
+
 import functools
 import Tkinter
+
 import RO.TkUtil
 import Entry
 import Label
 import InputDialog
 import OptionMenu
 import Menubutton
-
-__all__ = ["InputContPresetsWdg"]
 
 class InputContPresetsWdg(Menubutton.Menubutton):
     """Widget to manage named presets for an input container list

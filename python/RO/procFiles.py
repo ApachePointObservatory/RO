@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import absolute_import, division, print_function
 """procFiles calls a user-supplied function "func" to process a set of files one by one.
 The processed data is typically concatenated into one output file, but this behavior
 is controlled by outPath.
@@ -141,8 +142,8 @@ History:
                     Continue on error; report traceback unless RuntimeError.
 2005-03-15 ROwen    Bug fix: was setting outPath to "" instead of outDir if outFile="".
 """
-import fnmatch
-import types
+__all__ = ["procFiles"]
+
 import os.path
 import sys
 import traceback
@@ -190,7 +191,7 @@ def procFiles (
     # check outDir or fill in default
     if outDir:
         if not os.path.exists(outDir):
-            raise RuntimeError, "directory %r does not exist" % (outDir,)
+            raise RuntimeError("directory %r does not exist" % (outDir,))
     else:
         outDir = os.curdir
     
@@ -250,8 +251,8 @@ def procFiles (
                 sys.stderr.write ("Aborted during file %r\n" % (inPath,))
                 break
             
-            except RuntimeError, err:
-                sys.stderr.write ("Failed on file %r with error: %s\n" % (inPath, err))
+            except RuntimeError as e:
+                sys.stderr.write ("Failed on file %r with error: %s\n" % (inPath, e))
     
             except Exception:
                 sys.stderr.write ("Failed on file %r with error:\n" % (inPath,))
@@ -281,7 +282,7 @@ def testFunc (fName, isFirst=False, isLast=False, outPath=""):
         (fName, outPath, isFirst, isLast))
 
     if isFirst:
-        print "***** Beginning of all files *****\n"
+        print("***** Beginning of all files *****\n")
 
     # echo line of file
     while True:
@@ -291,7 +292,7 @@ def testFunc (fName, isFirst=False, isLast=False, outPath=""):
         sys.stdout.write(data)
 
     if isLast:
-        print "***** End of all files *****\n"
+        print("***** End of all files *****\n")
 
 if __name__ == '__main__':
     # test self on self

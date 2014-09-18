@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """
 A set of checkbuttons that hides or shows widgets, e.g. option setting panels.
 
@@ -26,7 +27,6 @@ History:
 __all__ = ['OptionPanelControl']
 
 import Tkinter
-import RO.Alg
 from Checkbutton import Checkbutton
 from CtxMenu import CtxMenuMixin
 

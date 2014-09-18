@@ -1,10 +1,13 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """
 History:
 2002-07-22 ROwen    Converted to Python from cnv_AppGeo2J 4-2.
 2002-12-23 ROwen    Fixed "failed to converge" message; thanks to pychecker.
 2007-04-24 ROwen    Converted from Numeric to numpy.
 """
+__all__ = ["icrsFromGeo"]
+
 import numpy
 import RO.MathUtil
 from RO.Astro import llv
@@ -17,7 +20,7 @@ _MaxIter = 20
 # are less than "_Accuracy", then the iteration has converged.
 _Accuracy = 1.0e-10
 
-def icrsFromGeo (appGeoP, agData):
+def icrsFromGeo(appGeoP, agData):
     """
     Converts apparent geocentric coordinates to ICRS.
     
@@ -81,9 +84,9 @@ def icrsFromGeo (appGeoP, agData):
         maxErr = max (abs (p2 - oldP2))
     # if no convergence, complain and exit
     if (itNum > _MaxIter):
-        raise RuntimeError, 'aberration correction failed to converge;' + \
+        raise RuntimeError('aberration correction failed to converge;' + \
             'after %s iterations; fractional error = %s, max allowed = %s' \
-            % (_MaxIter, maxErr, allowedErr)
+            % (_MaxIter, maxErr, allowedErr))
 
     # here is where the (iterative) correction for sun's gravity belongs
 
@@ -94,7 +97,7 @@ def icrsFromGeo (appGeoP, agData):
 if __name__ == "__main__":
     import RO.SeqUtil
     from AppGeoData import AppGeoData
-    print "testing icrsFromGeo"
+    print("testing icrsFromGeo")
     # test data is formatted as follows:
     # a list of entries, each consisting of:
     # - the input argument
@@ -124,8 +127,8 @@ if __name__ == "__main__":
         expectedFlat = RO.SeqUtil.flatten(expectedOutput)
         actualFlat = RO.SeqUtil.flatten(actualOutput)
         if RO.SeqUtil.matchSequences(actualFlat, expectedFlat, rtol=1.0e-9):
-            print "failed on input:", testInput
-            print "expected output:\n", expectedOutput
-            print "actual output:\n", actualOutput
+            print("failed on input:", testInput)
+            print("expected output:\n", expectedOutput)
+            print("actual output:\n", actualOutput)
 
 

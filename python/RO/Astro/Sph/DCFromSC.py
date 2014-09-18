@@ -1,12 +1,15 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """
 History:
 2002-07-23 R Owen.
 2007-04-24 ROwen    Changed Numeric to numpy in a doc string.
 """
-from CCFromSC import *
+__all__ = ["dcFromSC"]
 
-def dcFromSC (pos):
+from CCFromSC import ccFromSC
+
+def dcFromSC(pos):
     """Convert spherical coordinates to direction cosines, i.e. a unit vector.
 
     Inputs:
@@ -25,7 +28,7 @@ def dcFromSC (pos):
 
 if __name__ == "__main__":
     import RO.SeqUtil
-    print "testing dcFromSC"
+    print("testing dcFromSC")
     # test data is formatted as follows:
     # a list of entries, each consisting of:
     # - the input argument
@@ -42,6 +45,6 @@ if __name__ == "__main__":
     for testInput, expectedOutput in testData:
         actualOutput = dcFromSC(testInput)
         if RO.SeqUtil.matchSequences(actualOutput, expectedOutput, rtol=1.0e-14):
-            print "failed on input:", testInput
-            print "expected output:\n", expectedOutput
-            print "actual output:\n", actualOutput
+            print("failed on input:", testInput)
+            print("expected output:\n", expectedOutput)
+            print("actual output:\n", actualOutput)

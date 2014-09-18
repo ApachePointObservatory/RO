@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 r"""
 Interface for viewing images with the ds9 image viewer.
 Loosely based on XPA, by Andrew Williams.
@@ -151,14 +152,10 @@ __all__ = ["setup", "xpaget", "xpaset", "DS9Win"]
 
 import numpy
 import os
-import socket
 import time
 import warnings
 import RO.OS
-try:
-    import subprocess
-except ImportError:
-    import RO.Future.subprocess as subprocess
+import subprocess
 
 _DebugSetup = False
 
@@ -206,7 +203,6 @@ def _findApp(appName, subDirs = None, doRaise = True):
             else:
                 trialDir = appDir
             dirTrials.append(trialDir)
-            trialPath = os.path.join(trialDir, appName)
             if os.path.exists(os.path.join(trialDir, appName)):
                 _addToPATH(trialDir)
                 return trialDir
@@ -314,8 +310,8 @@ def _findDS9AndXPA():
         xpaDir = _findUnixApp("xpaget")
     
     if _DebugSetup:
-        print "_DirFromWhichToRunDS9=%r" % (_DirFromWhichToRunDS9,)
-        print "_DS9Path=%r" % (_DS9Path,)
+        print("_DirFromWhichToRunDS9=%r" % (_DirFromWhichToRunDS9,))
+        print("_DS9Path=%r" % (_DS9Path,))
     
     return (ds9Dir, xpaDir)
     
@@ -340,8 +336,8 @@ def setup(doRaise=False):
     try:
         ds9Dir, xpaDir = _findDS9AndXPA()
         if _DebugSetup:
-            print "ds9Dir=%r\nxpaDir=%r" % (ds9Dir, xpaDir)
-    except Exception, e:
+            print("ds9Dir=%r\nxpaDir=%r" % (ds9Dir, xpaDir))
+    except Exception as e:
         _SetupError = "RO.DS9 unusable: %s" % (e,)
         ds9Dir = xpaDir = None
     
@@ -518,7 +514,7 @@ def _splitDict(inDict, keys):
     """
     outDict = {}
     for key in keys:
-        if inDict.has_key(key):
+        if key in inDict:
             outDict[key] = inDict.pop(key)
     return outDict  
 

@@ -1,13 +1,16 @@
 #!/usr/bin/env python
+from __future__ import absolute_import, division, print_function
 """
 History
 2002-07-23 ROwen  Converted from TCC's sph_SC2CC 1-1.
 2007-04-24 ROwen    Converted from Numeric to numpy.
 """
+__all__ = ["ccFromSC"]
+
 import numpy
 import RO.MathUtil
 
-def ccFromSC (pos, magP):
+def ccFromSC(pos, magP):
     """
     Converts a spherical position to cartesian coordinates.
     
@@ -28,7 +31,7 @@ def ccFromSC (pos, magP):
 
 if __name__ == "__main__":
     import RO.SeqUtil
-    print "testing ccFromSC"
+    print("testing ccFromSC")
     # test data is formatted as follows:
     # a list of entries, each consisting of:
     # - the input argument
@@ -45,6 +48,6 @@ if __name__ == "__main__":
     for testInput, expectedOutput in testData:
         actualOutput = ccFromSC(*testInput)
         if RO.SeqUtil.matchSequences(actualOutput, expectedOutput, rtol=1.0e-14):
-            print "failed on input:", testInput
-            print "expected output:\n", expectedOutput
-            print "actual output:\n", actualOutput
+            print("failed on input:", testInput)
+            print("expected output:\n", expectedOutput)
+            print("actual output:\n", actualOutput)

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import absolute_import, division, print_function
 """Preferences for the RO.Wdg package.
 
 Note: call 
@@ -220,15 +221,15 @@ if __name__ == "__main__":
     setWdgPrefs()
     
     wdgPrefDict = getWdgPrefDict()
-    print "wdgDict:"
-    prefNames = wdgPrefDict.keys()
+    print("wdgDict:")
+    prefNames = list(wdgPrefDict.keys())
     prefNames.sort()
     for prefName in prefNames:
-        print "  %s: %r" % (prefName, wdgPrefDict[prefName].getValue())
-    print
-    print "sevPrefDict:"
+        print("  %s: %r" % (prefName, wdgPrefDict[prefName].getValue()))
+    print()
+    print("sevPrefDict:")
     sevPrefDict = getSevPrefDict()
     severities = sevPrefDict.keys()
     severities.sort()
     for severity in severities:
-        print "  %s: %r" % (severity, sevPrefDict[severity].getValue())
+        print("  %s: %r" % (severity, sevPrefDict[severity].getValue()))

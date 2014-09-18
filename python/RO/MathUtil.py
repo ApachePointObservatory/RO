@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+from __future__ import absolute_import, division, print_function
 """Math utilities by Russell Owen
 
 History:
@@ -23,6 +23,9 @@ History:
                     if too near the pole, but it did not do this reliably, if at all.
                     Changed to return theta = NaN (numpy.nan) if too near the pole.
 """
+__all__ = ["sind", "cosd", "tand", "asind", "acosd", "atand", "atan2d", "compareFloats", "checkRange",
+    "nint", "sign", "logEq", "logNE", "rot2D", "rThetaFromXY", "xyFromRTheta", "vecMag", "wrapCtr", "wrapPos"]
+
 import math
 import numpy
 from RO.PhysConst import RadPerDeg
@@ -92,29 +95,9 @@ def checkRange(value, minValue, maxValue, valDescr="value"):
     if value == None:
         return
     if maxValue != None and value > maxValue:
-        raise ValueError, "%s too large: %r > %r" % (valDescr, value, maxValue)
+        raise ValueError("%s too large: %r > %r" % (valDescr, value, maxValue))
     if minValue != None and value < minValue:
-        raise ValueError, "%s too small: %r < %r" % (valDescr, value, minValue)
-
-#The following were commented out 2001-01-10 because inf and nan
-#are not handled on Mac OS X (Python 2.2 from fink).
-#def isinf(num):
-#   """Returns true if num is inf.
-#   Commented out because it fails on Mac OS X.
-#   """
-#   # the second condition works around an apparent bug (MacPython 2.1.1)
-#   # whereby nan == any number or inf or nan
-#   return (num == inf) and (num != 0)
-#
-#def isnan(num):
-#   """Returns true if num is nan or inf.
-#   """
-#   if (nan == 0):
-#       # handles a bug in Python 2.0 and 2.1.1 whereby nan == any number or nan or inf
-#       return (num == inf) and (num == nan)
-#   else:
-#       # presumably the correct code if nan doesn't eaqual any number
-#       return (num == inf) or (num == nan)
+        raise ValueError("%s too small: %r < %r" % (valDescr, value, minValue))
 
 def nint(x, n=0):
     """Returns x rounded to the nearast multiple of 10**-n.
@@ -152,7 +135,7 @@ def logNE(a, b):
     """Returns 1 if the logical value of does not equal the logical value of b, 0 otherwise"""
     return (not a) != (not b)
 
-def rot2D (xyVec, angDeg):
+def rot2D(xyVec, angDeg):
     """Rotates a 2-dimensional vector by a given angle.
     
     Inputs:

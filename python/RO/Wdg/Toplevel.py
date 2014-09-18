@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import absolute_import, division, print_function
 """RO.Wdg.Toplevel wdigets are windows with some enhanced functionality, including:
 - Remembers last geometry if closed or iconified
 - Can record geometry, visibility and widget state in a file
@@ -56,13 +57,12 @@ History:
 2012-07-10 ROwen    Removed used of update_idletasks; used a different technique to fix the problem
                     that windows that are only resizable in one dimension are sometimes drawn incorrectly.
 2014-02-12 ROwen    Added getNamesInGeomFile method to ToplevelSet.
+2014-09-17 ROwen    Now requires json (will not use simplejson).
+                    Modified to test for Exception instead of StandardError.
 """
 __all__ = ['tl_CloseDestroys', 'tl_CloseWithdraws', 'tl_CloseDisabled', 'Toplevel', 'ToplevelSet']
 
-try:
-    import json
-except Exception:
-    import simplejson as json
+import json
 import os.path
 import sys
 import traceback
@@ -156,7 +156,7 @@ class Toplevel(Tkinter.Toplevel):
             try:
                 self.__wdg = wdgFunc(self)
                 self.__wdg.pack(expand="yes", fill="both")
-            except Exception, e:
+            except Exception as e:
                 sys.stderr.write("Could not create window %r: %s\n" % (title, RO.StringUtil.strFromException(e)))
                 traceback.print_exc(file=sys.stderr)
                 raise
@@ -328,11 +328,11 @@ class Toplevel(Tkinter.Toplevel):
     
     def __printInfo(self):
         """A debugging tool prints info to the main window"""
-        print "info for RO.Wdg.Toplevel %s" % self.wm_title()
-        print "getGeometry = %r" % (self.getGeometry(),)
-        print "geometry = %r" % (self.geometry())
-        print "width, height = %r, %r" % (self.winfo_width(), self.winfo_height())
-        print "req width, req height = %r, %r" % (self.winfo_reqwidth(), self.winfo_reqheight())
+        print("info for RO.Wdg.Toplevel %s" % self.wm_title())
+        print("getGeometry = %r" % (self.getGeometry(),))
+        print("geometry = %r" % (self.geometry()))
+        print("width, height = %r, %r" % (self.winfo_width(), self.winfo_height()))
+        print("req width, req height = %r, %r" % (self.winfo_reqwidth(), self.winfo_reqheight()))
 
     def __str__(self):
         return "Toplevel(%s)" % (self.wm_title(),)
@@ -393,7 +393,7 @@ class ToplevelSet(object):
         """Adds a new Toplevel instance to the set.
         """
         if self.getToplevel(name):
-            raise RuntimeError, "toplevel %r already exists" % (name,)
+            raise RuntimeError("toplevel %r already exists" % (name,))
         self.tlDict[name] = toplevel
     
     def createToplevel(self, 
@@ -423,7 +423,7 @@ class ToplevelSet(object):
         Return the new Toplevel
         """
         if self.getToplevel(name):
-            raise RuntimeError, "toplevel %r already exists" % (name,)
+            raise RuntimeError("toplevel %r already exists" % (name,))
         if defGeom:
             self.defGeomDict[name] = defGeom
         if defVisible == None:
@@ -514,7 +514,7 @@ class ToplevelSet(object):
     def makeVisible(self, name):
         tl = self.getToplevel(name)
         if not tl:
-            raise RuntimeError, "No such window %r" % (name,)
+            raise RuntimeError("No such window %r" % (name,))
         tl.makeVisible()
     
     def readGeomVisFile(self, fileName=None, doCreate=False):
@@ -534,14 +534,14 @@ class ToplevelSet(object):
         """
         fileName = fileName or self.defFileName
         if not fileName:
-            raise RuntimeError, "No geometry file specified and no default"
+            raise RuntimeError("No geometry file specified and no default")
         
         if not os.path.isfile(fileName):
             if doCreate:
                 try:
                     outFile = open(fileName, "w")
                     outFile.close()
-                except StandardError, e:
+                except Exception as e:
                     sys.stderr.write ("Could not create geometry file %r; error: %s\n" % (fileName, RO.StringUtil.strFromException(e)))
                 sys.stderr.write ("Created blank geometry file %r\n" % (fileName,))
             else:
@@ -550,8 +550,8 @@ class ToplevelSet(object):
 
         try:
             inFile = RO.OS.openUniv(fileName)
-        except StandardError, e:
-            raise RuntimeError, "Could not open geometry file %r; error: %s\n" % (fileName, RO.StringUtil.strFromException(e))
+        except Exception as e:
+            raise RuntimeError("Could not open geometry file %r; error: %s\n" % (fileName, RO.StringUtil.strFromException(e)))
             
         newGeomDict = {}
         newVisDict = {}
@@ -589,7 +589,7 @@ class ToplevelSet(object):
                         try:
                             stateDict = json.loads(stateDictStr)
                             newState[name] = stateDict
-                        except Exception, e:
+                        except Exception as e:
                             sys.stderr.write("Error reading line %d of geometry file %s: %s" % (ind+1, fileName, line))
                             sys.stderr.write("  failed to parse state: %r\n" % (stateDictStr,))
                             sys.stderr.write("  error: %s\n" % (RO.StringUtil.strFromException(e),))
@@ -613,15 +613,15 @@ class ToplevelSet(object):
         """
         fileName = fileName or self.defFileName
         if not fileName:
-            raise RuntimeError, "No geometry file specified and no default"
+            raise RuntimeError("No geometry file specified and no default")
         
         if readFirst and os.path.isfile(fileName):
             self.readGeomVisFile(fileName)
 
         try:
             outFile = open(fileName, "w")
-        except StandardError, e:
-            raise RuntimeError, "Could not open geometry file %r; error: %s\n" % (fileName, RO.StringUtil.strFromException(e))
+        except Exception as e:
+            raise RuntimeError("Could not open geometry file %r; error: %s\n" % (fileName, RO.StringUtil.strFromException(e)))
             
         try:
             names = self.getNames()
@@ -680,11 +680,11 @@ if __name__ == "__main__":
     l.pack()
     
     def printInfo():
-        print "testWin.getGeometry = %r" % (testWin.getGeometry(),)
-        print "geometry = %r" % (testWin.geometry())
-        print "width, height = %r, %r" % (testWin.winfo_width(), testWin.winfo_height())
-        print "req width, req height = %r, %r" % (testWin.winfo_reqwidth(), testWin.winfo_reqheight())
-        print ""
+        print("testWin.getGeometry = %r" % (testWin.getGeometry(),))
+        print("geometry = %r" % (testWin.geometry()))
+        print("width, height = %r, %r" % (testWin.winfo_width(), testWin.winfo_height()))
+        print("req width, req height = %r, %r" % (testWin.winfo_reqwidth(), testWin.winfo_reqheight()))
+        print("")
     
     b = Tkinter.Button(root, text="Window Info", command=printInfo)
     b.pack()

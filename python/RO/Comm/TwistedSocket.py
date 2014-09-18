@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """BasicSocket wrapper that works with the Twisted framework
 
 The intention is to work with TCPConnection and all the infrastructure that uses it.
@@ -316,7 +317,7 @@ class Socket(BaseSocket):
         if self._readCallback:
             try:
                 self._readCallback(self)
-            except Exception, e:
+            except Exception as e:
                 sys.stderr.write("%s read callback %s failed: %s\n" % (self, self._readCallback, e,))
                 traceback.print_exc(file=sys.stderr)
 
@@ -489,7 +490,7 @@ class Server(BaseServer):
 
         try:
             self._connCallback(newSocket)
-        except Exception, e:
+        except Exception as e:
             errMsg = "%s connection callback %s failed: %s" % (self.__class__.__name__, self._connCallback, e)
             sys.stderr.write(errMsg + "\n")
             traceback.print_exc(file=sys.stderr)
@@ -580,8 +581,8 @@ if __name__ == "__main__":
     def runTest():
         global clientSocket
         try:
-            testStr = strIter.next()
-            print "Client writing %r" % (testStr,)
+            testStr = next(strIter)
+            print("Client writing %r" % (testStr,))
             if binary:
                 clientSocket.write(testStr)
             else:
@@ -596,35 +597,35 @@ if __name__ == "__main__":
             outStr = sock.read()
         else:
             outStr = sock.readLine()
-        print "Client read    %r" % (outStr,)
+        print("Client read    %r" % (outStr,))
         if outStr and outStr.strip() == "quit":
-            print "*** Data exhausted; closing the client connection"
+            print("*** Data exhausted; closing the client connection")
             clientSocket.close()
 
     def clientState(sock):
         state, reason = sock.fullState
         if reason:
-            print "Client %s: %s" % (state, reason)
+            print("Client %s: %s" % (state, reason))
         else:
-            print "Client %s" % (state,)
+            print("Client %s" % (state,))
         if sock.isDone:
-            print "*** Client closed; now closing the server"
+            print("*** Client closed; now closing the server")
             echoServer.close()
         if sock.isReady:
-            print "*** Client connected; now sending test data"
+            print("*** Client connected; now sending test data")
             runTest()
 
     def serverState(server):
         state, reason = server.fullState
         if reason:
-            print "Server %s: %s" % (state, reason)
+            print("Server %s: %s" % (state, reason))
         else:
-            print "Server %s" % (state,)
+            print("Server %s" % (state,))
         if server.isReady:
-            print "*** Echo server ready; now starting up a client"
+            print("*** Echo server ready; now starting up a client")
             startClient()
         elif server.isDone:
-            print "*** Halting the reactor"
+            print("*** Halting the reactor")
             reactor.stop()
 
     def startClient():
@@ -651,7 +652,7 @@ if __name__ == "__main__":
             if readLine is not None:
                 sock.writeLine(readLine)
 
-    print "*** Starting echo server on port %s; binary=%s" % (port, binary)
+    print("*** Starting echo server on port %s; binary=%s" % (port, binary))
     echoServer = EchoServer(port = port, stateCallback = serverState)
 
     reactor.run()

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """
 A basic widget for showing the progress being made in a task.
 Includes a countdown timer RemainingTime.
@@ -389,7 +390,7 @@ class TimeBar(ProgressBar):
         self._updateTimer = Timer()
         self._startTime = None
 
-        if kargs.has_key("value"):
+        if "value" in kargs:
             self.start(kargs["value"])
     
     def clear(self):
@@ -469,7 +470,7 @@ class TimeBar(ProgressBar):
         self._updateTimer.cancel()
         
         if self._startTime == None:
-            raise RuntimeError, "bug! nothing to update"
+            raise RuntimeError("bug! nothing to update")
         
         # update displayed value
         if self._countUp:

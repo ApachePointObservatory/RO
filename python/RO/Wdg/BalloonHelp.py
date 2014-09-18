@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """Simple implementation of pop-up help.
 
 Call enableBalloonHelp to activate help for all widgets that have a helpText attribute.

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """A variant on Checkbutton that add help, default handling and other niceties
 including a command callback that is called in more cases.
 
@@ -400,7 +401,7 @@ if __name__ == "__main__":
     root = PythonTk.PythonTk()
     
     def btnCallback(btn):
-        print "%s state=%s" % (btn["text"], btn.getBool())
+        print("%s state=%s" % (btn["text"], btn.getBool()))
 
     row = 0
     col = 0

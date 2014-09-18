@@ -1,7 +1,11 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
+
+__all__ = ["ccFromSCPV"]
+
 import RO.PhysConst
 import RO.MathUtil
-from CCFromSC import *
+from CCFromSC import ccFromSC
 
 # Magic Numbers
 # if parallax is less than _MinParallax,
@@ -12,7 +16,7 @@ _MinParallax = 1.0e-7  # arcsec
 _RadPerYear_per_ASPerCy = RO.PhysConst.RadPerDeg / (RO.PhysConst.ArcSecPerDeg * 100.0)
 _AUPerYear_per_KMPerSec = RO.PhysConst.SecPerDay * RO.PhysConst.DayPerYear / RO.PhysConst.KmPerAU
 
-def ccFromSCPV (
+def ccFromSCPV(
     pos,
     pm,
     parallax,
@@ -94,7 +98,7 @@ def ccFromSCPV (
 
 if __name__ == "__main__":
     import RO.SeqUtil
-    print "testing ccFromSCPV"
+    print("testing ccFromSCPV")
     # test data is formatted as follows:
     # a list of entries, each consisting of:
     # - the input argument
@@ -181,6 +185,6 @@ if __name__ == "__main__":
         actualFlat = RO.SeqUtil.flatten(actualOutput)
         expectedFlat = RO.SeqUtil.flatten(expectedOutput)
         if RO.SeqUtil.matchSequences(actualFlat, expectedFlat, rtol=1.0e-14, atol=1.0e-9):
-            print "failed on input:", testInput
-            print "expected output:\n", expectedOutput
-            print "actual output:\n", actualOutput
+            print("failed on input:", testInput)
+            print("expected output:\n", expectedOutput)
+            print("actual output:\n", actualOutput)

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """Simple serial terminal.
 Type and press <return> in the entry field along the bottom to send data
 """
@@ -40,7 +41,7 @@ class SerialTerminal(Tkinter.Frame):
 if __name__ == "__main__":
     nArgs = len(sys.argv)
     if nArgs < 2 or (nArgs // 2) != (nArgs + 1) // 2:
-        print """Usage: serialterm portname [opt1 val1 [opt2 val2 [...]]]
+        print("""Usage: serialterm portname [opt1 val1 [opt2 val2 [...]]]
 
 Options include:
 baud: baud rate (default: 9600)
@@ -48,7 +49,7 @@ parity: (default: none)
 dataBits: data bits (default: 8)
 stopBits: stop bits (default: 1)
 localEcho: True or False (default: False)
-"""
+""")
         sys.exit(0)
     serialOptions = {}
     portName = sys.argv[1]
@@ -58,4 +59,3 @@ localEcho: True or False (default: False)
     root = Tkinter.Tk()
     serTerm = SerialTerminal(root, portName, **serialOptions)
     root.mainloop()
-    

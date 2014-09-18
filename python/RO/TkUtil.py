@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import absolute_import, division, print_function
 """Tkinter utilities
 
 History:
@@ -192,13 +193,13 @@ class TclFunc:
         except AttributeError:
             pass
         if self.debug:
-            print "registering tcl function %s for python function %s" % (self.tclFuncName, func)
+            print("registering tcl function %s for python function %s" % (self.tclFuncName, func))
         self.tkApp.createcommand(self.tclFuncName, self)
     
     def __call__(self, *args):
         try:
             self.func(*args)
-        except Exception, e:
+        except Exception as e:
             sys.stderr.write("tcl function %s failed: %s\n" % (self.tclFuncName, e))
             traceback.print_exc(file=sys.stderr)
         
@@ -207,16 +208,16 @@ class TclFunc:
         Safe to call if already deregistered.
         """
         if self.debug:
-            print "%r.deregister()" % (self,)
+            print("%r.deregister()" % (self,))
         if not self.func:
             if self.debug:
-                print "already deregistered"
+                print("already deregistered")
             return
         try:
             self.tkApp.deletecommand(self.tclFuncName)
-        except Tkinter.TclError, e:
+        except Tkinter.TclError as e:
             if self.debug:
-                print "deregistering failed: %r" % (e,)
+                print("deregistering failed: %r" % (e,))
             pass
         self.func = None
     
@@ -489,7 +490,7 @@ if __name__ == "__main__":
         geomStr = geomStrList.pop()
         geomObj = Geometry.fromTkStr(geomStr)
         constrainedGeom = geomObj.constrained()
-        print "geomStr=%s; constrainedGeomStr=%s" % (geomStr, constrainedGeom)
+        print("geomStr=%s; constrainedGeomStr=%s" % (geomStr, constrainedGeom))
         root.geometry(constrainedGeom.toTkStr())
         root.after(2000, setGeometry, geomStrList)
         

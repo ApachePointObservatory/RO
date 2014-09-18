@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """Tools for gridding widgets
 
 History:
@@ -93,9 +94,9 @@ class Gridder(object):
         """
         # verify that the widget can be used before subscribing to it
         if not hasattr(ctrl, "addCallback"):
-            raise TypeError, "widget %r does not have addCallback method" % cat
+            raise TypeError("widget %r does not have addCallback method" % cat)
         if not hasattr(ctrl, "getBool"):
-            raise TypeError, "widget %r does not have getBool method" % cat
+            raise TypeError("widget %r does not have getBool method" % cat)
         
         # record show/hide controls 
         self._showHideControlDict[cat] = ctrl
@@ -279,7 +280,7 @@ class Gridder(object):
         if spacing:
             spaceCol = newDefCol - 1
             if spaceCol < self._maxNextCol:
-                raise ValueError, "col too small; no room for spacer column"
+                raise ValueError("col too small; no room for spacer column")
             Tkinter.Frame(self._master, width=spacing).grid(row=row, column=spaceCol)
 
         self.setDefCol(newDefCol)

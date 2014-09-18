@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+from __future__ import division, print_function
 """Basic information and utilities for dealing with coordinate systems.
 
 To do:
@@ -206,15 +206,15 @@ def getSysConst(coordSys, defSys=""):
     
     # check for None first since it does not support lower()
     if coordSys == None:
-        raise ValueError, "None is not a valid coord sys name"
+        raise ValueError("None is not a valid coord sys name")
         
     try:
         return _SysConstDict[coordSys.lower()]
     except KeyError:
-        raise ValueError, "unknown coordinate system %r" % (coordSys,)
+        raise ValueError("unknown coordinate system %r" % (coordSys,))
 
 def isValid(coordSys):
     """Returns True if the coordinate system name is valid (not case sensitive),
     False otherwise.
     """
-    return _SysConstDict.has_key(coordSys.lower())
+    return coordSys.lower() in _SysConstDict

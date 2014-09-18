@@ -1,10 +1,10 @@
 #!/usr/bin/env python
+from __future__ import absolute_import, division, print_function
 """A script to release a new version of RO Python Package and upload it to PyPI
 
 To use:
     ./releaseNewVersion.py
 """
-from __future__ import with_statement
 import os
 import re
 import shutil
@@ -29,13 +29,13 @@ with file(os.path.join("docs", "VersionHistory.html")) as vhist:
         if versMatch:
             histVersStr = versMatch.groups()[0]
             if histVersStr == Version.__version__:
-                print "Version in VersionHistory.html matches"
+                print("Version in VersionHistory.html matches")
                 break
             else:
-                print "Error: version in VersionHistory.html = %s != %s" % (histVersStr, Version.__version__)
+                print("Error: version in VersionHistory.html = %s != %s" % (histVersStr, Version.__version__))
                 sys.exit(0)
 
-print "Status of git repository:"
+print("Status of subversion repository:")
 
 subprocess.call(["git", "status"])
 
@@ -43,13 +43,13 @@ versOK = raw_input("Is the git repository up to date? (y/[n]) ")
 if not versOK.lower() == "y":
     sys.exit(0)
 
-print "git repository OK"
+print("git repository OK")
 
 # warning: do not build from export because the git info is required to get the data files included
-print "Building the distribution package"
+print("Building the distribution package")
 status = subprocess.call(["python", "setup.py", "sdist"])
 if status != 0:
-    print "Build failed!"
+    print("Build failed!")
 
 # make sure the bitmap files got into the distribution
 # (sometimes they fail to, and it's a silent error unless I check)
@@ -61,21 +61,21 @@ bitmapToFind = "%s/python/RO/Bitmaps/crosshair.xbm" % (distBaseName,)
 try:
     tarObj.getmember(bitmapToFind)
 except Exception:
-    print "Error: distribution is missing its bitmap files!"
+    print("Error: distribution is missing its bitmap files!")
     sys.exit(1)
 
-print "Uploading to PyPI"
+print("Uploading to PyPI")
 status = subprocess.call(["twine", "upload", "dist/%s.tar.gz" % (distBaseName,)])
 if status != 0:
-    print "Upload failed!"
+    print("Upload failed!")
     sys.exit(1)
 
 eggDir = os.path.abspath("RO.egg-info")
 
-print "Deleting final build %r" % (distDir,)
+print("Deleting final build %r" % (distDir,))
 shutil.rmtree(distDir)
 
-print "Deleting egg info %r" % (eggDir,)
+print("Deleting egg info %r" % (eggDir,))
 shutil.rmtree(eggDir)
 
-print "***** Update documentation on the UW server! *****"
+print("***** Update documentation on the UW server! *****")

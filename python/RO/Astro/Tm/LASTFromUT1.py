@@ -1,11 +1,11 @@
-from __future__ import division, absolute_import
+from __future__ import absolute_import, division, print_function
+
+__all__ = ["lastFromUT1"]
 
 import RO.PhysConst
 import RO.MathUtil
 from RO.Astro import llv
 from .LMSTFromUT1 import lmstFromUT1
-
-__all__ = ["lastFromUT1"]
 
 def lastFromUT1(ut1, longitude):
     """Convert from universal time (MJD)

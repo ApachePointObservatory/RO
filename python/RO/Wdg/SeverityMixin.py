@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """Adjust widget foreground color as a function of severity,
 meaning one of the RO.Constant.sev constants:
 sevNormal
@@ -18,6 +19,8 @@ History:
 2005-06-08 ROwen    Changed SeverityMixin to a new-style class.
 2006-10-24 ROwen    Added support for RO.Constants.sevDebug.
 """
+__all__ = ["SeverityMixin", "SeverityActiveMixin", "SeveritySelectMixin"]
+
 import RO.Constants
 import WdgPrefs
 
@@ -143,7 +146,7 @@ if __name__ == "__main__":
             "Warning": RO.Constants.sevWarning,
             "Error": RO.Constants.sevError,
         }.get(severityStr)
-        print "Set severity to %s = %r" % (severityStr, severity)
+        print("Set severity to %s = %r" % (severityStr, severity))
         for wdg in wdgSet:
             wdg.setSeverity(severity)
 

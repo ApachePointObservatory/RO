@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """A window (Tk Toplevel widget) for setting preferences.
 
 To Do:
@@ -33,6 +34,8 @@ History:
 2014-08-31 ROwen    Added a contextual menu with Help (if helpURL provided) to all controls;
                     formerly only the status bar had this.
 """
+__all__ = ["PrefWin", "PrefWdg"]
+
 import Tkinter
 import PrefVar
 import PrefEditor
@@ -202,7 +205,7 @@ class PrefWdg(Tkinter.Frame):
         self.applyPrefs()
         try:
             self.prefSet.writeToFile()
-        except StandardError, e:
+        except Exception as e:
             self.statusBar.setMsg(
                 msgStr = "Save failed: %s" % (e,),
                 severity = RO.Constants.sevError,
@@ -420,8 +423,8 @@ if __name__ == "__main__":
     )
     try:
         prefSet.readFromFile()
-    except StandardError, e:
-        print "could not read prefs:", e
+    except Exception as e:
+        print("could not read prefs:", e)
 
     testFrame = PrefWdg (root, prefSet = prefSet)
     testFrame.pack(fill=Tkinter.BOTH, expand=Tkinter.YES)

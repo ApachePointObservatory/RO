@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division, print_function
 """Widgets to load and run RO.ScriptRunner scripts.
 
 ScriptModuleWdg loads a script from a specified module.

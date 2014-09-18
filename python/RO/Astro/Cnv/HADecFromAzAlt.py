@@ -1,14 +1,17 @@
 #!/usr/bin/env python
+from __future__ import absolute_import, division, print_function
 """
 History:
 2002-07-22 ROwen    Converted from the TCC's cnv_AzAlt2HADec 1-1.
 2002-12-23 ROwen    Cosmetic change to make pychecker happy.
 2007-04-24 ROwen    Converted from Numeric to numpy.
 """
+__all__ = ["haDecFromAzAlt"]
+
 import numpy
 import RO.MathUtil
 
-def haDecFromAzAlt (azAlt, lat):
+def haDecFromAzAlt(azAlt, lat):
     """Converts alt/az position to HA/Dec position.
 
     Inputs:
@@ -38,7 +41,7 @@ def haDecFromAzAlt (azAlt, lat):
 
 if __name__ == "__main__":
     import RO.SeqUtil
-    print "testing haDecFromAzAlt"
+    print("testing haDecFromAzAlt")
     # test data is formatted as follows:
     # a list of entries, each consisting of:
     # - the input argument
@@ -62,6 +65,6 @@ if __name__ == "__main__":
     for testInput, expectedOutput in testData:
         actualOutput = haDecFromAzAlt(*testInput)
         if RO.SeqUtil.matchSequences(actualOutput, expectedOutput, rtol=1.0e-15):
-            print "failed on input:", testInput
-            print "expected output:\n", expectedOutput
-            print "actual output:\n", actualOutput
+            print("failed on input:", testInput)
+            print("expected output:\n", expectedOutput)
+            print("actual output:\n", actualOutput)
