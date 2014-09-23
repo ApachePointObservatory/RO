@@ -227,10 +227,8 @@ class BaseSocket(Base):
         raise NotImplementedError()
 
     def readLine(self, default=None):
-        """Read one line of data.
-        Do not return the trailing newline.
-        If a full line is not available, return default.
-        
+        """Read one line of data, if available, discarding the trailing newline.
+
         Inputs:
         - default   value to return if a full line is not available
                     (in which case no data is read)
@@ -338,9 +336,12 @@ class BaseServer(Base):
         Inputs:
         - connCallback: function to call when a client connects; it receives the following arguments:
                     - sock, a BaseSocket
-        - stateCallback: a function to call when the server changes state
-        - sockReadCallback: function to call when a socket receives data
-        - sockStateCallback: function to call when a socket changes state
+        - stateCallback: a function to call when the server changes state: it receives one argument:
+            this server
+        - sockReadCallback: function to call when a socket receives data; it receives one argument:
+            the socket from which to read data
+        - sockStateCallback: function to call when a socket changes state; it receives one argument:
+            the socket whose state changed
         - name: a string to identify this server; strictly optional
         - state: initial state
         """
