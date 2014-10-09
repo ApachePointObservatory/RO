@@ -14,12 +14,15 @@ History:
 2014-01-01 ROwen    Removed experimental support for Deferreds.
 2014-04-10 ROwen    Moved host and port properties from Socket to TCPSocket; this gives better
                     answers if not connected (e.g. if host is invalid).
+2014-10-09 ROwen    Bug fix: Socket and TCPSocket had a non-null reason for a normal close;
+                    thanks to Conor Sayres for diagnosing this.
 """
 __all__ = ["Socket", "TCPSocket", "Server", "TCPServer"]
 
 import re
 import sys
 import traceback
+from twisted.python.failure import Failure
 from twisted.internet.error import ConnectionDone
 from twisted.internet.protocol import Factory, Protocol
 from twisted.internet.endpoints import TCP4ClientEndpoint, TCP4ServerEndpoint
@@ -181,7 +184,11 @@ class Socket(BaseSocket):
                 self._connectTimer.start(timeLim, self._connectTimeout)
             self._setState(BaseSocket.Connecting)
             self._endpointDeferred = self._endpoint.connect(_SocketProtocolFactory())
-            setCallbacks(self._endpointDeferred, self._connectionMade, self._connectionLost)
+            setCallbacks(
+                deferred = self._endpointDeferred,
+                callback = self._connectionMade,
+                errback = self._connectionLost,
+            )
 
     def _clearCallbacks(self):
         """Clear any callbacks added by this class. Called just after the socket is closed.
@@ -197,13 +204,15 @@ class Socket(BaseSocket):
 
     def _connectionLost(self, reason):
         """Connection lost callback
+
+        @param[in] reason  reason for losting connection; any of None, a twisted.python.failure.Failure
+            or a string
         """
-        #print "%s._connectionLost(reason=%r)" % (self, reason)
+        #print("%s._connectionLost(reason=%r)" % (self, reason))
         if reason is None:
             reasonStrOrNone = None
-        elif isinstance(reason, ConnectionDone):
+        elif isinstance(reason, Failure) and reason.check(ConnectionDone):
             # connection closed cleanly; no need for a reason
-            # use getattr in case reason as no type attribute
             reasonStrOrNone = None
         else:
             reasonStrOrNone = str(reason)
@@ -421,7 +430,11 @@ class Server(BaseServer):
         """Start listening for new connections
         """
         self._endpointDeferred = self._endpoint.listen(_SocketProtocolFactory(self._newConnection))
-        setCallbacks(self._endpointDeferred, self._listeningCallback, self._connectionLost)
+        setCallbacks(
+            deferred = self._endpointDeferred,
+            callback = self._listeningCallback,
+            errback = self._connectionLost,
+        )
 
     @property
     def port(self):
@@ -441,7 +454,11 @@ class Server(BaseServer):
         """
         if self._protocol is not None:
             self._closeDeferred = self._protocol.stopListening()
-            setCallbacks(self._closeDeferred, self._connectionLost, self._connectionLost)
+            setCallbacks(
+                deferred = self._closeDeferred,
+                callback = self._connectionLost,
+                errback = self._connectionLost,
+            )
     
     def _clearCallbacks(self):
         """Clear any callbacks added by this class. Called just after the socket is closed.
@@ -464,9 +481,8 @@ class Server(BaseServer):
 
         if reason is None:
             reasonStrOrNone = None
-        elif issubclass(getattr(reason, "type", None), ConnectionDone):
+        elif isinstance(reason, Failure) and reason.check(ConnectionDone):
             # connection closed cleanly; no need for a reason
-            # use getattr in case reason as no type attribute
             reasonStrOrNone = None
         else:
             reasonStrOrNone = str(reason)
