@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+from __future__ import division
 """Widgets to load and run RO.ScriptRunner scripts.
 
 ScriptModuleWdg loads a script from a specified module.
@@ -27,6 +27,8 @@ History:
 2010-02-17 ROwen    Improved the way the Pause/Resume button name is managed.
                     Removed several unused imports.
 2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
+2014-10-20 ROwen    Bug fix: ScriptFileWdg leaked from __future__ import print_function into loaded scripts
+                    (I'm not sure how, but I removed that import in this module to fix it).
 """
 __all__ = ['BasicScriptWdg', 'ScriptModuleWdg', 'ScriptFileWdg']
 
