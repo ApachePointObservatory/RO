@@ -35,7 +35,7 @@ with file(os.path.join("docs", "VersionHistory.html")) as vhist:
                 print("Error: version in VersionHistory.html = %s != %s" % (histVersStr, Version.__version__))
                 sys.exit(0)
 
-print("Status of subversion repository:")
+print("Status of git repository:")
 
 subprocess.call(["git", "status"])
 
