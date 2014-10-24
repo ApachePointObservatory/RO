@@ -4,6 +4,9 @@ History:
 2003-10-23 ROwen    Renamed from GetByPrefix and enhanced.
 2005-06-08 ROwen    Changed MatchList to a new style class.
 2008-01-04 ROwen    Bug fix: was not compatible with unicode entries (the match test would fail).
+2014-10-24 ROwen    Refined the error reporting for getUniqueMatch:
+                    - if there is more than one match the exception lists the matches in alphabetical order
+                    - if there are no matches then the exception lists all items in alphabetical order
 """
 __all__ = ["MatchList"]
 
@@ -27,7 +30,7 @@ class MatchList(object):
         self.setList(valueList)
 
     def getAllMatches(self, prefix):
-        """Return all matches
+        """Return a list of matches (an empty list if no matches)
         """
         if self.ignoreCase:
             prefix = prefix.lower()
@@ -43,10 +46,10 @@ class MatchList(object):
         if len(matchList) == 1:
             return matchList[0]
         else:
-            errList = [val[-1] for val in self.valueList]
             if matchList:
-                raise ValueError("too many matches for %r in %r" % (prefix, errList))
+                raise ValueError("too many matches for %r in %r" % (prefix, matchList))
             else:
+                errList = [val[-1] for val in self.valueList]
                 raise ValueError("no matches for %r in %r" % (prefix, errList))
     
     def matchKeys(self, fromDict):
@@ -75,3 +78,4 @@ class MatchList(object):
             self.valueList = [
                 (val,) for val in valueList if hasattr(val, "lower")
             ]
+        self.valueList.sort()
