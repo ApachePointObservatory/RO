@@ -142,7 +142,7 @@ class Base(object):
         - newState: the new state
         - reason: an explanation (None to leave alone)
         """
-        # print "%s._setState(newState=%s, reason=%s)" % (self, newState, reason)
+        # print("%s._setState(newState=%s, reason=%s)" % (self, newState, reason))
         if self.isDone:
             raise RuntimeError("Already done; cannot change state")
 
@@ -366,7 +366,7 @@ class BaseServer(Base):
             
         The twisted version returns a Deferred if the socket is not already closed, else None
         """
-#         print "%s.close(isOK=%r, reason=%r)" % (self, isOK, reason)
+        # print("%s.close(isOK=%r, reason=%r); state=%s" % (self, isOK, reason, self.state))
         if self.isDone:
             return
 
