@@ -16,6 +16,7 @@ History:
                     answers if not connected (e.g. if host is invalid).
 2014-10-09 ROwen    Bug fix: Socket and TCPSocket had a non-null reason for a normal close;
                     thanks to Conor Sayres for diagnosing this.
+2014-12-15 ROwen    Bug fix: if _protocol.stopListening return None instead of a deferred, don't assign callbacks.
 """
 __all__ = ["Socket", "TCPSocket", "Server", "TCPServer"]
 
@@ -452,8 +453,11 @@ class Server(BaseServer):
     def _basicClose(self):
         """Shut down the server.
         """
-        if self._protocol is not None:
-            self._closeDeferred = self._protocol.stopListening()
+        if self._protocol is None:
+            return
+
+        self._closeDeferred = self._protocol.stopListening()
+        if self._closeDeferred is not None:
             setCallbacks(
                 deferred = self._closeDeferred,
                 callback = self._connectionLost,

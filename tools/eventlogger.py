@@ -98,6 +98,7 @@ class EventLogger(Tkinter.Frame):
         
 #        print '; '.join(rptList)
         self.logWdg.addOutput('; '.join(rptList))
+        self.logWdg.text.see("end")
             
 
 if __name__ == "__main__":

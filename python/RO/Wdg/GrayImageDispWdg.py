@@ -685,10 +685,10 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
             ("dragZoom", rb),
         )
         stageEvtList = (
-            ("Start", "<Button-%d>"),
+            ("Start", "<ButtonPress-%d>"),
             ("Continue", "<B%d-Motion>"),
             ("End", "<ButtonRelease-%d>"),
-            ("Reset", "<Double-Button-%d>")
+            ("Reset", "<Double-ButtonPress-%d>")
         )
         for modeName, btnNum in modeButNumList:
             for stageName, evtName in stageEvtList:

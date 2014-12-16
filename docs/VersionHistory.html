@@ -7,6 +7,13 @@
 
 <h2>Version history for the <a href="Overview.html">RO Python Package</a></h2>
 
+<h3>3.6.4b1 2014-12-15</h3>
+
+<ul>
+    <li>RO.Comm.TwistedSocket.Server could raise an exception when closing (because protocol.stopListening can return None instead of a deferred and the code didn't handle that case).
+    <li>Event bindings changed to use ButtonPress instead of Button (both work, but the former is more standard).
+</ul>
+
 <h3>3.6.3 2014-10-24</h3>
 
 <ul>

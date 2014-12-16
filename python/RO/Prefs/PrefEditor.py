@@ -356,7 +356,7 @@ class _ColorButton(Tkinter.Frame, RO.Wdg.CtxMenuMixin):
             configFunc = ctxConfigFunc,
         )
         
-        self.button.bind("<Button-1>", self._mouseDown)
+        self.button.bind("<ButtonPress-1>", self._mouseDown)
         self.button.bind("<Leave>", self._leave)
         self.button.bind("<ButtonRelease>", self._buttonRelease)
 

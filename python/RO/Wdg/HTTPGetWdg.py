@@ -169,7 +169,7 @@ class HTTPGetWdg(Tkinter.Frame):
         
         detFrame.grid(row=1, column=0, columnspan=2, sticky="ew")
         
-        self.text.bind("<Button-1>", self._selectEvt)
+        self.text.bind("<ButtonPress-1>", self._selectEvt)
         self.text.bind("<B1-Motion>", self._selectEvt)
         
         self._startNew()

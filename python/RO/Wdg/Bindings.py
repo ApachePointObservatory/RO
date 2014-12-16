@@ -37,7 +37,7 @@ in a Mac-like way is difficult.
 2009-04-20 ROwen    Quit, Close are now handled as virtual events; this rationalizes the code
                     and improves support for toplevels that cannot be closed or iconified.
 2009-07-09 ROwen    Removed unused internal function doSelectAll (found by pychecker).
-2009-08-25 ROwen    Control-Button-1/2/3 events on X11 are no longer blocked.
+2009-08-25 ROwen    Control-ButtonPress-1/2/3 events on X11 are no longer blocked.
                     These events were blocked for the sake of Macs with 1-button mice running X11 Tcl/Tk,
                     but that is now too obscure a case to justify blocking control-click events. 
 """
@@ -112,9 +112,9 @@ def stdBindings(root, debug=False):
         # unix
         if debug:
             print("Unix/x11 key bindings")
-#         root.event_add("<<CtxMenu>>", "<Control-Button-1>")
-#         root.event_add("<<CtxMenu>>", "<Control-Button-2>")
-#         root.event_add("<<CtxMenu>>", "<Control-Button-3>")
+#         root.event_add("<<CtxMenu>>", "<Control-ButtonPress-1>")
+#         root.event_add("<<CtxMenu>>", "<Control-ButtonPress-2>")
+#         root.event_add("<<CtxMenu>>", "<Control-ButtonPress-3>")
     else:
         if winSys == RO.TkUtil.WSysAqua:
             if debug:
@@ -146,14 +146,14 @@ def stdBindings(root, debug=False):
         """
         root.bind_class("Entry", "<ButtonRelease-2>", stopEvent)
         root.bind_class("Text", "<ButtonRelease-2>", stopEvent)
-        # Entry and Text do have <Button-2> bindings;
+        # Entry and Text do have <ButtonPress-2> bindings;
         # they don't actually seem to do any harm
         # but I'd rather not risk it
-        root.unbind_class("Entry", "<Button-2>")
-        root.unbind_class("Text", "<Button-2>")
+        root.unbind_class("Entry", "<ButtonPress-2>")
+        root.unbind_class("Text", "<ButtonPress-2>")
 
     # bind right button to <<CtxMenu>>
-    root.event_add("<<CtxMenu>>", "<Button-%d>" % btnNums[2])
+    root.event_add("<<CtxMenu>>", "<ButtonPress-%d>" % btnNums[2])
 
     # virtual event bindings (common to all platforms)
     # beyond the default <<Cut>>, <<Copy>> and <<Paste>>
