@@ -45,9 +45,11 @@ History:
 2008-05-02 ROwen    Made prettyDict unicode-safe by using repr.
 2008-11-14 ROwen    Added unquoteStr.
 2014-05-07 ROwen    Changed is str test to use basestring.
-2014-09-17 ROwen    Modified to test for Exception instead of StandardError 
+2014-09-17 ROwen    Modified to test for Exception instead of StandardError
+2015-01-06 ROwen    Improved dmsStrFromDeg and dmsStrFromSec to handle non-finite values.
 """
 import re
+import numpy
 
 AngstromStr = u"\N{ANGSTROM SIGN}"
 DegStr = u"\N{DEGREE SIGN}"
@@ -67,7 +69,10 @@ def dmsStrFromDeg (decDeg, nFields=3, precision=1, omitExtraFields = False):
     
     Error conditions:
     - Raises ValueError if precision < 0
+    - Returns "" if decDeg is not finite
     """
+    if not numpy.isfinite(decDeg):
+        return ""
     nFields = min(3, nFields)
     signStr, fieldStrs = _getDMSFields(decDeg, nFields, precision)
     
@@ -91,7 +96,10 @@ def dmsStrFromSec (decSec, nFields=3, precision=1, omitExtraFields = True):
     
     Error conditions:
     - Raises ValueError if precision < 0
+    - Returns "" if decDeg is not finite
     """
+    if not numpy.isfinite(decSec):
+        return ""
     nFields = min(3, nFields)
     if nFields < 1:
         raise ValueError("nFields=%r; must be >= 1" % (nFields,))

@@ -298,7 +298,7 @@ class StrCnvNoCase(object):
         return self.subsDict.get(strKey.lower(), strKey)
 
 def posFromPVT(pvt):
-    """Return the position of an PVT, or None pvt is None or the PVT has no valid position.
+    """Return the position of an PVT, or None if pvt == None or has no valid position.
     
     Inputs:
     - PVT: an RO.PVT.PVT position, velocity, time object.

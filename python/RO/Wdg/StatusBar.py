@@ -57,6 +57,8 @@ History:
 2010-03-08 ROwen    Bug fix: command replies were sometimes displayed with the wrong color.
 2011-06-17 ROwen    Changed "type" to "msgType" in parsed message dictionaries to avoid conflict with builtin.
 2012-07-09 ROwen    Modified to use RO.TkUtil.Timer.
+2015-01-08 ROwen    If a message in reply to a command has unknown message type then report the problem
+                    and assume the command failed.
 """
 __all__ = ['StatusBar']
 
@@ -267,7 +269,14 @@ class StatusBar(Tkinter.Frame):
 
     def _cmdCallback(self, msgType, msgDict, cmdVar=None):
         # print "StatusBar _cmdCallback(%r, %r, %r)" % (msgType, msgDict, cmdVar)
-        msgDescr, newSeverity = RO.KeyVariable.TypeDict[msgType]
+        try:
+            msgDescr, newSeverity = RO.KeyVariable.TypeDict[msgType]
+        except KeyError:
+            # invalid msgType; print a warning, then assume failure
+            sys.stderr.write("StatusBar._cmdCallback: invalid msgType=%r for msgDict=%s; assuming failure\n" % (msgType, msgDict,))
+            msgDescr = "invalid msgType=%r" % (msgType,)
+            msgType = "f"
+            newSeverity = RO.Constants.sevError
         self.cmdMaxSeverity = max(newSeverity, self.cmdMaxSeverity)
         if msgType == ":":
             # command finished; omit associated text,

@@ -13,6 +13,9 @@ History:
 __all__ = ["PVT"]
 
 import time
+
+import numpy
+
 import RO.Astro.Tm
 import RO.CnvUtil
 import RO.MathUtil
@@ -62,11 +65,11 @@ class PVT(object):
     def isValid(self):
         """Returns True if the pvt is valid, False otherwise.
 
-        A pvt is valid if all values are known (not None) and time > 0.
+        A pvt is valid if all values are known (not None and finite) and time > 0.
         """
-        return  (self.pos != None) \
-            and (self.vel != None) \
-            and (self.t != None) \
+        return  (self.pos != None) and numpy.isfinite(self.pos) \
+            and (self.vel != None) and numpy.isfinite(self.vel) \
+            and (self.t   != None) and numpy.isfinite(self.t) \
             and (self.t > 0)
 
     def set(self, pos=None, vel=None, t=None):

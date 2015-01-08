@@ -7,9 +7,13 @@
 
 <h2>Version history for the <a href="Overview.html">RO Python Package</a></h2>
 
-<h3>3.6.4b1 2014-12-15</h3>
+<h3>3.6.4 2015-01-08</h3>
 
 <ul>
+    <li>RO.KeyVariable: added support for new message type "e", which indicates an error, but the command continues.
+    <li>RO.PVT: non-finite pos, vel and time are now handled properly.
+    <li>RO.Wdg.StatusWdg: messages with an invalid message code are handled better: a detailed error message is printed to stderr and the message is treated as a failure message.
+    <li>RO.StringUtil: enhanced dmsStrFromDeg and dmsStrFromSec to handle non-finite values by returning a blank string.
     <li>RO.Comm.TwistedSocket.Server could raise an exception when closing (because protocol.stopListening can return None instead of a deferred and the code didn't handle that case).
     <li>Event bindings changed to use ButtonPress instead of Button (both work, but the former is more standard).
 </ul>

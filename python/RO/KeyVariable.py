@@ -151,6 +151,7 @@ from RO.Comm.Generic import Timer
 # category is coarser and is used for filtering by category
 TypeDict = {
     "!":("fatal error", RO.Constants.sevError), # a process dies
+    "e":("error", RO.Constants.sevError),  # error, but command is not done
     "f":("failed", RO.Constants.sevError), # command failed
     "w":("warning", RO.Constants.sevWarning),
     "i":("information", RO.Constants.sevNormal), # the initial state
