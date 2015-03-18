@@ -66,6 +66,7 @@ History:
 2012-11-30 ROwen    Bug fix: width patch was not applied if width changed after the widget was created.
                     Now it is applied by overridden method configure.
 2012-11-30 ROwen    Does no width correction if bitmap is shown.
+2014-03-18 ROwen    Stop adding padding for indicatoron=False; it is not needed for Tcl/Tk 8.5.18.
 """
 __all__ = ['Checkbutton']
 
@@ -170,16 +171,6 @@ class Checkbutton (Tkinter.Checkbutton, RO.AddCallback.TkVarMixin,
             kargs.setdefault("indicatoron", False)
             kargs["textvariable"] = self._var
         
-        if not RO.CnvUtil.asBool(kargs.get("indicatoron", True)):
-            # user wants text, not a checkbox;
-            # on Aqua adjust default padding so text can be read
-            # also indicatoron is ignored on Aqua, except that it affects label width
-            if RO.TkUtil.getWindowingSystem() == RO.TkUtil.WSysAqua:
-                kargs.setdefault("padx", 6)
-                kargs.setdefault("pady", 5)
-            else:
-                kargs.setdefault("padx", 2)
-
         Tkinter.Checkbutton.__init__(self,
             master = master,
             variable = self._var,

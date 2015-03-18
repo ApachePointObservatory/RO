@@ -13,6 +13,9 @@ History:
                     (the fix will need modification if this bug is also present on Aqua Tk 8.6)
 2012-11-30 ROwen    Radiobutton bug fix: if using bitmaps the active button was not highlighted, at least on Aqua Tk 8.5.
                     Does no width correction if bitmap is shown.
+2015-03-18 ROwen    Bug fix: Radiobutton ignored keyword arguments for configuring the widget.
+                    Button: removed special width handling for Aqua Tk as it is neither needed nor wanted
+                    for Aqua Tk 8.5.18.
 """
 __all__ = ['Button', 'Radiobutton']
 
@@ -23,15 +26,15 @@ import RO.TkUtil
 import CtxMenu
 from SeverityMixin import SeverityActiveMixin
 
-class Button (Tkinter.Button, RO.AddCallback.TkButtonMixin, CtxMenu.CtxMenuMixin,
-    SeverityActiveMixin):
+class Button(Tkinter.Button, RO.AddCallback.TkButtonMixin, CtxMenu.CtxMenuMixin, SeverityActiveMixin):
     def __init__(self,
         master,
         helpText = None,
         helpURL = None,
         callFunc = None,
+        command = None,
         severity = RO.Constants.sevNormal,
-    **kargs):
+    **kwArgs):
         """Creates a new Button.
         
         Inputs:
@@ -40,19 +43,22 @@ class Button (Tkinter.Button, RO.AddCallback.TkButtonMixin, CtxMenu.CtxMenuMixin
         - callFunc  callback function; the function receives one argument: self.
                     It is called whenever the value changes (manually or via
                     the associated variable being set).
+        - command   like callFunc, but the callback receives no arguments (standard Tk behavior)
         - severity  initial severity; one of RO.Constants.sevNormal, sevWarning or sevError
         - all remaining keyword arguments are used to configure the Tkinter Button;
           command is supported, for the sake of conformity, but callFunc is preferred.
         """
         self.helpText = helpText
 
-        Tkinter.Button.__init__(self, master = master, **kargs)
+        Tkinter.Button.__init__(self, master = master, **kwArgs)
         
-        RO.AddCallback.TkButtonMixin.__init__(self, callFunc, False, **kargs)
-        
-        CtxMenu.CtxMenuMixin.__init__(self,
-            helpURL = helpURL,
+        RO.AddCallback.TkButtonMixin.__init__(self,
+            callFunc = callFunc,
+            callNow = False,
+            command = command,
         )
+        
+        CtxMenu.CtxMenuMixin.__init__(self, helpURL = helpURL)
         SeverityActiveMixin.__init__(self, severity)
     
     def setEnable(self, doEnable):
@@ -76,13 +82,13 @@ class Button (Tkinter.Button, RO.AddCallback.TkButtonMixin, CtxMenu.CtxMenuMixin
         return self["state"] != Tkinter.DISABLED
 
 
-class Radiobutton (Tkinter.Radiobutton, CtxMenu.CtxMenuMixin, SeverityActiveMixin):
+class Radiobutton(Tkinter.Radiobutton, CtxMenu.CtxMenuMixin, SeverityActiveMixin):
     def __init__(self,
         master,
         helpText = None,
         helpURL = None,
         severity=RO.Constants.sevNormal,
-    **kargs):
+    **kwArgs):
         """Creates a new Button.
         
         Inputs:
@@ -93,40 +99,7 @@ class Radiobutton (Tkinter.Radiobutton, CtxMenu.CtxMenuMixin, SeverityActiveMixi
         """
         self.helpText = helpText
 
-        # if bitmap is not a constructor parameter then the active button is not highlighted on Aqua Tk 8.5
-        bitmap = kargs.pop("bitmap", None)
-        Tkinter.Radiobutton.__init__(self, master = master, bitmap = bitmap)
-        self.configure(kargs) # call overridden configure to fix width, if necessary
-        CtxMenu.CtxMenuMixin.__init__(self,
-            helpURL = helpURL,
-        )
+        Tkinter.Radiobutton.__init__(self, master = master, **kwArgs)
+        CtxMenu.CtxMenuMixin.__init__(self, helpURL = helpURL)
         SeverityActiveMixin.__init__(self, severity)
     
-    def configure(self, argDict=None, **kargs):
-        """Overridden version of configure that applies a width correction, if necessary
-
-        Notes:
-        - configure is called by wdg[item] = value
-        - sometimes configure is called with a single positional argument: a dict of items,
-            and sometimes it is called with a set of keyword arguments. This code handles both cases.
-        - configure is NOT called by the widget's constructor, so you must call configure with your desired width
-            after constructing the widget, rather than passing width to the widget's constructor
-        """
-        if argDict is not None:
-            kargs.update(argDict)
-        if "width" in kargs:
-            kargs["width"] = self._computeCorrectedWidth(
-                width = kargs["width"],
-                hasBitmap = bool(kargs.get("bitmap", self["bitmap"])),
-            )
-        Tkinter.Radiobutton.configure(self, **kargs)
-    
-    def _computeCorrectedWidth(self, width, hasBitmap):
-        """Compute corrected width to overcome Tcl/Tk bug
-        """
-        if (width != 0) \
-            and not hasBitmap \
-            and (RO.TkUtil.getWindowingSystem() == RO.TkUtil.WSysAqua) \
-            and RO.TkUtil.getTclVersion().startswith("8.5"):
-            return width + 4
-        return width
