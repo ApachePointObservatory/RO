@@ -16,6 +16,7 @@ History:
 2015-03-18 ROwen    Bug fix: Radiobutton ignored keyword arguments for configuring the widget.
                     Button: removed special width handling for Aqua Tk as it is neither needed nor wanted
                     for Aqua Tk 8.5.18.
+2015-04-02 ROwen    Added a simple workaround for cramped button text in Aqua Tk 8.5.18.
 """
 __all__ = ['Button', 'Radiobutton']
 
@@ -49,6 +50,12 @@ class Button(Tkinter.Button, RO.AddCallback.TkButtonMixin, CtxMenu.CtxMenuMixin,
           command is supported, for the sake of conformity, but callFunc is preferred.
         """
         self.helpText = helpText
+
+        if RO.TkUtil.getWindowingSystem() == RO.TkUtil.WSysAqua:
+            # buttons with text are too cramped in 8.5.18; add some padding unless it's already been done
+            if "text" in kwArgs or "textvariable" in kwArgs:
+                kwArgs.setdefault("padx", 10)
+                kwArgs.setdefault("pady", 3)
 
         Tkinter.Button.__init__(self, master = master, **kwArgs)
         
