@@ -25,6 +25,7 @@ History:
                     Added barStipple argument.
 2012-07-10 ROwen    Modified to use RO.TkUtil.Timer.
                     Removed use of update_idletasks.
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 __all__ = ['ProgressBar', 'TimeBar']
 
@@ -109,7 +110,7 @@ class ProgressBar (Tkinter.Frame):
         self.isHorizontal = isHorizontal
         self.knownInd = 0 # 0 for known, 1 for unknown value
         self.fullBarLength = barLength
-        if barThick == None:
+        if barThick is None:
             if self.isHorizontal:
                 self.barThick = 0
             else:
@@ -127,7 +128,7 @@ class ProgressBar (Tkinter.Frame):
         if self.isHorizontal:
             labelAnchor = "e"
             packSide = "left"
-            if barThick == None: # default to label hieght
+            if barThick is None: # default to label hieght
                 cnvPadY = 5
                 packFill = "both"
             else:
@@ -173,7 +174,7 @@ class ProgressBar (Tkinter.Frame):
                 helpText = self.helpText,
                 helpURL = self.helpURL,
             )
-        elif self.labelWdg == None and self.barThick == None:
+        elif self.labelWdg is None and self.barThick is None:
             # use an empty label to force bar thickness
             def nullFormat(astr):
                 return ""
@@ -313,7 +314,7 @@ class ProgressBar (Tkinter.Frame):
         
         kargs is ignored if wdgInfo is a widget
         """
-        if wdgInfo == None:
+        if wdgInfo is None:
             return wdgInfo
         elif isinstance(wdgInfo, Tkinter.Widget):
             # a widget; assume it's a Label widget of some kind
@@ -420,7 +421,7 @@ class TimeBar(ProgressBar):
 
         Does nothing if not paused or running.
         """
-        if self._startTime == None:
+        if self._startTime is None:
             return
         self._startUpdate()
     
@@ -469,7 +470,7 @@ class TimeBar(ProgressBar):
         # cancel pending update, if any
         self._updateTimer.cancel()
         
-        if self._startTime == None:
+        if self._startTime is None:
             raise RuntimeError("bug! nothing to update")
         
         # update displayed value

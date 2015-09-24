@@ -147,6 +147,7 @@ History:
                     ability to set the window title. It turns the warning "The process has forked..." was
                     from running a Tiger (MacOS X 10.4) version of SAOImage DS9 on Leopard (MacOS X 10.5).
 2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 __all__ = ["setup", "xpaget", "xpaset", "DS9Win"]
 
@@ -193,7 +194,7 @@ def _findApp(appName, subDirs = None, doRaise = True):
     Return None or raise RuntimeError if not found.
     """
     appDirs = RO.OS.getAppDirs()
-    if subDirs == None:
+    if subDirs is None:
         subDirs = [None]
     dirTrials = []
     for appDir in appDirs:
@@ -380,6 +381,7 @@ def xpaget(cmd, template=_DefTemplate, doRaise = False):
     Raises RuntimeError or issues a warning (depending on doRaise)
     if anything is written to stderr.
     """
+    global _Popen
     fullCmd = "xpaget %s %s" % (template, cmd,)
 #   print fullCmd
 
@@ -429,6 +431,7 @@ def xpaset(cmd, data=None, dataFunc=None, template=_DefTemplate, doRaise = False
     Raises RuntimeError or issues a warning (depending on doRaise)
     if anything is written to stdout or stderr.
     """
+    global _Popen
     if data or dataFunc:
         fullCmd = "xpaset %s %s" % (template, cmd)
     else:
@@ -553,7 +556,7 @@ class DS9Win:
         if self.isOpen():
             return
         
-        global _DirFromWhichToRunDS9, _DS9Path
+        global _DirFromWhichToRunDS9, _DS9Path, _Popen
         _Popen(
             args = (_DS9Path, "-title", self.template, "-port", "0"),
             cwd = _DirFromWhichToRunDS9, 

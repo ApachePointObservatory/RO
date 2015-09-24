@@ -157,6 +157,7 @@ History:
 2014-05-07 ROwen    Changed is str test to use basestring.
 2014-07-21 ROwen    Disabling the widget now makes the widget lose focus, which is what users expect
                     and saves unsaved edits.
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 __all__ = ['StrEntry', 'ASCIIEntry', 'FloatEntry', 'IntEntry', 'DMSEntry']
 
@@ -265,7 +266,7 @@ class _BaseEntry (Tkinter.Entry, RO.AddCallback.BaseMixin,
         severity = RO.Constants.sevNormal,
     **kargs):
         self.defValueStr = "" # just create the field for now
-        if var == None:
+        if var is None:
             var = Tkinter.StringVar()   
         self.var = var
         self.label = label
@@ -274,7 +275,7 @@ class _BaseEntry (Tkinter.Entry, RO.AddCallback.BaseMixin,
         self._clearMenuName = clearMenu
         self._defMenuName = defMenu
         self._autoSetDefault = bool(autoSetDefault)
-        if trackDefault == None:
+        if trackDefault is None:
             trackDefault = bool(autoIsCurrent) and not autoSetDefault
         if (trackDefault and autoSetDefault):
             raise RuntimeError("Cannot set both trackDefault and autoSetDefault True")
@@ -352,7 +353,7 @@ class _BaseEntry (Tkinter.Entry, RO.AddCallback.BaseMixin,
         but doesn't do much in the base class.
         If val is "" or None, returns "".
         """
-        if val == None:
+        if val is None:
             return ""
         return RO.CnvUtil.asStr(val)
 
@@ -761,7 +762,7 @@ class StrEntry (_BaseEntry):
         finalPattern = None,
     **kargs):
         self.partialPatternStr = partialPattern
-        if finalPattern == None:
+        if finalPattern is None:
             finalPattern = partialPattern
         self.finalPatternStr = finalPattern
 
@@ -821,7 +822,7 @@ class ASCIIEntry (StrEntry):
         """Return any valid value as an ASCII string;
         raise UnicodeDecodeError otherwise.
         """
-        if val == None:
+        if val is None:
             return ""
         return RO.CnvUtil.asASCII(val)
 
@@ -948,10 +949,10 @@ class _NumEntry (_BaseEntry):
         If format is omitted, the default format is used.
         Performs no range checking.
         """
-        if numVal == None:
+        if numVal is None:
             return ""
 
-        if format == None:
+        if format is None:
             format = self.defFormat
         try:
             return format % (numVal,)
@@ -1390,10 +1391,10 @@ class DMSEntry (_NumEntry):
 
         Performs no range checking.
         """
-        if numVal == None:
+        if numVal is None:
             return ""
 
-        if format == None:
+        if format is None:
             nFields, precision = self.defFormat
         else:
             nFields, precision = self._constrainFormat(format)

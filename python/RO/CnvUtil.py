@@ -18,6 +18,7 @@ History:
                     Updated IntOrNoneFromStr and FloatOrNoneFromStr to use ("nan", "?") as a default invalid
                     values, instead of just "nan".
 2009-07-19 ROwen    Added posFromPVT.
+2015-09-24 ROwen    Replace "== None" with "is None" to future-proof array tests and modernize the code.
 """
 import SeqUtil
 
@@ -103,12 +104,12 @@ class BoolOrNoneFromStr(object):
     Raises TypeError if the input value is not a str.
     """
     def __init__(self, badStrs=None, trueStrs=None, falseStrs=None):
-        if badStrs == None:
+        if badStrs is None:
             self.badStrs = set()
         else:
             self.badStrs = set([s.lower() for s in SeqUtil.asCollection(badStrs)])
 
-        if trueStrs == None:
+        if trueStrs is None:
             self.trueStrs = set([v.lower() for v in _TrueValues if hasattr(v, "lower")])
             self.trueStrs -= self.badStrs
         else:
@@ -116,7 +117,7 @@ class BoolOrNoneFromStr(object):
             if self.trueStrs & self.badStrs:
                 raise ValueError("One or more bad values and true values overlap")
         
-        if falseStrs == None:
+        if falseStrs is None:
             self.falseStrs = set([v.lower() for v in _FalseValues if hasattr(v, "lower")])
             self.falseStrs -= self.badStrs
         else:
@@ -298,14 +299,14 @@ class StrCnvNoCase(object):
         return self.subsDict.get(strKey.lower(), strKey)
 
 def posFromPVT(pvt):
-    """Return the position of an PVT, or None if pvt == None or has no valid position.
+    """Return the position of a PVT, or None if pvt is None or has no valid position.
     
     Inputs:
     - PVT: an RO.PVT.PVT position, velocity, time object.
     
     This is a convenience function to handle the case that the input is None
     """
-    if pvt == None:
+    if pvt is None:
         return None
     return pvt.getPos()
 

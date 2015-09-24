@@ -25,6 +25,7 @@ History:
 2009-05-05 ROwen    Modified getFile to return an HTTPGet object.
 2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code.
 2012-08-01 ROwen    Updated for changes to HTTPGet.
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 __all__ = ['HTTPGetWdg']
 
@@ -51,7 +52,7 @@ class HTTPCallback(object):
         self.httpGet = httpGet
     
     def __call__(self):
-        if self.httpGet == None:
+        if self.httpGet is None:
             return
         
         if self.callFunc:
@@ -261,7 +262,7 @@ class HTTPGetWdg(Tkinter.Frame):
     def _selectInd(self, ind):
         """Display details for the httpGet at self.dispList[ind]
         and selects the associated line in the displayed list.
-        If ind == None then displays no info and deselects all.
+        If ind is None then displays no info and deselects all.
         """
         self.text.tag_remove('sel', '1.0', 'end')
         try:

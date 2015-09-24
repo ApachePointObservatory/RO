@@ -12,6 +12,7 @@ History
 2003-05-06 ROwen    Test copy and setdefault; renamed to ListDict
                     and added SetDict.
 2010-05-18 ROwen    Modified SetDict to use sets
+2015-09-24 ROwen    Replace "== None" with "is None" to future-proof array tests and modernize the code.
 """
 __all__ = ["ListDict", "SetDict"]
 
@@ -63,7 +64,7 @@ class SetDict(ListDict):
         Supports the notation: aListDict[key] = val
         """
         valSet = self.data.get(key)
-        if valSet == None:
+        if valSet is None:
             self.data[key] = set([val])
         else:
             valSet.add(val)
@@ -77,7 +78,7 @@ class SetDict(ListDict):
         - valList: an iterable collection of values
         """
         valSet = self.data.get(key)
-        if valSet == None:
+        if valSet is None:
             self.data[key] = set(valList)
         else:
             valSet.update(valList)

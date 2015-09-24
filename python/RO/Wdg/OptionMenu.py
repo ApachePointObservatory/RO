@@ -102,6 +102,7 @@ History:
 2014-02-04 ROwen    Improve label handling: the widget width was affected by the current value,
                     rather than the width of the label, and label="" was treated as None.
 2014-02-10 ROwen    Added forceValid argument to set.
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 __all__ = ['OptionMenu']
 
@@ -129,7 +130,7 @@ class OptionMenu(Menubutton, RO.AddCallback.TkVarMixin,
                 if an item = None then a separator is inserted
     - var       a Tkinter.StringVar (or any object that has set and get methods);
                 this is updated when a Menu item is selected or changed.
-                If defValue == None then var is used for the initialy displayed value
+                If defValue is None then var is used for the initialy displayed value
                 (without checking it); otherwise var is set to defValue.
     - defValue  the default value; if specified, must match something in "items"
                 (to skip checking, specify defValue = None initially, then call setDefault).
@@ -186,8 +187,8 @@ class OptionMenu(Menubutton, RO.AddCallback.TkVarMixin,
         postCommand = None,
         severity = RO.Constants.sevNormal,
     **kargs):
-        showDefault = not (var and defValue == None)
-        if var == None:
+        showDefault = not (var and defValue is None)
+        if var is None:
             var = Tkinter.StringVar()
         self._tempValue = None
         self._items = []
@@ -199,7 +200,7 @@ class OptionMenu(Menubutton, RO.AddCallback.TkVarMixin,
         self.helpText = None
         self.defMenu = defMenu
         self._matchItem = RO.Alg.MatchList(abbrevOK = abbrevOK, ignoreCase = ignoreCase)
-        if trackDefault == None:
+        if trackDefault is None:
             trackDefault = bool(autoIsCurrent)
         self.trackDefault = trackDefault
         
@@ -242,7 +243,7 @@ class OptionMenu(Menubutton, RO.AddCallback.TkVarMixin,
     
     def asString(self, val):
         """Return display string associated with specified value:
-        self.noneDisplay if val == None, val otherwise.
+        self.noneDisplay if val is None, val otherwise.
         """
         if val != None:
             return val
@@ -295,7 +296,7 @@ class OptionMenu(Menubutton, RO.AddCallback.TkVarMixin,
         - isOK  if False, the value was not valid and was not expanded.
             Note that None is always valid, but never expanded.
         """
-        if value == None:
+        if value is None:
             return None, True
 
         try:
@@ -319,7 +320,7 @@ class OptionMenu(Menubutton, RO.AddCallback.TkVarMixin,
         Returns None if the specified item is not present
         or if item=None and no item is selected.
         """
-        if item == None:
+        if item is None:
             item = self._var.get()
         else:
             item = str(item)
@@ -364,7 +365,7 @@ class OptionMenu(Menubutton, RO.AddCallback.TkVarMixin,
         Implemented to work around tktoolkit-Bugs-1581435:
         "menu index wrong if label is an integer".
         """
-        if val == None:
+        if val is None:
             val = self._var.get()
         return self._items.index(val)
     
@@ -441,7 +442,7 @@ class OptionMenu(Menubutton, RO.AddCallback.TkVarMixin,
         newDefValue, isOK = self.expandValue(newDefValue)
         if not isOK and doCheck:
             raise ValueError("Default value %r invalid" % newDefValue)
-        if showDefault == None:
+        if showDefault is None:
             showDefault = self.trackDefault and self.isDefault()
         self.defValue = newDefValue
         if isCurrent != None:
@@ -475,7 +476,7 @@ class OptionMenu(Menubutton, RO.AddCallback.TkVarMixin,
 
         # update help info
         self._helpTextDict = {}
-        if helpText == None:
+        if helpText is None:
             # if existing help text is fixed, keep using it
             # otherwise there is no help (cannot reuse item-specific help)
             self.helpText = self._fixedHelpText
@@ -527,7 +528,7 @@ class OptionMenu(Menubutton, RO.AddCallback.TkVarMixin,
         and self._items has been set
         """
         for item in self._items:
-            if item == None:
+            if item is None:
                 self._menu.add_separator()
             else:
                 self._menu.add_command(

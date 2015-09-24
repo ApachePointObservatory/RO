@@ -14,6 +14,7 @@ History:
                     Modified getStandardDir to return None if dirType is None.
                     Added getAppDirs and getPrefsDirs to the test code.
                     Removed obsolete getPrefsDir.
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 import Carbon.Folder, Carbon.Folders
 import MacOS
@@ -33,7 +34,7 @@ def getStandardDir(domain, dirType, doCreate=False):
         If dirType is None, then returns None.
     - doCreate: try to create the directory if it does not exist?
     """
-    if dirType == None:
+    if dirType is None:
         return None
     try:
         fsref = Carbon.Folder.FSFindFolder(domain, dirType, doCreate)

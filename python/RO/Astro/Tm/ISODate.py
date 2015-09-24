@@ -5,6 +5,7 @@ History:
 2010-06-28 ROwen    Bug fix: isoDateFromPySec was broken.
 2014-04-25 ROwen    Bug fix: isoDateTimeFromPySec returned an extra 0 before the decimal point if nDig>0.
                     Add from __future__ import division, absolute_import.
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 __all__ = ["isoDateFromPySec", "isoTimeFromPySec", "isoDateTimeFromPySec"]
 
@@ -31,7 +32,7 @@ def isoDateTimeFromPySec(pySec=None, nDig=3, useGMT=True, sepChar="T"):
     elif nDig > 6:
         nDig = 6
     
-    if pySec == None:
+    if pySec is None:
         pySec = time.time()
 
     roundedSec = round(pySec, nDig)

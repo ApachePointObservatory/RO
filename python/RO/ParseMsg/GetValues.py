@@ -11,6 +11,7 @@ History:
                     this could cause the caller to go into an infinite loop.
                     Modified to permit keys with = but no values.
 2004-09-14 ROwen    Renamed variable str in test code.
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 __all__ = ["getValues"]
 
@@ -37,11 +38,11 @@ Returns a duple consisting of:
 Exceptions:
     If astr[begInd] is not "=" or ";" then raises a SyntaxError
 """
-    if begInd == None:
+    if begInd is None:
         return ((), None)
 
     mo = _StartRE.match(astr, begInd)
-    if mo == None:
+    if mo is None:
         raise SyntaxError("cannot find value(s) starting at %d in :%s:" % \
             (begInd, astr))
     sepChar = mo.group('first')
@@ -70,7 +71,7 @@ Exceptions:
             # value is an undelimited word (e.g. a number, NaN, etc.)
 #           print "looking for an undelimited word starting at %d" % (nextInd)
             mo = _UndelimWordRE.match(astr, nextInd)
-            if mo == None:
+            if mo is None:
                 raise SyntaxError("cannot find an undelimited word starting at %d in :%s:" % \
                     (nextInd, astr))
             value = mo.group('str')
@@ -86,7 +87,7 @@ Exceptions:
 #       else:
 #           print ""
         
-        if nextInd == None:
+        if nextInd is None:
             # done with line
             break
 

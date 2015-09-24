@@ -59,6 +59,7 @@ History:
 2014-02-12 ROwen    Added getNamesInGeomFile method to ToplevelSet.
 2014-09-17 ROwen    Now requires json (will not use simplejson).
                     Modified to test for Exception instead of StandardError.
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 __all__ = ['tl_CloseDestroys', 'tl_CloseWithdraws', 'tl_CloseDisabled', 'Toplevel', 'ToplevelSet']
 
@@ -162,7 +163,7 @@ class Toplevel(Tkinter.Toplevel):
                 raise
             if doSaveState:
                 self._stateTracker = self.__wdg.getStateTracker()
-                if self._stateTracker == None:
+                if self._stateTracker is None:
                     raise RuntimeError("getStateTracker returned None")
                     
             
@@ -426,7 +427,7 @@ class ToplevelSet(object):
             raise RuntimeError("toplevel %r already exists" % (name,))
         if defGeom:
             self.defGeomDict[name] = defGeom
-        if defVisible == None:
+        if defVisible is None:
             # if defVisible omitted, see if visible specified
             defVisible = kargs.get("visible", None)
         if defVisible != None:

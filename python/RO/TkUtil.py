@@ -20,6 +20,7 @@ History:
 2012-11-16 ROwen    Added getTclVersion function.
 2013-10-07 ROwen    Timer.start accepts keyword arguments for the callback function.
 2014-07-21 ROwen    Timer.__init__ accepts keyword arguments for the callback function.
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 __all__ = ['addColors', 'colorOK', 'EvtNoProp', 'getWindowingSystem', 'getTclVersion', 'TclFunc',
     'Geometry', 'Timer', 'WSysAqua', 'WSysX11', 'WSysWin']
@@ -137,7 +138,7 @@ def getWindowingSystem():
 #class TkAdapter:
     #_tkWdg = None
     #def __init__(self):
-        #if self._tkWdg == None:
+        #if self._tkWdg is None:
             #self._tkWdg = self._getTkWdg()
         #self.funcDict = {}
     
@@ -183,7 +184,7 @@ class TclFunc:
     """
     tkApp = None
     def __init__(self, func, debug=False):
-        if self.tkApp == None:
+        if self.tkApp is None:
             self.tkApp = _getTkWdg().tk
         self.func = func
         self.tclFuncName = "pyfunc%s" % (id(self),)
@@ -282,7 +283,7 @@ class Geometry(object):
             raise RuntimeError("offsetFlipped=%r does not have two values" % (offsetFlipped,))
         self.offsetFlipped = tuple(bool(val) for val in offsetFlipped)
 
-        if extent == None:
+        if extent is None:
             self.extent = (None, None)
         else:
             if len(extent) != 2:
@@ -330,7 +331,7 @@ class Geometry(object):
         constrainedExtent = []
         for ii in range(2):
             extent_ii = self.extent[ii]
-            if extent_ii == None:
+            if extent_ii is None:
                 extent_ii = defExtent
             corner_ii = self.offset[ii]
             minCorner_ii = self.minCorner[ii]
@@ -383,7 +384,7 @@ class Geometry(object):
             self._signStrFromValue(self.offsetFlipped[0]), self.offset[0],
             self._signStrFromValue(self.offsetFlipped[1]), self.offset[1])
 
-        if includeExtent == None:
+        if includeExtent is None:
             includeExtent = self.hasExtent
 
         if includeExtent:
@@ -401,7 +402,7 @@ class Geometry(object):
 
     @staticmethod
     def _intFromStr(val):
-        if val == None:
+        if val is None:
             return val
         return int(val)
 

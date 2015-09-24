@@ -33,6 +33,7 @@ History:
                     instead of a ReverseOrderedDict.
                     Modified __repr__ to return a string that can recreate the dict.
                     Added __str__ to output the traditional dict representation.
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 __all__ = ["OrderedDict", "ReverseOrderedDict"]
 
@@ -46,7 +47,7 @@ class OrderedDict(dict):
     def __init__(self, seqOrDict=None):
         dict.__init__(self)
         self.__keyList = []
-        if seqOrDict == None:
+        if seqOrDict is None:
             return
         elif hasattr(seqOrDict, "iteritems"):
             for key, val in seqOrDict.iteritems():

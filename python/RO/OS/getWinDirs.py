@@ -47,6 +47,7 @@ History:
                     to import win32com.shell).
 2006-02-28 ROwen    Removed py2exe compatibility because it's more appropriate
                     for the py2exe setup.py script.
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 import pywintypes
 from win32com.shell import shell, shellcon
@@ -65,7 +66,7 @@ def getStandardDir(dirType):
     to dirType, but in practice this constant is NOT defined in win32com.shellcon,
     so it is risky (you'd have to specify an explicit integer and hope it did not change).
     """
-    if dirType == None:
+    if dirType is None:
         return None
     try:
         return shell.SHGetFolderPath(

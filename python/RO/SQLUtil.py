@@ -23,6 +23,7 @@ Tested with pyPgSQL (for PostgreSQL) and MySQLdb (for MySQL).
                     of the connection, but is used to create the cursor's lastrowid.)
 2006-01-31 ROwen    Added rowcount, lastrowid to NullDBCursor.
 2006-02-16 ROwen    Modified NullDBCursor output to restrict long entries to _MaxDiagnosticLen.
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 import time
 
@@ -154,7 +155,7 @@ def getLastInsertedIDPgSQL(dbCursor, table, primKeyName):
     For MySQLDb see the documentation for dbCursor.last_insert_id().
     """
     lastOID = dbCursor.oidValue
-    if lastOID == None:
+    if lastOID is None:
         return None
     sqlCmd = "select %s from %s where oid = %s" % (primKeyName, table, lastOID)
     dbCursor.execute(sqlCmd)
@@ -182,7 +183,7 @@ def insertRow(dbCursor, table, dataDict, fieldsToAdd=None, fieldsToCheck=None):
     if fieldsToCheck and rowExists(dbCursor, table, dataDict, fieldsToCheck):
         raise RuntimeError("a matching entry already exists")
     
-    if fieldsToAdd == None:
+    if fieldsToAdd is None:
         fieldsToAdd = dataDict.keys()
     
     addFieldStr = ", ".join(fieldsToAdd)
@@ -251,7 +252,7 @@ def rowExists(dbCursor, table, dataDict, fieldsToCheck=None):
     - dataDict: dict of field name: value entries
     - fieldsToCheck: list of fields to check; if None (default) then check all fields
     """
-    if fieldsToCheck == None:
+    if fieldsToCheck is None:
         fieldsToCheck = dataDict.keys()
 
     # generate the sql command:

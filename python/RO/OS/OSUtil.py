@@ -20,6 +20,7 @@ History:
 2011-08-01 ROwen    findFiles: added arguments dirPatterns and exclDirPatterns; modified to use os.walk.
 2011-09-09 ROwen    Misfeature fix: findFiles could return paths that start with "./".
 2011-10-11 ROwen    findFiles: document recursionDepth argument.
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 __all__ = ["delDir", "expandPath", "findFiles", "getResourceDir", "removeDupPaths", "splitPath", "openUniv"]
 
@@ -130,7 +131,7 @@ def findFiles(
     exclPatterns = RO.SeqUtil.asSequence(exclPatterns or ())
     dirPatterns = RO.SeqUtil.asSequence(dirPatterns or "*")
     exclDirPatterns = RO.SeqUtil.asSequence(exclDirPatterns or ())
-    if recursionDepth == None:
+    if recursionDepth is None:
         recursionDepth = _Inf()
     else:
         recursionDepth = int(recursionDepth)

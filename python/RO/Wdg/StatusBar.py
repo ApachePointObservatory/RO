@@ -59,6 +59,7 @@ History:
 2012-07-09 ROwen    Modified to use RO.TkUtil.Timer.
 2015-01-08 ROwen    If a message in reply to a command has unknown message type then report the problem
                     and assume the command failed.
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 __all__ = ['StatusBar']
 
@@ -77,7 +78,7 @@ def _getSound(playCmdSounds, prefs, prefName):
     if not playCmdSounds:
         return noPlay
     soundPref = prefs.getPrefVar(prefName)
-    if soundPref == None:
+    if soundPref is None:
         sys.stderr.write("StatusBar cannot play %r; no such preference" % prefName)
         return noPlay
     elif not hasattr(soundPref, "play"):
@@ -162,7 +163,7 @@ class StatusBar(Tkinter.Frame):
                 0 will clear any temporary message,
                 None will not clear anything
         """
-        if self.currID == None or msgID == None:
+        if self.currID is None or msgID is None:
             return None
 
         if msgID == 0 or self.currID == msgID:
@@ -182,7 +183,7 @@ class StatusBar(Tkinter.Frame):
         self.cmdVar = cmdVar
         self.cmdMaxSeverity = RO.Constants.sevNormal
         self.cmdLastWarning = None
-        if cmdSummary == None:
+        if cmdSummary is None:
             if len(self.cmdVar.cmdStr) > self.summaryLen + 3:
                 cmdSummary = self.cmdVar.cmdStr[0:self.summaryLen] + "..."
             else:

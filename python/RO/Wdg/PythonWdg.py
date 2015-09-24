@@ -34,7 +34,8 @@ History:
                     Modified to use an RO.Wdg.Text widget.
 2004-08-11 ROwen    Define __all__ to restrict import.
 2004-09-14 ROwen    Bug fix: output file close error (fd.close inst. of fd.close()).
-2005-06-16 ROwen    Changed is None to == None to appease pychecker and myself.
+2005-06-16 ROwen    Changed "== None" to "is None" in some cases, to appease pychecker and myself.
+2015-09-24 ROwen    Replace remaining "== None" with "is None" to modernize the code.
 """
 __all__ = ['PythonWdg']
 
@@ -112,10 +113,10 @@ class PythonWdg(Tkinter.Frame):
         rootPat = re.compile(r"^.*mainloop\(\).*$", re.MULTILINE)
         script = rootPat.sub("", script)
 
-        if globs == None:
+        if globs is None:
             import __main__
             globs = __main__.__dict__
-        if locs == None:
+        if locs is None:
             locs = globs
         exec script in globs, locs
 

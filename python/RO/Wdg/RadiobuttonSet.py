@@ -40,6 +40,7 @@ History:
                     Fixed and enhanced the demo code.
 2012-11-30 ROwen    Removed __getitem__ and __len__ methods because they confuse InputCont.
                     Moved fix for Aqua Tk 8.5 width bug to RO.Wdg.Radiobutton.
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 __all__ = ['RadiobuttonSet']
 
@@ -118,21 +119,21 @@ class RadiobuttonSet (RO.AddCallback.TkVarMixin,
         side = None,
     **kargs):
         self._defValue = None
-        if trackDefault == None:
+        if trackDefault is None:
             trackDefault = bool(autoIsCurrent)
         self.trackDefault = trackDefault
-        if textList == None and bitmapList == None:
+        if textList is None and bitmapList is None:
             raise ValueError("Must specify textList or bitmapList")
-        elif textList == None:
-            if valueList == None:
+        elif textList is None:
+            if valueList is None:
                 raise ValueError("Must specify textList or valueList")
             textList = [None]*len(bitmapList)
         else:
             # textList specified; use as default for valueList
-            if valueList == None:
+            if valueList is None:
                 valueList = textList
             
-            if bitmapList == None:
+            if bitmapList is None:
                 bitmapList = [None]*len(textList)
             else:
                 if len(textList) != len(bitmapList):
@@ -142,7 +143,7 @@ class RadiobuttonSet (RO.AddCallback.TkVarMixin,
             raise ValueError("valueList must have one entry per radio button")
 
         self._valueList = valueList
-        if var == None:
+        if var is None:
             var = Tkinter.StringVar()
         self._var = var
         self._defIfBlank = defIfBlank
@@ -202,9 +203,9 @@ class RadiobuttonSet (RO.AddCallback.TkVarMixin,
             otherwise silently returns value
         - descr: description of value; typically "value" or "default".
         
-        If value == None then None is always returned.
+        If value is None then None is always returned.
         """
-        if value == None:
+        if value is None:
             return
 
         try:
@@ -247,7 +248,7 @@ class RadiobuttonSet (RO.AddCallback.TkVarMixin,
     def restoreDefault(self):
         """Restore default value.
         """
-        if self._defValue == None:
+        if self._defValue is None:
             return
     
         if self._defValue not in self._valueList:
@@ -262,7 +263,7 @@ class RadiobuttonSet (RO.AddCallback.TkVarMixin,
         - doCheck: if True, raise an exception if value invalid,
                 else accept it "as is" and have no button selected
         """
-        if newValue == None:
+        if newValue is None:
             return
         
         newValue = self.expandValue(newValue, doCheck=doCheck, descr="button")

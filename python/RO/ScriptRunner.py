@@ -84,6 +84,7 @@ History:
 2014-03-14 ROwen    Changed default abortCmdStr from None to "".
 2014-04-29 ROwen    Bug fix: pause followed by resume lost the value returned by whatever was being paused.
 2014-07-21 ROwen    Added waitPause and waitSec.
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 __all__ = ["ScriptError", "ScriptRunner"]
 
@@ -207,7 +208,7 @@ class ScriptRunner(RO.AddCallback.BaseMixin):
                 raise ValueError("Cannot specify runFunc, initFunc or endFunc with scriptClass")
             if not hasattr(scriptClass, "run"):
                 raise ValueError("scriptClass=%r has no run method" % scriptClass)
-        elif runFunc == None:
+        elif runFunc is None:
             raise ValueError("Must specify runFunc or scriptClass")
         elif not callable(runFunc):
             raise ValueError("runFunc=%r not callable" % (runFunc,))
@@ -376,7 +377,7 @@ class ScriptRunner(RO.AddCallback.BaseMixin):
     def resumeUser(self):
         """Resume execution from waitUser
         """
-        if self._userWaitID == None:
+        if self._userWaitID is None:
             raise RuntimeError("Not in user wait mode")
             
         iterID = self._userWaitID

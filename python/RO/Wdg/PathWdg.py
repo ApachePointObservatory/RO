@@ -20,6 +20,7 @@ History:
                     Moved more functionality to BasePathWdg.
 2006-06-08 ROwen    FilePathWdg bug fix: initial defPath not shown.
 2012-07-09 ROwen    Modified to treat path="" as path=None. This fixes a problem with file and path prefs.
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 __all__ = ["DirWdg", "FileWdg"]
 
@@ -171,7 +172,7 @@ class BasePathWdg (Tkinter.Button, RO.AddCallback.BaseMixin, CtxMenu.CtxMenuMixi
         if not self.getEnable():
             return True
         
-        if self.path == None:
+        if self.path is None:
             state = "disabled"
         else:
             state = "normal"

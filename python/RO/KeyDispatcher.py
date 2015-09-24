@@ -85,6 +85,7 @@ History:
 2012-07-18 ROwen    Removed tkWdg argument from constructor.
                     Modified to use RO.Comm.Generic.Timer.
 2012-08-01 ROwen    Updated for RO.Comm.TCPConnection 3.0.
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 __all__ = ["logToStdOut", "KeyDispatcher"]
 
@@ -175,10 +176,10 @@ class KeyDispatcher(object):
         Issue the command specified by cmdVar.abortCmdStr, if present.
         Report the command as failed.
         
-        Has no effect if the command was never dispatched (cmdID == None)
+        Has no effect if the command was never dispatched (cmdID is None)
         or has already finished.
         """
-        if cmdID == None:
+        if cmdID is None:
             return
 
         cmdVar = self.cmdDict.get(cmdID)
@@ -440,9 +441,9 @@ class KeyDispatcher(object):
         """Generate a hub message based on the supplied data.
         Useful for reporting internal errors.
         """
-        if cmdr == None:
+        if cmdr is None:
             cmdr = self.connection.cmdr
-        if actor == None:
+        if actor is None:
             actor = self.name
 
         headerStr = "%s %d %s %s" % (
@@ -658,7 +659,7 @@ class KeyDispatcher(object):
         if not self._isConnected:
             return
 
-        if refreshCmdItemIter == None:
+        if refreshCmdItemIter is None:
             self._updateRefreshCmds()
             refreshCmdItemIter = self.refreshCmdDict.iteritems()
 

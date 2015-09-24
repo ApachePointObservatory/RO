@@ -3,6 +3,7 @@ from __future__ import division, absolute_import
 
 History:
 2014-04-25 ROwen    Add from __future__ import division, absolute_import.
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 __all__ = ["setClockError", "getClockError", "getCurrPySec", "utcFromPySec", "pySecFromUTC"]
 
@@ -53,7 +54,7 @@ def utcFromPySec(pySec = None):
     """
     global _TimeTupleJ2000
 
-    if pySec == None:
+    if pySec is None:
         pySec = getCurrPySec()
     
     # python time (in seconds) corresponding to 2000-01-01 00:00:00

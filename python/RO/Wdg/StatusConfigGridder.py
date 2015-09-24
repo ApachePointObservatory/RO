@@ -20,6 +20,7 @@ History:
                     in the same column.
 2008-03-14 ROwen    Bug fix: removed unused statusCols argument.
 2011-05-04 ROwen    Bug fix: was not setting _maxNextCol
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 __all__ = ['StatusConfigGridder']
 
@@ -175,11 +176,11 @@ class _StatusConfigGridSet(Gridder._BaseGridSet):
         - Raise RuntimeError if numStatusCols is not None and you use more than numStatusCols columns
           for status widgets
         """
-        if cfgColSpan == None:
+        if cfgColSpan is None:
             cfgColSpan = colSpan
-        if cfgUnits == None:
+        if cfgUnits is None:
             cfgUnits = units
-        if cfgSticky == None:
+        if cfgSticky is None:
             cfgSticky = sticky
         if numStatusCols != None:
             numStatusCols = int(numStatusCols)

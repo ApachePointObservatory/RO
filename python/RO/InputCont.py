@@ -92,6 +92,7 @@ History:
 2010-05-26 ROwen    Modified to use AddCallback 2010-05-26.
 2011-02-18 ROwen    Added allCallbacksEnabled method.
 2014-03-13 ROwen    Added omitDef argument to getValueDict and getValueList.
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 import itertools
 import RO.AddCallback
@@ -156,7 +157,7 @@ class BasicFmt(object):
             if '' in valList:
                 raise ValueError('must specify all values for %r' % (name,))
         
-        if self.omitName or name == None:
+        if self.omitName or name is None:
             nameStr = ''
         else:
             nameStr = name + self.nameSep
@@ -178,7 +179,7 @@ class VMSQualFmt(object):
         rejectBlanks = True,
         stripPlusses = False,
     ):
-        if valFmt == None:
+        if valFmt is None:
             def blankToQuotes(astr):
                 if astr == '':
                     return '""'
@@ -261,7 +262,7 @@ class BasicContListFmt(object):
             if len(strList) == 0:
                 return ''
 
-        if self.omitName or name == None:
+        if self.omitName or name is None:
             nameStr = ''
         else:
             nameStr = name + self.nameSep
@@ -308,7 +309,7 @@ class WdgCont(RO.AddCallback.BaseMixin):
         self._omitDef = bool(omitDef)
         self._setDefIfAbsent = bool(setDefIfAbsent)
         
-        if formatFunc == None:
+        if formatFunc is None:
             formatFunc = BasicFmt()
         self._formatFunc = formatFunc
         if not callable(self._formatFunc):
@@ -533,7 +534,7 @@ class BoolNegCont(WdgCont):
         self._negStr = negStr
         self._omitDef = omitDef
         
-        if wdgNames == None:
+        if wdgNames is None:
             wdgNames = [wdg['text'] for wdg in self._wdgList]
         else:
             wdgNames = RO.SeqUtil.asList(wdgNames)
@@ -659,7 +660,7 @@ class BoolOmitCont(WdgCont):
         self._negStr = negStr
         self._omitDef = omitDef
         
-        if wdgNames == None:
+        if wdgNames is None:
             wdgNames = [wdg['text'] for wdg in self._wdgList]
         else:
             wdgNames = RO.SeqUtil.asList(wdgNames)
@@ -741,7 +742,7 @@ class ContList(WdgCont):
         callFunc = None,
         callNow = False,
     ):
-        if formatFunc == None:
+        if formatFunc is None:
             formatFunc = BasicContListFmt()
 
         WdgCont.__init__(self,

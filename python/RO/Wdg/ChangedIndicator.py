@@ -11,6 +11,7 @@ History:
 2003-11-18 ROwen    Modified to use SeqUtil instead of MathUtil.
 2004-08-11 ROwen    Define __all__ to restrict import.
 2004-09-14 ROwen    Tweaked the imports.
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 __all__ = ['ChangedIndicator']
 
@@ -37,7 +38,7 @@ class ChangedIndicator (Tkinter.Label, CtxMenu.CtxMenuMixin):
         - helpURL   URL for longer help
         - all remaining keyword arguments are used to configure the Menu
         """
-        if var == None:
+        if var is None:
             var = Tkinter.StringVar()       
         self.__var = var
         self.__inputCont = None
@@ -63,7 +64,7 @@ class ChangedIndicator (Tkinter.Label, CtxMenu.CtxMenuMixin):
         """Adds a single ROEntry widget or set of widgets to control.
         Then sets the enabled state appropriately for all widgets.
         """
-        if wdgOrSet == None:
+        if wdgOrSet is None:
             return
 
         wdgSet = RO.SeqUtil.asList(wdgOrSet)

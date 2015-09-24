@@ -125,6 +125,7 @@ History:
                     but also test for None for backwards compability.
 2014-09-15 ROwen    Bug fix: an error message used a nonexistent variable.
                     Tweaked PVTVar._doCallbacks to do nothing if callbacks disabled.
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 __all__ = ["TypeDict", "AllTypes", "DoneTypes", "FailTypes", "KeyVar", "PVTKeyVar", "CmdVar", "KeyVarFactory"]
 
@@ -226,7 +227,7 @@ class KeyVar(RO.AddCallback.BaseMixin):
 
         # set and check self._converterList, self.minNVal and self.maxNVal
         self._converterList = RO.SeqUtil.asList(converters)
-        if nval == None:
+        if nval is None:
             # auto-compute
             self.minNVal = self.maxNVal = len(self._converterList)
         else:
@@ -251,7 +252,7 @@ class KeyVar(RO.AddCallback.BaseMixin):
             """Returns a string describing the range of values:
             """
             def asStr(numOrNone):
-                if numOrNone == None:
+                if numOrNone is None:
                     return "?"
                 return "%r" % (numOrNone,)
 
@@ -480,7 +481,7 @@ class KeyVar(RO.AddCallback.BaseMixin):
         If msgType in msgDict is missing or invalid, a warning message is printed
         to sys.stderr and self.lastType is set to warning.
         """
-        if valueList == None:
+        if valueList is None:
             self._restoreDefault()
         else: 
             nout = self._countValues(valueList)
@@ -533,7 +534,7 @@ class KeyVar(RO.AddCallback.BaseMixin):
           silently returns (None, 0) (a message has already been printed)
         """
         rawValue = valueList[ind]
-        if rawValue == None:
+        if rawValue is None:
             return None
         try:
             return self._getCnvFunc(ind)(rawValue)
@@ -775,7 +776,7 @@ class CmdVar(object):
         self.timeLimKeyword = timeLimKeyword
         self.abortCmdStr = str(abortCmdStr) if abortCmdStr else None # test None for backwards compatibility
         self.keyVarDict = dict()
-        if keyVars == None:
+        if keyVars is None:
             keyVars = ()
         else:
             for keyVar in keyVars:
@@ -878,7 +879,7 @@ class CmdVar(object):
         if not allVals:
             return None
         lastVal = allVals[-1]
-        if ind == None:
+        if ind is None:
             return lastVal
         return lastVal[ind]
     
@@ -1059,7 +1060,7 @@ class KeyVarFactory(object):
         netKeyArgs.update(keyArgs)
         keyVar = self._keyVarType(keyword, **netKeyArgs)
 
-        if allowRefresh == None:
+        if allowRefresh is None:
             allowRefresh = self._allowRefresh
         elif allowRefresh:
             # allowRefresh specified True in this call;
@@ -1181,7 +1182,7 @@ if __name__ == "__main__":
     print("\nrunning pvt callback test; hit ctrl-C to end")
     
     def pvtCallback(valList, isCurrent, keyVar):
-        if valList == None:
+        if valList is None:
             return
         pvt = valList[0]
         print("%s pos = %s" % (pvt, pvt.getPos()))

@@ -15,6 +15,7 @@ History:
 2004-05-18 ROwen    Stopped importing sys since it was not being used.
 2004-08-11 ROwen    Define __all__ to restrict import.
 2004-09-14 ROwen    Test code no longer imports RO.Wdg to avoid circular import.
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 __all__ = ['HistoryMenu']
 
@@ -108,7 +109,7 @@ class HistoryMenu (Tkinter.Menubutton, CtxMenu.CtxMenuMixin):
         """Returns the number of items in the history menu.
         """
         lastIndex = self.__menu.index("end")
-        if lastIndex == None:
+        if lastIndex is None:
             return 0
         return lastIndex + 1
         

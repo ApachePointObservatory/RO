@@ -25,6 +25,7 @@ History:
 2005-04-26 ROwen    Bug fix: conversions requiring a App Topo<->Observed step were broken
                     (thanks to Emmanouil Angelakis for the report).
 2007-04-24 ROwen    Converted from Numeric to numpy.
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 __all__ = ["coordConv"]
 
@@ -123,9 +124,9 @@ class _CnvObj (object):
         See notes for the coordConv function below.
         """
         # handle default dates
-        if fromDate == None:
+        if fromDate is None:
             fromDate = RO.CoordSys.getSysConst(fromSys).currDefaultDate()
-        if toDate == None:
+        if toDate is None:
             toDate = RO.CoordSys.getSysConst(toSys).currDefaultDate()
         
         self.fromDate = fromDate
@@ -209,7 +210,7 @@ class _CnvObj (object):
         return (icrsFromGeo(fromP, agData), _CnvObj.ZeroV)
     
     def TopocentricFromGeocentric(self, fromP, dumV):
-        if self.obsData == None:
+        if self.obsData is None:
             raise ValueError("must specify obsData to cnvert to Topocentric from Geocentric")
         return (
             topoFromGeo(fromP, Tm.lastFromUT1(self.toDate, self.obsData.longitude), self.obsData),
@@ -217,7 +218,7 @@ class _CnvObj (object):
         )
     
     def GeocentricFromTopocentric(self, fromP, dumV):
-        if self.obsData == None:
+        if self.obsData is None:
             raise ValueError("must specify obsData to convert to Geocentric from Topocentric")
         return (
             geoFromTopo(fromP, Tm.lastFromUT1(self.fromDate, self.obsData.longitude), self.obsData),
@@ -225,13 +226,13 @@ class _CnvObj (object):
         )
     
     def ObservedFromTopocentric(self, fromP, dumV):
-        if self.refCo == None:
+        if self.refCo is None:
             raise ValueError("must specify refCo to convert to Observed from Topocentric")
         pos, tooLow = obsFromTopo(fromP, self.refCo)
         return (pos, _CnvObj.ZeroV)
     
     def TopocentricFromObserved(self, fromP, dumV):
-        if self.refCo == None:
+        if self.refCo is None:
             raise ValueError("must specify refCo to convert to Topocentric from Observed")
         pos, tooLow = topoFromObs(fromP, self.refCo)
         return (pos, _CnvObj.ZeroV)

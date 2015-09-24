@@ -25,6 +25,7 @@ Implementation note:
 History:
 2006-09-13 ROwen
 2012-07-10 ROwen    Removed use of update_idletasks in test code.
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 __all__ = ["ResizableRect"]
 
@@ -70,7 +71,7 @@ class ResizableRect(RO.AddCallback.BaseMixin):
         
         self.mousePos = [] # x, y coords of button-down
         self.rectCoords = [] # x0, y0, x1, y1 coords of rectangle
-        if minSize == None:
+        if minSize is None:
             # 3 = 2 lines of width 1 + 1 for delta-coord - size
             minSize = 3 + (3 * self.grabSize[0]) + self.grabSize[1]
         self.minSizeLess1 = minSize - 1

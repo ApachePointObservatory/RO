@@ -48,6 +48,7 @@ History:
 2005-01-05 ROwen    Changed message state to severity, set/getState to set/getSeverity.
 2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code.
 2012-07-09 ROwen    Modified test code to user RO.TkUtil.Timer.
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 __all__ = ['Label', 'BoolLabel', 'StrLabel', 'IntLabel', 'FloatLabel', 'DMSLabel']
 
@@ -127,7 +128,7 @@ class Label(Tkinter.Label, CtxMenu.CtxMenuMixin, IsCurrentMixin, SeverityMixin):
         If isCurrent is false then the value is suspect
         Otherwise the value is valid and current.
         """
-        if self._value == None:
+        if self._value is None:
             return (None, self._isCurrent)
         else:
             return (self["text"], self._isCurrent)
@@ -175,7 +176,7 @@ class Label(Tkinter.Label, CtxMenu.CtxMenuMixin, IsCurrentMixin, SeverityMixin):
     def _updateText(self):
         """Updates the displayed value. Ignores isCurrent and severity.
         """
-        if self._value == None:
+        if self._value is None:
             self["text"] = ""
         else:
             try:
@@ -282,7 +283,7 @@ class FloatLabel(Label):
         assert "formatFunc" not in kargs, "formatFunc not allowed for %s" % self.__class__.__name__
 
         # handle default format string
-        if formatStr == None:
+        if formatStr is None:
             formatStr = "%." + str(precision) + "f"
             
         # test and set format string

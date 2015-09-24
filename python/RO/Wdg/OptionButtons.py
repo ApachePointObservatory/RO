@@ -30,6 +30,7 @@ History:
                     Bug fix: test code enable button was broken.
 2004-12-13 ROwen    Renamed doEnable to setEnable for modified RO.InputCont.
 2005-06-03 ROwen    Fixed one indentation quirk (space tab -> tab).
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 __all__ = ['OptionButtons']
 
@@ -101,7 +102,7 @@ class OptionButtons(InputContFrame.InputContFrame):
                 helpURL = helpURL,
             ).pack(side="top", anchor="w")
         
-        if formatFunc == None:
+        if formatFunc is None:
             formatFunc = RO.InputCont.BasicFmt()
 
         # create option checkboxes

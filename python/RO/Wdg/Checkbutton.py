@@ -67,6 +67,7 @@ History:
                     Now it is applied by overridden method configure.
 2012-11-30 ROwen    Does no width correction if bitmap is shown.
 2014-03-18 ROwen    Stop adding padding for indicatoron=False; it is not needed for Tcl/Tk 8.5.18.
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 __all__ = ['Checkbutton']
 
@@ -147,13 +148,13 @@ class Checkbutton (Tkinter.Checkbutton, RO.AddCallback.TkVarMixin,
         severity = RO.Constants.sevNormal,
     **kargs):
         self._defBool = False # just create the field for now
-        if var == None:
+        if var is None:
             var = Tkinter.StringVar()
-        elif defValue == None:
+        elif defValue is None:
             defValue = var.get()
         self._var = var
         self._defIfDisabled = bool(defIfDisabled)
-        if trackDefault == None:
+        if trackDefault is None:
             trackDefault = bool(autoIsCurrent)
         self._trackDefault = trackDefault
         self.helpText = helpText

@@ -28,6 +28,7 @@ History:
                     You must now call RO.Comm.Generic.setFramework before importing this module.
 2012-12-06 ROwen    Fixed a bug in the demo code; it once again requires Tkinter.
 2014-09-17 ROwen    Bug fix: an error message referenced a mis-typed variable name.
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 __all__ = ["HubConnection"]
 
@@ -155,7 +156,7 @@ class HubConnection(TCPConnection):
                 if (msgType != ":"):
                     errMsg = dataDict.get("why", hubMsg)[0]
                     raise RuntimeError("knockKnock failed: %s" % (errMsg,))
-                elif (nonce == None):
+                elif (nonce is None):
                     raise RuntimeError("nonce missing; got: %r" % (hubMsg,))
                 
                 # generate the combined password
@@ -180,7 +181,7 @@ class HubConnection(TCPConnection):
                 if (msgType != ":"):
                     errMsg = dataDict.get("why", hubMsg)[0]
                     raise RuntimeError("login failed: %s" % (errMsg,))
-                elif cmdr == None:
+                elif cmdr is None:
                     raise RuntimeError("cmdr missing; got: %r" % (hubMsg,))
                 
                 self.cmdr = cmdr

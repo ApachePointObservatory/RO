@@ -37,6 +37,7 @@ History:
                     Modified _cleanup to deregister tcl callbacks before cleaning up the connection.
                     Modified to print warnings to stderr instead of stdout.
 2014-09-18 ROwen    Fixed a bug in the unit test.
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 __all__ = ['HTTPGet']
 
@@ -177,7 +178,7 @@ class HTTPGet(RO.AddCallback.BaseMixin):
         dispStr = None,
         timeLim = None,
     ):
-        if self._tkApp == None:
+        if self._tkApp is None:
             self._tkApp = Tkinter.Frame().tk
         self.fromURL = fromURL
         self.toPath = toPath
@@ -189,7 +190,7 @@ class HTTPGet(RO.AddCallback.BaseMixin):
         else:
             self.timeLimMS = 0
 
-        if dispStr == None:
+        if dispStr is None:
             self.dispStr = fromURL
         else:
             self.dispStr = dispStr
@@ -292,7 +293,7 @@ class HTTPGet(RO.AddCallback.BaseMixin):
             self._setState(self.Aborted)
             return
 
-        if self._tclHTTPConn == None:
+        if self._tclHTTPConn is None:
             sys.stderr.write("HTTPGet cannot abort: isDone false but no http connection\n")
             return
 
@@ -419,7 +420,7 @@ class HTTPGet(RO.AddCallback.BaseMixin):
     def _httpDoneCallback(self, token=None):
         """Called when the http transfer is finished.
         """
-        if self._tclHTTPConn == None:
+        if self._tclHTTPConn is None:
             sys.stderr.write("HTTPGet warning: _httpDoneCallback called but no http connection\n")
             return
         

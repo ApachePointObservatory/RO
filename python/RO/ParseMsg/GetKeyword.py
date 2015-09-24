@@ -4,6 +4,7 @@ from __future__ import absolute_import, division, print_function
 History:
 2004-05-18 ROwen    Modified test code to use astr instead of str
                     and adict instead of dict.
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 __all__ = ["getKeyword"]
 
@@ -29,7 +30,7 @@ def getKeyword(astr, begInd=0):
         if the next non-whitespace thing is not a keyword, throws a SyntaxError
     """
     mo = ptn.match(astr, begInd)
-    if mo == None:
+    if mo is None:
         raise SyntaxError("not a keyword starting at %d in :%s:" % \
             (begInd,astr))
 

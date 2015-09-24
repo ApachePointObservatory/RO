@@ -12,6 +12,7 @@ History:
 2004-05-18 ROwen    Stopped importing string; it wasn't used.
                     Modified test code to use astr instead of str.
 2011-06-17 ROwen    Changed "type" to "msgType" in parsed message dictionaries to avoid conflict with builtin.
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 __all__ = ["getHubHeader", "getMidRidHeader", "getMidRidAsHubHeader"]
 
@@ -40,7 +41,7 @@ def getHubHeader(astr):
     - If the header cannot be fully parsed, throws a SyntaxError.
     """
     matchObj = _HubPattern.match(astr)
-    if matchObj == None:
+    if matchObj is None:
         raise SyntaxError("could not parse standard header in :%s:" % (astr))
 
     dataStart = matchObj.start(5)
@@ -74,7 +75,7 @@ def getMidRidHeader(astr):
     - If the header cannot be fully parsed, throws a SyntaxError.
     """
     matchObj = _MidRidPattern.match(astr)
-    if matchObj == None:
+    if matchObj is None:
         raise SyntaxError("could not parse mid/rid header in :%s:" % (astr))
 
     dataStart = matchObj.start(4)

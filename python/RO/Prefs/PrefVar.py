@@ -87,6 +87,7 @@ History:
 2009-09-23 ROwen    Updated SoundPrefVar documentation to remove explicit mention of snack.
 2012-12-19 ROwen    Added FontSizePrefVar.
 2014-05-07 ROwen    Changed is str test to use basestring.
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 __all__ = ["PrefVar", "StrPrefVar", "DirectoryPrefVar", "FilePrefVar", "SoundPrefVar", "BoolPrefVar", \
     "IntPrefVar", "FloatPrefVar", "ColorPrefVar", "FontPrefVar", "FontSizePrefVar", "PrefSet"]
@@ -300,7 +301,7 @@ class PrefVar(object):
         """Converts a raw value (internal rep. or string);
         None is converted to "".
         """
-        if rawValue == None:
+        if rawValue is None:
             return ""
         return self.formatStr % (self.asValue(rawValue),)
     
@@ -356,7 +357,7 @@ class StrPrefVar(PrefVar):
         Raise a ValueError exception if the value is invalid.
         """
         if self.validRE:
-            if self.validRE.match(value) == None:
+            if self.validRE.match(value) is None:
                 raise ValueError("%r does not match pattern %r" % (value, self.finalPattern))
     
     def getRangeStr(self):
@@ -643,11 +644,11 @@ class IntPrefVar(PrefVar):
 
     def getRangeStr(self):
         """Return a brief description of the variable's range or other restrictions"""
-        if self.minValue == None and self.maxValue == None:
+        if self.minValue is None and self.maxValue is None:
             return ""
-        elif self.minValue == None:
+        elif self.minValue is None:
             return ("<= " + self.formatStr) % (self.maxValue,)
-        elif self.maxValue == None:
+        elif self.maxValue is None:
             return (">= " + self.formatStr) % (self.minValue,)
         else:
             return ("[" + self.formatStr + ", " + self.formatStr + "]") % (self.minValue, self.maxValue)
@@ -719,11 +720,11 @@ class FloatPrefVar(PrefVar):
 
     def getRangeStr(self):
         """Return a brief description of the variable's range or other restrictions"""
-        if self.minValue == None and self.maxValue == None:
+        if self.minValue is None and self.maxValue is None:
             return ""
-        elif self.minValue == None:
+        elif self.minValue is None:
             return ("<= " + self.formatStr) % (self.maxValue,)
-        elif self.maxValue == None:
+        elif self.maxValue is None:
             return (">= " + self.formatStr) % (self.minValue,)
         else:
             return ("[" + self.formatStr + ", " + self.formatStr + "]") % (self.minValue, self.maxValue)

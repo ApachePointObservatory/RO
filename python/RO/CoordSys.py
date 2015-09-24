@@ -20,6 +20,7 @@ History:
 2003-05-28 ROwen    Added dateIsSidTime; changed dateInYears to dateIsYears.
 2003-10-24 ROwen    Made J2000 the default date for ICRS (instead of no date).
 2005-08-12 ROwen    Removed unused import of string module.
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 import RO.Astro.Tm
 import RO.StringUtil
@@ -205,7 +206,7 @@ def getSysConst(coordSys, defSys=""):
     coordSys = coordSys or defSys
     
     # check for None first since it does not support lower()
-    if coordSys == None:
+    if coordSys is None:
         raise ValueError("None is not a valid coord sys name")
         
     try:

@@ -36,6 +36,7 @@ History:
                     State constants are now FTPGet class variables instead of module globals.
                     State constants are now strings instead of integers.
 2014-09-17 ROwen    Bug fix: most state constants missing self. prefix.
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 __all__ = ['FTPGet']
 
@@ -114,7 +115,7 @@ class FTPGet:
         self.username = username or "anonymous"
         self.password = password or "abc@def.org"
         
-        if dispStr == None:
+        if dispStr is None:
             self.dispStr = urlparse.urljoin("ftp://" + self.host, self.fromPath)
         else:
             self.dispStr = dispStr

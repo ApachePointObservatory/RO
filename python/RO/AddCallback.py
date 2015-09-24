@@ -33,6 +33,7 @@ History:
 2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code.
 2013-09-24 ROwen    Added safeCall.
 2014-04-17 ROwen    Added safeCall2, which gives more feedback than safeCall.
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 __all__ = ["safeCall", "safeCall2", "BaseMixin", "TkButtonMixin", "TkVarMixin"]
 
@@ -139,7 +140,7 @@ class BaseMixin(object):
         
         Raises ValueError if callFunc is not callable
         """
-        if callFunc == None:
+        if callFunc is None:
             return
 
         if not callable(callFunc):
@@ -150,7 +151,7 @@ class BaseMixin(object):
             self._callbacks.append(callFunc)
         
         # if wanted, call the new function
-        if callNow or (callNow == None and self._defCallNow):
+        if callNow or (callNow is None and self._defCallNow):
             # use _doCallbacks in case it was overridden,
             # but only call this one function
             currCallbacks = self._callbacks

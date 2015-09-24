@@ -54,6 +54,7 @@ History:
 2011-08-16 ROwen    Commented out two diagnostic print statements.
 2011-10-11 ROwen    Documented as deprecated.
 2012-07-09 ROwen    Modified to use RO.TkUtil.Timer.
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 __all__ = ["DropletRunner"]
 
@@ -92,7 +93,7 @@ class DropletRunner(object):
         self.tkRoot = Tkinter.Tk()
         self._timer = Timer()
         
-        if title == None:
+        if title is None:
             title = os.path.splitext(os.path.basename(scriptPath))[0]
         self.tkRoot.title(title)
 

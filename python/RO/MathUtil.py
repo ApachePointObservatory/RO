@@ -22,6 +22,7 @@ History:
 2011-07-21 ROwen    API change and bug fix: rThetaFromXY was documented to raise an exception
                     if too near the pole, but it did not do this reliably, if at all.
                     Changed to return theta = NaN (numpy.nan) if too near the pole.
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 __all__ = ["sind", "cosd", "tand", "asind", "acosd", "atand", "atan2d", "compareFloats", "checkRange",
     "nint", "sign", "logEq", "logNE", "rot2D", "rThetaFromXY", "xyFromRTheta", "vecMag", "wrapCtr", "wrapPos"]
@@ -92,7 +93,7 @@ def checkRange(value, minValue, maxValue, valDescr="value"):
     If minValue or maxValue is None, that limit is not checked.
     If value is None, nothing is checked.
     """
-    if value == None:
+    if value is None:
         return
     if maxValue != None and value > maxValue:
         raise ValueError("%s too large: %r > %r" % (valDescr, value, maxValue))

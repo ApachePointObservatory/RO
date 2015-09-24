@@ -2,6 +2,9 @@ from __future__ import absolute_import, division, print_function
 """Track the state of a collection of widgets
 
 Intended for use with RO.Wdg.Toplevel in saving and restoring state
+
+History:
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 __all__ = ["StateTracker"]
 
@@ -40,7 +43,7 @@ class StateTracker(object):
             if None then writes to sys.stderr
         - doDebug: if True then print a message for each getState and setState
         """
-        if logFunc == None:
+        if logFunc is None:
             def logFunc(msgStr, severity=RO.Constants.sevNormal):
                 sys.stderr.write(msgStr)
         self._logFunc = logFunc

@@ -47,6 +47,7 @@ History:
 2014-05-07 ROwen    Changed is str test to use basestring.
 2014-09-17 ROwen    Modified to test for Exception instead of StandardError
 2015-01-06 ROwen    Improved dmsStrFromDeg and dmsStrFromSec to handle non-finite values.
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 import re
 import numpy
@@ -232,10 +233,10 @@ def findLeftNumber(astr, ind):
     to see if they make a valid number.
     """
     leftInd = _findLeftOfLeftNumber(astr, ind)
-    if leftInd == None:
+    if leftInd is None:
         return (None, None)
     rightInd = _findRightOfRightNumber(astr, leftInd)
-    if rightInd == None:
+    if rightInd is None:
         return (None, None)
     return (leftInd, rightInd)
 
@@ -250,10 +251,10 @@ def findRightNumber(astr, ind):
     to see if they make a valid number.
     """
     rightInd = _findRightOfRightNumber(astr, ind)
-    if rightInd == None:
+    if rightInd is None:
         return (None, None)
     leftInd = _findLeftOfLeftNumber(astr, rightInd)
-    if leftInd == None:
+    if leftInd is None:
         return (None, None)
     return (leftInd, rightInd)
 
@@ -360,10 +361,10 @@ def splitDMSStr (dmsStr):
     """
     assert isinstance(dmsStr, basestring)
     m = _DegRE.match(dmsStr) or _DegMinRE.match(dmsStr) or _DegMinSecRE.match(dmsStr)
-    if m == None:
+    if m is None:
         raise ValueError("splitDMSStr cannot parse %s as a sexagesimal string" % (dmsStr))
     matchSet = list(m.groups())
-    if matchSet[-1] == None:
+    if matchSet[-1] is None:
         matchSet[-1] = ''
     return matchSet
 
@@ -383,7 +384,7 @@ def floatFromStr(astr, allowExp=1):
         match = _FloatNoExpRE.match(astr)
     
     
-    if match == None:
+    if match is None:
         raise ValueError("cannot convert :%s: to a float" % (astr))
         
     try:
@@ -400,7 +401,7 @@ def intFromStr(astr):
     error conditions:
         raises ValueError if astr cannot be converted
     """
-    if _IntRE.match(astr) == None:
+    if _IntRE.match(astr) is None:
         raise ValueError("cannot convert :%s: to an integer" % (astr))
 
     try:

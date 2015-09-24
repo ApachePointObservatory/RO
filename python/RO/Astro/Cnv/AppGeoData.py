@@ -4,6 +4,7 @@ from __future__ import absolute_import, division, print_function
 History:
 2004-05-18 ROwen    Stop importing RO.PhysConst; it wasn't used.
 2007-04-24 ROwen    Converted from Numeric to numpy.
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 __all__ = ["AppGeoData"]
 
@@ -31,7 +32,7 @@ class AppGeoData(object):
                     default: current date
         """
         # compute star-independent apparent geocentric data
-        if tdbEpoch == None:
+        if tdbEpoch is None:
             tdbDays = Tm.utcFromPySec()
         else:
             tdbDays = Tm.mjdFromEpJ (tdbEpoch)

@@ -9,6 +9,7 @@ History:
 2003-11-21 ROwen    Bug fix: __init__ did not check the data.
 2005-06-08 ROwen    Changed PVT to a new-style class.
 2007-07-02 ROwen    Added hasVel method.
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 __all__ = ["PVT"]
 
@@ -52,7 +53,7 @@ class PVT(object):
         if not self.isValid():
             return None
 
-        if t == None:
+        if t is None:
             t = RO.Astro.Tm.taiFromPySec() * RO.PhysConst.SecPerDay
     
         return self.pos + (self.vel * (t - self.t))

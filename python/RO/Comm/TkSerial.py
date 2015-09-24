@@ -24,6 +24,7 @@ History:
                     to detect a port error is to catch a read or write error).
 2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
 2012-08-01 ROwen    Changed getState() to state and isOpen() to isOpen.
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 __all__ = ["TkSerial", "NullSerial"]
 
@@ -247,7 +248,7 @@ class TkSerial(TkBaseSerial):
         #print "%s.read(nChar=%s)" % (self, nChar)
         self._assertConn()
         try:
-            if nChar == None:
+            if nChar is None:
                 retVal = self._tk.call('read', self._chanID)
             else:
                 retVal = self._tk.call('read', self._chanID, nChar)

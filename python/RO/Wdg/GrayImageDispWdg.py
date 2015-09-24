@@ -166,6 +166,7 @@ History:
 2014-08-19 ROwen    Bug fix: Annotation.draw would fail if isImSize true and holeRad specified.
                     Change "import ImageTk" to "from PIL import ImageTk" for better Pillow compatibility.
 2014-09-16 ROwen    Modified the example to use astropy instead of pyfits, if available.
+2015-09-24 ROwen    Replace "== None" with "is None" to future-proof array tests and modernize the code.
 """
 __all__ = ["ann_Circle", "ann_Plus", "ann_X", "ann_Line", "ann_Text", "MaskInfo", "GrayImageWdg"]
 
@@ -783,7 +784,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
         
         Returns a unique id tag for use with removeAnnotaion.
         """
-        if self.dataArr == None:
+        if self.dataArr is None:
             return
 
         annObj = Annotation(
@@ -805,7 +806,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
         Inputs:
         - redisplay: redisplay existing image, else display new image
         """
-        if self.dataArr == None:
+        if self.dataArr is None:
             return
 
         minDisp = 0
@@ -851,7 +852,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
 
     def doRangeMenu(self, wdg=None, redisplay=True):
         """Handle new selection from range menu."""
-        if self.dataArr == None:
+        if self.dataArr is None:
             return
 
         strVal = self.rangeMenuWdg.getString()
@@ -888,7 +889,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
     def doScrollBar(self, ijInd, scrollCmd, scrollAmt=None, c=None):
         """Handle scroll bar events"""
         #print "doScrollBarijInd=%r, scrollCmd=%r, scrollAmt=%r, c=%r)" % (ijInd, scrollCmd, scrollAmt, c)
-        if scrollAmt == None or self.dataArr == None:
+        if scrollAmt is None or self.dataArr is None:
             return
         sbWdg = (self.vsb, self.hsb)[ijInd]
 
@@ -928,7 +929,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
     def doZoomWdg(self, wdg):
         """Set zoom to the value typed in the current zoom widget.
         """
-        if self.dataArr == None:
+        if self.dataArr is None:
             return
 
         newZoomFac = self.currZoomWdg.getNum()
@@ -939,7 +940,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
         relative to the center of image portal.
         """
         self._dragLevelTimer.cancel()
-        if self.dataArr == None:
+        if self.dataArr is None:
             return
         
         #print "cnvShape=%s, evt.x=%s, evt.y=%s" % (self.cnvShape, evt.x, evt.y)
@@ -972,7 +973,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
         self._dragLevelTimer.start(0.2, self.dragLevelContinue, evt)
 
     def dragZoomContinue(self, evt):
-        if self.dragStart == None:
+        if self.dragStart is None:
             return
 
         newPos = self.cnvPosFromEvt(evt)
@@ -985,13 +986,13 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
         if isTemp:
             self.modeWdg.set(self.permMode)
 
-        if self.dragStart == None:
+        if self.dragStart is None:
             return
         startPos = self.dragStart
         endPos = self.cnvPosFromEvt(evt)
         self.dragStart = None
         
-        if self.dataArr == None:
+        if self.dataArr is None:
             return
 
         deltaPos = numpy.subtract(endPos, startPos)
@@ -1022,7 +1023,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
     def dragZoomReset(self, wdg=None, isTemp=True):
         """Zoom so entire image is visible in image portal.
         """
-        if self.dataArr == None:
+        if self.dataArr is None:
             return
 
         newZoomFac = self.getFitZoomFac()
@@ -1047,7 +1048,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
         Include room for a 1-pixel border around the edge
         so it's obvious that the image is all visible.
         """
-        if self.dataArr == None:
+        if self.dataArr is None:
             return 1.0
 
         frameShapeIJ = self.frameShape[::-1]
@@ -1067,7 +1068,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
     def redisplay(self):
         """Starting from the data array, redisplay the data.
         """
-        if self.dataArr == None:
+        if self.dataArr is None:
             return
             
         self.strMsgWdg.grid_remove()
@@ -1075,7 +1076,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
         try:
             # offset so minimum display value = scaling function minimum input
             # reuse existing scaledArr memory if possible
-            if self.scaledArr == None or self.scaledArr.shape != self.dataArr.shape:
+            if self.scaledArr is None or self.scaledArr.shape != self.dataArr.shape:
                 self.scaledArr = numpy.subtract(self.dataArr, float(self.dataDispMin), dtype=numpy.float32)
             else:
                 numpy.subtract(self.dataArr, float(self.dataDispMin), self.scaledArr)
@@ -1236,7 +1237,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
         """
         self.clear()
         
-        if arr == None:
+        if arr is None:
             return
         
         try:
@@ -1342,7 +1343,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
         """Show the value that the mouse pointer is over.
         If evt is None then clear the current value.
         """
-        if (evt==None) or (self.dataArr == None):
+        if (evt==None) or (self.dataArr is None):
             self.currXPosWdg.set(None)
             self.currYPosWdg.set(None)
             self.currValWdg.set(None)
@@ -1380,11 +1381,11 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
         - updZoom:  if True, zoom is increased if necessary so that the image fills x or y
         """
         #print "self._updImBounds(desCtrIJ=%s, updZoom=%s)" % (desCtrIJ, updZoom)
-        if self.dataArr == None:
+        if self.dataArr is None:
             return
     
         if not updZoom:
-            if desCtrIJ == None:
+            if desCtrIJ is None:
                 desCtrIJ = numpy.divide(numpy.add(self.endIJ, self.begIJ), 2.0)
             desSizeIJ = numpy.around(numpy.divide(self.frameShape[::-1], float(self.zoomFac))).astype(int)
             sizeIJ = numpy.minimum(self.dataArr.shape, desSizeIJ)

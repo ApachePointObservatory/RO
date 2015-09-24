@@ -1,4 +1,11 @@
 #!/usr/bin/env python
+"""
+History:
+2003-03-20 ROwen    Added translation of \\->\, \<q> -> <q>
+                    where <q> is the quote character for this particular string
+2004-05-18 ROwen    Modified test code to use astr instead of str.
+2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
+"""
 from __future__ import absolute_import, division, print_function
 import sys
 
@@ -33,11 +40,6 @@ def getString(astr, begInd=0):
             were not appropriate "escaped" using the approved character pairs
         if the final string delimiter is missing, complains and returns
             astr[begInd+1:] (all data excluding the initial string delimiter)
-
-    History:
-    2003-03-20 ROwen    Added translation of \\->\, \<q> -> <q>
-                        where <q> is the quote character for this particular string
-    2004-05-18 ROwen    Modified test code to use astr instead of str.
     """
     quoteChar = astr[begInd]
     if quoteChar not in '\'\"':
@@ -129,7 +131,7 @@ if __name__ == '__main__':
         r'"missing final \";']
     for astr in testList:
         (data, ind) = getString(astr)
-        if ind == None:
+        if ind is None:
             print("getString(%s) = %s, end of string" % (astr, getString(astr)))
         else:
             print("getString(%s) = %s, astr[%d] = %s" % (astr, getString(astr), ind, astr[ind]))
