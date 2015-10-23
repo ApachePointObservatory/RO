@@ -60,6 +60,7 @@ History:
 2014-09-17 ROwen    Now requires json (will not use simplejson).
                     Modified to test for Exception instead of StandardError.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
+2015-10-23 ROwen    getNames now ignores case when sorting names.
 """
 __all__ = ['tl_CloseDestroys', 'tl_CloseWithdraws', 'tl_CloseDisabled', 'Toplevel', 'ToplevelSet']
 
@@ -491,13 +492,13 @@ class ToplevelSet(object):
     
     def getNames(self, prefix=""):
         """Return all window names of windows that start with the specified prefix
-        (or all names if prefix omitted). The names are in alphabetical order
-        (though someday that may change to the order in which windows are added).
-        
+        (or all names if prefix omitted).
+
+        The names are in alphabetical order, ignoring case.
         The list includes toplevels that have been destroyed.
         """
         nameList = self.tlDict.keys()
-        nameList.sort()
+        nameList.sort(key=lambda s: s.lower())
         if not prefix:
             return nameList
         return [name for name in nameList if name.startswith(prefix)]
