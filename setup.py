@@ -51,7 +51,7 @@ setup(
     long_description = long_description,
     author = "Russell Owen",
     author_email = "rowen@uw.edu",
-    url = "http://www.astro.washington.edu/rowen/",
+    url = "http://staff.washington.edu/rowen/",
     license = "MIT except RO.Astro which has more restrictions for commercial use",
     classifiers = [c for c in classifiers.split("\n") if c],
     platforms = ["MacOS X", "unix", "Windows"],

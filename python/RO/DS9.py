@@ -44,7 +44,7 @@ For a list of local servers try % xpaget xpans
 WARNING: ds9 3.0.3 and xpa 2.1.5 have several nasty bugs.
 One I have not figured out to work around is that on Windows
 showArray fails because the data undergoes newline translation.
-See <http://www.astro.washington.edu/rowen/ds9andxpa.html>
+See <http://staff.washington.edu/rowen/ds9andxpa.html>
 for more information. I have not checked this on recent versions.
 
 Requirements:
