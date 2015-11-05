@@ -31,6 +31,7 @@ History:
 2004-12-13 ROwen    Renamed doEnable to setEnable for modified RO.InputCont.
 2005-06-03 ROwen    Fixed one indentation quirk (space tab -> tab).
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
+2015-11-05 ROwen    Changed ==/!= True/False to is/is not True/False to modernize the code.
 """
 __all__ = ['OptionButtons']
 
@@ -151,7 +152,7 @@ class OptionButtons(InputContFrame.InputContFrame):
         self.optWdgList = []
 
         # optional "restore defaults" button
-        if defButton == True:
+        if defButton is True:
             defButton = "Defaults"
         if defButton not in (False, None):
             defButtonWdg = Button.Button(self,
@@ -162,7 +163,7 @@ class OptionButtons(InputContFrame.InputContFrame):
             self.optWdgList.append(defButtonWdg)
         
         # optional "clear" button
-        if clearButton == True:
+        if clearButton is True:
             clearButton = "Clear"
         if clearButton not in (False, None):
             clearButtonWdg = Button.Button(self,

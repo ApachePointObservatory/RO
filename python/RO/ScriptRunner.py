@@ -86,6 +86,7 @@ History:
 2014-07-21 ROwen    Added waitPause and waitSec.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
+2015-11-05 ROwen    Changed ==/!= True/False to is/is not True/False to modernize the code.
 """
 __all__ = ["ScriptError", "ScriptRunner"]
 
@@ -515,7 +516,7 @@ class ScriptRunner(RO.AddCallback.BaseMixin):
                 argList.append("timeLimKeyword=%r" % (timeLimKeyword,))
             if abortCmdStr:
                 argList.append("abortCmdStr=%r" % (abortCmdStr,))
-            if checkFail != True:
+            if checkFail is not True:
                 argList.append("checkFail=%r" % (checkFail,))
             self.debugPrint("startCmd(%s)" % (", ".join(argList),))
 

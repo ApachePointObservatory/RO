@@ -22,6 +22,7 @@ History:
 2011-05-04 ROwen    Bug fix: was not setting _maxNextCol
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
+2015-11-05 ROwen    Changed ==/!= True/False to is/is not True/False to modernize the code.
 """
 __all__ = ['StatusConfigGridder']
 
@@ -226,7 +227,7 @@ class _StatusConfigGridSet(Gridder._BaseGridSet):
         else:
             self.cfgWdg = None
             self.cfgUnitsWdg = None
-            if cfgWdg != False:     
+            if cfgWdg is not False:     
                 self.nextCol += cfgColSpan
-            if cfgUnits != False:
+            if cfgUnits is not False:
                 self.nextCol += 1

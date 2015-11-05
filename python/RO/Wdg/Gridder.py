@@ -34,6 +34,7 @@ History:
                     was missing the associated attribute.
 2011-07-29 ROwen    _BaseGridSet: added __getitem__, __len__  and __length__ to simplify access to widgets.
 2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
+2015-11-05 ROwen    Changed ==/!= True/False to is/is not True/False to modernize the code.
 """
 __all__ = ['Gridder']
 
@@ -368,7 +369,7 @@ class _BaseGridSet:
                     columnspan = colSpan,
                 )
                 self.wdgSet.append(wdg)
-            if wdg != False:
+            if wdg is not False:
                 self.nextCol += colSpan
 
     def _makeWdg(self, wdgInfo):
@@ -403,15 +404,15 @@ class _BaseGridSet:
 
     def _setHelpFromDataWdg(self, dataWdg):
         """Sets self.helpText and self.helpURL from first dataWdg, if requested and available
-        (if helpText or helpURL == True)
+        (if helpText or helpURL is True)
         """
         if True not in (self.helpText, self.helpURL):
             return
 
         firstWdg = RO.SeqUtil.asSequence(dataWdg)[0]
-        if self.helpText == True:
+        if self.helpText is True:
             self.helpText = getattr(firstWdg, "helpText", None)
-        if self.helpURL == True:
+        if self.helpURL is True:
             self.helpURL = getattr(firstWdg, "helpURL", None)
     
     def __getitem__(self, ind):

@@ -7,10 +7,10 @@
 
 <h2>Version history for the <a href="Overview.html">RO Python Package</a></h2>
 
-<h3>3.6.8+ 2015-11-03</h3>
+<h3>3.6.8+ 2015-11-05</h3>
 
 <ul>
-    <li>Changed "!= None" to "is not None" to prevent future problems with arrays, and to modernize the code.
+    <li>Changed remaining equality comparisons with None, True and False to use "is" and "is not" instead of "==" and "!=" in order to prevent future problems with arrays, and to modernize the code. (== None was handled in version 3.6.6).
 </ul>
 
 <h3>3.6.8 2015-11-02</h3>
