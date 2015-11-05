@@ -48,6 +48,7 @@ History:
 2014-09-17 ROwen    Modified to test for Exception instead of StandardError
 2015-01-06 ROwen    Improved dmsStrFromDeg and dmsStrFromSec to handle non-finite values.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
+2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
 import re
 import numpy
@@ -272,7 +273,7 @@ def _findLeftOfLeftNumber(astr, ind):
     for tryind in range(ind, -1, -1):
         if astr[tryind] in FloatChars:
             leftInd = tryind
-        elif leftInd != None:
+        elif leftInd is not None:
             break
     return leftInd
 
@@ -290,7 +291,7 @@ def _findRightOfRightNumber(astr, ind):
     for tryind in range(ind, len(astr)):
         if astr[tryind] in FloatChars:
             rightInd = tryind
-        elif rightInd != None:
+        elif rightInd is not None:
             break
     return rightInd
 

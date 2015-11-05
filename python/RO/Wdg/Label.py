@@ -49,6 +49,7 @@ History:
 2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code.
 2012-07-09 ROwen    Modified test code to user RO.TkUtil.Timer.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
+2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
 __all__ = ['Label', 'BoolLabel', 'StrLabel', 'IntLabel', 'FloatLabel', 'DMSLabel']
 
@@ -105,7 +106,7 @@ class Label(Tkinter.Label, CtxMenu.CtxMenuMixin, IsCurrentMixin, SeverityMixin):
         SeverityMixin.__init__(self, severity)
 
         self._formatStr = formatStr
-        if formatStr != None:
+        if formatStr is not None:
             formatFunc = self._formatFromStr
         self._formatFunc = formatFunc
         self.helpText = helpText
@@ -157,7 +158,7 @@ class Label(Tkinter.Label, CtxMenu.CtxMenuMixin, IsCurrentMixin, SeverityMixin):
         # print "RO.Wdg.Label.set called: value=%r, isCurrent=%r, **kargs=%r" % (value, isCurrent, kargs)
         self._value = value
         self.setIsCurrent(isCurrent)
-        if severity != None:
+        if severity is not None:
             self.setSeverity(severity)
         self._updateText()
     
@@ -337,7 +338,7 @@ class DMSLabel(Label):
         **kargs)
     
     def formatFunc(self, value):
-        if self.cvtDegToHrs and value != None:
+        if self.cvtDegToHrs and value is not None:
             value = value / 15.0
         return RO.StringUtil.dmsStrFromDeg (
             value,

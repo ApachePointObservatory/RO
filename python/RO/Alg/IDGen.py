@@ -9,6 +9,7 @@ History:
 2005-06-08 ROwen    Added error checking for inconsistent inputs.
                     Added method __repr__.
                     Changed to a new style class.
+2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
 __all__ = ["IDGen"]
 
@@ -30,7 +31,7 @@ class IDGen(object):
         self.wrapVal = wrapVal
         self.incr = incr
         self.ind = 0
-        if wrapVal != None:
+        if wrapVal is not None:
             self.nSteps = (wrapVal - startVal) // incr
             if self.nSteps < 1:
                 raise ValueError("no id numbers in range %s:%s:%s" % (startVal, wrapVal, incr))
@@ -42,7 +43,7 @@ class IDGen(object):
         """Return the next ID number."""
         newID = self.startVal + (self.ind * self.incr)
         self.ind += 1
-        if self.wrapVal != None:
+        if self.wrapVal is not None:
             self.ind %= self.nSteps
         return newID
     

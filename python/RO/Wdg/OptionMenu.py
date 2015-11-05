@@ -103,6 +103,7 @@ History:
                     rather than the width of the label, and label="" was treated as None.
 2014-02-10 ROwen    Added forceValid argument to set.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
+2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
 __all__ = ['OptionMenu']
 
@@ -245,7 +246,7 @@ class OptionMenu(Menubutton, RO.AddCallback.TkVarMixin,
         """Return display string associated with specified value:
         self.noneDisplay if val is None, val otherwise.
         """
-        if val != None:
+        if val is not None:
             return val
         else:
             return self.noneDisplay
@@ -268,7 +269,7 @@ class OptionMenu(Menubutton, RO.AddCallback.TkVarMixin,
 
     def ctxConfigMenu(self, menu):
         def addMenuItem(menu, descr, value):
-            if descr and value != None:
+            if descr and value is not None:
                 menuText = "%s (%s)" % (descr, value)
                 def setValue():
                     self._tempValue = None
@@ -445,7 +446,7 @@ class OptionMenu(Menubutton, RO.AddCallback.TkVarMixin,
         if showDefault is None:
             showDefault = self.trackDefault and self.isDefault()
         self.defValue = newDefValue
-        if isCurrent != None:
+        if isCurrent is not None:
             self.setIsCurrent(isCurrent)
 
         if showDefault:

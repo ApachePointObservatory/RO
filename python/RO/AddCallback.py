@@ -34,6 +34,7 @@ History:
 2013-09-24 ROwen    Added safeCall.
 2014-04-17 ROwen    Added safeCall2, which gives more feedback than safeCall.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
+2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
 __all__ = ["safeCall", "safeCall2", "BaseMixin", "TkButtonMixin", "TkVarMixin"]
 
@@ -120,7 +121,7 @@ class BaseMixin(object):
         self._defCallNow = bool(defCallNow)
         self._callbacks = []
         self._enableCallbacks = True
-        if callFunc != None:
+        if callFunc is not None:
             self.addCallback(callFunc, callNow)
     
     def addCallback(self,
@@ -261,7 +262,7 @@ class TkButtonMixin(BaseMixin):
             defCallNow = defCallNow,
         )
 
-        if command != None:
+        if command is not None:
             if not callable(command):
                 raise ValueError, "command %r is not callable" % (command,)
             def doCommand(wdg):

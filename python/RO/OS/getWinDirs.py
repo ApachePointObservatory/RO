@@ -48,6 +48,7 @@ History:
 2006-02-28 ROwen    Removed py2exe compatibility because it's more appropriate
                     for the py2exe setup.py script.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
+2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
 import pywintypes
 from win32com.shell import shell, shellcon
@@ -93,7 +94,7 @@ def getAppDirs(inclNone = False):
     retDirs = []
     for dirType in (None, shellcon.CSIDL_PROGRAM_FILES):
         path = getStandardDir(dirType)
-        if (path != None) or inclNone:
+        if (path is not None) or inclNone:
             retDirs.append(path)
     return retDirs      
 
@@ -111,7 +112,7 @@ def getAppSuppDirs(inclNone = False):
     retDirs = []
     for dirType in (shellcon.CSIDL_APPDATA, shellcon.CSIDL_COMMON_APPDATA):
         path = getStandardDir(dirType)
-        if (path != None) or inclNone:
+        if (path is not None) or inclNone:
             retDirs.append(path)
     return retDirs
 

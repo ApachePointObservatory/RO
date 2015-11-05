@@ -8,6 +8,7 @@ History:
 2004-09-14 ROwen    Tweaked the import in the test code.
 2004-11-22 ROwen    Corrected doc string for ScrolledWdg.
 2011-09-12 ROwen    Set highlightthickness = selectborderwidth = 0 on contained Canvas, making alignment easier.
+2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
 __all__ = ['ScrolledWdg']
 
@@ -95,7 +96,7 @@ class ScrolledWdg(Tkinter.Frame):
         
         Raises RuntimeError if called more than once.
         """
-        if self._wdg != None:
+        if self._wdg is not None:
             raise RuntimeError("setWdg may only be called once")
 
         self._wdg = wdg
@@ -110,13 +111,13 @@ class ScrolledWdg(Tkinter.Frame):
         self._cnv.grid(row=0, column=0, sticky="nsew")
         
         # deal with increments
-        if self._hincr != None:
+        if self._hincr is not None:
             if hasattr(self._hincr, "bind"):
                 self._hincr.bind("<Configure>", self._configHIncr, add=True)
                 self._configHIncr()
             else:
                 self._cnv.configure(xscrollincr = self._hincr)
-        if self._vincr != None:
+        if self._vincr is not None:
             if hasattr(self._vincr, "bind"):
                 self._vincr.bind("<Configure>", self._configVIncr, add=True)
                 self._configVIncr()

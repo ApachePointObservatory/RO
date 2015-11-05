@@ -72,6 +72,7 @@ History:
 2012-07-09 ROwen    Modified to use RO.TkUtil.Timer.
 2012-09-18 ROwen    Explicitly import matplotlib.dates to avoid a problem with matplotlib 1.2.0rc1
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
+2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
 __all__ = ["StripChartWdg"]
 
@@ -294,7 +295,7 @@ class StripChartWdg(Tkinter.Frame):
         subplot = self.subplotArr[subplotInd]
         yMin, yMax = subplot.get_ylim()
         
-        if y1 != None:
+        if y1 is not None:
             yList = [y0, y1]
         else:
             yList = [y0]

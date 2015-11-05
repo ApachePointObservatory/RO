@@ -88,6 +88,7 @@ History:
 2012-12-19 ROwen    Added FontSizePrefVar.
 2014-05-07 ROwen    Changed is str test to use basestring.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
+2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
 __all__ = ["PrefVar", "StrPrefVar", "DirectoryPrefVar", "FilePrefVar", "SoundPrefVar", "BoolPrefVar", \
     "IntPrefVar", "FloatPrefVar", "ColorPrefVar", "FontPrefVar", "FontSizePrefVar", "PrefSet"]
@@ -172,10 +173,10 @@ class PrefVar(object):
                 (self.__class__.__name__, name, e))
     
         # check values
-        if self.validValues != None:
+        if self.validValues is not None:
             for val in self.validValues:
                 self.checkValue(val)
-        if self.suggValues != None:
+        if self.suggValues is not None:
             for val in self.suggValues:
                 self.checkValue(val)
 
@@ -1056,7 +1057,7 @@ class PrefSet(object):
         self.defHeader = defHeader
         self.defFileName = defFileName
         self.prefDict = RO.Alg.OrderedDict()
-        if prefList != None:
+        if prefList is not None:
             for prefVar in prefList:
                 self.addPrefVar(prefVar)
         self.oldPrefDict = {}

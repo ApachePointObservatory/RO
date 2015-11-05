@@ -33,6 +33,7 @@ History:
 2012-12-19 ROwen    Added a FontSizePrefVar to the demo.
 2014-08-31 ROwen    Added a contextual menu with Help (if helpURL provided) to all controls;
                     formerly only the status bar had this.
+2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
 __all__ = ["PrefWin", "PrefWdg"]
 
@@ -154,7 +155,7 @@ class PrefWdg(Tkinter.Frame):
             # no change in selected; nothing done
             return
         
-        if self.currCat != None:
+        if self.currCat is not None:
             self.paneDict[self.currCat].pack_forget()
         self.paneDict[cat].pack(fill="both")
         self.currCat = cat

@@ -21,6 +21,7 @@ History:
 2011-09-09 ROwen    Misfeature fix: findFiles could return paths that start with "./".
 2011-10-11 ROwen    findFiles: document recursionDepth argument.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
+2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
 __all__ = ["delDir", "expandPath", "findFiles", "getResourceDir", "removeDupPaths", "splitPath", "openUniv"]
 
@@ -155,7 +156,7 @@ def findFiles(
                         root = ""
                     newDirs = []
                     subLevel = root.count(os.path.sep)
-                    if recursionDepth != None and subLevel - baseLevel >= recursionDepth:
+                    if recursionDepth is not None and subLevel - baseLevel >= recursionDepth:
                         del dirs[:]
                     else:
                         for d in dirs:

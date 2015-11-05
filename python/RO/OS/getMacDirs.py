@@ -15,6 +15,7 @@ History:
                     Added getAppDirs and getPrefsDirs to the test code.
                     Removed obsolete getPrefsDir.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
+2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
 import Carbon.Folder, Carbon.Folders
 import MacOS
@@ -57,7 +58,7 @@ def getMacUserSharedDirs(dirType, inclNone = False):
             dirType = dirType,
             doCreate = False,
         )
-        if (path != None) or inclNone:
+        if (path is not None) or inclNone:
             retDirs.append(path)
     return retDirs
 

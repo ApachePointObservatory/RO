@@ -126,6 +126,7 @@ History:
 2014-09-15 ROwen    Bug fix: an error message used a nonexistent variable.
                     Tweaked PVTVar._doCallbacks to do nothing if callbacks disabled.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
+2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
 __all__ = ["TypeDict", "AllTypes", "DoneTypes", "FailTypes", "KeyVar", "PVTKeyVar", "CmdVar", "KeyVarFactory"]
 
@@ -235,13 +236,13 @@ class KeyVar(RO.AddCallback.BaseMixin):
                 self.minNVal, self.maxNVal = RO.SeqUtil.oneOrNAsList(nval, 2, "nval")
                 assert isinstance(self.minNVal, int)
                 assert self.minNVal >= 0
-                if self.maxNVal != None:
+                if self.maxNVal is not None:
                     assert isinstance(self.maxNVal, int)
                     assert self.maxNVal >= self.minNVal
             except (ValueError, TypeError, AssertionError):
                 raise ValueError("invalid nval = %r for %s" % (nval, self))
                 
-            if RO.SeqUtil.isSequence(converters) and self.maxNVal != None and len(converters) > self.maxNVal:
+            if RO.SeqUtil.isSequence(converters) and self.maxNVal is not None and len(converters) > self.maxNVal:
                 raise ValueError("Too many converters (%d > %d=max) for %s" %
                     (len(converters), self.maxNVal, self))
         
@@ -295,7 +296,7 @@ class KeyVar(RO.AddCallback.BaseMixin):
         if RO.SeqUtil.isSequence(defValues):
             self._defValues = defValues
         else:
-            if self.maxNVal != None:
+            if self.maxNVal is not None:
                 nval = self.maxNVal
             else:
                 nval = self.minNVal
@@ -318,13 +319,13 @@ class KeyVar(RO.AddCallback.BaseMixin):
     
     def _restoreDefault(self):
         """Set self._valueList to initial values but does not call callbacks."""
-        if self._defValues != None:
+        if self._defValues is not None:
             self._valueList = self._defValues[:]
 
     def addDict (self, dict, item, fmtStr, ind=0):
         """Adds a dictionary whose specified item is to be set"""
         def setFunc (value, isCurrent, keyVar, dict=dict, item=item, fmtStr=fmtStr):
-            if value != None:
+            if value is not None:
                 dict[item] = fmtStr % value
             else:
                 dict[item] = None
@@ -333,7 +334,7 @@ class KeyVar(RO.AddCallback.BaseMixin):
     def addDictDMS (self, dict, item, nFields=3, precision=1, ind=0):
         """Adds a dictionary whose specified item is to be set to the DMS representation of the data"""
         def setFunc (value, isCurrent, keyVar, dict=dict, item=item, precision=precision):
-            if value != None:
+            if value is not None:
                 dict[item] = RO.StringUtil.dmsStrFromDeg(value, nFields, precision)
             else:
                 dict[item] = None
@@ -391,7 +392,7 @@ class KeyVar(RO.AddCallback.BaseMixin):
         
         Raise IndexError if there are more widgets than values.
         """
-        if self.maxNVal != None and len(wdgSet) > self.maxNVal:
+        if self.maxNVal is not None and len(wdgSet) > self.maxNVal:
             raise IndexError("too many widgets (%d > max=%d) for %s" % (len(wdgSet), self.maxNVal, self,))
         if setDefault:
             class callWdgSet(object):
@@ -553,7 +554,7 @@ class KeyVar(RO.AddCallback.BaseMixin):
         nval = len(valueList)
         if nval < self.minNVal:
             raise ValueError("too few values in %r for %s (%s < %s)" % (valueList, self, nval, self.minNVal))
-        if self.maxNVal != None and nval > self.maxNVal:
+        if self.maxNVal is not None and nval > self.maxNVal:
             raise ValueError("too many values in %r for %s (%s > %s)" % (valueList, self, nval, self.maxNVal))
         return nval
 
@@ -652,7 +653,7 @@ class PVTKeyVar(KeyVar):
         
         Raise IndexError if there are more widgets than values.
         """
-        if self.maxNVal != None and len(wdgSet) > self.maxNVal:
+        if self.maxNVal is not None and len(wdgSet) > self.maxNVal:
             raise IndexError("too many widgets (%d > max=%d) for %s" % (len(wdgSet), self.maxNVal, self,))
         class callWdgSet(object):
             def __init__(self, wdgSet):
@@ -707,7 +708,7 @@ class PVTKeyVar(KeyVar):
         nval = len(valueList)
         if nval < self.minNVal * 3:
             raise ValueError("too few values in %r for %s (%s < %s)" % (valueList, self, nval, self.minNVal * 3))
-        if self.maxNVal != None and nval > self.maxNVal * 3:
+        if self.maxNVal is not None and nval > self.maxNVal * 3:
             raise ValueError("too many values in %r for %s (%s > %s)" % (valueList, self, nval, self.maxNVal * 3))
         if nval % 3 != 0:
             raise ValueError("%s must contain a multiple of 3 elements for %s" % (valueList, self))
@@ -936,7 +937,7 @@ class CmdVar(object):
         Raises ValueError if the keyword exists but the value is invalid.
         """
         valueTuple = msgDict["data"].get(self.timeLimKeyword)
-        if valueTuple != None:
+        if valueTuple is not None:
             if len(valueTuple) != 1:
                 raise ValueError("Invalid value %r for timeout keyword %r for command %d: must be length 1"
                     % (valueTuple, self.timeLimKeyword, self.cmdID))

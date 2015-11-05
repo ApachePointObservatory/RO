@@ -58,6 +58,7 @@ History:
                     - The options menu button now has text Options.
 2012-07-09 ROwen    Modified to use RO.TkUtil.Timer.
 2012-12-19 ROwen    Added a FontSizePrefVar to the demo.
+2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
 import sys
 import PrefVar
@@ -292,10 +293,10 @@ class PrefEditor(object):
         # minimum and maximum values, if present
         try:
             didAdd = False
-            if self.prefVar.minValue != None:
+            if self.prefVar.minValue is not None:
                 mnu.add_command(label="Minimum (%s)" % (summaryFromVal(self.prefVar.minValue),), command=self.showCurrentValue)
                 didAdd = True
-            if self.prefVar.maxValue != None:
+            if self.prefVar.maxValue is not None:
                 mnu.add_command(label="Maximum (%s)" % (summaryFromVal(self.prefVar.maxValue),), command=self.showCurrentValue)
                 didAdd = True
             if didAdd:

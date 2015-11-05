@@ -43,6 +43,7 @@ History:
                     since the field containing the data is highlighted. It also helps Entry widgets
                     handle doneFunc better when a contextual menu modifies data, since the new data
                     will be accepted when the user chooses to leave the field.
+2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
 __all__ = ['CtxMenu', 'CtxMenuMixin', 'addCtxMenu']
 
@@ -107,8 +108,8 @@ class CtxMenu(object):
     def __postMenu(self, evt):
         """Posts the contextual menu"""
         menu = self.ctxGetMenu()
-        if menu.index("end") != None:
-            if evt.widget != None:
+        if menu.index("end") is not None:
+            if evt.widget is not None:
                 evt.widget.focus_set()
             menu.tk_popup(evt.x_root, evt.y_root)
     

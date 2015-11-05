@@ -5,6 +5,7 @@ Intended for use with RO.Wdg.Toplevel in saving and restoring state
 
 History:
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
+2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
 __all__ = ["StateTracker"]
 
@@ -108,7 +109,7 @@ class StateTracker(object):
         """
         for name, val in stateDict.iteritems():
             item = self._itemDict.get(name)
-            if item != None:
+            if item is not None:
                 try:
                     item.setFunc(val)
                 except Exception as e:

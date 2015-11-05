@@ -23,6 +23,7 @@ History:
                     if too near the pole, but it did not do this reliably, if at all.
                     Changed to return theta = NaN (numpy.nan) if too near the pole.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
+2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
 __all__ = ["sind", "cosd", "tand", "asind", "acosd", "atand", "atan2d", "compareFloats", "checkRange",
     "nint", "sign", "logEq", "logNE", "rot2D", "rThetaFromXY", "xyFromRTheta", "vecMag", "wrapCtr", "wrapPos"]
@@ -95,9 +96,9 @@ def checkRange(value, minValue, maxValue, valDescr="value"):
     """
     if value is None:
         return
-    if maxValue != None and value > maxValue:
+    if maxValue is not None and value > maxValue:
         raise ValueError("%s too large: %r > %r" % (valDescr, value, maxValue))
-    if minValue != None and value < minValue:
+    if minValue is not None and value < minValue:
         raise ValueError("%s too small: %r < %r" % (valDescr, value, minValue))
 
 def nint(x, n=0):

@@ -86,6 +86,7 @@ History:
                     Modified to use RO.Comm.Generic.Timer.
 2012-08-01 ROwen    Updated for RO.Comm.TCPConnection 3.0.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
+2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
 __all__ = ["logToStdOut", "KeyDispatcher"]
 
@@ -291,7 +292,7 @@ class KeyDispatcher(object):
         if cmdr == self.connection.cmdr:
             # get the command for this command id, if any
             cmdVar = self.cmdDict.get(cmdID, None)
-            if cmdVar != None:
+            if cmdVar is not None:
                 # send reply but don't log (that's already been done)
                 self._replyCmdVar(cmdVar, msgDict, doLog=False)
                     
@@ -638,7 +639,7 @@ class KeyDispatcher(object):
         if doLog:
             self.logMsgDict(msgDict)
         cmdVar.reply(msgDict)
-        if cmdVar.isDone() and cmdVar.cmdID != None:
+        if cmdVar.isDone() and cmdVar.cmdID is not None:
             try:
                 del (self.cmdDict[cmdVar.cmdID])
             except KeyError:

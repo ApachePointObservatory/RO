@@ -85,6 +85,7 @@ History:
 2014-04-29 ROwen    Bug fix: pause followed by resume lost the value returned by whatever was being paused.
 2014-07-21 ROwen    Added waitPause and waitSec.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
+2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
 __all__ = ["ScriptError", "ScriptRunner"]
 
@@ -438,7 +439,7 @@ class ScriptRunner(RO.AddCallback.BaseMixin):
 
         currVal, isCurrent = keyVar.get()
         if isCurrent:
-            if ind != None:
+            if ind is not None:
                 retVal = currVal[ind]
             else:
                 retVal = currVal
@@ -506,11 +507,11 @@ class ScriptRunner(RO.AddCallback.BaseMixin):
             argList = ["actor=%r, cmdStr=%r" % (actor, cmdStr)]
             if timeLim != 0:
                 argList.append("timeLim=%s" % (timeLim,))
-            if callFunc != None:
+            if callFunc is not None:
                 argList.append("callFunc=%r" % (callFunc,))
             if callTypes != RO.KeyVariable.DoneTypes:
                 argList.append("callTypes=%r" % (callTypes,))
-            if timeLimKeyword != None:
+            if timeLimKeyword is not None:
                 argList.append("timeLimKeyword=%r" % (timeLimKeyword,))
             if abortCmdStr:
                 argList.append("abortCmdStr=%r" % (abortCmdStr,))
@@ -715,7 +716,7 @@ class ScriptRunner(RO.AddCallback.BaseMixin):
         """
         self._waitCheck(setWait=True)
 
-        if self._userWaitID != None:
+        if self._userWaitID is not None:
             raise RuntimeError("Already in user wait mode")
             
         self._userWaitID = self._getNextID()
@@ -908,7 +909,7 @@ class ScriptRunner(RO.AddCallback.BaseMixin):
             self._end()
             
         self._state = newState
-        if reason != None:
+        if reason is not None:
             self._reason = reason
         self._doCallbacks()
     
@@ -975,7 +976,7 @@ class _WaitBase(object):
             self.scriptRunner._cancelFuncs.remove(self.cancelWait)
         except ValueError:
             raise RuntimeError("Cancel function missing; did you forgot the 'yield' when calling a ScriptRunner method?")
-        if self.scriptRunner.debug and val != None:
+        if self.scriptRunner.debug and val is not None:
             print("wait returns %r" % (val,))
         self.scriptRunner._continue(self._iterID, val)
 
@@ -1151,7 +1152,7 @@ class _WaitKeyVar(_WaitBase):
         Ignores defVal.
         """
         currVal, isCurrent = self.keyVar.get()
-        if self.ind != None:
+        if self.ind is not None:
             return currVal[self.ind], isCurrent
         else:
             return currVal, isCurrent

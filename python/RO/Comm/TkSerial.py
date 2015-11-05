@@ -25,6 +25,7 @@ History:
 2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
 2012-08-01 ROwen    Changed getState() to state and isOpen() to isOpen.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
+2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
 __all__ = ["TkSerial", "NullSerial"]
 
@@ -114,7 +115,7 @@ class TkBaseSerial(object):
         """
         #print "%s._setState(newState=%r, reason=%r)" % (self, newState, reason)
         self._state = newState
-        if reason != None:
+        if reason is not None:
             self._reason = str(reason)
 
         stateCallback = self._stateCallback
@@ -198,11 +199,11 @@ class TkSerial(TkBaseSerial):
             for key, value in chanKArgs.iteritems():
                 cfgArgs += ["-" + key, value]
             cfgArgs += ["-mode", "%s,%s,%s,%s" % (int(baud), parity, int(dataBits), int(stopBits))]
-            if buffering != None:
+            if buffering is not None:
                 cfgArgs += ["-buffering", str(buffering)]
-            if handshake != None:
+            if handshake is not None:
                 cfgArgs += ["-handshake", str(handshake)]
-            if translation != None:
+            if translation is not None:
                 cfgArgs += ["-translation", str(translation)]
                 
             self._tk.call("fconfigure", self._chanID, *cfgArgs)

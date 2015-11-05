@@ -21,6 +21,7 @@ History:
 2008-03-14 ROwen    Bug fix: removed unused statusCols argument.
 2011-05-04 ROwen    Bug fix: was not setting _maxNextCol
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
+2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
 __all__ = ['StatusConfigGridder']
 
@@ -57,7 +58,7 @@ class StatusConfigGridder(Gridder.Gridder):
             col = col,
             sticky = sticky,
         )
-        if numStatusCols != None:
+        if numStatusCols is not None:
             numStatusCols = int(numStatusCols)
         self._numStatusCols = numStatusCols
     
@@ -110,7 +111,7 @@ class StatusConfigGridder(Gridder.Gridder):
         self._nextCol = max(gs.nextCol, self._nextCol)
         self._maxNextCol = max(self._maxNextCol, self._nextCol)
 
-        if cat != None:
+        if cat is not None:
             self.addShowHideWdg(cat, gs.wdgSet)
         
         # set show/hide category ConfigCat for configuration widgets
@@ -182,7 +183,7 @@ class _StatusConfigGridSet(Gridder._BaseGridSet):
             cfgUnits = units
         if cfgSticky is None:
             cfgSticky = sticky
-        if numStatusCols != None:
+        if numStatusCols is not None:
             numStatusCols = int(numStatusCols)
 
         Gridder._BaseGridSet.__init__(self,
@@ -206,7 +207,7 @@ class _StatusConfigGridSet(Gridder._BaseGridSet):
         self.unitsWdg = self._makeWdg(units)
         self._gridWdg(self.unitsWdg, sticky="w", colSpan=1)
         
-        if self._numStatusCols != None:
+        if self._numStatusCols is not None:
             cfgStartCol = self.begCol + 1 + self._numStatusCols # 1 for label
             overflowCols = self.nextCol - cfgStartCol
             if overflowCols > 0:

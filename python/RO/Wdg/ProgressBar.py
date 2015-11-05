@@ -144,7 +144,7 @@ class ProgressBar (Tkinter.Frame):
 
         # handle label
         self.labelWdg = self._makeWdg(label, anchor = labelAnchor)
-        if self.labelWdg != None:
+        if self.labelWdg is not None:
             self.labelWdg.pack(side = packSide)
         
         # create canvas for bar graph
@@ -181,7 +181,7 @@ class ProgressBar (Tkinter.Frame):
             self.numWdg = Label.StrLabel(self, formatFunc = nullFormat)
         else:
             self.numWdg = None
-        if self.numWdg != None:
+        if self.numWdg is not None:
             self.numWdg.pack(side = packSide, anchor = numAnchor)
         
         # set values and update display
@@ -227,9 +227,9 @@ class ProgressBar (Tkinter.Frame):
         
         Note: always computes bar scale, numWdg width and calls update.
         """
-        if newMin != None:
+        if newMin is not None:
             self.minValue = newMin
-        if newMax != None:
+        if newMax is not None:
             self.maxValue = newMax
         self.fullUpdate()
     
@@ -436,14 +436,14 @@ class TimeBar(ProgressBar):
         
         Typically you will only specify newMax or nothing.
         """
-        if newMin != None:
+        if newMin is not None:
             self.minValue = float(newMin)
-        if newMax != None:
+        if newMax is not None:
             self.maxValue = float(newMax)
-        if countUp != None:
+        if countUp is not None:
             self._countUp = bool(countUp)
 
-        if value != None:
+        if value is not None:
             value = float(value)
         elif self._countUp:
             value = 0.0

@@ -12,6 +12,7 @@ History:
                     Modified to permit keys with = but no values.
 2004-09-14 ROwen    Renamed variable str in test code.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
+2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
 __all__ = ["getValues"]
 
@@ -82,7 +83,7 @@ Exceptions:
             valueList.append(value)
 
 #       print "valueList =", valueList, "nextInd =", nextInd,
-#       if nextInd != None:
+#       if nextInd is not None:
 #           print "char at nextInd =", astr[nextInd]
 #       else:
 #           print ""
@@ -153,7 +154,7 @@ if __name__ == '__main__':
         try:
             (data, nextInd) = getValues(testStr)
             print("getValues('%s') = %s;" % (testStr, repr((data, nextInd))), end=' ')
-            if nextInd != None:
+            if nextInd is not None:
                 print("str[%d] = \"%s\"" % (nextInd, testStr[nextInd]))
             else:
                 print("end of string")

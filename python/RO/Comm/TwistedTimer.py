@@ -5,6 +5,7 @@ Requires a running twisted reactor.
 History:
 2012-07-13 ROwen    Copied from opscore, but with active() replaced by isActive.
 2012-10-25 ROwen    Timer.start treats negative values as 0.
+2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
 __all__ = ["Timer"]
 
@@ -24,7 +25,7 @@ class Timer(object):
         *args: arguments for callFunc
         **kwargs: keyword arguments for callFunc; must not include "sec" or "callFunc"
         """
-        if sec != None:
+        if sec is not None:
             self._timer = _reactor.callLater(sec, callFunc, *args, **kwargs)
         else:
             self._timer = None

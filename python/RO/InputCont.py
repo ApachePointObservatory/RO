@@ -93,6 +93,7 @@ History:
 2011-02-18 ROwen    Added allCallbacksEnabled method.
 2014-03-13 ROwen    Added omitDef argument to getValueDict and getValueList.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
+2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
 import itertools
 import RO.AddCallback
@@ -151,7 +152,7 @@ class BasicFmt(object):
             return ''
         if self.blankIfDisabled and not inputCont.allEnabled():
             return ''
-        if self.valFmt != None:
+        if self.valFmt is not None:
             valList = [self.valFmt(val) for val in valList]
         if self.rejectBlanks:
             if '' in valList:
@@ -198,7 +199,7 @@ class VMSQualFmt(object):
             return ''
         if self.blankIfDisabled and not inputCont.allEnabled():
             return ''
-        if self.valFmt != None:
+        if self.valFmt is not None:
             valList = [self.valFmt(val) for val in valList]
         if self.rejectBlanks:
             if '' in valList:
@@ -462,7 +463,7 @@ class WdgCont(RO.AddCallback.BaseMixin):
         # note: entry may be a singleton or a sequence
         # convert to list before sending to setValueList and let it check length
         vals = valDict.get(self._name, None)
-        if vals != None:
+        if vals is not None:
             self.setValueList(RO.SeqUtil.asSequence(vals))
         elif self._setDefIfAbsent:
             self.restoreDefault()

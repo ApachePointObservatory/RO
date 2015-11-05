@@ -38,6 +38,7 @@ History:
                     Modified to print warnings to stderr instead of stdout.
 2014-09-18 ROwen    Fixed a bug in the unit test.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
+2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
 __all__ = ['HTTPGet']
 
@@ -185,7 +186,7 @@ class HTTPGet(RO.AddCallback.BaseMixin):
         self.isBinary = isBinary
         self.overwrite = bool(overwrite)
         self.createDir = createDir
-        if timeLim != None:
+        if timeLim is not None:
             self.timeLimMS = max(1, int(round(timeLim * 1000.0)))
         else:
             self.timeLimMS = 0
@@ -397,7 +398,7 @@ class HTTPGet(RO.AddCallback.BaseMixin):
             if _Debug:
                 print("deregister %s" % (tclFunc,))
             tclFunc.deregister()
-        if self._tclHTTPConn != None:
+        if self._tclHTTPConn is not None:
             self._tkApp.call("::http::cleanup", self._tclHTTPConn)
             self._tclHTTPConn = None
             if _Debug:

@@ -53,6 +53,7 @@ History:
 2012-12-17 ROwen    Initial state was 0, should have been Disconnected.
 2014-04-10 ROwen    Use NullTCPSocket instead of NullSocket for better "not connected" error messages.
 2014-09-18 ROwen    Fixed a bug in the unit test.
+2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
 __all__ = ["TCPConnection"]
 
@@ -358,7 +359,7 @@ class TCPConnection(object):
         if newState not in self._AllStates:
             raise RuntimeError("unknown connection state: %s" % (newState,))
         self._state = newState
-        if reason != None:
+        if reason is not None:
             self._reason = str(reason)
         
         # if the state or reason has changed, call state callbacks

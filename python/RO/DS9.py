@@ -148,6 +148,7 @@ History:
                     from running a Tiger (MacOS X 10.4) version of SAOImage DS9 on Leopard (MacOS X 10.5).
 2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
+2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
 __all__ = ["setup", "xpaget", "xpaset", "DS9Win"]
 
@@ -278,7 +279,7 @@ def _findDS9AndXPA():
             "SAOImage DS9.app/Contents/MacOS",
             "SAOImageDS9.app/Contents/MacOS",
         ], doRaise=False)
-        foundDS9 = (ds9Dir != None)
+        foundDS9 = (ds9Dir is not None)
         if foundDS9:
             _DS9Path = os.path.join(ds9Dir, "ds9")
         foundXPA = False

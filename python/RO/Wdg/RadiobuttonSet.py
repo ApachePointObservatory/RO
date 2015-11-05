@@ -41,6 +41,7 @@ History:
 2012-11-30 ROwen    Removed __getitem__ and __len__ methods because they confuse InputCont.
                     Moved fix for Aqua Tk 8.5 width bug to RO.Wdg.Radiobutton.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
+2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
 __all__ = ['RadiobuttonSet']
 
@@ -286,7 +287,7 @@ class RadiobuttonSet (RO.AddCallback.TkVarMixin,
         restoreDef = (self.trackDefault and self.isDefault()) \
             or (self._defIfBlank and self._var.get() == "")
         self._defValue = newDefValue
-        if isCurrent != None:
+        if isCurrent is not None:
             self.setIsCurrent(isCurrent)
 
         if restoreDef:

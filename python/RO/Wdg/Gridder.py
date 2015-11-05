@@ -33,6 +33,7 @@ History:
                     Bug fix: gridWdg would fail if helpText or helpURL was True and the first data widget
                     was missing the associated attribute.
 2011-07-29 ROwen    _BaseGridSet: added __getitem__, __len__  and __length__ to simplify access to widgets.
+2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
 __all__ = ['Gridder']
 
@@ -183,7 +184,7 @@ class Gridder(object):
         self._nextRow = gs.row + 1
         self._nextCol = gs.nextCol
         self._maxNextCol = max(gs.nextCol, self._nextCol)
-        if cat != None:
+        if cat is not None:
             self.addShowHideWdg(cat, gs.wdgSet)
         return gs
     
@@ -272,7 +273,7 @@ class Gridder(object):
         """
         self._nextRow = int(row)
 
-        if col != None:
+        if col is not None:
             newDefCol = int(col)
         else:
             newDefCol = self._maxNextCol + 1

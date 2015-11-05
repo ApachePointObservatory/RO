@@ -167,6 +167,7 @@ History:
                     Change "import ImageTk" to "from PIL import ImageTk" for better Pillow compatibility.
 2014-09-16 ROwen    Modified the example to use astropy instead of pyfits, if available.
 2015-09-24 ROwen    Replace "== None" with "is None" to future-proof array tests and modernize the code.
+2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
 __all__ = ["ann_Circle", "ann_Plus", "ann_X", "ann_Line", "ann_Text", "MaskInfo", "GrayImageWdg"]
 
@@ -361,13 +362,13 @@ class Annotation(object):
             # radius is in image units; put it in floating point now
             # and adjust for zoom factor when drawing it
             self.rad = float(rad)
-            if self.holeRad != None:
+            if self.holeRad is not None:
                 self.holeRad = float(self.holeRad)
         else:
             # radius is in canvas units
             # round it now and leave it alone later
             self.rad = int(round(rad))
-            if self.holeRad != None:
+            if self.holeRad is not None:
                 self.holeRad = int(round(self.holeRad))
 
         self.idTag = "_ann_%s" % id(self)
@@ -391,7 +392,7 @@ class Annotation(object):
         if self.isImSize:
             # radius is in image units; adjust for zoom factor
             rad = int(round(self.rad * self.gim.zoomFac))
-            if self.holeRad != None:
+            if self.holeRad is not None:
                 self.kargs["holeRad"] = int(round(self.holeRad * self.gim.zoomFac))
         else:
             # radius is already in canvas units; leave it alone
@@ -1117,7 +1118,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
                 0,
                 -1,
             )
-            if self.mask != None:
+            if self.mask is not None:
                 self.scaledMask = Image.frombuffer(
                     "L",
                     subFrameShapeIJ[::-1],
@@ -1212,7 +1213,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
         2 shows each pixel 2x as large as it should be
         etc.
         """
-        if desCtrCnv != None:
+        if desCtrCnv is not None:
             desCtrIJ = self.arrIJFromImPos(self.imPosFromCnvPos(desCtrCnv), doCheck=False)
         else:
             desCtrIJ = None
@@ -1251,7 +1252,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
             self.dataArr = dataArr
             self.savedShape = self.dataArr.shape
             
-            if (mask != None) and self.stretchExcludeBits:
+            if (mask is not None) and self.stretchExcludeBits:
                 mask = numpy.asarray(mask)
                 if mask.shape != self.dataArr.shape:
                     raise RuntimeError("mask shape=%s != arr shape=%s" % \

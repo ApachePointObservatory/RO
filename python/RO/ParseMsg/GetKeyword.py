@@ -5,6 +5,7 @@ History:
 2004-05-18 ROwen    Modified test code to use astr instead of str
                     and adict instead of dict.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
+2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
 __all__ = ["getKeyword"]
 
@@ -69,7 +70,7 @@ if __name__ == '__main__':
         try:
             (adict, nextInd) = getKeyword(astr, nextInd)
             print("getKeyword('%s') = \"%s\";" % (astr, adict), end=' ')
-            if nextInd != None:
+            if nextInd is not None:
                 print("astr[%d] = \"%s\"" % (nextInd, astr[nextInd]))
             else:
                 print("end of text")

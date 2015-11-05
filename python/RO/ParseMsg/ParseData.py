@@ -9,6 +9,7 @@ History:
                     Added "noValKey=" to test cases as it caused an infinite loop.
 2004-05-18 ROwen    Modified test code to use astr instead of str.
 2014-09-17 ROwen    Modified to test for Exception instead of StandardError 
+2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
 __all__ = ["parseKeyValueData"]
 
@@ -48,7 +49,7 @@ def parseKeyValueData(astr):
     if astr == '':
         return dataDict
     nextInd = 0
-    while nextInd != None:
+    while nextInd is not None:
         keyword, nextInd = getKeyword(astr, nextInd)
         # print "got keyword %r; nextInd = %r" % (keyword, nextInd)
         valueTuple, nextInd = getValues(astr, nextInd)

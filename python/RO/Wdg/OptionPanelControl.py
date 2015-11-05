@@ -23,6 +23,7 @@ History:
                     _WdgButton: renamed doClick to _updVisible.
 2012-07-10 ROwen    Removed use of update_idletasks.
 2012-11-13 ROwen    Stop using Checkbutton indicatoron=False because it is no longer supported on MacOS X.
+2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
 __all__ = ['OptionPanelControl']
 
@@ -108,7 +109,7 @@ class OptionPanelControl(Tkinter.Frame, CtxMenuMixin):
         CtxMenuMixin.__init__(self)
         self._btnDict = {}
         
-        if labelText != None:
+        if labelText is not None:
             Tkinter.Label(self, text=labelText).pack(side="top", anchor="nw")
 
         wdgMaster = wdgList[0][1].master

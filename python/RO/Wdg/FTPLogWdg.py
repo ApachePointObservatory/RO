@@ -48,6 +48,7 @@ History:
 2012-07-09 ROwen    Modified to use RO.TkUtil.Timer.
 2012-08-01 ROwen    Updated for changes to FTPGet.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
+2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
 __all__ = ['FTPLogWdg']
 
@@ -294,7 +295,7 @@ class FTPLogWdg(Tkinter.Frame):
         if doAutoSelect:
             self._selectInd(-1)
             self.text.see("end")
-        elif selInd != None:
+        elif selInd is not None:
             self._selectInd(selInd)
         
         #print "dispList=", self.dispList

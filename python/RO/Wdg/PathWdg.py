@@ -21,6 +21,7 @@ History:
 2006-06-08 ROwen    FilePathWdg bug fix: initial defPath not shown.
 2012-07-09 ROwen    Modified to treat path="" as path=None. This fixes a problem with file and path prefs.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
+2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
 __all__ = ["DirWdg", "FileWdg"]
 
@@ -191,7 +192,7 @@ class BasePathWdg (Tkinter.Button, RO.AddCallback.BaseMixin, CtxMenu.CtxMenuMixi
     def _copyToClip(self):
         """Copy the current path to the clipboard
         """
-        if self.path != None:
+        if self.path is not None:
             self.clipboard_clear()
             self.clipboard_append(self.path)
 
@@ -204,7 +205,7 @@ class DirWdg(BasePathWdg):
     def _doChoose(self):
         """Put up a dialog to choose a new file.
         """
-        if self.path != None:
+        if self.path is not None:
             startDir = self.path
         else:
             startDir = self.defPath
@@ -247,12 +248,12 @@ class FileWdg(BasePathWdg):
     def _doChoose(self):
         """Put up a dialog to choose a new file.
         """
-        if self.path != None:
+        if self.path is not None:
             startPath = self.path
         else:
             startPath = self.defPath
         
-        if startPath != None:
+        if startPath is not None:
             startDir, startFile = os.path.split(self.path)
             if not os.path.isfile(startPath):
                 startFile = None
@@ -260,7 +261,7 @@ class FileWdg(BasePathWdg):
             startFile = None
             startDir = self.defDir
 
-        if startDir != None and not os.path.isdir(startDir):
+        if startDir is not None and not os.path.isdir(startDir):
             startDir = startFile = None
 
         kargs = {}

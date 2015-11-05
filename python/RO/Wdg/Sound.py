@@ -12,6 +12,7 @@ History:
 2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
 2013-09-03 ROwen    Sound: if fileName specified and does not exist, raise RuntimeError
                     (I am surprised pygame.mixer.Sound doesn't complain).
+2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
 __all__ = ['bell', 'BellPlay', 'SoundPlayer', 'NoPlay']
 
@@ -137,7 +138,7 @@ class SoundPlayer(object):
         if pygame is mis-installed then it is possible to laod sounds
         but not play them.
         """
-        fileLoaded = (self._snd != None)
+        fileLoaded = (self._snd is not None)
         return (self._fileName, fileLoaded)
         
 class NoPlay(object):

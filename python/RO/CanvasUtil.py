@@ -17,6 +17,7 @@ History:
                     - Use list comprehension to speed computation of coords.
 2005-06-08 ROwen    Changed Spiral to a new style class.
 2009-08-04 ROwen    Added radialLine.
+2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
 __all__ = ["ctrCircle", "ctrPlus", "ctrX", "radialLine", "Spiral"]
 
@@ -200,7 +201,7 @@ class Spiral(object):
             self.draw()
 
     def setAngLim(self, begAng, endAng, redraw=True):
-        if (begAng != None) and (begAng == endAng):
+        if (begAng is not None) and (begAng == endAng):
             raise RuntimeError("angle range must be nonzero (though it may be None)")
         self.begAng = begAng
         self.endAng = endAng
@@ -216,7 +217,7 @@ class Spiral(object):
             self.draw()
     
     def draw(self):
-        if self.cnvID != None:
+        if self.cnvID is not None:
             self.cnv.delete(self.cnvID)
 
         if (None in (self.begAng, self.endAng)) or (int(max(self.begRad, self.endRad)) <= 0):

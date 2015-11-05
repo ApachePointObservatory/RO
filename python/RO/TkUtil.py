@@ -436,7 +436,7 @@ class Timer(object):
         """
         self._tkWdg = _getTkWdg()
         self._timerID = None
-        if sec != None:
+        if sec is not None:
             self.start(sec, callFunc, *args, **kwargs)
     
     def start(self, sec, callFunc, *args, **kwargs):

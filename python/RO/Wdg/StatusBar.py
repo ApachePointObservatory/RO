@@ -60,6 +60,7 @@ History:
 2015-01-08 ROwen    If a message in reply to a command has unknown message type then report the problem
                     and assume the command failed.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
+2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
 __all__ = ['StatusBar']
 
@@ -260,7 +261,7 @@ class StatusBar(Tkinter.Frame):
         self.displayWdg.set(msgStr, severity=severity)
         if isTemp:
             self.currID = next(self.tempIDGen)
-            if duration != None:
+            if duration is not None:
                 Timer(duration / 1000.0, self.clearTempMsg, self.currID)
         else:
             self.permMsg = msgStr

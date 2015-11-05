@@ -158,6 +158,7 @@ History:
 2014-07-21 ROwen    Disabling the widget now makes the widget lose focus, which is what users expect
                     and saves unsaved edits.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
+2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
 __all__ = ['StrEntry', 'ASCIIEntry', 'FloatEntry', 'IntEntry', 'DMSEntry']
 
@@ -363,7 +364,7 @@ class _BaseEntry (Tkinter.Entry, RO.AddCallback.BaseMixin,
     def _ctxAddSetItem(self, menu, descr, value):
         """Add a set value item to the contextual menu.
         """
-        if descr and value != None:
+        if descr and value is not None:
             menuText = "%s (%s)" % (descr, value)
             def setValue():
                 self.set(value)
@@ -569,10 +570,10 @@ class _BaseEntry (Tkinter.Entry, RO.AddCallback.BaseMixin,
         - Raises ValueError and leaves the widget unchanged
           if newVal is invalid (including out of range for numeric entry widgets).
         """
-        if newVal != None:
+        if newVal is not None:
             self.checkValue(newVal)
         self.setIsCurrent(isCurrent)
-        if severity != None:
+        if severity is not None:
             self.setSeverity(severity)
         
         if self._inMethodCall:
@@ -607,7 +608,7 @@ class _BaseEntry (Tkinter.Entry, RO.AddCallback.BaseMixin,
         restoreDef = (self._trackDefault and self.isDefault()) \
             or (self._defIfBlank and self.var.get() == "")
         self.defValueStr = self.asStr(newDefValue)
-        if isCurrent != None:
+        if isCurrent is not None:
             self.setIsCurrent(isCurrent)
 
         if restoreDef:
@@ -921,11 +922,11 @@ class _NumEntry (_BaseEntry):
     
     def getDefaultWidth(self):
         """Return the default width"""
-        if self.minNum != None:
+        if self.minNum is not None:
             widthForMin = len(self.defFormat % (self.minNum,))
         else:
             widthForMin = 8
-        if self.maxNum != None:
+        if self.maxNum is not None:
             widthForMax = len(self.defFormat % (self.maxNum,))
         else:
             widthForMax = 8
@@ -1025,11 +1026,11 @@ class _NumEntry (_BaseEntry):
         self.minNum = minNum
         self.maxNum = maxNum
 
-        if minNum != None and minNum <= 0:
+        if minNum is not None and minNum <= 0:
             self.minPartialNum = minNum
         else:
             self.minPartialNum = None
-        if maxNum != None and maxNum >= 0:
+        if maxNum is not None and maxNum >= 0:
             self.maxPartialNum = maxNum
         else:
             self.maxPartialNum = None
@@ -1102,10 +1103,10 @@ class _NumEntry (_BaseEntry):
         # this catches a minus sign when first typed in
         # whereas the range check below needs a digit before it can act
         if RO.SeqUtil.isString(val):
-            if self.minNum != None and self.minNum >= 0 and "-" in val:
+            if self.minNum is not None and self.minNum >= 0 and "-" in val:
                 raise ValueError("%s- forbidden; min val = %s" % \
                     (errPrefix, self.minNum))
-            if self.maxNum != None and self.maxNum < 0 and "-" not in val:
+            if self.maxNum is not None and self.maxNum < 0 and "-" not in val:
                 raise ValueError("%s- required; max val = %s" % \
                     (errPrefix, self.maxNum))
         

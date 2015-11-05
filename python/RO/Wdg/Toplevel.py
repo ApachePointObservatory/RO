@@ -61,6 +61,7 @@ History:
                     Modified to test for Exception instead of StandardError.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 2015-10-23 ROwen    getNames now ignores case when sorting names.
+2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
 __all__ = ['tl_CloseDestroys', 'tl_CloseWithdraws', 'tl_CloseDisabled', 'Toplevel', 'ToplevelSet']
 
@@ -280,7 +281,7 @@ class Toplevel(Tkinter.Toplevel):
     def getDoSaveState(self):
         """Returns True if saving state
         """
-        return self._stateTracker != None
+        return self._stateTracker is not None
     
     def getStateIsDefault(self):
         """Returns the state dictionary of the underlying widget and a flag indicating if default
@@ -431,7 +432,7 @@ class ToplevelSet(object):
         if defVisible is None:
             # if defVisible omitted, see if visible specified
             defVisible = kargs.get("visible", None)
-        if defVisible != None:
+        if defVisible is not None:
             # if we have a default visibility, put it in the dictionary
             self.defVisDict[name] = bool(defVisible)
         geom = self.getDesGeom(name)
@@ -444,7 +445,7 @@ class ToplevelSet(object):
         # restore state, if appropriate
         if newToplevel.getDoSaveState():
             stateDict = self.fileState.get(name)
-            if stateDict != None:
+            if stateDict is not None:
 #                 print "restoring state for Toplevel %s: %s" % (name, stateDict)
                 newToplevel.setState(stateDict)
 #             else:
