@@ -159,6 +159,7 @@ History:
                     and saves unsaved edits.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
+2015-11-05 ROwen    Stop using dangerous bare "except:".
 """
 __all__ = ['StrEntry', 'ASCIIEntry', 'FloatEntry', 'IntEntry', 'DMSEntry']
 
@@ -957,7 +958,7 @@ class _NumEntry (_BaseEntry):
             format = self.defFormat
         try:
             return format % (numVal,)
-        except:
+        except Exception:
             raise ValueError("%scannot format data %r with format %r" % \
                 (self._getErrorPrefix(), numVal, format))
 
@@ -1280,7 +1281,7 @@ class DMSEntry (_NumEntry):
         try:
             nFields, precision = format
             constrainedFormat = (max(0, int(nFields)), max(0, int(precision)))
-        except:
+        except Exception:
             raise ValueError("%sinvalid format %r; must be (nFields, precision)" % \
                 (self._getErrorPrefix(), format,))
         return constrainedFormat

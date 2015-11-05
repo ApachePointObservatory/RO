@@ -29,6 +29,7 @@ History:
 2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
 2014-10-20 ROwen    Bug fix: ScriptFileWdg leaked from __future__ import print_function into loaded scripts
                     (I'm not sure how, but I removed that import in this module to fix it).
+2015-11-05 ROwen    Stop using dangerous bare "except:".
 """
 __all__ = ['BasicScriptWdg', 'ScriptModuleWdg', 'ScriptFileWdg']
 
@@ -341,8 +342,8 @@ class _BaseUserScriptWdg(Tkinter.Frame, BasicScriptWdg):
             self.scriptFrame.grid(row=self.scriptFrameRow, column=0, sticky="news")
             self._makeScriptRunner(self.scriptFrame, **srArgs)
             self.scriptStatusBar.setMsg("Reloaded", RO.Constants.sevNormal)
-        except:
-            self.scriptStatusBar.setMsg("Reload failed; see error log", RO.Constants.sevError)
+        except Exception as e:
+            self.scriptStatusBar.setMsg("Reload failed: %s" % (e,), RO.Constants.sevError)
             raise
             
     

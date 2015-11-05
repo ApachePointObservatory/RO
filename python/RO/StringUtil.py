@@ -49,6 +49,7 @@ History:
 2015-01-06 ROwen    Improved dmsStrFromDeg and dmsStrFromSec to handle non-finite values.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
+2015-11-05 ROwen    Stop using dangerous bare "except:".
 """
 import re
 import numpy
@@ -204,7 +205,7 @@ def checkDMSStr(dmsStr):
     try:
         splitDMSStr(dmsStr)
         return True
-    except:
+    except Exception:
         return False
 
 def dmsStrFieldsPrec(dmsStr):
@@ -390,7 +391,7 @@ def floatFromStr(astr, allowExp=1):
         
     try:
         return float(astr)
-    except:
+    except Exception:
         # partial float
         return 0.0
 
@@ -407,7 +408,7 @@ def intFromStr(astr):
 
     try:
         return int(astr)
-    except:
+    except Exception:
         # partial int
         return 0
 

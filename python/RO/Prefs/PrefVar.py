@@ -89,6 +89,7 @@ History:
 2014-05-07 ROwen    Changed is str test to use basestring.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
+                    Stop using dangerous bare "except:".
 """
 __all__ = ["PrefVar", "StrPrefVar", "DirectoryPrefVar", "FilePrefVar", "SoundPrefVar", "BoolPrefVar", \
     "IntPrefVar", "FloatPrefVar", "ColorPrefVar", "FontPrefVar", "FontSizePrefVar", "PrefSet"]
@@ -216,7 +217,7 @@ class PrefVar(object):
         # check that the value can be formatted for output
         try:
             self.asStr(value)
-        except:
+        except Exception:
             raise ValueError("value %r could not be formatted with string %r" % (value, self.formatStr))
     
     def getDefValue(self):

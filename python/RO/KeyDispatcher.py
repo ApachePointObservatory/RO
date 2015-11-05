@@ -87,6 +87,7 @@ History:
 2012-08-01 ROwen    Updated for RO.Comm.TCPConnection 3.0.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
+2015-11-05 ROwen    Stop using dangerous bare "except:".
 """
 __all__ = ["logToStdOut", "KeyDispatcher"]
 
@@ -284,7 +285,7 @@ class KeyDispatcher(object):
             for keyVar in keyVarList:
                 try:
                     keyVar.set(valueTuple, msgDict = msgDict)
-                except:
+                except Exception:
                     traceback.print_exc(file=sys.stderr)
 
         # if you are the commander for this message,
@@ -580,7 +581,7 @@ class KeyDispatcher(object):
                 # (thereby giving other time to other events)
                 # continuing where I left off
                 self._checkRemCmdTimer.start(_ShortInterval, self._checkRemCmdTimeouts, cmdVarIter)
-        except:
+        except Exception:
             sys.stderr.write ("RO.KeyDispatcher._checkRemCmdTimeouts failed\n")
             traceback.print_exc(file=sys.stderr)
 
@@ -678,7 +679,7 @@ class KeyDispatcher(object):
                 isRefresh = True,
             )
             self.executeCmd(cmdVar)
-        except:
+        except Exception:
             sys.stderr.write("%s._sendNextRefreshCmd: refresh command %s failed:\n" % (self.__class__.__name__, cmdVar,))
             traceback.print_exc(file=sys.stderr)
         self._refreshNextTimer.start(_ShortInterval, self._sendNextRefreshCmd, refreshCmdItemIter)

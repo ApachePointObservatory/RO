@@ -50,6 +50,7 @@ History:
 2012-07-09 ROwen    Modified test code to user RO.TkUtil.Timer.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
+2015-11-05 ROwen    Stop using dangerous bare "except:".
 """
 __all__ = ['Label', 'BoolLabel', 'StrLabel', 'IntLabel', 'FloatLabel', 'DMSLabel']
 
@@ -290,7 +291,7 @@ class FloatLabel(Label):
         # test and set format string
         try:
             formatStr % (1.1,)
-        except:
+        except Exception:
             raise ValueError("Invalid floating point format string %s" % (formatStr,))
 
         Label.__init__(self,

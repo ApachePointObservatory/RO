@@ -127,6 +127,7 @@ History:
                     Tweaked PVTVar._doCallbacks to do nothing if callbacks disabled.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
+2015-11-05 ROwen    Stop using dangerous bare "except:".
 """
 __all__ = ["TypeDict", "AllTypes", "DoneTypes", "FailTypes", "KeyVar", "PVTKeyVar", "CmdVar", "KeyVarFactory"]
 
@@ -599,7 +600,7 @@ class PVTKeyVar(KeyVar):
     To do: make regular callbacks optional for vel!=0 or remove entirely
     and ask the user to implement this directly.
 
-    Similar to KeyVar except:
+    Similar to KeyVar, but:
     - The supplied keyword data is in the form:
         pos1, vel1, t1, pos2, vel2, t2..., pos<naxes>, vel<naxes>, t<naxes>
     - Values are PVTs
@@ -924,7 +925,7 @@ class CmdVar(object):
             if msgType in callTypes:
                 try:
                     callFunc(msgType, msgDict, cmdVar=self)
-                except:
+                except Exception:
                     sys.stderr.write ("%s callback %s failed\n" % (self, callFunc))
                     traceback.print_exc(file=sys.stderr)
         if self.lastType in DoneTypes:
@@ -943,7 +944,7 @@ class CmdVar(object):
                     % (valueTuple, self.timeLimKeyword, self.cmdID))
             try:
                 newTimeLim = float(valueTuple[0])
-            except:
+            except Exception:
                 raise ValueError("Invalid value %r for timeout keyword %r for command %d: must be (number,)"
                     % (valueTuple, self.timeLimKeyword, self.cmdID))
             self.maxEndTime = time.time() + newTimeLim

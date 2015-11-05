@@ -20,6 +20,7 @@ redbird/> or e-mail me at <redbird@rbisland.cx>.
 
 #history
 
+0.5.2+ - stop using dangerous bare "except:" 2015-11-05 ROwen
 0.5.2 - added --version command
 0.5.1 - added support for long (--) options
 0.5 - added support for following links and verbosity.  Lot of work.
@@ -30,7 +31,7 @@ redbird/> or e-mail me at <redbird@rbisland.cx>.
 0.0 - just converts the given files
 """
 
-__version__ = "cheol 0.5.2, Copyright 2000-2001 Gordon Worley via the Python License, version 2.1.\nType -h for help"
+__version__ = "cheol 0.5.2+, Copyright 2000-2001 Gordon Worley via the Python License, version 2.1.\nType -h for help"
 #fn = filename
 
 #this first part is not by me, but put right in this code
@@ -205,7 +206,7 @@ if __name__ == '__main__':
     import sys, getopt
     try:
         opts, args = getopt.getopt(sys.argv[1:], "hlvmudr", ("help", "mac", "unix", "dos", "version"))
-    except:
+    except Exception:
         print("That's not an option.  Type -h for help.")
         sys.exit(1)
     mode = 1 #default is unix, 0 is mac, 2 is dos
