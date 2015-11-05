@@ -149,6 +149,7 @@ History:
 2011-06-16 ROwen    Ditched obsolete "except (SystemExit, KeyboardInterrupt): raise" code
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
+2015-11-05 ROwen    Initialize globals to make pyflakes happy.
 """
 __all__ = ["setup", "xpaget", "xpaset", "DS9Win"]
 
@@ -160,6 +161,12 @@ import RO.OS
 import subprocess
 
 _DebugSetup = False
+
+# initialize globals
+_SetupError = "Not yet setup"
+_Popen = None
+_DirFromWhichToRunDS9 = None
+_DS9Path = None
 
 def _addToPATH(newPath):
     """Add newPath to the PATH environment variable.
@@ -384,7 +391,7 @@ def xpaget(cmd, template=_DefTemplate, doRaise = False):
     """
     global _Popen
     fullCmd = "xpaget %s %s" % (template, cmd,)
-#   print fullCmd
+    # print(fullCmd)
 
     p = _Popen(
         args = fullCmd,
@@ -437,7 +444,7 @@ def xpaset(cmd, data=None, dataFunc=None, template=_DefTemplate, doRaise = False
         fullCmd = "xpaset %s %s" % (template, cmd)
     else:
         fullCmd = "xpaset -p %s %s" % (template, cmd)
-#   print fullCmd
+    # print(fullCmd)
 
     p = _Popen(
         args = fullCmd,
@@ -616,7 +623,7 @@ class DS9Win:
         # if necessary, convert array type
         cnvType = _CnvDict.get(arr.dtype)
         if cnvType:
-#           print "converting array from %s to %s" % (arr.dtype, cnvType)
+            # print("converting array from %s to %s" % (arr.dtype, cnvType))
             arr = arr.astype(cnvType)
 
         # determine byte order of array (^ is xor)
@@ -651,37 +658,6 @@ class DS9Win:
         
         for keyValue in kargs.iteritems():
             self.xpaset(cmd=" ".join(keyValue))
-
-# showBinFile is commented out because it is broken with ds9 3.0.3
-# (apparently due to a bug in ds9) and because it wasn't very useful
-#   def showBinFile(self, fname, **kargs):
-#       """Display a binary file in ds9.
-#       
-#       The following keyword arguments are used to specify the array:
-#       - xdim      # of points along x
-#       - ydim      # of points along y
-#       - dim       # of points along x = along y (only use for a square array)
-#       - zdim      # of points along z
-#       - bitpix    number of bits/pixel; negative if floating
-#       - arch  one of bigendian or littleendian (intel)
-#       
-#       The remaining keywords are extras treated as described
-#       in the module comment.
-#
-#       Note: integer data must be UInt8, Int16 or Int32
-#       (i.e. the formats supported by FITS).
-#       """
-#       arryDict = _splitDict(kargs, _ArrayKeys)
-#       if not arryDict:
-#           raise RuntimeError("must specify dim (or xdim and ydim) and bitpix")
-#
-#       arrInfo = "[%s]" % (_formatOptions(arryDict),)
-#       filePathPlusInfo = _expandPath(fname, arrInfo)
-#
-#       self.xpaset(cmd='file array "%s"' % (filePathPlusInfo,))
-#       
-#       for keyValue in kargs.iteritems():
-#           self.xpaset(cmd=" ".join(keyValue))
     
     def showFITSFile(self, fname, **kargs):
         """Display a fits file in ds9.
@@ -693,7 +669,7 @@ class DS9Win:
         must NOT be included.
         """
         filepath = _expandPath(fname)
-        self.xpaset(cmd='file "%s"' % filepath)
+        self.xpaset(cmd='fits "%s"' % filepath)
 
         # remove array info keywords from kargs; we compute all that
         arrKeys = _splitDict(kargs, _ArrayKeys)
