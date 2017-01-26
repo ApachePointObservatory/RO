@@ -19,7 +19,7 @@ Mouse Gestures
     - Drag LR->UL to zoom out (a small box zooms out more).
       The minimum zoom is that needed to show the entire image.
     - Zoom to see the entire image: double-click or drag a tiny amount LR->UL.
-    
+
     Levels (L mode or use button 2)
     - Drag mouse to change the levels shown as black and white.
       Black/white level is controlled by x/y distance from center.
@@ -168,6 +168,8 @@ History:
 2014-09-16 ROwen    Modified the example to use astropy instead of pyfits, if available.
 2015-09-24 ROwen    Replace "== None" with "is None" to future-proof array tests and modernize the code.
 2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
+2017-01-26 CSayres  Improve compatibility with recent versions Pillow
+                    by casting image shape to a tuple when calling fromBuffer.
 """
 __all__ = ["ann_Circle", "ann_Plus", "ann_X", "ann_Line", "ann_Text", "MaskInfo", "GrayImageWdg"]
 
@@ -201,7 +203,7 @@ _ModeNormal = "normal"
 _ModeLevels = "level"
 _ModeZoom = "zoom"
 
-_DebugMem = False # print messages when memory recovered?
+_DebugMem = False  # print messages when memory recovered?
 
 ann_Circle = RO.CanvasUtil.ctrCircle
 ann_Plus = RO.CanvasUtil.ctrPlus
@@ -210,7 +212,7 @@ ann_Line = RO.CanvasUtil.radialLine
 
 def ann_Text(cnv, xpos, ypos, rad, text, anchor="c", **kargs):
     """Draws a centered circle on the specified canvas.
-    
+
     Inputs:
     - cnv: canvas on which to draw
     - xpos: x position
@@ -238,8 +240,8 @@ _BitmapDict = getBitmapDict()
 
 class MaskInfo(object):
     """Information about a mask plane
-    
-    Inputs: 
+
+    Inputs:
     - bitInd: index of bit, starting from 0 for LSB
     - name: name of bit plane (for help text)
     - btext: text for the display button (keep it short)
@@ -272,30 +274,30 @@ class MaskInfo(object):
             self.tkWdg = Tkinter.Frame()
 
         self.setColor(color)
-    
+
     def applyMask(self, im, maskIm):
         """Apply the color transformation for this mask.
-        
+
         Inputs:
         - im: un-transformed image
         - maskIm: mask image (with all bit planes)
-        
+
         Returns the transformed image.
         """
         if (not self.wdg) or (not self.wdg.getBool()):
             return im
-            
+
         bitmask = maskIm.point(lambda val: bool(val & self.andVal))
         rgbMaskSet = []
-        
-        # create color image of mask 
+
+        # create color image of mask
         for colval in self.maskRGB:
             rgbMaskSet.append(bitmask.point(lambda val: val * colval))
         rgbMask = Image.merge("RGB", rgbMaskSet)
-        
+
         # create transparency version of mask
         transMask = bitmask.point(lambda val: val * self.intens)
-        
+
         # merge mask and image
         rgbim = im.convert("RGB")
         rgbim.paste(rgbMask, mask=transMask)
@@ -304,7 +306,7 @@ class MaskInfo(object):
     def setWdg(self, wdg):
         """Specify a checkbuttonw widget to control show/hide of this mask"""
         self.wdg = wdg
-    
+
     def setColor(self, color):
         """Set the mask color"""
         self.maskRGB = [val/256 for val in self.tkWdg.winfo_rgb(color)]
@@ -383,7 +385,7 @@ class Annotation(object):
 
     def draw(self):
         """Draw the annotation.
-        
+
         Warning: calling multiple times draws multiple copies.
         (Not an issue with GrayImageWdg because it tends to delete
         the canvas and start over when redrawing).
@@ -405,15 +407,15 @@ class Annotation(object):
             cnvPos[1] + self.cnvOffset[1],
             rad,
         **self.kargs)
-    
+
     def delete(self):
         """Delete the annotation from the canvas.
         """
         self.gim.cnv.delete(self.idTag)
-            
+
 class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
     """Display a grayscale image.
-    
+
     Inputs:
     - master    parent widget
     - height    height of image portal (visible area)
@@ -441,20 +443,20 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
         RO.AddCallback.BaseMixin.__init__(self)
         if defRange not in self._RangeMenuItems:
             raise RuntimeError("invalid defRange")
-        
+
         # raw data array and attributes
         self.dataArr = None
         self.savedShape = None
         self.sortedDataArr = None
         self.dataDispMin = None
         self.dataDispMax = None
-        
+
         # scaled data array and attributes
         self.scaledArr = None # must be float32; Image doesn't support float64!
         self.scaledIm = None
         self.scaleFuncOff = 0.0
         self.scaleFunc = None
-        
+
         # displayed image attributes
         self.zoomFac = None
         self.begIJ = None   # start of data subregion to display
@@ -462,7 +464,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
         self.dispOffset = 0
         self.dispScale = 1.0
         self.frameShape = (width, height) # shape of area in which image can be displayed
-        
+
         if maskInfo:
             maskInfo = RO.SeqUtil.asSequence(maskInfo)
         else:
@@ -472,27 +474,27 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
         for mi in maskInfo:
             if not mi.doStretch:
                 self.stretchExcludeBits += mi.andVal
-        
+
         self.dispMinLevel = 0.0
         self.dispMaxLevel = 256.0
-        
+
         self._dragLevelTimer = RO.TkUtil.Timer()
-        
+
         # fields for drag-to-act
         self.dragStart = None
         self.dragRectID = None
-        
+
         # annotation dict;
         # key: a tuple of all tags used for the annotation
         # value: the annotation
         self.annDict = {}
-        
+
         self.mode = _ModeNormal
         self.permMode = _ModeNormal
-        
+
         # dict of weak references for debugging memory leaks
         self._memDebugDict = {}
-        
+
         # tool bar
         toolFrame = Tkinter.Frame(self)
 
@@ -516,7 +518,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
             helpURL =  helpURL,
         )
         self.rangeMenuWdg.pack(side="left")
-        
+
         modeList = (
             _ModeNormal,
             _ModeLevels,
@@ -540,7 +542,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
             side = "left",
         )
         wdgSet = self.modeWdg.getWdgSet()
-    
+
         self.currZoomWdg = Entry.FloatEntry(
             master = toolFrame,
             width = 4,
@@ -555,7 +557,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
         self.currZoomWdg.bind("<Key-Return>", self.doZoomWdg)
 
         wdgSet.insert(2, self.currZoomWdg)
-        
+
         if self.maskInfo:
             for mInfo in self.maskInfo:
                 maskWdg = RO.Wdg.Checkbutton(
@@ -570,7 +572,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
 
         toolFrame.pack(side="top", anchor="nw")
         self.toolFrame = toolFrame
-    
+
         # add current position and current value widgets
         posFrame = Tkinter.Frame(self)
         Label.StrLabel(
@@ -625,14 +627,14 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
         )
         self.currValWdg.pack(side="left")
         posFrame.pack(side="bottom", anchor="nw")
-        
+
         # set up scrolling panel to display canvas and error messages
         self.scrollFrame = Tkinter.Frame(self, height=height, width=width) #, borderwidth=2, relief="sunken")
         self.scrollFrame.grid_propagate(False)
         self.strMsgWdg = Label.StrLabel(self.scrollFrame)
         self.strMsgWdg.grid(row=0, column=0)
         self.strMsgWdg.grid_remove()
-        
+
         self.hsb = Tkinter.Scrollbar(
             self.scrollFrame,
             orient="horizontal",
@@ -642,7 +644,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
         self.hsb.grid(row=1, column=0, sticky="ew")
         self._hscrollbar = self.hsb
         self.hsb.set(0.0, 1.0)
-        
+
         self.vsb = Tkinter.Scrollbar(
             self.scrollFrame,
             orient="vertical",
@@ -663,23 +665,23 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
 
         self.scrollFrame.grid_rowconfigure(0, weight=1)
         self.scrollFrame.grid_columnconfigure(0, weight=1)
-        
+
         self.scrollFrame.pack(side="top", expand=True, fill="both")
-                
+
         bdWidth = 0
         for bdName in ("borderwidth", "selectborderwidth", "highlightthickness"):
             bdWidth += int(self.cnv[bdName])
         self.bdWidth = bdWidth
         self.cnvShape = (0,0)
-        
+
         # set up bindings
         self.cnv.bind("<Motion>", self._updCurrVal)
         self.hsb.bind("<Configure>", self._updFrameShape)
         self.vsb.bind("<Configure>", self._updFrameShape)
-        
+
         # compute middle and right button numbers
         lb, mb, rb = RO.TkUtil.getButtonNumbers()
-        
+
         # bind mouse-button events to various modes and actions
         modeButNumList = (
             ("mode", lb),
@@ -701,9 +703,9 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
                     func = RO.TkUtil.EvtNoProp(func)
                 fullEvtName = evtName % (btnNum,)
                 self.cnv.bind(fullEvtName, func)
-        
+
         self.modeWdg.set(_ModeNormal)
-        
+
         # set scale function to match default
         # (note: the range menu requires data, so it is handled by showArr)
         self.doScaleMenu()
@@ -732,7 +734,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
             self.dragZoomStart(evt, isTemp = False)
         elif self.mode == _ModeLevels:
             self.dragLevelStart(evt, isTemp = False)
-    
+
     def modeContinue(self, evt):
         if self.mode == _ModeNormal:
             return
@@ -740,7 +742,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
             self.dragZoomContinue(evt)
         elif self.mode == _ModeLevels:
             self.dragLevelContinue(evt)
-    
+
     def modeEnd(self, evt):
         if self.mode == _ModeNormal:
             return
@@ -748,14 +750,14 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
             self.dragZoomEnd(evt, isTemp = False)
         elif self.mode == _ModeLevels:
             self.dragLevelEnd(evt, isTemp = False)
-    
+
     def modeReset(self, evt):
         if self.mode == _ModeNormal:
             return
         elif self.mode == _ModeZoom:
             self.dragZoomReset(isTemp = False)
         elif self.mode == _ModeLevels:
-            self.dragLevelReset(isTemp = False)         
+            self.dragLevelReset(isTemp = False)
 
     def addAnnotation(self, annType, imPos, rad, cnvOffset=(0, 0), tags=None, isImSize=True, **kargs):
         """Add an annotation.
@@ -782,7 +784,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
                     color of middle of circle for ann_Circle
             - outline: color of line for ann_Circle
             - holeRad: radius of central hole (if any) for ann_X and ann_Plus
-        
+
         Returns a unique id tag for use with removeAnnotaion.
         """
         if self.dataArr is None:
@@ -799,11 +801,11 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
         **kargs)
         self.annDict[annObj.tags] = annObj
         return annObj.idTag
-    
+
     def applyRange(self, redisplay=True):
         """Compute dispScale and dispOffset based on
         dispMin, dispMax, dispMaxLevel and dispMinLevel.
-        
+
         Inputs:
         - redisplay: redisplay existing image, else display new image
         """
@@ -822,20 +824,20 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
         if self.scaledMask:
             for mInfo in self.maskInfo:
                 currIm = mInfo.applyMask(currIm, self.scaledMask)
-        
+
         if redisplay:
             # redisplay existing image
             self.tkIm.paste(currIm)
         else:
             # create new image and display it
             self.tkIm = ImageTk.PhotoImage(currIm)
-        
+
             self.cnv.create_image(
                 self.bdWidth, self.bdWidth,
                 anchor="nw",
                 image=self.tkIm,
             )
-    
+
     def clear(self, clearArr=True):
         """Clear the display.
         """
@@ -865,16 +867,16 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
         highInd = int(highFrac * dataLen) - 1
         self.dataDispMin = self.sortedData[lowInd]
         self.dataDispMax = self.sortedData[highInd]
-        
+
         #print "doRangeMenu; strVal=%r; numVal=%s; lowFrac=%s; highFrac=%s, dataLen=%s, lowInd=%s, highInd=%s, dataDispMin=%s, dataDispMax=%s" % (strVal, numVal, lowFrac, highFrac, dataLen, lowInd, highInd, self.dataDispMin, self.dataDispMax)
         if redisplay:
             self.redisplay()
-    
+
     def doShowHideMask(self, wdg=None):
         """Show or hide a mask.
         """
         self.redisplay()
-        
+
     def doScaleMenu(self, *dumArgs):
         """Handle new selection from scale menu."""
         strVal = self.scaleMenuWdg.getString()
@@ -886,7 +888,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
         except AttributeError:
             raise RuntimeError("Bug! No function named %r" % (funcName,))
         func(*args)
-    
+
     def doScrollBar(self, ijInd, scrollCmd, scrollAmt=None, c=None):
         """Handle scroll bar events"""
         #print "doScrollBarijInd=%r, scrollCmd=%r, scrollAmt=%r, c=%r)" % (ijInd, scrollCmd, scrollAmt, c)
@@ -898,8 +900,8 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
         visFrac = currScroll[1] - currScroll[0]
         if visFrac > 1.0:
             print("doScrollBar warning: visFrac = %r >1" % (visFrac,))
-            
-        
+
+
         if scrollCmd == "scroll":
             multFac = int(scrollAmt)
             newScroll = currScroll + (multFac * (visFrac / 2.0))
@@ -917,7 +919,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
             newScroll = [1.0 - visFrac, 1.0]
         elif newScroll[0] < 0.0:
             newScroll = [0.0, visFrac]
-        
+
         if ijInd == 0:
             temp = newScroll[:]
             newScroll = [1.0 - elt for elt in temp[::-1]]
@@ -926,7 +928,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
         self.begIJ[ijInd] = self.dataArr.shape[ijInd] * newScroll[0]
         self.endIJ[ijInd] = self.dataArr.shape[ijInd] * newScroll[1]
         self._updImBounds(updZoom=False)
-    
+
     def doZoomWdg(self, wdg):
         """Set zoom to the value typed in the current zoom widget.
         """
@@ -935,7 +937,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
 
         newZoomFac = self.currZoomWdg.getNum()
         self.setZoomFac(newZoomFac)
-    
+
     def dragLevelContinue(self, evt):
         """Adjust black and white levels based on position of cursor
         relative to the center of image portal.
@@ -943,7 +945,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
         self._dragLevelTimer.cancel()
         if self.dataArr is None:
             return
-        
+
         #print "cnvShape=%s, evt.x=%s, evt.y=%s" % (self.cnvShape, evt.x, evt.y)
         ctr = [sh/2.0 for sh in self.cnvShape]
         dx = evt.x - ctr[0]
@@ -952,7 +954,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
         self.dispMinLevel = 0 + dx
         self.dispMaxLevel = 256 + dy
         self.applyRange(redisplay=True)
-    
+
     def dragLevelEnd(self, evt, isTemp=True):
         if isTemp:
             self.modeWdg.set(self.permMode)
@@ -964,10 +966,10 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
         self.dispMinLevel = 0
         self.dispMaxLevel = 256
         self.applyRange(redisplay=True)
-        
+
         if isTemp:
             self.modeWdg.set(self.permMode)
-        
+
     def dragLevelStart(self, evt, isTemp=True):
         if isTemp:
             self.modeWdg.set(_ModeLevels, isTemp=True)
@@ -979,11 +981,11 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
 
         newPos = self.cnvPosFromEvt(evt)
         self.cnv.coords(self.dragRectID, self.dragStart[0], self.dragStart[1], newPos[0], newPos[1])
-    
+
     def dragZoomEnd(self, evt, isTemp=True):
         self.cnv.delete(self.dragRectID)
         self.dragRectID = None
-        
+
         if isTemp:
             self.modeWdg.set(self.permMode)
 
@@ -992,13 +994,13 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
         startPos = self.dragStart
         endPos = self.cnvPosFromEvt(evt)
         self.dragStart = None
-        
+
         if self.dataArr is None:
             return
 
         deltaPos = numpy.subtract(endPos, startPos)
         ctrCnvPos = numpy.add(startPos, deltaPos/2.0)
-        
+
         if deltaPos[0] > 0 and deltaPos[1] > 0:
             # zoom in
             newZoomFac = _MaxZoomFac
@@ -1008,7 +1010,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
                 #print "ii=%s, desZoomFac=%s; newZoomFac=%s" % (ii, desZoomFac, newZoomFac)
             #print "newZoomFac=%s" % (newZoomFac,)
             self.setZoomFac(newZoomFac, ctrCnvPos)
-            
+
         elif deltaPos[0] < 0 and deltaPos[1] < 0:
             # zoom out
             newZoomFac = _MaxZoomFac
@@ -1020,7 +1022,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
             newZoomFac = max(newZoomFac, self.getFitZoomFac())
 
             self.setZoomFac(newZoomFac, ctrCnvPos)
-    
+
     def dragZoomReset(self, wdg=None, isTemp=True):
         """Zoom so entire image is visible in image portal.
         """
@@ -1029,7 +1031,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
 
         newZoomFac = self.getFitZoomFac()
         self.setZoomFac(newZoomFac)
-        
+
         if isTemp:
             self.modeWdg.set(self.permMode)
 
@@ -1040,10 +1042,10 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
             outline = "green",
             tags = _DragRectTag,
         )
-        
+
         if isTemp:
             self.modeWdg.set(_ModeZoom, isTemp=True)
-    
+
     def getFitZoomFac(self):
         """Return the largest zoom factor that makes the image fit.
         Include room for a 1-pixel border around the edge
@@ -1058,20 +1060,20 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
         limZoomFac = limitZoomFac(fitZoomFac)
         #print "getFitZoomFac: arrShape=%s, frameShapeIJ=%s, desZoomFac=%s, fitZoomFac=%s, limZoomFac=%s" % (self.dataArr.shape, frameShapeIJ, desZoomFac, fitZoomFac, limZoomFac)
         return limZoomFac
-        
+
     def isNormalMode(self):
         return self.mode == _ModeNormal
 
     def nullHandler(self, evt):
         """Ignore an event."""
         return
-    
+
     def redisplay(self):
         """Starting from the data array, redisplay the data.
         """
         if self.dataArr is None:
             return
-            
+
         self.strMsgWdg.grid_remove()
 
         try:
@@ -1081,9 +1083,9 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
                 self.scaledArr = numpy.subtract(self.dataArr, float(self.dataDispMin), dtype=numpy.float32)
             else:
                 numpy.subtract(self.dataArr, float(self.dataDispMin), self.scaledArr)
-            
+
             offsetDispRange = [0.0, float(self.dataDispMax - self.dataDispMin)]
-            
+
             # apply scaling function, if any
             if self.scaleFunc:
                 self.scaleFunc(self.scaledArr, self.scaledArr)
@@ -1106,7 +1108,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
             cnvShapeXY = numpy.around(numpy.multiply(subFrameShapeXY, self.zoomFac)).astype(int)
             if not numpy.allclose(self.cnvShape, cnvShapeXY):
                 self._setCnvSize(cnvShapeXY)
-            
+
             # create image with scaled data; warning: F format is 32 bit float;
             # Image doesn't support 64 bit floats
             self.scaledIm = Image.frombuffer(
@@ -1130,30 +1132,30 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
                 )
             else:
                 self.scaledMask = None
-    
+
             # resize image, if necessary
             if not numpy.allclose(subFrameShapeXY, self.cnvShape):
                 #print "applying zoom factor =", self.zoomFac
                 self.scaledIm = self.scaledIm.resize(self.cnvShape)
                 if self.scaledMask:
                     self.scaledMask = self.scaledMask.resize(self.cnvShape)
-                
+
             # update scroll bars
             # note that the vertical scrollbar is upside-down with respect to ij, so set it to 1-end, 1-beg
             floatShape = [float(elt) for elt in self.dataArr.shape]
             self.hsb.set(self.begIJ[1] / floatShape[1], self.endIJ[1] / floatShape[1])
             self.vsb.set(1.0 - (self.endIJ[0] / floatShape[0]), 1.0 - (self.begIJ[0] / floatShape[0]))
-            
+
             # compute and apply current range
             self.applyRange(redisplay=False)
-            
+
             # display annotations
             for ann in self.annDict.itervalues():
                 ann.draw()
         except MemoryError:
             self.showMsg("Insufficient Memory!", severity=RO.Constants.sevError)
-        
-        self._doCallbacks()     
+
+        self._doCallbacks()
 
     def removeAnnotation(self, tag):
         """Remove all annotations (if any) with the specified tag.
@@ -1165,20 +1167,20 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
             else:
                 newDict[tags] = ann
         self.annDict = newDict
-    
+
     def scaleASinh(self, scaleFac=0.1):
         """Apply an arcsinh scale
-        
+
         Note: this needs tuning parameters, which are just kludged in for now.
         f(x) = arcsinh(scale [x - m])
-        
+
         I don't yet set m. I might be able to add it, I'm just not sure
         it's useful given how I already stretch data
         """
         def arcsinh(x, out=None):
             return numpy.arcsinh(numpy.multiply(x, scaleFac), out)
         self.setScaleFunc(arcsinh)
-    
+
     def scaleLinear(self):
         """Restore linear scaling and redisplay.
         """
@@ -1188,26 +1190,26 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
         """Apply a square root scale
         """
         self.setScaleFunc(numpy.sqrt)
-    
+
     def setScaleFunc(self, func):
         """Set a new scale function and redisplay.
-        
+
         scaled value = func(data - dataMin)
         """
         self.scaleFunc = func
         #print "scaleFunc = %r" % (self.scaleFunc)
         self.redisplay()
-    
+
     def setZoomFac(self, zoomFac, desCtrCnv = None, forceRedisplay=False):
         """Set the zoom factor.
-        
+
         Inputs:
         - zoomFac   the desired new zoom factor (can be float);
                     values outside [_MinZoomFac, _MaxZoomFac] are silently truncated
         - desCtrCnv the desired center, in canvas x,y pixels;
                     if omitted, the center of the visible image is used
         - forceRedisplay    if False, redisplay only if zoom factor changed
-        
+
         0.5 shows every other pixel, starting with the 2nd pixel
         1 shows the image at original size
         2 shows each pixel 2x as large as it should be
@@ -1222,42 +1224,42 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
         self.zoomFac = limitZoomFac(zoomFac)
         self.currZoomWdg.set(self.zoomFac)
         #print "setZoomFac(zoomFac=%s; desCtrCnv=%s); oldZoomFac=%s, newZoomFac=%s" % (zoomFac, desCtrCnv, oldZoomFac, self.zoomFac)
-        
+
         if self.zoomFac != oldZoomFac or forceRedisplay:
             self._updImBounds(desCtrIJ=desCtrIJ, updZoom=False)
-        
+
     def showArr(self, arr, mask=None):
         """Specify an array to display.
-        If the arr is None then the display is cleared. 
+        If the arr is None then the display is cleared.
         The data is initially scaled from minimum to maximum.
-        
+
         Inputs:
         - arr: an array of data
         - mask: an optional bitmask (note that the meaning of the bitplanes
             must be specified when creating this object)
         """
         self.clear()
-        
+
         if arr is None:
             return
-        
+
         try:
             # convert data and check type
             dataArr = numpy.asarray(arr)
             if dataArr.dtype.name.startswith("complex"):
                 raise TypeError("cannot handle complex data")
-    
+
             # display new image
             oldShape = self.savedShape
             self.dataArr = dataArr
             self.savedShape = self.dataArr.shape
-            
+
             if (mask is not None) and self.stretchExcludeBits:
                 mask = numpy.asarray(mask)
                 if mask.shape != self.dataArr.shape:
                     raise RuntimeError("mask shape=%s != arr shape=%s" % \
                         (mask.shape, self.dataArr.shape))
-                    
+
                 # an extra array cast is used because "compressed" returns what *looks* like an array
                 # but is actually something else (I'm not sure exactly what)
                 unmaskedArr = numpy.array(
@@ -1272,16 +1274,16 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
             else:
                 unmaskedArr = numpy.array(self.dataArr.astype(float).flat)
             self.mask = mask
-            
+
             self.sortedData = unmaskedArr
             self.sortedData.sort()
-    
+
             # look for data leaks
             self._trackMem(self.dataArr, "dataArr")
             self._trackMem(self.sortedData, "sortedData")
-            
+
             self.doRangeMenu(redisplay=False)
-            
+
             if self.dataArr.shape != oldShape or not self.zoomFac:
                 # unknown zoom or new image is a different size than the old one; zoom to fit
                 self.begIJ = (0,0)
@@ -1293,7 +1295,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
                 self.redisplay()
         except MemoryError:
             self.showMsg("Insufficient Memory!", severity=RO.Constants.sevError)
-    
+
     def showMsg(self, msgStr, severity=RO.Constants.sevNormal):
         """Show a text message instead of an image.
         Typically used to display warnings or errors.
@@ -1311,23 +1313,23 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
         """
         #print "_dispFromScaled(%r); scale=%r; offset=%r" % (val, self.dispScale, self.dispOffset)
         return val * self.dispScale + self.dispOffset
-        
+
     def _setCnvSize(self, cnvShape):
         """Clear canvas and set new canvas size.
         """
         # delete all displayed content
         self.cnv.delete("all")
-        
+
         # set canvas size and scroll region
         self.cnv.configure(
             width = cnvShape[0],
             height = cnvShape[1],
             scrollregion = (0, 0, cnvShape[0], cnvShape[1]),
         )
-        
+
         # save the shape for use elsewhere
         self.cnvShape = cnvShape
-    
+
     def _trackMem(self, obj, objName):
         """Print a message when an object is deleted.
         """
@@ -1339,7 +1341,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
             del(self._memDebugDict[objID])
 
         self._memDebugDict[objID] = weakref.ref(obj, refGone)
-    
+
     def _updCurrVal(self, evt=None):
         """Show the value that the mouse pointer is over.
         If evt is None then clear the current value.
@@ -1356,14 +1358,14 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
             arrIJ = self.arrIJFromImPos(imPos)
         except IndexError:
             return
-        
+
         #print "evtxy=%s; cnvPos=%s; ds9pos=%s; arrIJ=%s" %  ((evt.x, evt.y), cnvPos, imPos, arrIJ)
-                
+
         val = self.dataArr[arrIJ[0], arrIJ[1]]
         self.currXPosWdg.set(imPos[0])
         self.currYPosWdg.set(imPos[1])
         self.currValWdg.set(val)
-    
+
     def _updFrameShape(self, evt=None):
         """Update frameShape and redisplay image.
         """
@@ -1373,18 +1375,18 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
         )
         #print "self._updFrameShape: self.frameShape=%s" % (self.frameShape,)
         self._updImBounds(updZoom=True)
-    
+
     def _updImBounds(self, desCtrIJ=None, updZoom=True):
         """Update self.begIJ, self.endIJ and (if desired) self.zoomFac
         based on self.zoomFac and self.frameShape.
-        
+
         Inputs:
         - updZoom:  if True, zoom is increased if necessary so that the image fills x or y
         """
         #print "self._updImBounds(desCtrIJ=%s, updZoom=%s)" % (desCtrIJ, updZoom)
         if self.dataArr is None:
             return
-    
+
         if not updZoom:
             if desCtrIJ is None:
                 desCtrIJ = numpy.divide(numpy.add(self.endIJ, self.begIJ), 2.0)
@@ -1401,35 +1403,35 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
             self.zoomFac = limitZoomFac(desZoomFac)
             self.currZoomWdg.set(self.zoomFac)
 #           print "self._updImBounds; sizeIJ=%s, frameShape=%s, actZoomIJ=%s, desZoomFac=%s, zoomFac=%s" % (sizeIJ, self.frameShape, actZoomIJ, desZoomFac, self.zoomFac)
-        
+
         self.redisplay()
 
     def cnvPosFromImPos(self, imPos):
         """Convert image pixel position to canvas position
-        
+
         The image pixel position convention is:
         - 0,0 is the lower left corner of the lower left image pixel
         - 0.5, 0.5 is the center of the lower left image pixel
-        
+
         The returned position is floating point and should be rounded
         before being applied to draw anything.
         """
         # offImPos = imPos with respect to LL corner of displayed subframe
         begImPos = self.begIJ[::-1]
         offImPos = [imPos[ii] - begImPos[ii] for ii in (0,1)]
-        
+
         # cnvLLPos is the canvas position relative to the
         # lower left corner of the displayed subframe (with borders removed)
         # and with +y increasing upwards
         cnvLLPos = [(imElt * self.zoomFac) - 0.5 for imElt in offImPos]
-        
+
         cnvPos = [
             cnvLLPos[0] + self.bdWidth,
             self.cnvShape[1] - 1 - self.bdWidth - cnvLLPos[1],
         ]
         #print "cnvPosFromImPos(imPos=%s) begImPos=%s, offImPos=%s, cnvLLPos=%s, cnvPos=%s" % (imPos, begImPos, offImPos, cnvLLPos, cnvPos)
         return cnvPos
-    
+
     def arrIJFromImPos(self, imPos, doCheck=True):
         """Convert an image position to an the corresponding array index.
         By default, check range and raise IndexError if out of range.
@@ -1440,30 +1442,30 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
                 and 0 <= arrIJ[1] < self.dataArr.shape[1]):
                 raise IndexError("%s out of range" % arrIJ)
         return arrIJ
-    
+
     def imPosFromArrIJ(self, arrIJ):
         """Convert a numpy array index to the corresponding image position.
         """
         return [float(arrIJ[ii]) for ii in (1, 0)]
-    
+
     def imPosFromCnvPos(self, cnvPos):
         """Convert canvas position to image pixel position.
-        
+
         See cnvPosFromImPos for details.
         """
         cnvLLPos = (
             cnvPos[0] - self.bdWidth,
             self.cnvShape[1] - 1 - self.bdWidth - cnvPos[1],
         )
-        
+
         offImPos = [(cnvLL + 0.5) / float(self.zoomFac) for cnvLL in cnvLLPos]
-        
+
         begImPos = self.begIJ[::-1]
         imPos = [offImPos[ii] + begImPos[ii] for ii in (0,1)]
         #print "imPosFroMCnvPos(cnvPos=%s) cnvLLPos=%s, offImPos=%s, begImPos=%s, imPos=%s" % (cnvPos, cnvLLPos, offImPos, begImPos, imPos)
-        
+
         return imPos
-    
+
     def cnvPosFromEvt(self, evt):
         """Computed canvas x,y from an event.
 
@@ -1481,12 +1483,12 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
         portion of the canvas. It matches the canvas position
         if and only if the upper-left corner of the canvas is visible.
         """
-        
+
         return (
             self.cnv.canvasx(visPos[0]),
             self.cnv.canvasy(visPos[1]),
         )
-    
+
     def evtOnCanvas(self, evt):
         """Return True if event is on the visible part of the image/canvas.
         """
@@ -1495,7 +1497,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
             and cnvPos[1] >= 0 \
             and cnvPos[0] < self.cnv.winfo_width() \
             and cnvPos[1] < self.cnv.winfo_height()
-    
+
 def limitZoomFac(desZoomFac):
     """Return zoom factor restricted to be in bounds"""
     return max(_MinZoomFac, min(_MaxZoomFac, desZoomFac))
@@ -1509,7 +1511,7 @@ if __name__ == "__main__":
     import RO.DS9
     import PythonTk
     import StatusBar
-    
+
     root = PythonTk.PythonTk()
     root.geometry("450x450")
 
@@ -1534,7 +1536,7 @@ if __name__ == "__main__":
 
     testFrame = GrayImageWdg(root, maskInfo = maskInfo)
     testFrame.grid(row=0, column=0, sticky="news")
-    
+
     statusBar = StatusBar.StatusBar(root)
     statusBar.grid(row=1, column=0, sticky="ew")
 
@@ -1542,10 +1544,10 @@ if __name__ == "__main__":
     root.grid_columnconfigure(0, weight=1)
 
     root.wait_visibility()
-    
+
     if not fileName:
         arrSize = 255
-        
+
         imArr = numpy.arange(arrSize**2, dtype=numpy.float64).reshape([arrSize, arrSize])
         # put marks at center
         ctr = (arrSize - 1) / 2
@@ -1564,10 +1566,10 @@ if __name__ == "__main__":
             mask = fitsIm[1].data
 
     testFrame.showArr(imArr, mask=mask)
-    
+
     #ds9 = RO.DS9.DS9Win()
     #ds9.showArray(imArr)
-    
+
     root.mainloop()
 
 

@@ -7,7 +7,14 @@
 
 <h2>Version history for the <a href="Overview.html">RO Python Package</a></h2>
 
-<h3>3.6.8+ 2015-11-05</h3>
+<h3>3.6.10 2017-01-26</h3>
+
+<ul>
+    <li>Update RO.Wdg.GrayImageDispWdg for compatibility with modern versions of Pillow: cast image array shape to a tuple when calling fromBuffer.
+    <li>Update .gitignore to hide .pyc files.
+</ul>
+
+<h3>3.6.9 2015-11-10</h3>
 
 <ul>
     <li>Changed remaining equality comparisons with None, True and False to use "is" and "is not" instead of "==" and "!=" in order to prevent future problems with arrays, and to modernize the code. (== None was handled in version 3.6.6).
