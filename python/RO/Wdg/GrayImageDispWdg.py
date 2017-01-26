@@ -1111,7 +1111,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
             # Image doesn't support 64 bit floats
             self.scaledIm = Image.frombuffer(
                 "F",
-                subFrameShapeIJ[::-1],
+                tuple(subFrameShapeIJ[::-1]),
                 self.scaledArr[self.begIJ[0]:self.endIJ[0], self.begIJ[1]:self.endIJ[1]].tostring(),
                 "raw",
                 "F",
@@ -1121,7 +1121,7 @@ class GrayImageWdg(Tkinter.Frame, RO.AddCallback.BaseMixin):
             if self.mask is not None:
                 self.scaledMask = Image.frombuffer(
                     "L",
-                    subFrameShapeIJ[::-1],
+                    tuple(subFrameShapeIJ[::-1]),
                     self.mask[self.begIJ[0]:self.endIJ[0], self.begIJ[1]:self.endIJ[1]].tostring(),
                     "raw",
                     "L",
