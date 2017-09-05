@@ -36,20 +36,20 @@ class _SocketProtocol(Protocol):
     """Twisted socket protocol for use with these socket classes
 
     Based on twisted LineReceiver protocol.
-    
+
     lineEndPattern: line-ending delimiters used by readLine, as a compiled regular expression.
         By default it uses any of \r\n, \r or \n
     """
     lineEndPattern = re.compile("\r\n|\r|\n")
-    
+
     def __init__(self):
         self._readCallback = nullCallback
         self._connectionLostCallback = nullCallback
         self.__buffer = ""
-    
+
     def roSetCallbacks(self, readCallback, connectionLostCallback):
         """Add Socket-specific callbacks
-        
+
         Inputs:
         - readCallback: a function that receives one argument: the read data
         - connectionLostCallback: a function that receives one argument: a Twisted error object
@@ -67,7 +67,7 @@ class _SocketProtocol(Protocol):
         b = self.__buffer
         self.__buffer = ""
         return b
-    
+
     def read(self, nChar):
         """Read at most nChar characters; if nChar=None then get all chars
         """
@@ -80,7 +80,7 @@ class _SocketProtocol(Protocol):
         if self.__buffer and self._readCallback:
             Timer(0, self._readCallback, self)
         return data
-        
+
     def readLine(self, default=None):
         """Read a line of data; return default if a line is not present
         """
@@ -95,7 +95,7 @@ class _SocketProtocol(Protocol):
         if self.__buffer and self._readCallback:
             Timer(0, self._readCallback, self)
         return res[0]
-        
+
     def dataReceived(self, data):
         """
         Protocol.dataReceived.
@@ -104,19 +104,19 @@ class _SocketProtocol(Protocol):
         """
         self.__buffer = self.__buffer + data
         self._readCallback(self)
-    
+
     def connectionMade(self):
         """The connection was successfully made
         """
         #print "%s.connectionMade(); self.factory._connectionMadeCallback=%s" % (self, self.factory._connectionMadeCallback)
         self.factory._connectionMadeCallback(self)
-    
+
     def connectionLost(self, reason):
         """The connection was lost (whether by request or error)
         """
         #print "%s.connectionLost(reason=%s)" % (self, reason)
         self._connectionLostCallback(reason)
-    
+
     def roAbort(self):
         """Discard callbacks and abort the connection
         """
@@ -125,16 +125,16 @@ class _SocketProtocol(Protocol):
         self._connectionLostCallback = nullCallback
         if self.transport:
             self.transport.abortConnection()
-    
+
     def __str__(self):
         return "%s" % (self.__class__.__name__,)
 
-    
+
 class _SocketProtocolFactory(Factory):
     """Twisted _SocketProtocol factory for use with these socket classes
     """
     protocol = _SocketProtocol
-    
+
     def __init__(self, connectionMadeCallback = nullCallback):
         self._connectionMadeCallback = connectionMadeCallback
 
@@ -150,6 +150,7 @@ class Socket(BaseSocket):
         stateCallback = nullCallback,
         timeLim = None,
         name = "",
+        lineTerminator = "\r\n",
     ):
         """Construct a Socket
 
@@ -162,6 +163,7 @@ class Socket(BaseSocket):
         - stateCallback a state callback function; see addStateCallback for details
         - timeLim   time limit to make connection (sec); no limit if None or 0
         - name      a string to identify this socket; strictly optional
+        - lineTerminator  specifies the terminator used in writeLine
         """
         #print "Socket(name=%r, endpoint=%r, protocol=%r, state=%r, readCallback=%r, stateCallback=%r)" % \
         #    (name, endpoint, protocol, state, readCallback, stateCallback)
@@ -172,6 +174,7 @@ class Socket(BaseSocket):
         self._protocol = None
         self._data = None
         self._connectTimer = Timer()
+        self._lineTerminator = lineTerminator
         BaseSocket.__init__(self,
             state = state,
             readCallback = readCallback,
@@ -222,7 +225,7 @@ class Socket(BaseSocket):
             self._setState(BaseSocket.Closed, reasonStrOrNone)
         else:
             self._setState(BaseSocket.Failed, reasonStrOrNone)
-    
+
     def _connectionMade(self, protocol):
         """Callback when connection made
         """
@@ -255,45 +258,49 @@ class Socket(BaseSocket):
         if self._protocol:
             return getattr(self._protocol.transport.getPeer(), "port", None)
         return None
-    
+
+    @property
+    def lineTerminator(self):
+        return self._lineTerminator
+
     def read(self, nChar=None):
         """Read data. Do not block.
-        
+
         Inputs:
         - nChar: maximum number of chars to return; if None then all available data is returned.
-        
+
         Raise RuntimeError if the socket is not connected.
         """
         if not self.isReady:
             raise RuntimeError("%s not connected" % (self,))
         return self._protocol.read(nChar)
-    
+
     def readLine(self, default=None):
         """Read one line of data, not including the end-of-line indicator. Do not block.
-        
+
         Any of \r\n, \r or \n are treated as end of line.
-        
+
         Inputs:
         - default   value to return if a full line is not available
                     (in which case no data is read)
-        
+
         Raise RuntimeError if the socket is not connected.
         """
         if not self.isReady:
             raise RuntimeError("%s not connected" % (self,))
         return self._protocol.readLine(default)
-    
+
     def write(self, data):
         """Write data to the socket (without blocking)
-        
+
         Safe to call as soon as you call connect, but of course
         no data is sent until the connection is made.
-        
+
         Raise UnicodeError if the data cannot be expressed as ascii.
         Raise RuntimeError if the socket is not connecting or connected.
         If an error occurs while sending the data, the socket is closed,
         the state is set to Failed and _reason is set.
-        
+
         An alternate technique (from Craig):
         turn } into \}; consider escaping null and all but
         the final \n in the same fashion
@@ -306,19 +313,19 @@ class Socket(BaseSocket):
         if not self.isReady:
             raise RuntimeError("%s.write(%r) failed: not connected" % (self, data))
         self._protocol.transport.write(str(data))
-    
+
     def writeLine(self, data):
         """Write a line of data terminated by standard newline
         """
         #print "%s.writeLine(data=%r)" % (self, data)
-        self.write(data + "\r\n")
-    
+        self.write(data + self.lineTerminator)
+
     def _connectTimeout(self):
         """Call if connection times out
         """
         if not self.isReady or self.isDone:
             self.close(isOK=False, reason="timeout")
-    
+
     def _doRead(self, sock):
         """Called when there is data to read
         """
@@ -347,9 +354,10 @@ class TCPSocket(Socket):
         stateCallback = None,
         timeLim = None,
         name = "",
+        lineTerminator = "\r\n",
     ):
         """Construct a TCPSocket
-    
+
         Inputs:
         - host      the IP address
         - port      the port
@@ -357,6 +365,7 @@ class TCPSocket(Socket):
         - stateCallback a state callback function; see addStateCallback for details
         - timeLim   time limit to make connection (sec); no limit if None or 0
         - name      a string to identify this socket; strictly optional
+        - lineTerminator  specifies the terminator used in Socket.writeLine
         """
         self._host = host # host
         self._port = port # requested port; if None then one is assigned
@@ -367,8 +376,9 @@ class TCPSocket(Socket):
             stateCallback = stateCallback,
             timeLim = timeLim,
             name = name,
+            lineTerminator = lineTerminator,
         )
-    
+
     @property
     def host(self):
         """Return the address, or None if not known
@@ -401,7 +411,7 @@ class Server(BaseServer):
         name = "",
     ):
         """Construct a socket server
-        
+
         Inputs:
         - endpoint: a Twisted endpoint, e.g. twisted.internet.endpoints.TCP4ClientEndpoint
         - connCallback: function to call when a client connects; it receives the following arguments:
@@ -426,7 +436,7 @@ class Server(BaseServer):
         self._numConn = 0
         Timer(0, self._startListening) # let device be fully constructed before listening
             # I'm not sure why this is needed, but it seems to help
-    
+
     def _startListening(self):
         """Start listening for new connections
         """
@@ -463,7 +473,7 @@ class Server(BaseServer):
                 callback = self._connectionLost,
                 errback = self._connectionLost,
             )
-    
+
     def _clearCallbacks(self):
         """Clear any callbacks added by this class. Called just after the socket is closed.
         """
@@ -475,7 +485,7 @@ class Server(BaseServer):
         if self._closeDeferred:
             self._closeDeferred.cancel()
             self._closeDeferred = None
-    
+
     def _connectionLost(self, reason):
         """Connection failed callback
         """
@@ -495,7 +505,7 @@ class Server(BaseServer):
             self._setState(BaseSocket.Closed, reasonStrOrNone)
         else:
             self._setState(BaseSocket.Failed, reasonStrOrNone)
-    
+
     def _newConnection(self, protocol):
         """A client has connected. Create a Socket and call the connection callback with it.
         """
@@ -528,7 +538,7 @@ class TCPServer(Server):
         name = "",
     ):
         """Construct a socket server
-        
+
         Inputs:
         - port: the port on which to listen for new connections
         - connCallback: function to call when a client connects; it receives the following arguments:
@@ -557,9 +567,9 @@ class TCPServer(Server):
 
 def setCallbacks(deferred, callback, errback):
     """Convenience function to add callbacks to a deferred
-    
+
     Also adds a final logging errback.
-    
+
     This exists due to an obscure error in the pattern I was using:
         self.deferred = ... (create the deferred somehow)
         self.deferred.addCallbacks(callfunc, errfunc)
@@ -577,7 +587,7 @@ if __name__ == "__main__":
     port = 2150
     binary = False
     clientSocket = None
-            
+
     if binary:
         testStrings = (
             "foo\nba",
@@ -595,7 +605,7 @@ if __name__ == "__main__":
             "string with carriage return: \r end",
             "quit",
         )
-    
+
     strIter = iter(testStrings)
 
     def runTest():
@@ -657,7 +667,7 @@ if __name__ == "__main__":
             readCallback = clientRead,
             name = "client",
         )
-    
+
     class EchoServer(TCPServer):
         def __init__(self, port, stateCallback):
             TCPServer.__init__(self,

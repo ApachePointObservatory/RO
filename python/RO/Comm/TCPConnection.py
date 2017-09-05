@@ -93,7 +93,7 @@ class TCPConnection(object):
     _DisconnectedStates = set((Disconnected, Failed))
     _DoneStates = set((Connected, Disconnected, Failed))
     _FailedStates = set((Failed,))
-    
+
     def __init__(self,
         host = None,
         port = 23,
@@ -103,6 +103,7 @@ class TCPConnection(object):
         authReadCallback = None,
         authReadLines = False,
         name = "",
+        lineTerminator = "\r\n",
     ):
         """Construct a TCPConnection
 
@@ -120,9 +121,11 @@ class TCPConnection(object):
             if auth succeeds, it must call self._authDone()
         - authReadLines: if True, the auth read callback receives entire lines
         - name: a string to identify this object; strictly optional
-        """        
+        - lineTerminator  specifies the terminator used in socket.writeLine
+        """
         self.host = host
         self.port = port
+        self.lineTerminator = lineTerminator
         self._readLines = bool(readLines)
         self._userReadCallbacks = []
         if readCallback:
@@ -137,7 +140,7 @@ class TCPConnection(object):
         self._state = self.Disconnected
         self._reason = ""
         self._currReadCallbacks = []
-        
+
         # translation table from TCPSocket states to local states
         # note that the translation of Connected will depend
         # on whether there is authorization; this initial setup
@@ -154,12 +157,12 @@ class TCPConnection(object):
             TCPSocket.Closed: self.Disconnected,
             TCPSocket.Failed: self.Failed,
         }
-        
+
         self._sock = NullTCPSocket(name=name, host=host, port=port)
-        
+
     def addReadCallback(self, readCallback):
         """Add a read function, to be called whenever data is read.
-        
+
         Inputs:
         - readCallback: function to call whenever a line of data is read;
           it is sent two arguments:
@@ -168,10 +171,10 @@ class TCPConnection(object):
         """
         assert callable(readCallback), "read callback not callable"
         self._userReadCallbacks.append(readCallback)
-    
+
     def addStateCallback(self, stateCallback, callNow=False):
         """Add a state function to call whenever the state or reason changes.
-        
+
         Inputs:
         - stateCallback: the function; it is sent one argument: this TCPConnection
         - callNow: call the connection function immediately?
@@ -192,7 +195,7 @@ class TCPConnection(object):
         - host: IP address (name or numeric) of host; if omitted, the default is used
         - port: port number; if omitted, the default is used
         - timeLim: time limit (sec); if None then no time limit
-        
+
         Raise RuntimeError if:
         - already connecting or connected
         - host omitted and self.host not already set
@@ -204,7 +207,7 @@ class TCPConnection(object):
 
         self.host = host or self.host
         self.port = port or self.port
-        
+
         self._sock.setStateCallback() # remove socket state callback
         if not self._sock.isDone:
             self._sock.close()
@@ -215,25 +218,26 @@ class TCPConnection(object):
             stateCallback = self._sockStateCallback,
             timeLim = timeLim,
             name = self._name,
+            lineTerminator = self.lineTerminator,
         )
-        
+
         if self._authReadCallback:
             self._localSocketStateDict[TCPSocket.Connected] = self.Authorizing
             self._setRead(True)
         else:
             self._localSocketStateDict[TCPSocket.Connected] = self.Connected
             self._setRead(False)
-    
+
     def disconnect(self, isOK=True, reason=None):
         """Close the connection.
 
         Called disconnect instead of close (the usual counterpoint in the socket library)
         because you can reconnect at any time by calling connect.
-        
+
         Inputs:
         - isOK: if True, final state is Disconnected, else Failed
         - reason: a string explaining why, or None to leave unchanged;
-            please specify a reason if isOK is false!   
+            please specify a reason if isOK is false!
         """
         self._sock.close(isOK=isOK, reason=reason)
 
@@ -250,13 +254,13 @@ class TCPConnection(object):
         """Returns the current state as a string.
         """
         return self._state
-    
+
     @property
     def isConnected(self):
         """Return True if connected, False otherwise.
         """
         return self._state in self._ConnectedStates
-    
+
     @property
     def isDisconnected(self):
         """Return True if fully disconnected, False otherwise.
@@ -268,13 +272,13 @@ class TCPConnection(object):
         """Return True if the last transition is finished, i.e. connected, disconnected or failed.
         """
         return self._state in self._DoneStates
-    
+
     @property
     def didFail(self):
         """Return True if the connection failed
         """
         return self._state in self._FailedStates
-    
+
     @property
     def mayConnect(self):
         """Return True if one may call connect, false otherwise"""
@@ -301,13 +305,13 @@ class TCPConnection(object):
             return True
         except ValueError:
             return False
-    
+
     def write(self, astr):
         """Write data to the socket. Does not block.
-        
+
         Safe to call as soon as you call connect, but of course
         no data is sent until the connection is made.
-        
+
         Raises UnicodeError if the data cannot be expressed as ascii.
         Raises RuntimeError if the socket is not connecting or connected.
         If an error occurs while sending the data, the socket is closed,
@@ -324,17 +328,17 @@ class TCPConnection(object):
         the state is set to Failed and _reason is set.
         """
         self._sock.writeLine(astr)
-    
+
     def _authDone(self, msg=""):
         """Call from your authorization callback function
         when authorization succeeds.
         Do not call unless you specified an authorization callback function.
-        
+
         If authorization fails, call self.disconnect(False, error msg) instead.
         """
         self._setRead(forAuth=False)
         self._setState(self.Connected, msg)
-    
+
     def _setRead(self, forAuth=False):
         """Set up reads.
         """
@@ -361,15 +365,15 @@ class TCPConnection(object):
         self._state = newState
         if reason is not None:
             self._reason = str(reason)
-        
+
         # if the state or reason has changed, call state callbacks
         if oldStateReason != (self._state, self._reason):
             for stateCallback in self._stateCallbacks:
                 safeCall2("%s._setState" % (self,), stateCallback, self)
-    
+
     def _sockReadCallback(self, sock):
         """Read callback for the socket in binary mode (not line mode).
-                
+
         When data is received, read it and issues all callbacks.
         """
         dataRead = sock.read()
@@ -379,7 +383,7 @@ class TCPConnection(object):
 
     def _sockReadLineCallback(self, sock):
         """Read callback for the socket in line mode.
-                
+
         Whenever a line is received, issues all callbacks, first stripping the line terminator.
         """
         dataRead = sock.readLine()
@@ -389,7 +393,7 @@ class TCPConnection(object):
         #print "%s._sockReadLineCallback(sock=%r) called with data %r" % (self, sock, dataRead)
         for subr in self._currReadCallbacks:
             subr(sock, dataRead)
-    
+
     def _sockStateCallback(self, sock):
         sockState, reason = sock.fullState
         try:
@@ -416,13 +420,13 @@ if __name__ == "__main__":
     root.withdraw()
     from RO.Comm.Generic import TCPServer
     from RO.TkUtil import Timer
-    
+
     clientConn = None
     echoServer = None
     didConnect = False
-    
+
     port = 2150
-            
+
     testStrings = (
         "string with 3 nulls: 1 \0 2 \0 3 \0 end",
         "string with 3 quoted nulls: 1 \\0 2 \\0 3 \\0 end",
@@ -433,7 +437,7 @@ if __name__ == "__main__":
         "string with carriage return: \r end",
         "quit",
     )
-    
+
     strIter = iter(testStrings)
 
     def runTest():
@@ -452,7 +456,7 @@ if __name__ == "__main__":
         if outStr and outStr.strip() == "quit":
             print("*** Data exhausted; disconnecting client connection")
             clientConn.disconnect()
-            
+
 
     def clientState(conn):
         global didConnect, echoServer
@@ -492,7 +496,7 @@ if __name__ == "__main__":
             name = "client",
         )
         clientConn.connect()
-    
+
     class EchoServer(TCPServer):
         def __init__(self, port, stateCallback):
             TCPServer.__init__(self,
@@ -509,5 +513,5 @@ if __name__ == "__main__":
 
     print("*** Starting echo server on port %s" % (port,))
     echoServer = EchoServer(port = port, stateCallback = serverState)
-    
+
     root.mainloop()
