@@ -174,12 +174,12 @@ class Socket(BaseSocket):
         self._protocol = None
         self._data = None
         self._connectTimer = Timer()
-        self._lineTerminator = lineTerminator
         BaseSocket.__init__(self,
             state = state,
             readCallback = readCallback,
             stateCallback = stateCallback,
-            name = name
+            name = name,
+            lineTerminator = lineTerminator
         )
         if protocol is not None:
             self._connectionMade(protocol)
@@ -258,10 +258,6 @@ class Socket(BaseSocket):
         if self._protocol:
             return getattr(self._protocol.transport.getPeer(), "port", None)
         return None
-
-    @property
-    def lineTerminator(self):
-        return self._lineTerminator
 
     def read(self, nChar=None):
         """Read data. Do not block.

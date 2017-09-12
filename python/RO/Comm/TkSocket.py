@@ -108,7 +108,7 @@ class _TkSocketWrapper(object):
         name = "",
     ):
         """Create a _TkSocketWrapper
-    
+
         Inputs:
         - tkSock    the tk socket connection; if not None then sockArgs is ignored
         - sockArgs  argument list for tk socket; ignored if tkSock not None
@@ -140,7 +140,7 @@ class _TkSocketWrapper(object):
                 '-encoding', 'binary',
                 '-translation', 'binary',
             )
-            
+
             #print "name=%s, configArgs=%s" % (name, configArgs)
             self._tk.call('fconfigure', self._tkSocket, *configArgs)
         except Tkinter.TclError as e:
@@ -149,7 +149,7 @@ class _TkSocketWrapper(object):
     @property
     def isOKReason(self):
         """Return isOK, reason
-        
+
         Returns:
         - True, "" if OK
         - False, errStr if an error
@@ -175,7 +175,7 @@ class _TkSocketWrapper(object):
                 pass
             self._tkSocket = None
         self._tk = None
-    
+
     def clearCallbacks(self):
         """Clear any callbacks added by this class.
         Called just after the socket is closed.
@@ -183,7 +183,7 @@ class _TkSocketWrapper(object):
         for tclFunc in self._callbackDict.itervalues():
             tclFunc.deregister()
         self._callbackDict = dict()
-    
+
     def setCallback(self, callFunc=None, doWrite=False):
         """Set, replace or clear the read or write callback.
 
@@ -196,14 +196,14 @@ class _TkSocketWrapper(object):
             typeStr = 'writable'
         else:
             typeStr = 'readable'
-        
+
         if callFunc:
             tclFunc = RO.TkUtil.TclFunc(callFunc)
             tkFuncName = tclFunc.tclFuncName
         else:
             tclFunc = None
             tkFuncName = ""
-        
+
         try:
             self._tk.call('fileevent', self._tkSocket, typeStr, tkFuncName)
         except Tkinter.TclError as e:
@@ -219,20 +219,20 @@ class _TkSocketWrapper(object):
         # Save a reference to the new tclFunc,, if any
         if tclFunc:
             self._callbackDict[typeStr] = tclFunc
-    
+
     def read(self):
         """Read data from the socket. Do not block.
         """
-        return self._tk.call('read', self._tkSocket)        
-    
+        return self._tk.call('read', self._tkSocket)
+
     def write(self, data):
         """Write data to the socket. Do not block.
-        
+
         The data is queued if the socket is not yet connected.
         The behavior is undefined if the socket has errors or has disconnected.
-        
+
         Raises UnicodeError if the data cannot be expressed as ascii.
-        
+
         An alternate technique (from Craig):
         turn } into \}; consider escaping null and all but
         the final \n in the same fashion
@@ -267,9 +267,10 @@ class TCPSocket(BaseSocket):
         tkSock = None,
         timeLim = None,
         name = "",
+        lineTerminator = "\r\n",
     ):
         """Construct a TCPSocket
-    
+
         Inputs:
         - host      IP address as dotted name or dotted numbers
         - port      IP port
@@ -287,6 +288,7 @@ class TCPSocket(BaseSocket):
             readCallback = readCallback,
             stateCallback = stateCallback,
             name = name,
+            lineTerminator=lineTerminator,
         )
         if tkSock is None:
             sockArgs = ('-async', host, port)
@@ -311,17 +313,17 @@ class TCPSocket(BaseSocket):
     @property
     def host(self):
         return self._host
-    
+
     @property
     def port(self):
         return self._port
 
     def read(self, nChar=None):
         """Read data. Do not block.
-        
+
         Inputs:
         - nChar: maximum number of chars to return; if None then all available data is returned.
-        
+
         Raise RuntimeError if the socket is not connected.
         """
         if nChar is None:
@@ -336,13 +338,13 @@ class TCPSocket(BaseSocket):
 
     def readLine(self, default=None):
         """Read one line of data, not including the end-of-line indicator. Do not block.
-        
+
         Any of \r\n, \r or \n are treated as end of line.
-        
+
         Inputs:
         - default   value to return if a full line is not available
                     (in which case no data is read)
-        
+
         Raise RuntimeError if the socket is not connected.
         """
         res = self.lineEndPattern.split(self.__buffer, 1)
@@ -356,15 +358,15 @@ class TCPSocket(BaseSocket):
         if self.__buffer and self._readCallback:
             RO.TkUtil.Timer(0.000001, self._readCallback, self)
         return res[0]
-    
+
     def write(self, data):
         """Write data. Do not block.
-        
+
         No end-of-line translation is performed.
-        
+
         Safe to call as soon as you call connect, but of course
         no data is sent until the connection is made.
-        
+
         Raises UnicodeError if the data cannot be expressed as ascii.
         Raises RuntimeError if the socket is not connecting or connected.
         If an error occurs while sending the data, the socket is closed,
@@ -380,8 +382,8 @@ class TCPSocket(BaseSocket):
         """Write a line of data terminated by standard newline (\r\n). Do not block.
         """
         #print "%s.writeLine(%r)" % (self, data)
-        self.write(data + "\r\n")
-    
+        self.write(data + self.lineTerminator)
+
     def _assertConn(self):
         """Check connection; close and raise RuntimeError if not OK.
         """
@@ -396,7 +398,7 @@ class TCPSocket(BaseSocket):
             self._setState(self.Closed)
         else:
             self._setState(self.Failed)
-    
+
     def _checkSocket(self):
         """Check socket for errors.
 
@@ -410,33 +412,33 @@ class TCPSocket(BaseSocket):
             self.close(isOK=isOK, reason=errStr)
             return False
         return True
-    
+
     def _setState(self, *args, **kwargs):
         BaseSocket._setState(self, *args, **kwargs)
         if self.isReady or self.isDone:
             self._connectTimer.cancel()
-    
+
     def _clearCallbacks(self):
         """Clear any callbacks added by this class.
         Called just after the socket is closed.
         """
         BaseSocket._clearCallbacks(self)
         self._tkSocketWrapper.clearCallbacks()
-    
+
     def _connectTimeout(self):
         """Call if connection timed out
         """
         self.close(isOK=False, reason="timeout")
-    
+
     def _doConnect(self):
         """Called when connection made.
         """
         # cancel write handler; it has done its job
         self._tkSocketWrapper.setCallback(callFunc=None, doWrite=True)
-        
+
         if self._checkSocket():
             self._setState(self.Connected)
-    
+
     def _doRead(self, *args):
         newData = self._tkSocketWrapper.read()
         self.__buffer = newData if not self.__buffer else self.__buffer + newData
@@ -449,7 +451,7 @@ class TCPSocket(BaseSocket):
 
 class TCPServer(BaseServer):
     """A tcp socket server
-    
+
     Inputs:
     - connCallback  function to call when a client connects; it recieves the following arguments:
                 - sock, a TCPSocket
@@ -463,7 +465,7 @@ class TCPServer(BaseServer):
         name = "",
     ):
         """Construct a socket server
-        
+
         Inputs:
         - connCallback: function to call when a client connects; it receives the following arguments:
                     - sock, a Socket
@@ -475,7 +477,7 @@ class TCPServer(BaseServer):
         - sockStateCallback: function for each server socket to call when it receives data
             See BaseSocket.addStateCallback for details
         - name: a string to identify this socket; strictly optional
-        
+
         Warning: stateCallback does not get all state changes reliably.
         It gets Listening as soon as the server is created (even though it is not listening yet)
         and the only other notice is closure when close is called.
@@ -520,7 +522,7 @@ class TCPServer(BaseServer):
         self._tkSocketWrapper.clearCallbacks()
         self._tkNewConn.deregister()
         self._tkNewConn = None
-    
+
     def _newConnection(self, tkSock, clientAddr, clientPort):
         """A client has connected. Create a TCPSocket and call the connection callback with it.
         """
@@ -532,7 +534,7 @@ class TCPServer(BaseServer):
             stateCallback = self._sockStateCallback,
             name = self.name,
         )
-        
+
         try:
             self._connCallback(newSocket)
         except Exception as e:
@@ -550,11 +552,11 @@ if __name__ == "__main__":
     root = Tkinter.Tk()
     root.withdraw()
     from RO.TkUtil import Timer
-    
+
     port = 2150
     binary = True
     clientSocket = None
-            
+
     if binary:
         testStrings = (
             "foo\nba",
@@ -572,7 +574,7 @@ if __name__ == "__main__":
             "string with carriage return: \r end",
             "quit",
         )
-    
+
     strIter = iter(testStrings)
 
     def runTest():
@@ -634,7 +636,7 @@ if __name__ == "__main__":
             readCallback = clientRead,
             name = "client",
         )
-    
+
     class EchoServer(TCPServer):
         def __init__(self, port, stateCallback):
             TCPServer.__init__(self,
@@ -651,5 +653,5 @@ if __name__ == "__main__":
 
     print("*** Starting echo server on port %s; binary=%s" % (port, binary))
     echoServer = EchoServer(port = port, stateCallback = serverState)
-    
+
     root.mainloop()

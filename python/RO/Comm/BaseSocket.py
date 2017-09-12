@@ -28,7 +28,7 @@ def nullCallback(*args, **kwargs):
 
 class Base(object):
     """Base class for BaseSocket and BaseServer
-    
+
     Subclasses may wish to override class variables:
     - _AllStates: a set of states (strings)
     - _DoneStates: a set of states indicating the object is done (e.g. Closed or Failed)
@@ -40,7 +40,7 @@ class Base(object):
         name = "",
     ):
         """Construct a Base
-        
+
         @param[in] state  initial state
         @param[in] stateCallback  function to call when socket state changes; it receives one argument: this socket;
             if None then no callback
@@ -61,31 +61,31 @@ class Base(object):
         - reason: the reason for the state ("" if none)
         """
         return (self._state, self._reason)
-    
+
     @property
     def state(self):
         """Returns the current state as a string.
         """
         return self._state
-    
+
     @property
     def isDone(self):
         """Return True if object is fully closed (due to request or failure)
         """
         return self._state in self._DoneStates
-    
+
     @property
     def isReady(self):
         """Return True if object is ready, e.g. socket is connected or server is listening
         """
         return self._state in self._ReadyStates
-    
+
     @property
     def didFail(self):
         """Return True if object failed, e.g. connection failed
         """
         return self._state in self._FailedStates
-    
+
     def addStateCallback(self, callFunc):
         """Add a state callback function; it receives one argument: this socket
         """
@@ -100,7 +100,7 @@ class Base(object):
 
         Return:
         - True if successful, raise error or return False otherwise.
-        
+
         If doRaise true and callback not found then raise ValueError.
         """
         try:
@@ -110,12 +110,12 @@ class Base(object):
             if doRaise:
                 raise ValueError("Callback %r not found" % callFunc)
             return False
-    
+
     def setStateCallback(self, callFunc=None):
         """Set the state callback function (replacing all current ones).
-        
+
         Deprecated; please use addStateCallback instead.
-        
+
         Inputs:
         - callFunc: the callback function, or None if none wanted
                     The function is sent one argument: this Socket
@@ -124,7 +124,7 @@ class Base(object):
             self._stateCallbackList = [callFunc]
         else:
             self._stateCallbackList = []
-    
+
     def setName(self, newName):
         """Set socket name
         """
@@ -137,7 +137,7 @@ class Base(object):
 
     def _setState(self, newState, reason=None):
         """Change the state.
-        
+
         Inputs:
         - newState: the new state
         - reason: an explanation (None to leave alone)
@@ -149,7 +149,7 @@ class Base(object):
         self._state = newState
         if reason is not None:
             self._reason = str(reason)
-        
+
         for stateCallback in self._stateCallbackList:
             try:
                 stateCallback(self)
@@ -182,7 +182,7 @@ class BaseSocket(Base):
     Failing = "Failing"
     Closed = "Closed"
     Failed = "Failed"
-    
+
     _AllStates = set((
         Connecting,
         Connected,
@@ -194,32 +194,38 @@ class BaseSocket(Base):
     _DoneStates = set((Closed, Failed))
     _ReadyStates = set((Connected,))
     _FailedStates = set((Failed,))
-        
+
     StateStrMaxLen = 0
     for _stateStr in _AllStates:
         StateStrMaxLen = max(StateStrMaxLen, len(_stateStr))
     del(_stateStr)
-    
+
     def __init__(self,
         state = Connected,
         readCallback = None,
         stateCallback = None,
         name = "",
+        lineTerminator = "\r\n",
     ):
         """Construct a BaseSocket
-        
+
         Arguments:
         - state: initial state
         - readCallback: function to call when data is read; it receives one argument: this socket
         - stateCallback: function to call when socket state changes; it receives one argument: this socket
         - name: a string to identify this socket; strictly optional
         """
+        self._lineTerminator = lineTerminator
         self._readCallback = readCallback or nullCallback
         Base.__init__(self,
             state = state,
             stateCallback = stateCallback,
             name = name,
         )
+
+    @property
+    def lineTerminator(self):
+        return self._lineTerminator
 
     def read(self, nChar=None):
         """Return up to nChar characters; if nChar is None then return all available characters.
@@ -232,33 +238,33 @@ class BaseSocket(Base):
         Inputs:
         - default   value to return if a full line is not available
                     (in which case no data is read)
-        
+
         Raise RuntimeError if the socket is not connected.
         """
         raise NotImplementedError()
-    
+
     def setReadCallback(self, callFunc=None):
         """Set the read callback function (replacing the current one).
-        
+
         Inputs:
         - callFunc: the callback function, or nullCallback if none wanted.
                     The function is sent one argument: this Socket
         """
         self._readCallback = callFunc or nullCallback
-    
+
     def write(self, data):
         """Write data to the socket. Does not block.
-        
+
         Safe to call as soon as you call connect, but of course
         no data is sent until the connection is made.
-        
+
         Raises UnicodeError if the data cannot be expressed as ascii.
         Raises RuntimeError if the socket is not connecting or connected.
         If an error occurs while sending the data, the socket is closed,
         the state is set to Failed and _reason is set.
         """
         raise NotImplementedError()
-    
+
     def writeLine(self, data):
         """Write a line of data terminated by standard newline
         (which for the net is \r\n, but the socket's auto newline
@@ -268,9 +274,9 @@ class BaseSocket(Base):
 
     def close(self, isOK=True, reason=None):
         """Start closing the socket.
-        
+
         Does nothing if the socket is already closed or failed.
-        
+
         Inputs:
         - isOK: if True, mark state as Closed, else Failed
         - reason: a string explaining why, or None to leave unchanged;
@@ -288,7 +294,7 @@ class BaseSocket(Base):
             self._setState(self.Failing, reason)
 
         self._basicClose()
-    
+
     def _basicClose(self):
         """Start closing the socket.
         """
@@ -310,7 +316,7 @@ class BaseServer(Base):
     Failing = "Failing"
     Closed = "Closed"
     Failed = "Failed"
-    
+
     _AllStates = set((
         Starting,
         Listening,
@@ -332,7 +338,7 @@ class BaseServer(Base):
         name = "",
     ):
         """Construct a socket server
-        
+
         Inputs:
         - connCallback: function to call when a client connects; it receives the following arguments:
                     - sock, a BaseSocket
@@ -352,18 +358,18 @@ class BaseServer(Base):
             state = state,
             stateCallback = stateCallback,
             name = name,
-        )        
-    
+        )
+
     def close(self, isOK=True, reason=None):
         """Start closing the server.
-        
+
         Does nothing if the socket is already closed or failed.
-        
+
         Inputs:
         - isOK: if True, mark state as Closed, else Failed
         - reason: a string explaining why, or None to leave unchanged;
             please specify if isOK is false.
-            
+
         The twisted version returns a Deferred if the socket is not already closed, else None
         """
         # print("%s.close(isOK=%r, reason=%r); state=%s" % (self, isOK, reason, self.state))
@@ -381,7 +387,7 @@ class BaseServer(Base):
         """Start closing the socket.
         """
         raise NotImplementedError()
-    
+
     def _clearCallbacks(self):
         """Clear any callbacks added by this class.
         Called just after the socket is closed.
@@ -406,7 +412,7 @@ class NullSocket(BaseSocket):
 
     def read(self, *args, **kargs):
         raise RuntimeError("Cannot read from null socket")
-        
+
     def readLine(self, *args, **kargs):
         raise RuntimeError("Cannot readLine from null socket")
 

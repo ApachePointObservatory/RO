@@ -66,7 +66,7 @@ _Framework = None
 
 def setFramework(framework):
     """Set which framework you wish to use.
-    
+
     WARNING: you must set up your event loop and call setFramework
     before using any of the objects in this module.
     See the module doc string for more information and examples.
@@ -105,7 +105,7 @@ class WaitForTCPServer(object):
     """
     def __init__(self, host, port, callFunc, timeLim=5, pollInterval=0.2):
         """Start waiting for a TCP server to accept a connection
-        
+
         @param[in] host  host address of server
         @param[in] port  port number of server
         @param[in] callFunc  function to call when server ready or wait times out;
@@ -113,7 +113,7 @@ class WaitForTCPServer(object):
         @param[in] timeLim  approximate maximum wait time (sec);
             the actual wait time may be up to pollInterval longer
         @param[in] pollInterval  interval at which to poll (sec)
-        
+
         Useful attributes:
         - isDone: the wait is over
         - didFail: the wait failed
@@ -129,12 +129,12 @@ class WaitForTCPServer(object):
         self._startTime = time.time()
         self._tryConnection()
         self._timeoutTimer = Timer(timeLim, self._finish)
-    
+
     def _tryConnection(self):
         """Attempt a connection
         """
         self._sock = TCPSocket(host=self.host, port=self.port, stateCallback=self._sockStateCallback)
-    
+
     def _sockStateCallback(self, sock):
         """Socket state callback
         """
@@ -144,7 +144,7 @@ class WaitForTCPServer(object):
         elif sock.isDone:
             # connection failed; try again
             self._pollTimer.start(self._pollInterval, self._tryConnection)
-        
+
     def _finish(self):
         """Set _isReady and call the callback function
         """
@@ -171,9 +171,9 @@ if __name__ == "__main__":
     root.withdraw()
     setFramework("tk") # since it is almost always installed
     clientSocket = None
-    
+
     port = 2150
-            
+
     testStrings = (
         "string with 3 nulls: 1 \0 2 \0 3 \0 end",
         "string with 3 quoted nulls: 1 \\0 2 \\0 3 \\0 end",
@@ -182,7 +182,7 @@ if __name__ == "__main__":
         "string with carriage return: \r end",
         "quit",
     )
-    
+
     strIter = iter(testStrings)
 
     def runTest():
@@ -225,7 +225,7 @@ if __name__ == "__main__":
         if server.isReady:
             print("*** Echo server ready; now starting up a client")
             startClient()
-    
+
     def startClient():
         global clientSocket
         clientSocket = TCPSocket(
@@ -235,7 +235,7 @@ if __name__ == "__main__":
             readCallback = clientRead,
             name = "client",
         )
-    
+
     class EchoServer(TCPServer):
         def __init__(self, port, stateCallback):
             TCPServer.__init__(self,
@@ -251,5 +251,5 @@ if __name__ == "__main__":
 
     print("*** Starting echo server on port", port)
     echoServer = EchoServer(port = port, stateCallback = serverState)
-    
+
     root.mainloop()
