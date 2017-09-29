@@ -41,7 +41,7 @@ from . import Checkbutton
 from . import InputContFrame
 from . import Label
 
-class OptionButtons(InputContFrame.InputContFrame):
+class OptionButtons(InputContFrame):
     def __init__ (self,
         master,
         name,
@@ -90,7 +90,7 @@ class OptionButtons(InputContFrame.InputContFrame):
             The default format is RO.InputCont.BasicFmt.
         **kargs: keyword arguments for Frame
         """
-        InputContFrame.InputContFrame.__init__(self, master, **kargs)
+        InputContFrame.__init__(self, master, **kargs)
 
         # optional header
         if headerText:
@@ -102,7 +102,7 @@ class OptionButtons(InputContFrame.InputContFrame):
                 text = headerText,
                 helpURL = helpURL,
             ).pack(side="top", anchor="w")
-        
+
         if formatFunc is None:
             formatFunc = RO.InputCont.BasicFmt()
 
@@ -115,7 +115,7 @@ class OptionButtons(InputContFrame.InputContFrame):
             # name, label, default value, helpURL, helpText
             # and the last two items are optional
             nameStr, labelStr, defVal = optionData[0:3]
-            
+
             def listGet(aList, ind, defVal=None):
                 try:
                     return aList[ind]
@@ -135,7 +135,7 @@ class OptionButtons(InputContFrame.InputContFrame):
             wdg.pack(side="top", anchor="w")
             wdgList.append(wdg)
             wdgNames.append(nameStr)
-        
+
         # create input container
         self.inputCont = (
             RO.InputCont.BoolNegCont (
@@ -147,7 +147,7 @@ class OptionButtons(InputContFrame.InputContFrame):
                 formatFunc = formatFunc,
             )
         )
-    
+
         # optional extra buttons
         self.optWdgList = []
 
@@ -161,7 +161,7 @@ class OptionButtons(InputContFrame.InputContFrame):
                 helpText = "Restore defaults",
             )
             self.optWdgList.append(defButtonWdg)
-        
+
         # optional "clear" button
         if clearButton is True:
             clearButton = "Clear"
@@ -176,14 +176,14 @@ class OptionButtons(InputContFrame.InputContFrame):
         # pack optional buttons, if any
         for wdg in self.optWdgList:
             wdg.pack(side="top", anchor="nw")
-    
+
 if __name__ == "__main__":
     from . import PythonTk
     root = PythonTk.PythonTk()
 
     def doPrint():
         print("getString() = %r" % (optFrame.getString(),))
-    
+
     def setEnable(wdg=None):
         optFrame.setEnable(enableButton.getBool())
 

@@ -40,7 +40,7 @@ import RO.Constants
 import RO.MathUtil
 import RO.Comm.HTTPGet as HTTPGet
 import RO.Wdg
-from . import CtxMenu
+
 
 _StatusInterval = 200 # ms between status checks
 
@@ -51,11 +51,11 @@ class HTTPCallback(object):
         object.__init__(self)
         self.callFunc = callFunc
         self.httpGet = httpGet
-    
+
     def __call__(self):
         if self.httpGet is None:
             return
-        
+
         if self.callFunc:
             try:
                 self.callFunc(self.httpGet)
@@ -63,7 +63,7 @@ class HTTPCallback(object):
                 errMsg = "httpGet callback %r failed: %s" % (self.callFunc, e)
                 sys.stderr.write(errMsg + "\n")
                 traceback.print_exc(file=sys.stderr)
-        
+
         if self.httpGet.isDone:
             self.clear()
 
@@ -73,12 +73,12 @@ class HTTPCallback(object):
             print("HTTPCallback(%s) clear" % (self.httpGet,))
         self.httpGet = None
         self.callFunc = None
-    
+
 
 class HTTPGetWdg(tkinter.Frame):
     """A widget to initiate file get via http, to display the status
     of the transfer and to allow users to abort the transfer.
-    
+
     Inputs:
     - master: master widget
     - maxTransfers: maximum number of simultaneous transfers; additional transfers are queued
@@ -98,14 +98,14 @@ class HTTPGetWdg(tkinter.Frame):
     **kargs):
         tkinter.Frame.__init__(self, master = master, **kargs)
         self._memDebugDict = {}
-        
+
         self.maxLines = maxLines
         self.maxTransfers = maxTransfers
         self.selHTTPGet = None # selected getter, for displaying details; None if none
-        
+
         self.dispList = []  # list of displayed httpGets
         self.getQueue = []  # list of unfinished (httpGet, stateLabel) tuples
-        
+
         self.yscroll = tkinter.Scrollbar (
             master = self,
             orient = "vertical",
@@ -127,14 +127,14 @@ class HTTPGetWdg(tkinter.Frame):
                 wdg = self.text,
                 helpURL = helpURL + "#LogDisplay",
             )
-        
+
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
-        
+
         detFrame = tkinter.Frame(self)
-            
+
         gr = RO.Wdg.Gridder(detFrame, sticky="ew")
-        
+
         self.fromWdg = RO.Wdg.StrEntry(
             master = detFrame,
             readOnly = True,
@@ -150,7 +150,7 @@ class HTTPGetWdg(tkinter.Frame):
             borderwidth = 0,
         )
         gr.gridWdg("To", self.toWdg, colSpan=2)
-        
+
         self.stateWdg = RO.Wdg.StrEntry(
             master = detFrame,
             readOnly = True,
@@ -164,23 +164,23 @@ class HTTPGetWdg(tkinter.Frame):
             helpURL = helpURL and helpURL + "#Abort",
         )
         gr.gridWdg("State", self.stateWdg, colSpan=2)
-        
+
         self.abortWdg.grid(row=1, column=2, rowspan=2, sticky="s")
-        
+
         detFrame.columnconfigure(1, weight=1)
-        
+
         detFrame.grid(row=1, column=0, columnspan=2, sticky="ew")
-        
+
         self.text.bind("<ButtonPress-1>", self._selectEvt)
         self.text.bind("<B1-Motion>", self._selectEvt)
-        
+
         self._startNew()
 
     def getFile(self, *args, **kargs):
         """Get a file
-    
+
         Inputs: the same as for RO.Comm.HTTPGet
-            
+
         Returns an RO.Comm.HTTPGet object
         """
         httpGet = HTTPGet.HTTPGet(*args, **kargs)
@@ -206,7 +206,7 @@ class HTTPGetWdg(tkinter.Frame):
             RO.Alg.GenericCallback(self._stateCallback, stateLabel),
             callNow = True,
         )
-        
+
         # purge old display items if necessary
         ind = 0
         selInd = None
@@ -219,7 +219,7 @@ class HTTPGetWdg(tkinter.Frame):
                 ind += 1
                 continue
             #print "HTTPGetWdg.getFile: purging entry at ind=%s" % (ind,)
-            
+
             if (not doAutoSelect) and (self.selHTTPGet == self.dispList[ind]):
                 selInd = ind
                 #print "HTTPGetWdg.getFile: purging currently selected file; saving index"
@@ -235,18 +235,18 @@ class HTTPGetWdg(tkinter.Frame):
             self.text.see("end")
         elif selInd is not None:
             self._selectInd(selInd)
-        
+
         #print "dispList=", self.dispList
         #print "getQueue=", self.getQueue
-        
+
         return httpGet
-    
+
     def _abort(self):
         """Abort the currently selected transaction (if any).
         """
         if self.selHTTPGet:
             self.selHTTPGet.abort()
-    
+
     def _selectEvt(self, evt):
         """Determine the line currently pointed to by the mouse
         and show details for that transaction.
@@ -259,7 +259,7 @@ class HTTPGetWdg(tkinter.Frame):
         ind = int(indStr.split(".")[0]) - 1
         self._selectInd(ind)
         return "break"
-    
+
     def _selectInd(self, ind):
         """Display details for the httpGet at self.dispList[ind]
         and selects the associated line in the displayed list.
@@ -276,7 +276,7 @@ class HTTPGetWdg(tkinter.Frame):
         except IndexError:
             self.selHTTPGet = None
         self._updDetailStatus()
-    
+
     def _startNew(self):
         """Start new transfers if any are pending and there is room
         """
@@ -295,9 +295,9 @@ class HTTPGetWdg(tkinter.Frame):
             elif state in (httpGet.Running, httpGet.Connecting):
                 nRunning += 1
         self.getQueue = newGetQueue
-    
+
         #self._updDetailStatus()
-        
+
     def _stateCallback(self, stateLabel, httpGet):
         """State callback for running transfers"""
         state = httpGet.state
@@ -317,10 +317,10 @@ class HTTPGetWdg(tkinter.Frame):
             else:
                 severity = RO.Constants.sevNormal
             stateLabel.set(state, severity=severity)
-        
+
         if httpGet == self.selHTTPGet:
             self._updDetailStatus()
-        
+
         if httpGet.isDone:
             self._startNew()
 
@@ -336,7 +336,7 @@ class HTTPGetWdg(tkinter.Frame):
 
         self._memDebugDict[objID] = weakref.ref(obj, refGone)
         del(obj)
-    
+
     def _updDetailStatus(self):
         """Update the detail status for self.selHTTPGet"""
         if not self.selHTTPGet:
@@ -349,7 +349,7 @@ class HTTPGetWdg(tkinter.Frame):
 
         httpGet = self.selHTTPGet
         state = httpGet.state
-        
+
         # show or hide abort button, appropriately
         if httpGet.isAbortable:
             if not self.abortWdg.winfo_ismapped():
@@ -381,7 +381,7 @@ if __name__ == "__main__":
     root = PythonTk()
 
     row = 0
-    
+
     testFrame = HTTPGetWdg (
         master=root,
     )
@@ -403,21 +403,21 @@ if __name__ == "__main__":
     toPathWdg.insert(0, "tempfile")
     toPathWdg.grid(row=row, column=1, sticky="ew")
     row += 1
-    
+
     tkinter.Label(root, text="FromURL:").grid(row=row, column=0, sticky="e")
     fromURLWdg = tkinter.Entry(root)
     fromURLWdg.grid(row=row, column=1, sticky="ew")
     row += 1
 
-    
+
     def getFile(evt):
         overwrite = overwriteVar.get()
         toPath = toPathWdg.get()
         fromURL = fromURLWdg.get()
         testFrame.getFile(url=fromURL, toPath=toPath, overwrite=overwrite)
-        
+
     fromURLWdg.bind("<Return>", getFile)
-    
+
     root.rowconfigure(0, weight=1)
     root.columnconfigure(1, weight=1)
 

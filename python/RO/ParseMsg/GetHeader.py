@@ -36,7 +36,7 @@ def getHubHeader(astr):
       - "msgType": type of message (character)
     - dataStart: the index of the first non-whitespace character following the header,
         or len(astr) if no data follows the header
-    
+
     Exceptions:
     - If the header cannot be fully parsed, throws a SyntaxError.
     """
@@ -62,7 +62,7 @@ def getMidRidHeader(astr):
 
     Inputs:
     - astr: the string to parse
-    
+
     Returns a duple:
     - headerDict: a dictionary containing:
       - "mid": message ID (integer)
@@ -70,7 +70,7 @@ def getMidRidHeader(astr):
       - "msgType": type of message (character)
     - dataStart: the index of the first non-whitespace character following the header,
         or len(astr) if no data follows the header
-    
+
     Exceptions:
     - If the header cannot be fully parsed, throws a SyntaxError.
     """
@@ -99,7 +99,7 @@ def getMidRidAsHubHeader(astr, cmdr="", actor=""):
     - astr: the string to parse
     - cmdr: the desired commander
     - actor: the desired actor
-    
+
     Returns a duple:
     - headerDict: a dictionary containing:
       - "cmdr": commander (string)
@@ -108,7 +108,7 @@ def getMidRidAsHubHeader(astr, cmdr="", actor=""):
       - "msgType": type of message (character)
     - dataStart: the index of the first non-whitespace character following the header,
         or len(astr) if no data follows the header
-    
+
     Exceptions:
     - If the header cannot be fully parsed, throws a SyntaxError.
     """
@@ -139,7 +139,7 @@ if __name__ == '__main__':
             print("astr[%d:] = %r" % (dataStart, astr[dataStart:]))
         except Exception as e:
             print("failed with error: %s" % (e))
-    
+
     print("testing getMidRidHeader\n")
     testList = [
         "123  456 > keyword",

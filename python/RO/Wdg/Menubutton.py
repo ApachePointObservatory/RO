@@ -9,9 +9,10 @@ __all__ = ['Menubutton']
 
 from six.moves import tkinter
 import RO.Constants
-from . import CtxMenu
+from .CtxMenu import CtxMenuMixin
 
-class Menubutton(tkinter.Menubutton, CtxMenu.CtxMenuMixin):
+
+class Menubutton(tkinter.Menubutton, CtxMenuMixin):
     def __init__(self,
         master,
         helpText = None,
@@ -20,7 +21,7 @@ class Menubutton(tkinter.Menubutton, CtxMenu.CtxMenuMixin):
         severity = RO.Constants.sevNormal,
     **kwArgs):
         """Creates a new Menubutton.
-        
+
         Inputs:
         - helpText  text for hot help
         - helpURL   URL for longer help
@@ -35,8 +36,8 @@ class Menubutton(tkinter.Menubutton, CtxMenu.CtxMenuMixin):
 
         tkinter.Menubutton.__init__(self, master = master, **kwArgs)
 
-        CtxMenu.CtxMenuMixin.__init__(self, helpURL = helpURL)
-    
+        CtxMenuMixin.__init__(self, helpURL = helpURL)
+
     def setEnable(self, doEnable):
         """Enable or disable widget
 
@@ -49,7 +50,7 @@ class Menubutton(tkinter.Menubutton, CtxMenu.CtxMenuMixin):
             self["state"] = tkinter.NORMAL
         else:
             self["state"] = tkinter.DISABLED
-    
+
     def getEnable(self):
         """Return True if widget is enabled, False otherwise
 

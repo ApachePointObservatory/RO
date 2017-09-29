@@ -59,11 +59,11 @@ from six.moves import tkinter
 import RO.Constants
 import RO.MathUtil
 import RO.StringUtil
-from . import CtxMenu
+from .CtxMenu import CtxMenuMixin
 from .SeverityMixin import SeverityMixin
 from .IsCurrentMixin import IsCurrentMixin
 
-class Label(tkinter.Label, CtxMenu.CtxMenuMixin, IsCurrentMixin, SeverityMixin):
+class Label(tkinter.Label, CtxMenuMixin, IsCurrentMixin, SeverityMixin):
     """Base class for labels (display ROWdgs); do not use directly.
 
     Inputs:
@@ -100,7 +100,7 @@ class Label(tkinter.Label, CtxMenu.CtxMenuMixin, IsCurrentMixin, SeverityMixin):
 
         tkinter.Label.__init__(self, master, **kargs)
 
-        CtxMenu.CtxMenuMixin.__init__(self, helpURL=helpURL)
+        CtxMenuMixin.__init__(self, helpURL=helpURL)
 
         IsCurrentMixin.__init__(self, isCurrent)
 

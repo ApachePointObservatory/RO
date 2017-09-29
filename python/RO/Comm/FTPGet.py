@@ -43,7 +43,7 @@ __all__ = ['FTPGet']
 
 import os
 import sys
-import urllib.parse
+import six.moves.urllib.parse as parse
 import threading
 import ftplib
 
@@ -51,7 +51,7 @@ _Debug = False
 
 class FTPGet:
     """Retrieves the specified url to a file.
-    
+
     Inputs:
     - host  IP address of ftp host
     - fromPath  full path of file on host to retrieve
@@ -78,7 +78,7 @@ class FTPGet:
     Done = "Done"
     Aborted = "Aborted"
     Failed = "Failed"
-    
+
     _AllStates = set((
         Queued,
         Connecting,
@@ -115,9 +115,9 @@ class FTPGet:
         self.createDir = createDir
         self.username = username or "anonymous"
         self.password = password or "abc@def.org"
-        
+
         if dispStr is None:
-            self.dispStr = urllib.parse.urljoin("ftp://" + self.host, self.fromPath)
+            self.dispStr = parse.urljoin("ftp://" + self.host, self.fromPath)
         else:
             self.dispStr = dispStr
 
@@ -128,17 +128,17 @@ class FTPGet:
         self._state = self.Queued
         self._exception = None
         self._stateLock = threading.RLock()
-        
+
         # set up background thread
         self._getThread = threading.Thread(name="get", target=self._getTask)
         self._getThread.setDaemon(True)
 
         if startNow:
             self.start()
-                    
+
     def start(self):
         """Start the download.
-        
+
         If state is not Queued, raises RuntimeError
         """
         self._stateLock.acquire()
@@ -163,26 +163,26 @@ class FTPGet:
             else:
                 return
         finally:
-            self._stateLock.release()   
+            self._stateLock.release()
 
     def getException(self):
         """If the state is Failed, returns the exception that caused the failure.
         Otherwise returns None.
         """
         return self._exception
-    
+
     @property
     def isAbortable(self):
         """True if the transaction can be aborted
         """
         return self._state in self._AbortableStates
-    
+
     @property
     def isDone(self):
         """True if the transaction is finished (succeeded, aborted or failed), False otherwise.
         """
         return self._state in self._DoneStates
-    
+
     @property
     def readBytes(self):
         """bytes read so far
@@ -192,26 +192,26 @@ class FTPGet:
     @property
     def totBytes(self):
         """total bytes in file, if known, None otherwise.
-        
+
         The value is certain to be unknown until the transfer starts;
         after that it depends on whether the server sends the info.
         """
         return self._totBytes
-    
+
     @property
     def state(self):
         """Current state, as a string
         """
         return self._state
-    
+
     def _cleanup(self, newState, exception=None):
         """Clean up everything. Must only be called from the _getTask thread.
-        
+
         Close the input and output files.
         If not isDone (transfer not finished) then updates the state
         If newState in (Aborted, Failed) and not isDone, deletes the file
         If newState == Failed and not isDone, sets the exception
-        
+
         Inputs:
         - newState: new state; ignored if isDone
         - exception: exception that is the reason for failure;
@@ -236,8 +236,8 @@ class FTPGet:
             sys.stderr.write("FTPGet._cleanup invalid cleanup state %r; assuming %s=Failed\n" % \
                 (newState, self.Failed))
             newState = self.Failed
-        
-        self._stateLock.acquire()   
+
+        self._stateLock.acquire()
         try:
             if self.isDone:
                 # already finished; do nothing
@@ -246,13 +246,13 @@ class FTPGet:
                 self._state = newState
         finally:
             self._stateLock.release()
-        
+
         if didOpen and newState in (self.Aborted, self.Failed):
             try:
                 os.remove(self.toPath)
             except OSError:
                 pass
-            
+
             if newState == self.Failed:
                 self._exception = exception
 
@@ -280,7 +280,7 @@ class FTPGet:
             if _Debug:
                 print("FTPGet: open ftp connection to %r" % (self.host))
             ftp = ftplib.FTP(self.host, self.username, self.password)
-            
+
             if _Debug:
                 print("FTPGet: set connection isbinary=%r on %r" % (self.isBinary, self.host))
             if self.isBinary:
@@ -296,12 +296,12 @@ class FTPGet:
             try:
                 self._state = self.Running
             finally:
-                self._stateLock.release()   
+                self._stateLock.release()
 
             if _Debug:
                 print("FTPGet: totBytes = %r; read %r on %r " % \
                     (self._totBytes, self.fromPath, self.host))
-            
+
             while True:
                 nextData = self._fromSocket.recv(8192)
                 if not nextData:
@@ -311,25 +311,25 @@ class FTPGet:
                     return
                 self._readBytes += len(nextData)
                 self._toFile.write(nextData)
-            
+
             self._cleanup(self.Done)
         except Exception as e:
             self._cleanup(self.Failed, exception = e)
-        
-    
+
+
     def __str__(self):
         return "%s(%s)" % (self.__class__.__name__, self.fromPath)
 
     def _toPrep(self):
         """Create or verify the existence of the output directory
         and check if output file already exists.
-        
+
         Raises an exception if anything is wrong.
         """
         # if output file exists and not overwrite, complain
         if not self.overwrite and os.path.exists(self.toPath):
             raise ValueError("toPath %r already exists" % (self.toPath,))
-        
+
         # if directory does not exist, create it or fail, depending on createDir;
         # else if "directory" exists but is a file, fail
         toDir = os.path.dirname(self.toPath)

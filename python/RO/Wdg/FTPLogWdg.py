@@ -64,7 +64,7 @@ import RO.MathUtil
 from RO.TkUtil import Timer
 from RO.Comm.FTPGet import FTPGet
 import RO.Wdg
-from . import CtxMenu
+
 
 _StatusInterval = 0.200 # time between status checks (sec)
 

@@ -24,10 +24,10 @@ from six.moves import tkinter
 import RO.AddCallback
 import RO.Constants
 import RO.TkUtil
-from . import CtxMenu
+from .CtxMenu import CtxMenuMixin
 from .SeverityMixin import SeverityActiveMixin
 
-class Button(tkinter.Button, RO.AddCallback.TkButtonMixin, CtxMenu.CtxMenuMixin, SeverityActiveMixin):
+class Button(tkinter.Button, RO.AddCallback.TkButtonMixin, CtxMenuMixin, SeverityActiveMixin):
     def __init__(self,
         master,
         helpText = None,
@@ -37,7 +37,7 @@ class Button(tkinter.Button, RO.AddCallback.TkButtonMixin, CtxMenu.CtxMenuMixin,
         severity = RO.Constants.sevNormal,
     **kwArgs):
         """Creates a new Button.
-        
+
         Inputs:
         - helpText  text for hot help
         - helpURL   URL for longer help
@@ -58,16 +58,16 @@ class Button(tkinter.Button, RO.AddCallback.TkButtonMixin, CtxMenu.CtxMenuMixin,
                 kwArgs.setdefault("pady", 3)
 
         tkinter.Button.__init__(self, master = master, **kwArgs)
-        
+
         RO.AddCallback.TkButtonMixin.__init__(self,
             callFunc = callFunc,
             callNow = False,
             command = command,
         )
-        
-        CtxMenu.CtxMenuMixin.__init__(self, helpURL = helpURL)
+
+        CtxMenuMixin.__init__(self, helpURL = helpURL)
         SeverityActiveMixin.__init__(self, severity)
-    
+
     def setEnable(self, doEnable):
         """Enable or disable widget
 
@@ -80,7 +80,7 @@ class Button(tkinter.Button, RO.AddCallback.TkButtonMixin, CtxMenu.CtxMenuMixin,
             self["state"] = tkinter.NORMAL
         else:
             self["state"] = tkinter.DISABLED
-    
+
     def getEnable(self):
         """Return True if widget is enabled, False otherwise
 
@@ -89,7 +89,7 @@ class Button(tkinter.Button, RO.AddCallback.TkButtonMixin, CtxMenu.CtxMenuMixin,
         return self["state"] != tkinter.DISABLED
 
 
-class Radiobutton(tkinter.Radiobutton, CtxMenu.CtxMenuMixin, SeverityActiveMixin):
+class Radiobutton(tkinter.Radiobutton, CtxMenuMixin, SeverityActiveMixin):
     def __init__(self,
         master,
         helpText = None,
@@ -97,7 +97,7 @@ class Radiobutton(tkinter.Radiobutton, CtxMenu.CtxMenuMixin, SeverityActiveMixin
         severity=RO.Constants.sevNormal,
     **kwArgs):
         """Creates a new Button.
-        
+
         Inputs:
         - helpText  text for hot help
         - helpURL   URL for longer help
@@ -107,6 +107,5 @@ class Radiobutton(tkinter.Radiobutton, CtxMenu.CtxMenuMixin, SeverityActiveMixin
         self.helpText = helpText
 
         tkinter.Radiobutton.__init__(self, master = master, **kwArgs)
-        CtxMenu.CtxMenuMixin.__init__(self, helpURL = helpURL)
+        CtxMenuMixin.__init__(self, helpURL = helpURL)
         SeverityActiveMixin.__init__(self, severity)
-    

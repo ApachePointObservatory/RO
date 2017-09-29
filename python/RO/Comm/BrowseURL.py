@@ -10,7 +10,7 @@ History:
 __all__ = ["browseURL"]
 
 import threading
-import urllib.parse
+import six.moves.urllib.parse as parse
 import webbrowser
 
 class _BrowseURLThread(threading.Thread):
@@ -29,10 +29,10 @@ class _BrowseURLThread(threading.Thread):
 
         # failed! if this is a file URL with an anchor,
         # try again without the anchor
-        urlTuple = urllib.parse.urlparse(url)
+        urlTuple = parse.urlparse(url)
         if urlTuple[0] == "file" and urlTuple[-1] != '':
             urlTuple = urlTuple[0:-1] + ('',)
-            url = urllib.parse.urlunparse(urlTuple)
+            url = parse.urlunparse(urlTuple)
             if not url:
                 return
             try:
