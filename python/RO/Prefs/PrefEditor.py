@@ -63,6 +63,7 @@ History:
 import sys
 from . import PrefVar
 from six.moves import tkinter
+import six.moves.tkinter_font as tkFont
 import RO.Alg
 import RO.Wdg
 from RO.TkUtil import Timer
@@ -504,7 +505,7 @@ class FontPrefEditor(PrefEditor):
     def _getEditWdg(self):
         currFontDict = self.prefVar.value
         fontFamilies = []
-        for fam in tkinter.font.families():
+        for fam in tkFont.families():
             try:
                 fam = str(fam)
                 if fam.startswith("."):
@@ -516,7 +517,7 @@ class FontPrefEditor(PrefEditor):
         fontSizes = [str(x) for x in range(6, 25)]
 
         # create a Font for the font editor widgets
-        self.editFont = tkinter.font.Font(**currFontDict)
+        self.editFont = tkFont.Font(**currFontDict)
 
         fontNameVarSet = (
             ("family", tkinter.StringVar()),

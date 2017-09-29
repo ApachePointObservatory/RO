@@ -15,7 +15,7 @@ __all__ = ["IDGen"]
 
 class IDGen(object):
     """generate a sequence of integer ID numbers, wrapping around if desired.
-    
+
     Warning: can be used as an iterator, but there is no stop condition!
     """
     def __init__(self, startVal=1, wrapVal=None, incr=1):
@@ -38,7 +38,10 @@ class IDGen(object):
 
     def __iter__(self):
         return self
-    
+
+    def next(self):
+        self.__next__()
+
     def __next__(self):
         """Return the next ID number."""
         newID = self.startVal + (self.ind * self.incr)
@@ -46,6 +49,6 @@ class IDGen(object):
         if self.wrapVal is not None:
             self.ind %= self.nSteps
         return newID
-    
+
     def __repr__(self):
         return "IDGen(startVal=%s, wrapVal=%s, incr=%s)" % (self.startVal, self.wrapVal, self.incr)

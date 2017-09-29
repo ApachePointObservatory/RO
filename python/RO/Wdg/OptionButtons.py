@@ -39,7 +39,7 @@ import RO.InputCont
 from . import Button
 from . import Checkbutton
 from . import InputContFrame
-from . import Label
+from .Label import Label
 
 class OptionButtons(InputContFrame):
     def __init__ (self,
@@ -97,7 +97,7 @@ class OptionButtons(InputContFrame):
             helpURL = helpURLPrefix
             if helpURL and helpURL.endswith("#"):
                 helpURL = helpURL[:-1]
-            Label.Label(
+            Label(
                 master = self,
                 text = headerText,
                 helpURL = helpURL,
@@ -126,7 +126,7 @@ class OptionButtons(InputContFrame):
             helpURL = listGet(optionData, 4)
             if helpURLPrefix and not helpURL:
                 helpURL = helpURLPrefix + nameStr
-            wdg = Checkbutton.Checkbutton(self,
+            wdg = Checkbutton(self,
                 text=labelStr,
                 defValue = defVal,
                 helpText = helpText,
@@ -155,7 +155,7 @@ class OptionButtons(InputContFrame):
         if defButton is True:
             defButton = "Defaults"
         if defButton not in (False, None):
-            defButtonWdg = Button.Button(self,
+            defButtonWdg = Button(self,
                 text=defButton,
                 command=self.restoreDefault,
                 helpText = "Restore defaults",
@@ -166,7 +166,7 @@ class OptionButtons(InputContFrame):
         if clearButton is True:
             clearButton = "Clear"
         if clearButton not in (False, None):
-            clearButtonWdg = Button.Button(self,
+            clearButtonWdg = Button(self,
                 text=clearButton,
                 command=self.clear,
                 helpText = "Uncheck all checkboxes",
@@ -187,7 +187,7 @@ if __name__ == "__main__":
     def setEnable(wdg=None):
         optFrame.setEnable(enableButton.getBool())
 
-    enableButton = Checkbutton.Checkbutton (
+    enableButton = Checkbutton (
         master = root,
         defValue = True,
         callFunc = setEnable,
@@ -195,7 +195,7 @@ if __name__ == "__main__":
     )
     enableButton.pack()
 
-    printButton = Button.Button (
+    printButton = Button (
         master = root,
         command = doPrint,
         text = "Print Values",

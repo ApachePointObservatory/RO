@@ -190,7 +190,7 @@ import RO.Constants
 import RO.SeqUtil
 import RO.TkUtil
 from . import Entry
-from . import Label
+from .Label import StrLabel, FloatLabel
 from . import OptionMenu
 from . import RadiobuttonSet
 
@@ -498,7 +498,7 @@ class GrayImageWdg(tkinter.Frame, RO.AddCallback.BaseMixin):
         # tool bar
         toolFrame = tkinter.Frame(self)
 
-        self.scaleMenuWdg = OptionMenu.OptionMenu(
+        self.scaleMenuWdg = OptionMenu(
             master = toolFrame,
             items = ("Linear", "ASinh 0.01", "ASinh 0.1", "ASinh 1"),
             defValue = "Linear",
@@ -508,7 +508,7 @@ class GrayImageWdg(tkinter.Frame, RO.AddCallback.BaseMixin):
             helpURL =  helpURL,
         )
         self.scaleMenuWdg.pack(side = "left")
-        self.rangeMenuWdg = OptionMenu.OptionMenu(
+        self.rangeMenuWdg = OptionMenu(
             master = toolFrame,
             items = self._RangeMenuItems,
             defValue = defRange,
@@ -525,7 +525,7 @@ class GrayImageWdg(tkinter.Frame, RO.AddCallback.BaseMixin):
             _ModeZoom,
         )
         bitmapList = [_BitmapDict[md] for md in modeList]
-        self.modeWdg = RadiobuttonSet.RadiobuttonSet(
+        self.modeWdg = RadiobuttonSet(
             master = toolFrame,
             bitmapList = bitmapList,
             valueList = modeList,
@@ -575,7 +575,7 @@ class GrayImageWdg(tkinter.Frame, RO.AddCallback.BaseMixin):
 
         # add current position and current value widgets
         posFrame = tkinter.Frame(self)
-        Label.StrLabel(
+        StrLabel(
             posFrame,
             text = " Cursor Pos: ",
             bd = 0,
@@ -583,7 +583,7 @@ class GrayImageWdg(tkinter.Frame, RO.AddCallback.BaseMixin):
             helpText = "Cursor position (pix)",
             helpURL =  helpURL,
         ).pack(side="left")
-        self.currXPosWdg = Label.FloatLabel(
+        self.currXPosWdg = FloatLabel(
             posFrame,
             width = 6,
             precision = 1,
@@ -593,13 +593,13 @@ class GrayImageWdg(tkinter.Frame, RO.AddCallback.BaseMixin):
             helpURL =  helpURL,
         )
         self.currXPosWdg.pack(side="left")
-        Label.StrLabel(
+        StrLabel(
             posFrame,
             text=",",
             bd = 0,
             padx = 0,
         ).pack(side="left")
-        self.currYPosWdg = Label.FloatLabel(
+        self.currYPosWdg = FloatLabel(
             posFrame,
             width = 6,
             precision = 1,
@@ -609,7 +609,7 @@ class GrayImageWdg(tkinter.Frame, RO.AddCallback.BaseMixin):
             helpURL =  helpURL,
         )
         self.currYPosWdg.pack(side="left")
-        Label.StrLabel(
+        StrLabel(
             posFrame,
             text = "  Value: ",
             bd = 0,
@@ -617,7 +617,7 @@ class GrayImageWdg(tkinter.Frame, RO.AddCallback.BaseMixin):
             helpText = "Value at cursor (ADUs)",
             helpURL =  helpURL,
         ).pack(side="left")
-        self.currValWdg = Label.FloatLabel(
+        self.currValWdg = FloatLabel(
             posFrame,
             bd = 0,
             padx = 0,
@@ -631,7 +631,7 @@ class GrayImageWdg(tkinter.Frame, RO.AddCallback.BaseMixin):
         # set up scrolling panel to display canvas and error messages
         self.scrollFrame = tkinter.Frame(self, height=height, width=width) #, borderwidth=2, relief="sunken")
         self.scrollFrame.grid_propagate(False)
-        self.strMsgWdg = Label.StrLabel(self.scrollFrame)
+        self.strMsgWdg = StrLabel(self.scrollFrame)
         self.strMsgWdg.grid(row=0, column=0)
         self.strMsgWdg.grid_remove()
 
@@ -1571,5 +1571,3 @@ if __name__ == "__main__":
     #ds9.showArray(imArr)
 
     root.mainloop()
-
-

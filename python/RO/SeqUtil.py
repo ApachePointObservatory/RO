@@ -32,11 +32,14 @@ History:
 """
 
 try:
-    import UserString
+    from UserString import UserString
 except ImportError:
     import collections.UserString as UserString
 
+from six import string_types
+
 import RO.MathUtil
+
 
 def asCollection(item):
     """Convert one or more items to a Collection.
@@ -126,7 +129,7 @@ def isString(item):
 
     From Python Cookbook, 2nd ed.
     """
-    return isinstance(item, (str, UserString))
+    return isinstance(item, string_types) or isinstance(item, UserString)
 
 def oneOrNAsList (
     oneOrNVal,
