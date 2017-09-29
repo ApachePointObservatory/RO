@@ -7,6 +7,8 @@ History:
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
 
+from __future__ import print_function
+
 import sys
 
 __all__ = ["getString"]
@@ -107,7 +109,7 @@ def getString(astr, begInd=0):
 #       print "stripping double backslash from %r" % retStr
         retStr = retStr.replace("\\\\", "\\")
     if stripBslashQuote:
-#       print "stripping backslash %s from %r" % (quoteChar, retStr) 
+#       print "stripping backslash %s from %r" % (quoteChar, retStr)
         retStr = retStr.replace("\\" + quoteChar, quoteChar)
     return (retStr, nextInd)
 

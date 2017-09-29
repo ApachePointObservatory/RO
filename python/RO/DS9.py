@@ -154,7 +154,7 @@ History:
 __all__ = ["setup", "xpaget", "xpaset", "DS9Win"]
 
 import numpy
-from . import os
+import os
 import time
 import warnings
 import RO.OS
@@ -191,13 +191,13 @@ def _findApp(appName, subDirs = None, doRaise = True):
     """Find a Mac or Windows application by expicitly looking for
     the in the standard application directories.
     If found, add directory to the PATH (if necessary).
-    
+
     Inputs:
     - appName   name of application, with .exe or .app extension
     - subDirs   subdirectories of the main application directories;
                 specify None if no subdirs
     - doRaise   raise RuntimeError if not found?
-    
+
     Returns a path to the application's directory.
     Return None or raise RuntimeError if not found.
     """
@@ -218,7 +218,7 @@ def _findApp(appName, subDirs = None, doRaise = True):
     if doRaise:
         raise RuntimeError("Could not find %s in %s" % (appName, dirTrials,))
     return None
-    
+
 
 def _findUnixApp(appName):
     """Use the unix "which" command to find the application on the PATH
@@ -249,12 +249,12 @@ def _findUnixApp(appName):
 
 def _findDS9AndXPA():
     """Locate ds9 and xpa, and add to PATH if not already there.
-    
+
     Returns:
     - ds9Dir    directory containing ds9 executable
     - xpaDir    directory containing xpaget and (presumably)
                 the other xpa executables
-    
+
     Sets global variables:
     - _DirFromWhichToRunDS9 (the default dir from which to open DS9)
         - On Windows set to xpaDir to make sure that ds9 on Windows can find xpans
@@ -264,7 +264,7 @@ def _findDS9AndXPA():
         - On MacOS X if using the aqua SAOImage DS9 application then the path to the ds9 command line
           executable inside the aqua application bundle
         - Otherwise set to "ds9"; it is assumed to be on the PATH
-                
+
     Raise RuntimeError if ds9 or xpa are not found.
     """
     global _DirFromWhichToRunDS9, _DS9Path
@@ -275,7 +275,7 @@ def _findDS9AndXPA():
         # - ~/Applications/ds9.app
         # - /Applications.ds9.app
         # - on the PATH (adding /usr/local/bin if necessary)
-        
+
         # add DISPLAY envinronment variable, if necessary
         # (since ds9 is an X11 application and environment
         os.environ.setdefault("DISPLAY", "localhost:0")
@@ -304,32 +304,32 @@ def _findDS9AndXPA():
 
             if not foundDS9:
                 ds9Dir = _findUnixApp("ds9")
-    
+
             if not foundXPA:
                 xpaDir = _findUnixApp("xpaget")
-    
+
     elif RO.OS.PlatformName == "win":
         ds9Dir = _findApp("ds9.exe", ["ds9"], doRaise=True)
         xpaDir = _findApp("xpaget.exe", ["xpa", "ds9"], doRaise=True)
         _DirFromWhichToRunDS9 = xpaDir
-    
+
     else:
         # unix
         ds9Dir = _findUnixApp("ds9")
         xpaDir = _findUnixApp("xpaget")
-    
+
     if _DebugSetup:
         print("_DirFromWhichToRunDS9=%r" % (_DirFromWhichToRunDS9,))
         print("_DS9Path=%r" % (_DS9Path,))
-    
+
     return (ds9Dir, xpaDir)
-    
+
 
 def setup(doRaise=False):
     """Search for xpa and ds9 and set globals accordingly.
     Return None if all is well, else return an error string.
     The return value is also saved in global variable _SetupError.
-    
+
     Sets global variables:
     - _SetupError   same value as returned
     - _Popen        subprocess.Popen, if ds9 and xpa found,
@@ -349,13 +349,13 @@ def setup(doRaise=False):
     except Exception as e:
         _SetupError = "RO.DS9 unusable: %s" % (e,)
         ds9Dir = xpaDir = None
-    
+
     if _SetupError:
         class _Popen(subprocess.Popen):
             def __init__(self, *args, **kargs):
                 setup(doRaise=True)
                 subprocess.Popen.__init__(self, *args, **kargs)
-        
+
         if doRaise:
             raise RuntimeError(_SetupError)
     else:
@@ -377,7 +377,7 @@ def xpaget(cmd, template=_DefTemplate, doRaise = False):
     """Executes a simple xpaget command:
         xpaget -p <template> <cmd>
     returning the reply.
-    
+
     Inputs:
     - cmd       command to execute; may be a string or a list
     - template  xpa template; can be the ds9 window title
@@ -420,9 +420,9 @@ def xpaset(cmd, data=None, dataFunc=None, template=_DefTemplate, doRaise = False
         xpaset -p <template> <cmd>
     or else feeds data to:
         xpaset <template> <cmd>
-        
+
     The command must not return any output for normal completion.
-    
+
     Inputs:
     - cmd       command to execute
     - data      data to write to xpaset's stdin; ignored if dataFunc specified.
@@ -435,7 +435,7 @@ def xpaset(cmd, data=None, dataFunc=None, template=_DefTemplate, doRaise = False
                 host:port, etc.
     - doRaise   if True, raise RuntimeError if there is a communications error,
                 else issue a UserWarning warning
-    
+
     Raises RuntimeError or issues a warning (depending on doRaise)
     if anything is written to stdout or stderr.
     """
@@ -476,10 +476,10 @@ def xpaset(cmd, data=None, dataFunc=None, template=_DefTemplate, doRaise = False
 def _computeCnvDict():
     """Compute array type conversion dict.
     Each item is: unsupported type: type to which to convert.
-    
+
     ds9 supports UInt8, Int16, Int32, Float32 and Float64.
     """
-    
+
     cnvDict = {
         numpy.int8: numpy.int16,
         numpy.uint16: numpy.int32,
@@ -527,12 +527,12 @@ def _splitDict(inDict, keys):
     for key in keys:
         if key in inDict:
             outDict[key] = inDict.pop(key)
-    return outDict  
+    return outDict
 
 
 class DS9Win:
     """An object that talks to a particular window on ds9
-    
+
     Inputs:
     - template: window name (see ds9 docs for talking to a remote ds9);
             ignored on MacOS X (unless using X11 version of ds9).
@@ -555,19 +555,19 @@ class DS9Win:
         self.closeFDs = bool(closeFDs)
         if doOpen:
             self.doOpen()
-    
+
     def doOpen(self):
         """Open the ds9 window (if necessary).
-        
+
         Raise OSError or RuntimeError on failure, even if doRaise is False.
         """
         if self.isOpen():
             return
-        
+
         global _DirFromWhichToRunDS9, _DS9Path, _Popen
         _Popen(
             args = (_DS9Path, "-title", self.template, "-port", "0"),
-            cwd = _DirFromWhichToRunDS9, 
+            cwd = _DirFromWhichToRunDS9,
         )
 
         startTime = time.time()
@@ -593,7 +593,7 @@ class DS9Win:
         3-d images are displayed as data cubes, meaning one can
         view a single z at a time or play through them as a movie,
         that sort of thing.
-        
+
         Inputs:
         - arr: a numpy array; must be 2-d or 3-d:
             2-d arrays have index order (y, x)
@@ -601,17 +601,17 @@ class DS9Win:
         kargs: see Extra Keyword Arguments in the module doc string for information.
         Keywords that specify array info (see doc for showBinFile for the list)
         are ignored, because array info is determined from the array itself.
-        
+
         Data types:
         - UInt8, Int16, Int32 and floating point types sent unmodified.
         - All other integer types are converted before transmission.
         - Complex types are rejected.
-    
+
         Raises ValueError if arr's elements are not some kind of integer.
         Raises RuntimeError if ds9 is not running or returns an error message.
         """
         arr = numpy.asarray(arr)
-        
+
         if arr.dtype.name.startswith("complex"):
             raise TypeError("ds9 cannot handle complex data")
 
@@ -628,13 +628,13 @@ class DS9Win:
 
         # determine byte order of array (^ is xor)
         isBigEndian = arr.dtype.isnative ^ numpy.little_endian
-        
+
         # compute bits/pix; ds9 uses negative values for floating values
         bitsPerPix = arr.itemsize * 8
         if arr.dtype.name.startswith("float"):
             # array is float; use negative value
             bitsPerPix = -bitsPerPix
-    
+
         # remove array info keywords from kargs; we compute all that
         _splitDict(kargs, _ArrayKeys)
 
@@ -644,24 +644,24 @@ class DS9Win:
         arryDict = {}
         for axis, size in zip(dimNames, arr.shape):
             arryDict["%sdim" % axis] = size
-        
+
         arryDict["bitpix"] = bitsPerPix
         if (isBigEndian):
             arryDict["arch"] = "bigendian"
         else:
             arryDict["arch"] = "littleendian"
-            
+
         self.xpaset(
             cmd = "array [%s]" % (_formatOptions(arryDict),),
             dataFunc = arr.tofile,
         )
-        
+
         for keyValue in kargs.items():
             self.xpaset(cmd=" ".join(keyValue))
-    
+
     def showFITSFile(self, fname, **kargs):
         """Display a fits file in ds9.
-        
+
         Inputs:
         - fname name of file (including path information, if necessary)
         kargs: see Extra Keyword Arguments in the module doc string for information.
@@ -675,19 +675,19 @@ class DS9Win:
         arrKeys = _splitDict(kargs, _ArrayKeys)
         if arrKeys:
             raise RuntimeError("Array info not allowed; rejected keywords: %s" % list(arrKeys.keys()))
-        
+
         for keyValue in kargs.items():
             self.xpaset(cmd=" ".join(keyValue))
 
     def xpaget(self, cmd):
         """Execute a simple xpaget command and return the reply.
-        
+
         The command is of the form:
             xpaset -p <template> <cmd>
-        
+
         Inputs:
         - cmd       command to execute
-    
+
         Raises RuntimeError if anything is written to stderr.
         """
         return xpaget(
@@ -695,22 +695,22 @@ class DS9Win:
             template = self.template,
             doRaise = self.doRaise,
         )
-    
+
 
     def xpaset(self, cmd, data=None, dataFunc=None):
         """Executes a simple xpaset command:
             xpaset -p <template> <cmd>
         or else feeds data to:
             xpaset <template> <cmd>
-            
+
         The command must not return any output for normal completion.
-        
+
         Inputs:
         - cmd       command to execute
         - data      data to write to xpaset's stdin; ignored if dataFunc specified
         - dataFunc  a function that takes one argument, a file-like object,
                     and writes data to that file. If specified, data is ignored.
-        
+
         Raises RuntimeError if anything is written to stdout or stderr.
         """
         return xpaset(
@@ -730,4 +730,3 @@ if __name__ == "__main__":
     myArray = numpy.arange(10000).reshape([100,100])
     ds9Win = DS9Win("DS9Test")
     ds9Win.showArray(myArray)
-

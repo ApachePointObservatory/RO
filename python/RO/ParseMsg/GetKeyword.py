@@ -7,6 +7,10 @@ History:
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
+
+from __future__ import print_function
+
+
 __all__ = ["getKeyword"]
 
 import re
@@ -17,16 +21,16 @@ def getKeyword(astr, begInd=0):
     """
     Returns the next keyword from an APO format message. Keywords must start
     with a letter or underscore and may contain those characters or digits thereafter.
-    
+
     Inputs:
         astr: the string to parse
         begInd: the starting index; must point to the beginning of the keyword
             to be extracted, though leading white space is ignored.
-    
+
     Returns a duple containing:
         the next keyword
         the index to the next token (should be "=" or ";"), or None of end-of-string
-    
+
     Exceptions:
         if the next non-whitespace thing is not a keyword, throws a SyntaxError
     """

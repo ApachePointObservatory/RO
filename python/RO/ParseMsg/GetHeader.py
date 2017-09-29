@@ -14,7 +14,11 @@ History:
 2011-06-17 ROwen    Changed "type" to "msgType" in parsed message dictionaries to avoid conflict with builtin.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
+
+from __future__ import print_function
+
 __all__ = ["getHubHeader", "getMidRidHeader", "getMidRidAsHubHeader"]
+
 
 import re
 
