@@ -40,7 +40,7 @@ class IDGen(object):
         return self
 
     def next(self):
-        self.__next__()
+        return self.__next__()
 
     def __next__(self):
         """Return the next ID number."""
