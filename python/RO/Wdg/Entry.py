@@ -175,6 +175,7 @@ from . import Bindings
 from .CtxMenu import CtxMenuMixin
 from .IsCurrentMixin import AutoIsCurrentMixin, IsCurrentMixin
 from .SeverityMixin import SeveritySelectMixin
+from six import u
 
 class _BaseEntry (tkinter.Entry, RO.AddCallback.BaseMixin,
     AutoIsCurrentMixin, IsCurrentMixin, SeveritySelectMixin, CtxMenuMixin):
@@ -1459,7 +1460,7 @@ class DMSEntry (_NumEntry):
         if self.isHours:
             unitsStr = "%sh%sm%ss%s%s" % unitsSepTuple
         else:
-            unitsStr = "%s\N{DEGREE SIGN}%s\'%s\"%s%s" % unitsSepTuple
+            unitsStr = u("%s\N{DEGREE SIGN}%s\'%s\"%s%s" % unitsSepTuple)
         self.unitsVar.set(unitsStr)
 
         # index = nFields*2-1  # use if there is a separator between characters, e.g. h:m:s

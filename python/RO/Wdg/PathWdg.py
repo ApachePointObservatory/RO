@@ -31,6 +31,7 @@ import RO.AddCallback
 import RO.Constants
 from .CtxMenu import CtxMenuMixin
 from .SeverityMixin import SeverityActiveMixin
+from six import u
 
 class BasePathWdg (tkinter.Button, RO.AddCallback.BaseMixin, CtxMenuMixin,
     SeverityActiveMixin):
@@ -150,7 +151,7 @@ class BasePathWdg (tkinter.Button, RO.AddCallback.BaseMixin, CtxMenuMixin,
             if len(path) > self.maxChar:
                 dispStr = "".join((
                     path[0:self.leftChar],
-                    "\N{HORIZONTAL ELLIPSIS}",
+                    u("\N{HORIZONTAL ELLIPSIS}"),
                     path[-self.rightChar:],
                 ))
             else:
