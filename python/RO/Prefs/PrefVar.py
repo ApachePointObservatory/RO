@@ -98,6 +98,7 @@ import os.path
 import re
 import sys
 from six.moves import tkinter
+from six.moves import tkinter_font as tkFont
 import RO.Alg
 import RO.CnvUtil
 import RO.MathUtil
@@ -843,7 +844,7 @@ class FontPrefVar(PrefVar):
     ):
         kargs = kargs.copy()    # prevent modifying a passed-in dictionary
 
-        self.font = font or tkinter.font.Font()
+        self.font = font or tkFont.Font()
         kargs["formatStr"] = "%r"
         kargs["cnvFunc"] = dict # a function that parsed string representations of a dict would be nicer
 
@@ -866,7 +867,7 @@ class FontPrefVar(PrefVar):
             netDefValue.update(font.configure())
         if defWdg:
             # the following is the only way I know to obtain a font dictionary from a widget
-            wdgFontDict = tkinter.font.Font(font=defWdg.cget("font")).configure()
+            wdgFontDict = tkFont.Font(font=defWdg.cget("font")).configure()
             netDefValue.update(wdgFontDict)
         if defValue:
             # defValue is the only one likely to have a bogus value; check it before applying it
@@ -981,7 +982,7 @@ class FontSizePrefVar(PrefVar):
     ):
         kargs = kargs.copy()    # prevent modifying a passed-in dictionary
 
-        self.font = tkinter.font.Font()
+        self.font = tkFont.Font()
         kargs["formatStr"] = "%s"
         kargs["cnvFunc"] = int
 
@@ -991,7 +992,7 @@ class FontSizePrefVar(PrefVar):
             netDefValue = font.cget("size")
         if defWdg:
             # the following is the only way I know to obtain a font dictionary from a widget
-            netDefValue = tkinter.font.Font(font=defWdg.cget("font")).cget("size")
+            netDefValue = tkFont.Font(font=defWdg.cget("font")).cget("size")
         if defValue:
             # defValue is the only one likely to have a bogus value; check it before applying it
             self.locCheckValue(defValue)

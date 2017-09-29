@@ -34,6 +34,7 @@ import sys
 import traceback
 import weakref
 from . import Bindings
+from .CtxMenu import addCtxMenu
 from six.moves import tkinter
 import RO.AddCallback
 import RO.Constants
@@ -123,7 +124,7 @@ class HTTPGetWdg(tkinter.Frame):
         self.yscroll.grid(row=0, column=1, sticky="ns")
         Bindings.makeReadOnly(self.text)
         if helpURL:
-            CtxMenu.addCtxMenu(
+            addCtxMenu(
                 wdg = self.text,
                 helpURL = helpURL + "#LogDisplay",
             )
