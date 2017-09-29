@@ -32,9 +32,9 @@ from . import Button
 
 class ModalDialogBase(tkinter.Toplevel):
     """Base class for modal dialogs.
-    
+
     The result is returned in self.result
-    
+
     You should subclass "body" and "setResult" and may subclass "buttons".
     """
 
@@ -48,12 +48,12 @@ class ModalDialogBase(tkinter.Toplevel):
             self.title(title)
 
         self.result = None
-        
+
         self.doneVar = tkinter.BooleanVar()
-        
+
         # widget that had focus before this dialog opened
         self.prevFocus = self.focus_get() or master
-        
+
         buttonFrame = tkinter.Frame(self)
         self.buttons(master = buttonFrame)
         buttonFrame.pack(side="bottom")
@@ -65,7 +65,7 @@ class ModalDialogBase(tkinter.Toplevel):
         if not self.initialFocus:
             self.initialFocus = self
         bodyFrame.pack(side="bottom")
-        
+
         self.protocol("WM_DELETE_WINDOW", self.close)
 
         self.geometry("+%d+%d" % (master.winfo_rootx()+50,
@@ -110,7 +110,7 @@ class ModalDialogBase(tkinter.Toplevel):
         """Create the standard "OK" and "Cancel" buttons.
         Override if you want something else.
         """
-        
+
         self.okWdg = Button.Button(master, text="OK", width=6, command=self.ok, default="active")
         self.okWdg.pack(side="left")
         self.cancelWdg = Button.Button(master, text="Cancel", width=6, command=self.close)
@@ -128,7 +128,7 @@ class ModalDialogBase(tkinter.Toplevel):
         except ValueError:
             self.initialFocus.focus_set() # put focus back to initial input widget
             return
-            
+
         self.close()
 
     def close(self, event=None):
@@ -140,9 +140,9 @@ class ModalDialogBase(tkinter.Toplevel):
 
     def setResult(self):
         """Set self.result based on supplied data.
-        
+
         Raise ValueError if the data is not valid.
-        
+
         Called if "OK" pressed. Subclasses should override.
         """
         self.result = "OK"
@@ -151,27 +151,27 @@ class ModalDialogBase(tkinter.Toplevel):
 if __name__ == "__main__":
     class TestDialog(ModalDialogBase):
         def body(self, master):
-    
+
             tkinter.Label(master, text="Name:").grid(row=0)
             tkinter.Label(master, text="Password:").grid(row=1)
-    
+
             self.e1 = tkinter.Entry(master)
             self.e2 = tkinter.Entry(master, show="*")
-    
+
             self.e1.grid(row=0, column=1)
             self.e2.grid(row=1, column=1)
             return self.e1 # initial focus
-    
+
         def setResult(self):
             first = self.e1.get()
             second = self.e2.get()
             self.result = (first, second)
-    
+
     def doDialog():
         d = TestDialog(root, "User Info")
         l["text"] = "Result: %s" % (d.result,)
         print(d.result)
-            
+
     root = tkinter.Tk()
     e = tkinter.Entry(root)
     e.pack()

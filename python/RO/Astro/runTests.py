@@ -19,7 +19,7 @@ for dirpath, dirnames, filenames in os.walk(thisDir):
     # strip invisible directories and files
     newdirnames = [dn for dn in dirnames if not dn.startswith(".")]
     dirnames[:] = newdirnames
-    
+
     # don't test modules in the root directory
     if isFirst:
         isFirst = False

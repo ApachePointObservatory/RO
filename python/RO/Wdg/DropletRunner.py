@@ -70,16 +70,16 @@ from . import LogWdg
 
 class DropletRunner(object):
     """Run a script as a droplet (an application onto which you drop file) with a log window.
-    
+
     Data the script writes to sys.stdout and sys.stderr is written to a log window;
-    stderr output is shown in red.    
+    stderr output is shown in red.
 
     On Mac OS X additional files may be dropped on the application icon once the first batch is processed.
     I don't know how to support this on other platforms.
     """
     def __init__(self, scriptPath, title=None, initialText=None, **keyArgs):
         """Construct and run a DropletRunner
-        
+
         Inputs:
         - scriptPath: path to script to run when files are dropped on the application
         - title: title for log window; if None then generated from scriptPath
@@ -93,7 +93,7 @@ class DropletRunner(object):
 
         self.tkRoot = tkinter.Tk()
         self._timer = Timer()
-        
+
         if title is None:
             title = os.path.splitext(os.path.basename(scriptPath))[0]
         self.tkRoot.title(title)
@@ -113,7 +113,7 @@ class DropletRunner(object):
         self.logWdg.grid(row=0, column=0, sticky="nsew")
         self.tkRoot.grid_rowconfigure(0, weight=1)
         self.tkRoot.grid_columnconfigure(0, weight=1)
-        
+
         if initialText:
             self.logWdg.addOutput(initialText)
 
@@ -145,7 +145,7 @@ class DropletRunner(object):
             self._cleanup()
         else:
             self._timer(0.1, self._poll)
-    
+
     def _readStdOut(self, *dumArgs):
         """Read and log data from script's stdout
         """

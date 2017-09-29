@@ -21,7 +21,7 @@ class TCPClient(tkinter.Frame):
         )
         self.logWdg.grid(row=0, column=0, sticky="nsew")
 #        self.logWdg.pack(side="top", expand=True, fill="both")
-        
+
         self.cmdWdg = RO.Wdg.CmdWdg(
             master = self,
             maxCmds = 100,
@@ -29,7 +29,7 @@ class TCPClient(tkinter.Frame):
         )
         self.cmdWdg.grid(row=1, column=0, sticky="ew")
 #        self.cmdWdg.pack(side="top", expand=True, fill="x")
-        
+
         self.conn = RO.Comm.TCPConnection.TCPConnection(
             host = addr,
             port = port,
@@ -38,17 +38,17 @@ class TCPClient(tkinter.Frame):
             readCallback = self.connRead,
         )
         self.conn.connect()
-        
+
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
-    
+
     def connState(self, sock):
         state, reason = sock.fullState
         if reason:
             self.logMsg("*** Socket %s: %s" % (state, reason))
         else:
             self.logMsg("*** Socket %s" % (state,))
-    
+
     def connRead(self, sock, readStr):
         self.logMsg(repr(readStr))
 
@@ -56,7 +56,7 @@ class TCPClient(tkinter.Frame):
         if not self.conn.isConnected:
             self.logMsg("*** Not connected")
         self.conn.writeLine(cmd)
-    
+
     def logMsg(self, msg):
         """Append msg to log, with terminating \n"""
         self.logWdg.addOutput(msg + "\n")
@@ -66,13 +66,13 @@ if __name__ == "__main__":
     if len(sys.argv) not in (2,3):
         print("Usage: tcpclient.py addr [port]")
         sys.exit(1)
-    
+
     addr = sys.argv[1]
     if len(sys.argv) > 2:
         port = sys.argv[2]
     else:
         port = 23
-    
+
     root = tkinter.Tk()
     root.geometry("400x200")
     client = TCPClient(root, addr, port)

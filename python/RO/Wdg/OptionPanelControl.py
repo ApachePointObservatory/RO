@@ -48,12 +48,12 @@ class _WdgButton(Checkbutton):
         takefocus = True,
     ):
         self.__wdg = wdg
-        
+
         try:
             var = wdg.getShowVar()
         except AttributeError:
             var = tkinter.BooleanVar()
-        
+
         Checkbutton.__init__(self,
             master = master,
             text = wdgName,
@@ -63,7 +63,7 @@ class _WdgButton(Checkbutton):
             var = var,
             callFunc = self._updVisible,
         )
-    
+
     def _updVisible(self, btn=None):
         """Handle a change in checkbutton state
         by showing or hiding the widget appropriately.
@@ -100,7 +100,7 @@ class OptionPanelControl(tkinter.Frame, CtxMenuMixin):
         - labelText text for a label above the set of checkbuttons
         - takefocus should the checkbuttons take focus?
         - **kargs   keyword arguments for Tkinter.Frame
-        
+
         All widgets in wdgList must have a common master, which the user is responsible for displaying
         (i.e. packing or gridding). This widget displays checkbuttons which will automatically
         show or hide (by gridding or ungridding) the widgets within their master frame.
@@ -108,14 +108,14 @@ class OptionPanelControl(tkinter.Frame, CtxMenuMixin):
         tkinter.Frame.__init__(self, master, **kargs)
         CtxMenuMixin.__init__(self)
         self._btnDict = {}
-        
+
         if labelText is not None:
             tkinter.Label(self, text=labelText).pack(side="top", anchor="nw")
 
         wdgMaster = wdgList[0][1].master
         emptyFrame = tkinter.Frame(wdgMaster)
         emptyFrame.grid(row=0, column=0)
-        
+
         for ind in range(len(wdgList)):
             wdgData = wdgList[ind]
             wdgName = wdgData[0]
@@ -125,12 +125,12 @@ class OptionPanelControl(tkinter.Frame, CtxMenuMixin):
                 helpText = wdgData[2]
             except IndexError:
                 helpText = "show/hide %s panel" % wdgName
-                
+
             try:
                 helpURL = wdgData[3]
             except IndexError:
                 helpURL = None
-                
+
             wdg.grid(row=0, column=ind, sticky="n")
             wdg.grid_remove()
 
@@ -144,44 +144,44 @@ class OptionPanelControl(tkinter.Frame, CtxMenuMixin):
                 takefocus = takefocus,
             )
             btn.pack(side="top", anchor="nw")
-            
+
             self._btnDict[wdgName] = btn
-    
+
     def setEnable(self, wdgName, doEnable):
         """Enable or disable the appropriate widget control button.
-        
+
         If disabled, then the associated widget is hidden,
         else it is either shown or hidden according to the button.
-        
+
         Raise KeyError if no such widget.
         """
         self._btnDict[wdgName].setEnable(doEnable)
-    
+
     def setBool(self, wdgName, doShow):
         """Set the state of the appropriate widget control button.
-        
+
         Inputs:
         - wdgName: name of widget panel
         - doShow: new state of widget control button: True/False for show/hide,
             but if panel is disabled then it remains hidden regardless.
-        
+
         Raise KeyError if no such widget.
         """
         self._btnDict[wdgName].setBool(doShow)
-    
+
 
 if __name__ == "__main__":
     from RO.Wdg.PythonTk import PythonTk
     root = PythonTk()
-    
+
     # frame for the set of hideable widgets
     wdgFrame = tkinter.Frame(root, bg="red", relief="ridge")
-    
+
     # hideable widgets
     wdgA = tkinter.Label(wdgFrame, text="Wdg A")
     wdgB = tkinter.Label(wdgFrame, text="Wdg B")
     wdgC = tkinter.Label(wdgFrame, text="Wdg C")
-    
+
     extFrame = OptionPanelControl(
         root,
         wdgList = (
@@ -192,7 +192,7 @@ if __name__ == "__main__":
         labelText="Show/Hide:",
     )
     extFrame.pack(side="left")
-    
+
     wdgFrame.pack(side="left")
 
     root.mainloop()

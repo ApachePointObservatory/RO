@@ -15,7 +15,7 @@ def GenericCallback(callback, *firstArgs, **firstKWArgs):
     """Returns a callable object that when called with (*args, **kwArgs),
     calls a callback function with arguments: (*(firstArgs + args), **allKWArgs),
     where allKWArgs = firstKWArgs updated with kwArgs
-    
+
     Note that if a given keyword argument is specified both at instantiation
     (in firstKWArgs) and when the object is called (in kwArgs),
     the value in the call (kwArgs) is used. No warning is issued.
@@ -38,7 +38,7 @@ class _GC:
             netKWArgs = self.__firstKWArgs.copy()
             netKWArgs.update(kwArgs)
         else:
-            netKWArgs = self.__firstKWArgs 
+            netKWArgs = self.__firstKWArgs
         return self.__callback (*(self.__firstArgs + args), **netKWArgs)
 
 

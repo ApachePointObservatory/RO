@@ -27,15 +27,15 @@ from . import WdgPrefs
 class IsCurrentMixin(object):
     """Mixin classes that add an "isCurrent" flag
     and adjust background color based on isCurrent.
-    
+
     Use this version for widgets without the activebackground attribute,
     including Label and Entry.
     See also IsCurrentActiveMixin.
-    
+
     Uses these RO.Wdg.WdgPref preferences:
     - "Background Color"
     - "Bad Background"
-    
+
     Adds these private attributes:
     - self._isCurrent
     - self._isCurrentPrefDict
@@ -51,7 +51,7 @@ class IsCurrentMixin(object):
         """Return isCurrent flag (False or True)
         """
         return self._isCurrent
-        
+
     def setIsCurrent(self, isCurrent):
         """Update isCurrent information.
         """
@@ -59,14 +59,14 @@ class IsCurrentMixin(object):
         if self._isCurrent != isCurrent:
             self._isCurrent = isCurrent
             self._updateIsCurrentColor()
-    
+
     def _setIsCurrentPrefDict(self):
         """Set self._isCurrentPrefDict"""
         self._isCurrentPrefDict[False] = WdgPrefs.getWdgPrefDict()["Bad Background"]
         self._isCurrentPrefDict[True] = WdgPrefs.getWdgPrefDict()["Background Color"]
         WdgPrefs.getWdgPrefDict()["Bad Background"].addCallback(self._updateIsCurrentColor, callNow=False)
         # normal background color is auto-updated within tcl; no callback needed
-        
+
     def _updateIsCurrentColor(self, *args):
         """Set the background to the current isCurrent color.
 
@@ -86,7 +86,7 @@ class IsCurrentActiveMixin(IsCurrentMixin):
     """Version of IsCurrentMixin for widgets with activebackground:
     Button, Menu, Menubutton, Radiobutton, Scale, Scrollbar.
     For Checkbutton see IsCurrentCheckbuttonMixin.
-    
+
     Uses these RO.Wdg.WdgPref preferences:
     - "Background Color"
     - "Bad Background"
@@ -124,13 +124,13 @@ class IsCurrentActiveMixin(IsCurrentMixin):
         normalColor, activeColor = [pref.getValue() for pref in self._isCurrentPrefDict[isCurrent]]
         self.configure(background = normalColor, activebackground = activeColor)
 
-class IsCurrentCheckbuttonMixin(IsCurrentActiveMixin): 
+class IsCurrentCheckbuttonMixin(IsCurrentActiveMixin):
     """Version of IsCurrentMixin for Checkbutton widgets.
-    
+
     Warning: selectbackground is forced equal to background
     if indicatoron false (since selectbackground is used
     as the text background in that case).
-    
+
     Adds these private attributes:
     - self._isCurrent
     - self._isCurrentPrefDict
@@ -146,11 +146,11 @@ class IsCurrentCheckbuttonMixin(IsCurrentActiveMixin):
     def _updateIsCurrentColor(self, *args):
         """Set the background to the current isCurrent color
         and activebackground to the current isCurrent active color.
-        
+
         Also set selectbackground = background if indicatoron = false
         (because then the text background is selectbackground
         when the button is checked).
-        
+
         Called automatically. Do NOT call manually.
         """
         if not self._isCurrentPrefDict:
@@ -169,7 +169,7 @@ class IsCurrentCheckbuttonMixin(IsCurrentActiveMixin):
 
 class AutoIsCurrentMixin(object):
     """Add optional automatic control of isCurrent to input widgets.
-    
+
     The widget must be an IsCurrent...Mixin object and must support:
     - isDefault(): return True if widget has default value, False otherwise
     - addCallback(callFunc): call a function whenever the state changes
@@ -179,7 +179,7 @@ class AutoIsCurrentMixin(object):
       the widget is current if and only if self._isCurrent true.
     - If true (automatic mode), then the widget is current
       only if the self._isCurrent flag is true and isDefault() is true.
-        
+
     To use this class:
     - Inherit from this class AND THEN from one of the IsCurrent...Mixin classes.
       AutoIsCurrentMixin must be listed BEFORE IsCurrent...Mixin,
@@ -189,7 +189,7 @@ class AutoIsCurrentMixin(object):
     Adds these private attributes:
     - self._autoIsCurrent
     - self._isCurrent
-    
+
     Note: you may wonder why there is no separate defIsCurrent flag
     for non-current default values. I certainly contemplated it,
     but it turns out to really over-complicate things, at least
@@ -205,9 +205,9 @@ class AutoIsCurrentMixin(object):
     ):
         self._autoIsCurrent = bool(autoIsCurrent)
         self._isCurrent = True
-        
+
         self.addCallback(self._updateIsCurrentColor)
-    
+
     def getIsCurrent(self):
         """Return True if value is current, False otherwise.
 
@@ -223,13 +223,13 @@ class AutoIsCurrentMixin(object):
             except (ValueError, TypeError):
                 return False
         return self._isCurrent
-    
-    
+
+
 if __name__ == "__main__":
     from six.moves import tkinter
     from . import PythonTk
     root = PythonTk.PythonTk()
-    
+
     class ColorButton(tkinter.Button, IsCurrentActiveMixin):
         def __init__(self, *args, **kargs):
             tkinter.Button.__init__(self, *args, **kargs)
@@ -260,14 +260,14 @@ if __name__ == "__main__":
         print("Set isCurrent %r" % (isCurrent,))
         for wdg in wdgSet:
             wdg.setIsCurrent(isCurrent)
-    
+
     isCurrentVar = tkinter.BooleanVar()
     isCurrentVar.set(True)
     isCurrentVar.trace_variable("w", setIsCurrent)
 
     stateVar = tkinter.StringVar()
     stateVar.set("Normal")
-    
+
     entryVar = tkinter.StringVar()
     entryVar.set("Entry")
     wdgSet = (
@@ -293,5 +293,5 @@ if __name__ == "__main__":
     )
     for wdg in wdgSet:
         wdg.pack(fill=tkinter.X)
-            
+
     root.mainloop()

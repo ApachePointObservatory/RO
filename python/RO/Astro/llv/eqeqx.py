@@ -11,17 +11,17 @@ _ArcSecPerRev = RO.PhysConst.ArcSecPerDeg * 360.0
 
 def eqeqx(tdb):
     """The equation of the equinoxes (IAU 1994).
-    
+
     Inputs:
     - tdb (MJD): TDB (loosely ET) as a Modified Julian Date
-    
+
     Returns eqeqx, where:
     Greenwich apparent sidereal time = Greenwich mean sidereal time + eqeqx
 
     Based on Pat Wallace's EQEQX, which in turn is based on:
     IAU Resolution C7, Recommendation 3 (1994)
     Capitaine, N. & Gontier, A.-M., Astron. Astrophys., 275, 645-650 (1993)
-    
+
     History:
     Patrick Wallace   Starlink   21 November 1994
     2002-07-11 ROwen  Converted to Python

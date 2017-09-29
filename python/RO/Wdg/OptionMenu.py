@@ -125,7 +125,7 @@ class _DoItem:
 class OptionMenu(Menubutton, RO.AddCallback.TkVarMixin,
     AutoIsCurrentMixin, IsCurrentActiveMixin, SeverityActiveMixin):
     """A Tkinter OptionMenu that adds many features.
-    
+
     Inputs:
     - items     a list of items (strings) for the menu;
                 if an item = None then a separator is inserted
@@ -204,7 +204,7 @@ class OptionMenu(Menubutton, RO.AddCallback.TkVarMixin,
         if trackDefault is None:
             trackDefault = bool(autoIsCurrent)
         self.trackDefault = trackDefault
-        
+
         # handle keyword arguments for the Menubutton
         # start with defaults, update with user-specified values, if any
         # then set text or textvariable
@@ -236,12 +236,12 @@ class OptionMenu(Menubutton, RO.AddCallback.TkVarMixin,
 
         self.setItems(items, helpText=helpText, checkCurrent = False, checkDefault = False)
         self.setDefault(defValue, isCurrent = isCurrent, doCheck = True, showDefault = showDefault)
-        
+
         # add callback function after setting default
         # to avoid having the callback called right away
         if callFunc:
             self.addCallback(callFunc, callNow=False)
-    
+
     def asString(self, val):
         """Return display string associated with specified value:
         self.noneDisplay if val is None, val otherwise.
@@ -250,11 +250,11 @@ class OptionMenu(Menubutton, RO.AddCallback.TkVarMixin,
             return val
         else:
             return self.noneDisplay
-    
+
     def asValue(self, str):
         """Return value associated with display string:
         None if str = self.noneDisplay and str is not a valid value, str otherwise.
-        
+
         Note: this is the inverse transform of asString only if noneDisplay is not a valid value.
         """
         if str == self.noneDisplay and str not in self._items:
@@ -284,11 +284,11 @@ class OptionMenu(Menubutton, RO.AddCallback.TkVarMixin,
         From Tkinter's OptionMenu"""
         Menubutton.destroy(self)
         self._menu = None
-    
+
     def expandValue(self, value):
         """Expand a value, unabbreviating and case correcting,
         as appropriate.
-        
+
         Returns:
         - value: the expanded value, or the original value if None or invalid.
             Expansion of abbreviations and correction of case
@@ -304,7 +304,7 @@ class OptionMenu(Menubutton, RO.AddCallback.TkVarMixin,
             return self._matchItem.getUniqueMatch(value), True
         except ValueError:
             return value, False
-    
+
     def getDefault(self):
         """Returns the default value.
         """
@@ -313,7 +313,7 @@ class OptionMenu(Menubutton, RO.AddCallback.TkVarMixin,
     def getIndex(self, item=None):
         """Returns the index of the specified item,
         or the currently selected item if item=None.
-        
+
         Originally used self._menu.index,
         but that gives the wrong answer if the item
         is the string representation of an integer.
@@ -330,46 +330,46 @@ class OptionMenu(Menubutton, RO.AddCallback.TkVarMixin,
             return self._items.index(item)
         except ValueError:
             return None
-    
+
     def getMenu(self):
         """Returns the Menu object from the OptionMenu;
         handy if you want to modify it in some way but use sparingly
         as you can easily manipulate it to foul up this widget
         """
         return self._menu
-    
+
     def getString(self):
         """Returns the current value of the field, or the default if the current value is not valid.
-        
+
         If you want the displayed value, regardless of validity, use getVar().get()
         """
         if not self.isValid():
             return self.defValue or ""
         return self._var.get()
-    
+
     def getVar(self):
         """Returns the variable that is set to the currently selected item
         """
         return self._var
-    
+
     def index(self, val=None):
         """Return the index of an item.
-        
+
         Inputs:
         - val: the item for which an index is desired;
                 None for the currently selected item.
-        
+
         Raise ValueError if no match. This can happen even if value is None
         because the displayed value can be forced equal to a value
         not in the list of allowed values.
-        
+
         Implemented to work around tktoolkit-Bugs-1581435:
         "menu index wrong if label is an integer".
         """
         if val is None:
             val = self._var.get()
         return self._items.index(val)
-    
+
     def insert_separator(self, indx, **kargs):
         """Inserts a separator at the appropriate location.
         Note: the interal self._list is not modified,
@@ -378,20 +378,20 @@ class OptionMenu(Menubutton, RO.AddCallback.TkVarMixin,
         that you inserted.
         """
         self._menu.insert_separator(indx, **kargs)
-    
+
     def isDefault(self):
         """Return True if current value matches the default value.
-        
+
         Note that it returns false if the current value is not valid.
         """
         return self._var.get() == self.asString(self.defValue)
-    
+
     def isValid(self):
         """Return True if the currently displayed value is one of the items set by setItems
         """
         return self._var.get() in self._items \
             or (self._tempValue is not None and self._var.get() == self._tempValue)
-    
+
     def restoreDefault(self):
         """Restore the default value.
         """
@@ -416,7 +416,7 @@ class OptionMenu(Menubutton, RO.AddCallback.TkVarMixin,
                 self._tempValue = str(newValue)
             elif doCheck:
                 raise ValueError("Value %r invalid" % newValue)
-    
+
         self.setIsCurrent(isCurrent)
         self._var.set(self.asString(newValue))
 
@@ -453,11 +453,11 @@ class OptionMenu(Menubutton, RO.AddCallback.TkVarMixin,
             self.restoreDefault()
         else:
             self._doCallbacks()
-    
+
     def setItems(self, items, isCurrent=None, helpText=None, checkCurrent=True, checkDef=False, **kargs):
         """Replaces the current set of items (but only if the new
         list is different than the old one).
-        
+
         Inputs:
         - see init for most of them
         - isCurrent is ignored; it's purely for compatibility with key variable callbacks
@@ -466,7 +466,7 @@ class OptionMenu(Menubutton, RO.AddCallback.TkVarMixin,
         - checkDef  if True, set default to None if it is not in the new list of items
         - if helpText is None then the old helpText is left alone if it was a single string
           (rather than a set of strings) and is nulled otherwise
-        
+
         Warnings:
         - If the default is not present in the new list,
         then the default is silently nulled.
@@ -493,7 +493,7 @@ class OptionMenu(Menubutton, RO.AddCallback.TkVarMixin,
         else:
             # new fixed help
             self.helpText = self._fixedHelpText = helpText
-        
+
         # if no change (ignoring the difference between a list and a tuple)
         # then do nothing
         if items == self._items:
@@ -501,25 +501,25 @@ class OptionMenu(Menubutton, RO.AddCallback.TkVarMixin,
 
         # update _matchItem
         self._matchItem.setList(items)
-                
+
         # if the default value is not present, null the default value
         # don't bother with abbrev expansion; defValue should already be expanded
         if checkDef and self.defValue not in items:
             self.defValue = None
-        
+
         # rebuild the menu
         self._items = items
         self._addItems()
         self._menu.delete(0, "end")
         self._addItems()
-        
+
         if checkCurrent:
             currValue = self._var.get()
             try:
                 self.set(currValue, isCurrent=self.getIsCurrent(), doCheck=True)
             except ValueError:
                 self.restoreDefault()
-        
+
         if self._helpTextDict:
             self.helpText = self._helpTextDict.get(self._var.get())
 
@@ -548,7 +548,7 @@ if __name__ == "__main__":
     from . import PythonTk
     from . import StatusBar
     root = PythonTk.PythonTk()
-    
+
     def callFunc(wdg):
         label.set(wdg.getString())
 
@@ -607,7 +607,7 @@ if __name__ == "__main__":
 
     label = Label.Label(root, width=20, anchor="w", helpText="most recently selected value")
     label.grid(row=2, column=0, columnspan=4, sticky="w")
-    
+
     statusBar = StatusBar.StatusBar(root, width=20)
     statusBar.grid(row=3, column=0, columnspan=4, sticky="ew")
 

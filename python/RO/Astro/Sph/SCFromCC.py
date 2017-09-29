@@ -10,10 +10,10 @@ import RO.SysConst
 def scFromCC(p):
     """
     Converts cartesian position to spherical coordinates.
-    
+
     Inputs:
     - p(3)      cartesian position (arbitrary units)
-    
+
     Returns a tuple containing:
     - pos(2):   spherical position (deg) as equatorial, polar angle,
                 e.g. (RA, Dec), (-HA, Dec) or (Az, Alt);
@@ -21,11 +21,11 @@ def scFromCC(p):
     - magP:     magnitude of p (same units as p)
     - atPole:   True if very near the pole, in which case pos[1] = 0,
                 and pos[0] = +/- 90 as appropriate.
-    
+
     Error Conditions:
     - If |p| is too small, raises ValueError.
     - If |p| is too large, overflows are possible--roughly if p^2 overflows.
-    
+
     History
     2002-07-23 ROwen    Converted from TCC's sph_SC2CC 1-1.
     2003-05-06 ROwen    Modified to use FAccuracy instead of FSmallNum;
@@ -54,11 +54,11 @@ def scFromCC(p):
             pos2 = -90.0
     else:
         atPole = False
-        
+
         # compute position (in degrees)
         pos1 = RO.MathUtil.atan2d (y, x)
         pos2 = RO.MathUtil.atan2d (z, math.sqrt(magPxySq))
-    
+
         # put pos1 into the range [0,360); presently it's in range (-180,180]
         if (pos1 < 0.0):
             pos1 += 360.0

@@ -16,21 +16,21 @@ def haDecFromAzAlt (azAlt, lat):
      - azAlt    (az, alt) (deg)
      - lat      latitude (degrees);
                 >0 is north of the equator, <0 is south
-    
+
     Returns a tuple containing:
     - haDec     (HA, Dec) (deg), a tuple;
                 HA is in the range (-180, 180]
     - atPole    true => object near the pole (see Error Conditions)
-    
+
     Error Conditions:
     - If converted position is too near the north or south pole,
     atPole is set true and HA is some arbitrary value.
-    
+
     Details:
       Sign conventions:
       - azimuth is 0 south and 90 east
       - ha/dec is the usual left-handed coordinate system
-    
+
     History:
     3/01 ROwen  Converted to Python from TCC's sph_AzAlt2HADec 1-2.
     2/02 ROwen  Minor tweaks to header.

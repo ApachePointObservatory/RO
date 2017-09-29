@@ -18,16 +18,16 @@ def prebn(bep0, bep1):
     Generate the matrix of precession between two epochs,
     using the old, pre-IAU1976, Bessel-Newcomb model,
     using Kinoshita's formulation.
-    
+
     Inputs:
     - bep0      beginning Besselian epoch
     - bep1      ending Besselian epoch
-    
+
     Returns:
     - pMat      the precession matrix, a 3x3 numpy.array
-    
+
     The matrix is in the sense  p(bep1)  =  pMat * p(bep0)
-    
+
     Reference:
     Kinoshita, H. (1975) 'Formulas for precession', SAO Special
     Report No. 364, Smithsonian Institution Astrophysical

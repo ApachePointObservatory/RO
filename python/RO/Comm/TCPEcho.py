@@ -23,7 +23,7 @@ class _EchoHandler(socketserver.BaseRequestHandler):
 
 def startServer(port, multi=False):
     """Create server and start serving.
-    
+
     Inputs:
     - port  TCP port
     - multi if True, serves multiple users,
@@ -38,7 +38,7 @@ def startServer(port, multi=False):
     else:
         print("Starting single-user echo server on port", port)
         print("Send 'quit' to quit the server")
-    
+
         serv.handle_request()
 
 if __name__ == "__main__":

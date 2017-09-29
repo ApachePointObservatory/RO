@@ -24,36 +24,36 @@ def ccFromSCPV(
 ):
     """
     Converts spherical position and velocity to cartesian coordinates.
-    
+
     Inputs:
     - pos(2)    spherical position
     - pm(2)     proper motion ("/century)
     - parallax  parallax (arcsec)
     - radVel    radial velocity (km/s, positive receding)
-    
+
     Returns a tuple consisting of:
     - p cartesian position (au)
     - v cartesian velocity (au/year)
     - atInf true if object is very far away(see Details)
-    
+
     Error Conditions:
     - Raises ValueError if pos[1] is not in the range -90 to 90 deg
-    
+
     Warnings:
     - Negative parallax is silently treated as zero parallax (object at infinity).
-    
+
     Details:
     - Proper motion is dPos/dt, not rate on the sky; in other words,
       pm[0] gets large near the pole.
-    
+
     - If the star is very far away (parallax < _MinParallax), atInf is set true,
     the distance is set to that limit and radial velocity is treated as zero.
-    
+
     - We could handle any range of pos[1] by checking to see if it's
     in quadrants ii or iii, and if so, adding 180 degrees to offDir
     and possibly negating pm[0] and pm[1]. However, it's not certain that's
     what the user wanted, so for now avoid all that math and just complain.
-    
+
     History
     2002-07-08 ROwen    Converted from TCC's sph_SCPV2CC 1-1.
     2002-12-23 ROwen    Cosmetic change to make pychecker happy.
@@ -68,7 +68,7 @@ def ccFromSCPV(
 
     # compute distance in au; note that distance (parsecs) = 1/parallax (")
     distAU = RO.PhysConst.AUPerParsec / parallax
-    
+
     # compute p
     p = ccFromSC (pos, distAU)
 
@@ -84,7 +84,7 @@ def ccFromSCPV(
     pmAUPerYr = [x * distAU * _RadPerYear_per_ASPerCy for x in pm]
 
     # change units of radial velocity from km/sec to au/year
-    radVelAUPerYr = radVel * _AUPerYear_per_KMPerSec 
+    radVelAUPerYr = radVel * _AUPerYear_per_KMPerSec
 
     # compute velocity vector in au/year
     v = (
@@ -92,7 +92,7 @@ def ccFromSCPV(
           pmAUPerYr[0]*cosP1*cosP0 - pmAUPerYr[1]*sinP1*sinP0 + radVelAUPerYr*cosP1*sinP0,
                                      pmAUPerYr[1]*cosP1       + radVelAUPerYr*sinP1,
     )
-    
+
     return (p, v, atInf)
 
 
@@ -119,10 +119,10 @@ if __name__ == "__main__":
         (((0, 0), (100, 200), 5, 300),
             ((41252.9612494193    ,  0.000000000000000E+000,  0.000000000000000E+000),
             (63.2848582670328    ,  0.200000000000000     ,  0.400000000000000), 0)),
-        (((0, 0), (100, 200), 5, 30), 
+        (((0, 0), (100, 200), 5, 30),
             ((41252.9612494193    ,  0.000000000000000E+000,  0.000000000000000E+000),
             (6.32848582670328    ,  0.200000000000000     ,  0.400000000000000), 0)),
-        (((0, 0), (100, 200), 5, 3), 
+        (((0, 0), (100, 200), 5, 3),
             ((41252.9612494193    ,  0.000000000000000E+000,  0.000000000000000E+000),
             (0.632848582670328   ,  0.200000000000000     ,  0.400000000000000), 0)),
         (((0, 0), (100, 200), 5, -3),

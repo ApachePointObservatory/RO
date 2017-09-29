@@ -13,16 +13,16 @@ def azAltFromHADec(haDec, lat):
     Inputs:
      - haDec    (ha, dec) (degrees)
      - lat  latitude (degrees)
-    
+
     Returns a tuple containing:
       (az, alt) (degrees)
       atPole    true => object near the pole (see Error Conditions)
-    
+
     Error Conditions:
     - If converted position is too near the pole, atPole is true and ha is undefined.
-    
+
     Sign convention: azimuth is 0 south and 90 east.
-    
+
     History:
     2002-07-23 ROwen  Converted from TCC's sph_HADec2AzAlt 1-2.
     2003-05-06 ROwen    Modified test data to match new scFromCC.

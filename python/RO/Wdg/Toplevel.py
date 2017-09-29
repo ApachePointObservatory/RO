@@ -113,19 +113,19 @@ class Toplevel(tkinter.Toplevel):
             and the widget it returns must support this method:
             - getStateTracker(): return an RO.Wdg.StateTracker object
             State is saved in the geometry file as a JSon encoding of the dict.
-          
+
         Typically one uses RO.Alg.GenericCallback or something similar to generate wdgFunc,
         for example: GenericFunction(Tkinter.Label, text="this is a label").
         But BEWARE!!! if you use GenericCallback then you must give it NAMED ARGUMENTS ONLY.
         This is because GenericCallback puts unnamed saved (specified in advance) arguments first,
         but the master widget (which is passed in later) must be first.
-        
+
         An alternative solution is to create a variant of GenericCallback that
         is specialized for Tk widgets or at least puts unnamed dynamic arguments first.
         """
         tkinter.Toplevel.__init__(self, master)
         self.wm_withdraw()
-        
+
         resizable = RO.SeqUtil.oneOrNAsList(resizable, 2, valDescr = "resizable")
         resizable = tuple([bool(rsz) for rsz in resizable])
         self.__canResize = resizable[0] or resizable[1]
@@ -138,10 +138,10 @@ class Toplevel(tkinter.Toplevel):
         if title:
             self.wm_title(title)
         self.wm_resizable(*resizable)
-        
+
         self.bind("<Unmap>", self.__recordGeometry)
         self.bind("<Destroy>", self.__recordGeometry)
-        
+
         # handle special close modes
         self.__closeMode = closeMode  # save in case someone wants to look it up
         if self.__closeMode == tl_CloseDisabled:
@@ -153,7 +153,7 @@ class Toplevel(tkinter.Toplevel):
             self.bind("<<Close>>", stopEvent)
         elif self.__closeMode == tl_CloseWithdraws:
             self.protocol("WM_DELETE_WINDOW", self.withdraw)
-        
+
         # if a widget creation function supplied, use it
         if wdgFunc:
             try:
@@ -167,8 +167,8 @@ class Toplevel(tkinter.Toplevel):
                 self._stateTracker = self.__wdg.getStateTracker()
                 if self._stateTracker is None:
                     raise RuntimeError("getStateTracker returned None")
-                    
-            
+
+
         elif doSaveState:
             raise RuntimeError("You must provide wdgFunc if you specify doSaveState True")
 
@@ -192,12 +192,12 @@ class Toplevel(tkinter.Toplevel):
             self.makeVisible()
         else:
             self.setGeometry(geometry)
-        
+
         # it is unlikely that the state will depend on the geometry, but just in case,
         # record the default state last
         if self.getDoSaveState():
             self._defState = self._stateTracker.getState()
-    
+
     def setGeometry(self, geomStr):
         """Set the geometry of the window based on a Tk geometry string.
 
@@ -220,7 +220,7 @@ class Toplevel(tkinter.Toplevel):
         self.geometry(constrainedGeomStr)
         if not self.getVisible():
             self.__geometry = geom.toTkStr(includeExtent=None)
-    
+
     def __recordGeometry(self, evt=None):
         """Record the current geometry of the window.
         """
@@ -233,10 +233,10 @@ class Toplevel(tkinter.Toplevel):
 
         self.__geometry = self.geometry()
         self._reportedBadPosition = False
-    
+
     def __adjWidth(self, evt=None):
         """Update geometry to shrink-to-fit width and user-requested height
-        
+
         Use as the binding for <Configure> if resizable = (True, False).
         """
         height = self.winfo_height()
@@ -245,10 +245,10 @@ class Toplevel(tkinter.Toplevel):
         reqwidth = self.winfo_reqwidth()
         if self.winfo_width() != reqwidth:
             self.geometry("%sx%s" % (reqwidth, height))
-    
+
     def __adjHeight(self, evt=None):
         """Update geometry to shrink-to-fit height and user-requested width
-        
+
         Use as the binding for <Configure> if resizable = (False, True).
         """
         width = self.winfo_width()
@@ -257,40 +257,40 @@ class Toplevel(tkinter.Toplevel):
         reqheight = self.winfo_reqheight()
         if self.winfo_height() != reqheight:
             self.geometry("%sx%s" % (width, reqheight))
-    
+
     def getVisible(self):
         """Returns True if the window is visible, False otherwise
         """
         return self.winfo_exists() and self.winfo_ismapped()
-    
+
     def getGeometry(self):
         """Returns the geometry string of the window.
-        
+
         Similar to the standard geometry method, but:
         - If the window is visible, the geometry is recorded as well as returned.
         - If the winow is not visible, the last recorded geometry is returned.
         - If the window was never displayed, returns the initial geometry
           specified, if any, else ""
-        
+
         The position is measured in pixels from the upper-left-hand corner.
         """
         if self.getVisible():
             self.__recordGeometry()
         return self.__geometry
-    
+
     def getDoSaveState(self):
         """Returns True if saving state
         """
         return self._stateTracker is not None
-    
+
     def getStateIsDefault(self):
         """Returns the state dictionary of the underlying widget and a flag indicating if default
-        
+
         Returns three items:
         - stateDict: the state dictionary of the underlying widget, or {} if not saving state
         - isDefault: a flag indicating whether the state is the default state;
             always True if not saving state
-        
+
         Raise RuntimeError if not saving state
         """
         if not self.getDoSaveState():
@@ -302,33 +302,33 @@ class Toplevel(tkinter.Toplevel):
 
     def setState(self, stateDict):
         """Set the state dictionary of the underlying widget
-        
+
         Raise RuntimeError if not saving state
         """
         if not self.getDoSaveState():
             raise RuntimeError("Not saving state")
         self._stateTracker.setState(stateDict)
-        
+
     def getWdg(self):
         """Returns the contained widget, if it was specified at creation with wdgFunc.
         Please use with caution; this is primarily intended for debugging.
         """
         return self.__wdg
-    
+
     def makeVisible(self):
         """Displays the window, if withdrawn or deiconified, or raises it if already visible.
         """
         if self.wm_state() == "normal":
             # window is visible
             self.lift()  # note: the equivalent tk command is "raise"
-        else:           
+        else:
             # window is withdrawn or iconified
             # At one time I set the geometry first "to avoid displaying and then moving it"
             # but I can't remember why this was useful; meanwhile I've commented it out
 #           self.setGeometry(self.__geometry)
             self.wm_deiconify()
             self.lift()
-    
+
     def __printInfo(self):
         """A debugging tool prints info to the main window"""
         print("info for RO.Wdg.Toplevel %s" % self.wm_title())
@@ -360,7 +360,7 @@ class ToplevelSet(object):
             - visible flag; None for no default
         - createFile: if the geometry file does not exist, create a new blank one?
         """
-        
+
         self.defFileName = fileName
 
         # geometry, visibility and state dictionaries
@@ -388,7 +388,7 @@ class ToplevelSet(object):
         self.tlDict = {}    # dictionary of name:toplevel items
         if self.defFileName:
             self.readGeomVisFile(fileName, createFile)
-    
+
     def addToplevel(self,
         toplevel,
         name,
@@ -398,15 +398,15 @@ class ToplevelSet(object):
         if self.getToplevel(name):
             raise RuntimeError("toplevel %r already exists" % (name,))
         self.tlDict[name] = toplevel
-    
-    def createToplevel(self, 
+
+    def createToplevel(self,
         name,
         master=None,
         defGeom="",
         defVisible=None,
         **kargs):
         """Create a new Toplevel, add it to the set and return it.
-        
+
         Inputs are:
         - name: unique identifier for Toplevel.
             If you don't specify a separate title in kargs,
@@ -422,7 +422,7 @@ class ToplevelSet(object):
         - **kargs: keyword arguments for Toplevel, which see;
             note that visible is ignored unless defVisible is omitted
             and visible exists, in which case defVisible = visible
-        
+
         Return the new Toplevel
         """
         if self.getToplevel(name):
@@ -441,7 +441,7 @@ class ToplevelSet(object):
             kargs["title"] = name.split(".")[-1]
         #print "ToplevelSet is creating %r with master = %r, geom= %r, kargs = %r" % (name, master, geom, kargs)
         newToplevel = Toplevel(master, geom, **kargs)
-        
+
         # restore state, if appropriate
         if newToplevel.getDoSaveState():
             stateDict = self.fileState.get(name)
@@ -450,31 +450,31 @@ class ToplevelSet(object):
                 newToplevel.setState(stateDict)
 #             else:
 #                 print "no saved state for Toplevel %s" % (name,)
-            
+
         self.tlDict[name] = newToplevel
         return newToplevel
-    
+
     def getDesGeom(self, name):
         """Return the desired geometry for the named toplevel, or "" if none.
-        
+
         Inputs:
         - name: name of toplevel
-        
+
         Returns geometry in standard Tk format: <width>x<height>[+/-<x0>+/-<x0>]
         where +/- means + or - and the extent information in [] may be missing.
-        
+
         The desired geometry is the entry in the geometry file (if any),
         else the entry in the default geometry dictionary.
-        
+
         Warning: the desired geometry may be entirely off screen.
         Eventually I hope to constrain it.
         """
         desGeom = self.fileGeomDict.get(name, self.defGeomDict.get(name, ""))
         return desGeom
-    
+
     def getDesVisible(self, name):
         """Return the desired visiblity for the named toplevel, or True if none.
-        
+
         The desired visibility is the entry in the geom/vis file (if any),
         else the entry in the default visibility dictionary.
         """
@@ -490,7 +490,7 @@ class ToplevelSet(object):
             del self.tlDict[name]
             return None
         return tl
-    
+
     def getNames(self, prefix=""):
         """Return all window names of windows that start with the specified prefix
         (or all names if prefix omitted).
@@ -519,13 +519,13 @@ class ToplevelSet(object):
         if not tl:
             raise RuntimeError("No such window %r" % (name,))
         tl.makeVisible()
-    
+
     def readGeomVisFile(self, fileName=None, doCreate=False):
         """Read toplevel geometry, visibility and state from a file.
         Inputs:
         - fileName: full path to file
         - doCreate: if file does not exist, create a blank one?
-        
+
         File format:
         - Comments (starting with "#") and blank lines are ignored.
         - Data lines have the format:
@@ -538,7 +538,7 @@ class ToplevelSet(object):
         fileName = fileName or self.defFileName
         if not fileName:
             raise RuntimeError("No geometry file specified and no default")
-        
+
         if not os.path.isfile(fileName):
             if doCreate:
                 try:
@@ -555,7 +555,7 @@ class ToplevelSet(object):
             inFile = RO.OS.openUniv(fileName)
         except Exception as e:
             raise RuntimeError("Could not open geometry file %r; error: %s\n" % (fileName, RO.StringUtil.strFromException(e)))
-            
+
         newGeomDict = {}
         newVisDict = {}
         newState = {}
@@ -585,7 +585,7 @@ class ToplevelSet(object):
                     if vis:
                         vis = RO.CnvUtil.asBool(vis)
                         newVisDict[name] = vis
-                
+
                 if len(geomVisList) > 2:
                     stateDictStr = geomVisList[2].strip()
                     if stateDictStr:
@@ -602,13 +602,13 @@ class ToplevelSet(object):
             self.fileState = newState
         finally:
             inFile.close()
-        
+
     def writeGeomVisFile(self, fileName=None, readFirst = True):
         """Writes toplevel geometry and visiblity info to a file
         that readGeomVisFile can read.
         Comments out entries for windows with default geometry and visibility,
         unless the data was specified in the file.
-        
+
         Inputs:
         - fileName: full path name of geometry file
         - readFirst: read the geometry file first (if it exists) to be sure of having
@@ -617,7 +617,7 @@ class ToplevelSet(object):
         fileName = fileName or self.defFileName
         if not fileName:
             raise RuntimeError("No geometry file specified and no default")
-        
+
         if readFirst and os.path.isfile(fileName):
             self.readGeomVisFile(fileName)
 
@@ -625,7 +625,7 @@ class ToplevelSet(object):
             outFile = open(fileName, "w")
         except Exception as e:
             raise RuntimeError("Could not open geometry file %r; error: %s\n" % (fileName, RO.StringUtil.strFromException(e)))
-            
+
         try:
             names = self.getNames()
             names.sort()
@@ -635,7 +635,7 @@ class ToplevelSet(object):
                 doSaveState = False
                 currState = {}
                 isDefaultState = True
-                
+
                 tl = self.getToplevel(name)
                 if tl:
                     currGeom = tl.getGeometry() or defGeom # getGeometry may return "" if window never displayed
@@ -650,16 +650,16 @@ class ToplevelSet(object):
                     currVis = False
                 isDefaultGeom = currGeom == defGeom
                 isDefaultVis = currVis == defVis
-                
+
                 # record current values in file dictionaries (to match the file we're writing)
                 self.fileGeomDict[name] = currGeom
                 self.fileVisDict[name] = currVis
                 self.fileState[name] = currState
-                
+
                 valueList = [currGeom, str(currVis)]
                 if doSaveState:
                     valueList.append(json.dumps(currState))
-                    
+
                 # comment out entry if all values are default
                 if isDefaultGeom and isDefaultVis and isDefaultState:
                     prefixStr = "# "
@@ -673,7 +673,7 @@ class ToplevelSet(object):
 if __name__ == "__main__":
     from RO.Wdg.PythonTk import PythonTk
     root = PythonTk()
-    
+
     testWin = Toplevel(
         title="test window",
         resizable=(False, True),
@@ -681,15 +681,15 @@ if __name__ == "__main__":
     )
     l = tkinter.Label(testWin, text="This is a label")
     l.pack()
-    
+
     def printInfo():
         print("testWin.getGeometry = %r" % (testWin.getGeometry(),))
         print("geometry = %r" % (testWin.geometry()))
         print("width, height = %r, %r" % (testWin.winfo_width(), testWin.winfo_height()))
         print("req width, req height = %r, %r" % (testWin.winfo_reqwidth(), testWin.winfo_reqheight()))
         print("")
-    
+
     b = tkinter.Button(root, text="Window Info", command=printInfo)
     b.pack()
-            
+
     root.mainloop()

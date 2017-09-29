@@ -31,10 +31,10 @@ def parseHubMsg(astr):
         - "dataStart": starting index of data in astr,
         - "data": dataDict, as returned by parseKeyValueData(astr[dataStart:]),
         - "msgStr": astr,
-    
+
     For details of the header format, please see ParseHeader:getHubHeader
     For details of the keyword/value format and the returned dataList,
-    please see ParseData:parseKeyValueData  
+    please see ParseData:parseKeyValueData
     """
     # start the message dictionary by extracting the header from astr;
     # this also returns the index to the next item (start of data) in astr
@@ -43,14 +43,14 @@ def parseHubMsg(astr):
 
     # coerce message type to lowercase
     msgDict["msgType"] = msgDict["msgType"].lower()
-    
+
     # extract data
     msgDict['dataStart'] = dataStart
     msgDict['data'] = parseKeyValueData(astr[dataStart:])
-    
+
     # include full message string
     msgDict['msgStr'] = astr
-        
+
     return msgDict
 
 

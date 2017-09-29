@@ -10,7 +10,7 @@ Tested with pyPgSQL (for PostgreSQL) and MySQLdb (for MySQL).
                     Fixed a nonfunctional assert statement in insertRow.
 2005-11-14 ROwen    Renamed module from PgSQLUtil to SQLUtil.
                     Renamed getLastInsertedID to getLastInsertedIDPgSQL.
-                    Added getLastInsertedIDMySQL.                       
+                    Added getLastInsertedIDMySQL.
 2005-12-13 ROwen    Mod. insertRow so fieldsToAdd defaults to all fields.
                     Mod. rowExists so fieldsToCheck defaults to all fields.
                     Added NullDBConn, NullDBCursor, for testing database code
@@ -37,7 +37,7 @@ class FieldDescr(object):
     """
     def __init__(self, fieldName, cnvFunc=str, blankOK=False, blankVal=None, isArray=False, arraySep=_ArraySepStr):
         """Create a new database field descriptor.
-        
+
         Inputs:
         - fieldName: the name of the field, as given in the database
         - cnvFunc: the function to convert a string value to the final value;
@@ -77,7 +77,7 @@ class FieldDescr(object):
             return [self._scalarValFromStr(itemStrVal) for itemStrVal in strVal.split(self.arraySep)]
         else:
             return self._scalarValFromStr(strVal)
-        
+
 
 def dateToDBFmt(strVal, fromFmt="%m/%d/%Y"):
     """Convert a date from the specified fromFmt (a string accepted by time.strptime)
@@ -94,9 +94,9 @@ def dataDictFromStr(line, fieldDescrList, fieldSep=_DataSepStr):
     """Converts a set of string values for fields into a data dictionary;
     The data is given as a list of fields, in the order specified by fieldDescrList
     and separated by fieldSep;
-    
+
     The defaults are appropriate to FileMaker Pro "merge" format.
-    
+
     Inputs:
     - fieldDescrList: a list of FieldDescr objects, one per field
     - fieldSep: string that separates values for each field
@@ -110,14 +110,14 @@ def dataDictFromStr(line, fieldDescrList, fieldSep=_DataSepStr):
         raise RuntimeError("Bad data length; %s data items != %s field descriptors in line:\n%r\n" % \
             (len(dataArry), len(fieldDescrList), line)
         )
-    
+
     dataDict = {}
     for ind in range(len(fieldDescrList)):
         fieldDescr = fieldDescrList[ind]
         try:
             strVal = dataArry[ind]
         except IndexError:
-        
+
             print("fieldDescrList(%s)=%s" % (len(fieldDescrList), fieldDescrList))
             print("dataArry(%s)=%s" % (len(dataArry), dataArry))
             raise
@@ -129,11 +129,11 @@ def formatFieldEqVal(fieldNames, sepStr = " and "):
     """Format a (field1=value1) and (field2=value2)... clause
     in the form used with a data dictionary.
     This is intended to help generate select commands.
-    
+
     Inputs:
     - fieldNames: a list or other sequence of field names
     - sepStr: the string to separate field=value pairs.
-    
+
     Example:
     sqlCmd = "select * from %s where %s" % (tableName, formatFieldEqVal(fieldNames))
     dbCursor.execute(sqlCmd, dataDict)
@@ -150,7 +150,7 @@ def getLastInsertedIDPgSQL(dbCursor, table, primKeyName):
     - dbCursor: database cursor
     - table: name of table
     - primKeyName: name of primary key field
-    
+
     Database-specific because every database seems to handle this differently.
     For MySQLDb see the documentation for dbCursor.last_insert_id().
     """
@@ -166,7 +166,7 @@ def getLastInsertedIDPgSQL(dbCursor, table, primKeyName):
 
 def insertRow(dbCursor, table, dataDict, fieldsToAdd=None, fieldsToCheck=None):
     """Insert a row of data into the specified table in a database.
-    
+
     Inputs:
     - dbCursor: database cursor
     - table: name of table
@@ -182,10 +182,10 @@ def insertRow(dbCursor, table, dataDict, fieldsToAdd=None, fieldsToCheck=None):
     # if fieldsToCheck specified, make sure an entry with matching fields does not already exist
     if fieldsToCheck and rowExists(dbCursor, table, dataDict, fieldsToCheck):
         raise RuntimeError("a matching entry already exists")
-    
+
     if fieldsToAdd is None:
         fieldsToAdd = list(dataDict.keys())
-    
+
     addFieldStr = ", ".join(fieldsToAdd)
     addValueList = ["%%(%s)s" % (fieldName,) for fieldName in fieldsToAdd]
     addValueStr = ", ".join(addValueList)
@@ -197,7 +197,7 @@ def insertRow(dbCursor, table, dataDict, fieldsToAdd=None, fieldsToCheck=None):
 def insertMany(dbCursor, table, dataDict, arrayFields, scalarFields=None):
     """Insert multiple rows into the specified table of a database.
     Should raise an exception if it fails--does it do so reliably?
-    
+
     Inputs:
     - dbCursor: database cursor
     - table: name of table
@@ -207,7 +207,7 @@ def insertMany(dbCursor, table, dataDict, arrayFields, scalarFields=None):
         one row will be added for each array element
     - scalarFields: a list of fields to add whose values are scalars;
         these fields will have the same value for every added row
-        
+
     Returns the number of rows added.
     """
     scalarFields = scalarFields or []
@@ -222,21 +222,21 @@ def insertMany(dbCursor, table, dataDict, arrayFields, scalarFields=None):
             numEntries = len(dataDict[fieldName])
     if numEntries == 0:
         return 0
-    
+
     # convert the data to the form of a list of tuples, one per row,
     # with values in the same order as allFields = scalarFields + arrayFields
     listOfLists = [[dataDict[fieldName]]*numEntries for fieldName in scalarFields] \
         + [dataDict[fieldName] for fieldName in arrayFields]
     zippedList = list(zip(*listOfLists))
     allFields = scalarFields + arrayFields
-    
+
     # set up the query as:
     # insert into <table> (<fieldName1>, <fieldName2>,...) values (%s, %s,...)
     # note: (%s, %s, ...) is just a comma-separated set of "%s"s, one per field
     fieldListStr = ", ".join(allFields) # "fieldName1, fieldName2, ..."
     sArry = ("%s, " * len(allFields))[:-2]
     sqlCmd = "insert into %s (%s) values (%s)" % (table, fieldListStr, sArry)
-    
+
     # execute the insert
     dbCursor.executemany(sqlCmd, zippedList)
     return numEntries
@@ -245,7 +245,7 @@ def insertMany(dbCursor, table, dataDict, arrayFields, scalarFields=None):
 def rowExists(dbCursor, table, dataDict, fieldsToCheck=None):
     """Check to see if row exists with matching values in the specified fields.
     Returns True or False.
-    
+
     Inputs:
     - dbCursor: database cursor
     - table: name of table
@@ -258,7 +258,7 @@ def rowExists(dbCursor, table, dataDict, fieldsToCheck=None):
     # generate the sql command:
     # select * from table where (fieldName1=%(fieldName1)s, fieldName2=%(fieldName2)s,...)
     sqlCmd = "select * from %s where %s" % (table, formatFieldEqVal(fieldsToCheck))
-    
+
     # execute the command; if any rows found, the row exists
     dbCursor.execute(sqlCmd, dataDict)
     result = dbCursor.fetchone()
@@ -267,10 +267,10 @@ def rowExists(dbCursor, table, dataDict, fieldsToCheck=None):
 
 class NullDBCursor (object):
     """A fake database cursor for testing database code.
-    
+
     This likely does not support the entire database cursor interface,
     but does support everything used by RO.SQLUtil.
-    
+
     It prints out the SQL commands that would be executed.
     """
     def __init__(self, db):
@@ -290,22 +290,22 @@ class NullDBCursor (object):
                 if len(valStr) > _MaxDiagnosticLen:
                     valStr = valStr[0:_MaxDiagnosticLen-10] + "..." + valStr[-7:]
                 print("* %s = %s" % (key, valStr))
-    
+
     def fetchone(self):
         return [1]
-    
+
     def executemany(self, sqlCmd, aList):
         print("%s.executemany %s" % (self, sqlCmd))
         for item in aList:
             print("  %s" % (item,))
-    
+
     def __repr__(self):
         return "NullDBCursor(db=%s)" % (self.db,)
 
 
 class NullDBConn (object):
     """A fake database connection for testing database code.
-    
+
     Example:
     import MySQLdb
     import RO.SQLUtil
@@ -315,7 +315,7 @@ class NullDBConn (object):
     else:
         connect = MySQLdb.connect
     dbConn = connect(user=..., db=..., ....)
-    
+
     This likely does not support the entire database connection interface,
     but does support everything used by RO.SQLUtil.
     """
@@ -329,20 +329,20 @@ class NullDBConn (object):
 
     def cursor(self):
         return NullDBCursor(db = self.db)
-    
+
     def commit(self):
         print("%s.commit" % (self,))
-    
+
     def rollback(self):
         print("%s.rollback" % (self,))
-    
+
     def close(self):
         self.isOpen = False
         print("%s.close" % (self,))
-    
+
     def __str__(self):
         return "NullDBConn(db=%s; user=%s)" % (self.db, self.user)
-        
+
     def __repr__(self):
         if self.isOpen:
             state = "open"

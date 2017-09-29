@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""    
+"""
 History:
 2002-07-12 ROwen    Converted to Python from the TCC's cnv_J2AppGeo 7-3
 2007-04-24 ROwen    Converted from Numeric to numpy.
@@ -13,19 +13,19 @@ from RO.Astro import llv
 def geoFromICRS(icrsP, icrsV, agData):
     """
     Converts ICRS coordinates to apparent geocentric coordinates.
-    
+
     Inputs:
     - icrsP(3)      ICRS cartesian position (au)
     - icrsV(3)      ICRS cartesian velocity (au/year) (e.g. proper motion and radial velocity)
     - agData        an AppGeoData object containing star-independent apparent geocentric data
-    
+
     Returns:
     - appGeoP(3)    apparent geocentric cartesian position (au), a numpy.array
-    
+
     Warnings:
     - Uses the approximation ICRS = FK5 J2000.
     - Not fully accurate for solar system objects.
-    
+
     Details:
     The following approximations have been used:
     - FK5 J2000 is the same as ICRS
@@ -34,22 +34,22 @@ def geoFromICRS(icrsP, icrsV, agData):
     - No correction is applied for the bending of light by sun's gravity.
       This introduces errors on the order of 0.02"
       at a distance of 20 degrees from the sun (Wallace, 1986)
-    
+
     References:
     ABERAT, from the APPLE (J2000) subroutine library, U.S. Naval Observatory
     P.T. Wallace's MAPQK routine
     P.T. Wallace, "Proposals for Keck Tel. Point. Algorithms", 1986 (unpub.)
     "The Astronomical Almanac" for 1978, U.S. Naval Observatory
     """
-    # make sure inputs are floating-point numpy arrays    
+    # make sure inputs are floating-point numpy arrays
     icrsP = numpy.asarray(icrsP, dtype = float)
     icrsV = numpy.asarray(icrsV, dtype = float)
-    
+
     # correct for velocity and Earth's offset from the barycenter
     p2 = icrsP + icrsV * agData.dtPM - agData.bPos
-    
+
     # here is where the correction for sun's gravity belongs
-    
+
     # correct for annual aberration
     p2Dir, p2Mag = llv.vn(p2)
     dot2 = numpy.dot(p2Dir, agData.bVelC)
@@ -57,7 +57,7 @@ def geoFromICRS(icrsP, icrsV, agData):
     # but handles |p2|=0 gracefully (by setting dot2 to 0)
     vfac = p2Mag * (1.0 + dot2 / (1.0 + agData.bGamma))
     p3 = ((p2 * agData.bGamma) + (vfac * agData.bVelC)) / (1.0 + dot2)
-    
+
     # correct position for precession and nutation
     return numpy.dot(agData.pnMat, p3)
 

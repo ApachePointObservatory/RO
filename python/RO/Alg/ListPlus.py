@@ -14,14 +14,14 @@ class ListPlus (list):
             return self[key]
         except (LookupError, TypeError):
             return defValue
-    
+
     def has_key(self, key):
         try:
             self[key]
             return True
         except (LookupError, TypeError):
             return False
-    
+
     def iteritems(self):
         for key in self.keys():
             yield (key, self[key])
@@ -34,6 +34,6 @@ class ListPlus (list):
 
     def keys(self):
         return list(range(len(self)))
-    
+
     def values(self):
         return self[:]

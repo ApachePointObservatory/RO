@@ -11,19 +11,19 @@ def scFromDC(p):
 
     Inputs:
      - p(3)     direction cosines or any cartesian vector
-    
+
     Returns a tuple containing:
     - pos(2)    spherical position (deg) as equatorial, polar angle,
                 e.g. (RA, Dec), (-HA, Dec) or (Az, Alt);
                 ranges are: pos[0]: [0, 360), pos[1]: [-90,90]
     - atPole    true if very near the pole, in which case pos[1] = 0,
                 and pos[0] = +/- 90 as appropriate.
-    
+
     Error Conditions:
     - If |p| is too small, raises ValueError.
     - If |p| is too large, overflows are possible--roughly if p^2 overflows.
     Of course neither of these can occur if p is a direction cosine (unit vector).
-    
+
     History:
     2002-07-23 R Owen.
     """

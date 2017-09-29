@@ -144,31 +144,31 @@ CCIM = 8.978749E-2
 def evp(tdb, deqx = 0.0):
     """
     Barycentric and heliocentric velocity and position of the Earth
-    
+
     Inputs:
     - tdb   TDB date (loosely et) as a Modified Julian Date
     - deqx  Julian Epoch (e.g. 2000.0) of mean equator and
             equinox of the vectors returned. If deqx <= 0.0,
             all vectors are referred to the mean equator and
             equinox (fk5) of epoch date.
-    
+
     Returns a tuple consisting of (all numpy.array(3)):
     - Barycentric velocity of Earth (au/s)
     - Barycentric position of Earth (au)
     - Heliocentric velocity of Earth (au/s)
     - Heliocentric position of Earth (au)
-    
+
     Accuracy:
-    
+
     The maximum deviations from the JPL DE96 ephemeris are as
     follows:
-    
+
     barycentric velocity    0.42  m/s
     barycentric position    6900  km
-    
+
     heliocentric velocity   0.42  m/s
     heliocentric position   1600  km
-    
+
     This routine is adapted from the barvel and barcor
     subroutines of P.Stumpff, which are described in
     Astron. Astrophys. Suppl. Ser. 41, 1-8 (1980).  Most of the
@@ -184,7 +184,7 @@ def evp(tdb, deqx = 0.0):
     that one of Stumpff's precession constants differs by 0.001 arcsec
     from the value given in the Explanatory Supplement to the A.E.
     """
-    
+
     # note: in the original code, E was a shortcut for sorbel[0]
     # and G was a shortcut for forbel[0]
 
@@ -357,19 +357,19 @@ def evp(tdb, deqx = 0.0):
 
         # Yes: compute precession matrix from mjd date to Julian epoch deqx
         dprema = prec(depj,deqx)
-    
+
         # Rotate helVel
         helVel = numpy.dot(dprema, helVel)
-    
+
         # Rotate barVel
         barVel = numpy.dot(dprema, barVel)
-    
+
         # Rotate helPos
         helPos = numpy.dot(dprema, helPos)
-    
+
         # Rotate barPos
         barPos = numpy.dot(dprema, barPos)
-    
+
     return (barVel, barPos, helVel, helPos)
 
 

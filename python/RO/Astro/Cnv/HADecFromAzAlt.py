@@ -17,13 +17,13 @@ def haDecFromAzAlt(azAlt, lat):
     Inputs:
     - azAlt(3)  cartesian Az/Alt (any units)
     - lat       observer's latitude north (deg)
-    
+
     Returns:
     - haDec(3)  cartesian hour angle, declination (same units as azAlt), a numpy.array
-    
+
     Error Conditions:
     (none)
-    
+
     Sign convention:
     increasing azAlt[0] is south-ish
     increasing azAlt[1] is east

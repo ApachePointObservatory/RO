@@ -42,7 +42,7 @@ except NameError:
 class TkBaseSerial(object):
     """Base class for communication via a serial port using the tcl event loop.
     This class handles state and supports TckSerial and NullSerial.
-         
+
     Inputs:
     - chanID    the tk socket connection; if not None then sockArgs is ignored
     - state     the initial state
@@ -50,9 +50,9 @@ class TkBaseSerial(object):
     Open = "Open"
     Closed = "Closed"
     Failed = "Failed"
-    
+
     _StateSet = set((Open, Closed, Failed))
-    
+
     def __init__(self,
         portName,
         state,
@@ -65,7 +65,7 @@ class TkBaseSerial(object):
         self._reason = ""
         self._stateCallback = stateCallback
         self._tkCallbackDict = dict()
-    
+
     @property
     def state(self):
         """Returns the current state as a tuple:
@@ -79,11 +79,11 @@ class TkBaseSerial(object):
         """Return True if serial connection is open"
         """
         return (self._state == self.Open)
-    
+
     def setStateCallback(self, callFunc=None):
         """Specifies a state callback function
         (replacing the current one, if one exists).
-        
+
         Inputs:
         - callFunc: the callback function, or None if none wanted
                     The function is sent one argument: this TkSerial
@@ -105,10 +105,10 @@ class TkBaseSerial(object):
         """
         #print "%s.__del()"
         self._stateCallback = None
-    
+
     def _setState(self, newState, reason=None):
         """Change the state.
-        
+
         Inputs:
         - newState: the new state
         - reason: an explanation (None to leave alone)
@@ -121,21 +121,21 @@ class TkBaseSerial(object):
         stateCallback = self._stateCallback
         if not self.isOpen:
             self._clearCallbacks()
-        
+
         if stateCallback:
             try:
                 stateCallback(self)
             except Exception as e:
                 sys.stderr.write("%s state callback %s failed: %s\n" % (self, self._stateCallback, e,))
                 traceback.print_exc(file=sys.stderr)
-    
+
     def __str__(self):
         return "%s(port=%s)" % (self.__class__.__name__, self._portName)
 
 
 class TkSerial(TkBaseSerial):
     """Connection via a serial port using the tcl event loop.
-    
+
     Inputs:
     - portName      serial port (e.g. "/dev/tty...")
     - baud          desired baud rate
@@ -154,7 +154,7 @@ class TkSerial(TkBaseSerial):
                     via Tcl's fconfigure command (after prepending "-" to each keyword).
                     Note: -mode is set using the keywords baud, parity, dataBits and stopBits;
                     it may not be overridden using mode=....
-    
+
     For more information about the configuration options
     see the Tcl documentation for these two commands:
     - fconfigure (for options that are common to all types of connections)
@@ -163,9 +163,9 @@ class TkSerial(TkBaseSerial):
     Open = "Open"
     Closed = "Closed"
     Failed = "Failed"
-    
+
     _StateSet = set((Open, Closed, Failed))
-        
+
     def __init__(self,
         portName,
         baud = 9600,
@@ -184,7 +184,7 @@ class TkSerial(TkBaseSerial):
             stateCallback = stateCallback,
         )
         self._readCallback = readCallback
-        
+
         self._tk = tkinter.StringVar()._tk
 
         self._chanID = 0
@@ -192,7 +192,7 @@ class TkSerial(TkBaseSerial):
             self._chanID = self._tk.call('open', portName, 'r+')
             if not self._chanID:
                 raise RuntimeError("Failed to open serial port %r" % (portName,))
-            
+
             cfgArgs = [
                 "-blocking", 0,
             ]
@@ -205,9 +205,9 @@ class TkSerial(TkBaseSerial):
                 cfgArgs += ["-handshake", str(handshake)]
             if translation is not None:
                 cfgArgs += ["-translation", str(translation)]
-                
+
             self._tk.call("fconfigure", self._chanID, *cfgArgs)
-                
+
             # add callbacks; the write callback indicates the serial is open
             # and is just used to detect state
             self._setSockCallback(self._doRead)
@@ -217,9 +217,9 @@ class TkSerial(TkBaseSerial):
 
     def close(self, isOK=True, reason=None):
         """Start closing the serial port.
-        
+
         Does nothing if the serial is already closed or failed.
-        
+
         Inputs:
         - isOK: if True, mark state as Closed, else Failed
         - reason: a string explaining why, or None to leave unchanged;
@@ -241,7 +241,7 @@ class TkSerial(TkBaseSerial):
         else:
             self._setState(self.Failed, reason)
         self._tk = None
-    
+
     def read(self, nChar=None):
         """Return up to nChar characters; if nChar is None then return
         all available characters.
@@ -263,11 +263,11 @@ class TkSerial(TkBaseSerial):
         """Read one line of data.
         Do not return the trailing newline.
         If a full line is not available, return default.
-        
+
         Inputs:
         - default   value to return if a full line is not available
                     (in which case no data is read)
-        
+
         Raise RuntimeError if the serial is not open.
         """
         #print "%s.readLine(default=%s)" % (self, default)
@@ -281,20 +281,20 @@ class TkSerial(TkBaseSerial):
             return default
         #print "readLine returning %r" % (readStr,)
         return readStr
-    
+
     def setReadCallback(self, callFunc=None):
         """Specifies a read callback function
         (replacing the current one, if one exists).
-        
+
         Inputs:
         - callFunc: the callback function, or None if none wanted.
                     The function is sent one argument: this TkSerial
         """
         self._readCallback = callFunc
-    
+
     def write(self, data):
         """Write data to the serial port. Does not block.
-        
+
         Raises UnicodeError if the data cannot be expressed as ascii.
         Raises RuntimeError if the serial connection is not open.
         If an error occurs while sending the data, the serial is closed,
@@ -308,7 +308,7 @@ class TkSerial(TkBaseSerial):
             self.close(isOK = False, reason=str(e))
             raise
         self._assertConn()
-    
+
     def writeLine(self, data):
         """Write a line of data terminated by standard newline
         (which for the net is \r\n, but the serial's auto newline
@@ -322,13 +322,13 @@ class TkSerial(TkBaseSerial):
             self.close(isOK = False, reason=str(e))
             raise
         self._assertConn()
-    
+
     def _assertConn(self):
         """If not open, raise RuntimeError.
         """
         if self._state != self.Open:
             raise RuntimeError("%s not open" % (self,))
-    
+
     def _clearCallbacks(self):
         """Clear any callbacks added by this class.
         Called just after the serial is closed.
@@ -358,14 +358,14 @@ class TkSerial(TkBaseSerial):
             typeStr = 'writable'
         else:
             typeStr = 'readable'
-        
+
         if callFunc:
             tclFunc = RO.TkUtil.TclFunc(callFunc)
             tkFuncName = tclFunc.tclFuncName
         else:
             tclFunc = None
             tkFuncName = ""
-        
+
         try:
             self._tk.call('fileevent', self._chanID, typeStr, tkFuncName)
         except tkinter.TclError as e:
@@ -381,7 +381,7 @@ class TkSerial(TkBaseSerial):
         # Save a reference to the new tclFunc,, if any
         if tclFunc:
             self._tkCallbackDict[typeStr] = tclFunc
-    
+
     def __del__(self):
         """At object deletion, make sure the serial is properly closed.
         """
@@ -389,7 +389,7 @@ class TkSerial(TkBaseSerial):
         self._readCallback = None
         self._stateCallback = None
         self.close()
-    
+
     def __str__(self):
         return "%s(port=%s, chanID=%s)" % (self.__class__.__name__, self._portName, self._chanID)
 
@@ -408,7 +408,7 @@ class NullSerial(TkBaseSerial):
 
     def read(self, *args, **kargs):
         raise RuntimeError("Cannot read from null serial")
-        
+
     def readLine(self, *args, **kargs):
         raise RuntimeError("Cannot readLine from null serial")
 

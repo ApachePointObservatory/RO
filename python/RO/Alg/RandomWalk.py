@@ -25,7 +25,7 @@ class ConstrainedGaussianRandomWalk(object):
 
     def __iter__(self):
         return self
-    
+
     def __next__(self):
         """Randomly change the value and return the next value
         """
@@ -58,7 +58,7 @@ class GaussianRandomWalk(object):
 
     def __iter__(self):
         return self
-    
+
     def __next__(self):
         """Randomly change the value and return the new value
         """

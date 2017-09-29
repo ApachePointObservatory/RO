@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-""" 
-History:    
+"""
+History:
 P.T.Wallace Starlink    1 January 1993
 2002-07-11 ROwen    Converted to Python.
 2007-04-24 ROwen    Converted from Numeric to numpy (in test code).
@@ -15,17 +15,17 @@ def nut(tdb):
     """
     Form the matrix of nutation for a given TDB - IAU 1980 theory
     (double precision)
-    
+
     References:
     Final report of the IAU Working Group on Nutation,
     chairman P.K.Seidelmann, 1980.
     Kaplan,G.H., 1981, USNO circular no. 163, pA3-6.
-    
+
     Inputs:
     - TDB   TDB date (loosely et) as Modified Julian Date
 
     Returns the nutation matrix as a 3x3 numpy.array
-    
+
     The matrix is in the sense  V(true)  =  rmatn * V(mean)
     """
     # Nutation components and mean obliquity

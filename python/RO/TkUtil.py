@@ -43,10 +43,10 @@ g_tkVersion = None
 
 def addColors(*colorMultPairs):
     """Add colors or scale a color.
-    
+
     Inputs:
     - A list of one or more (color, mult) pairs.
-    
+
     Returns sum of (R, G, B) * mult for each (color, mult) pair,
     with R, G, and B individually limited to range [0, 0xFFFF].
     """
@@ -92,14 +92,14 @@ def getButtonNumbers():
 
 def getTclVersion():
     """Return the Tcl/Tk version as a string
-    
+
     Returns the result of tcl command "info patchlevel". Some representative return values
     (from tcl documentation for tcl_patchLevel):
     8.4.16
     8.5b3
     """
     global g_tkVersion
-    
+
     if g_tkVersion is None:
         tkWdg = _getTkWdg()
         g_tkVersion = tkWdg.tk.call("info", "patchlevel")
@@ -107,21 +107,21 @@ def getTclVersion():
 
 def getWindowingSystem():
     """Return the Tk window system.
-    
+
     Returns one of:
     - WSysAqua: the MacOS X native system
     - WSysX11: the unix windowing system
     - WSysWin: the Windows windowing system
     Other values might also be possible.
-    
+
     Please don't call this until you have started Tkinter with Tkinter.Tk().
-    
+
     Warning: windowingsystem is a fairly recent tk command;
     if it is not available then this code does its best to guess
     but will not guess aqua.
     """
     global g_winSys
-    
+
     if not g_winSys:
         tkWdg = _getTkWdg()
         try:
@@ -141,7 +141,7 @@ def getWindowingSystem():
         #if self._tkWdg is None:
             #self._tkWdg = self._getTkWdg()
         #self.funcDict = {}
-    
+
     #def after(*args):
         #self._tkWdg.after(*args)
 
@@ -155,7 +155,7 @@ def getWindowingSystem():
         #funcName = funcObj.tclFuncName
         #self.funcDict[funcName] = funcObj
         #return funcName
-    
+
     #def deregister(self, funcName):
         #"""Deregister a tcl function.
 
@@ -163,7 +163,7 @@ def getWindowingSystem():
         #"""
         #func = self.funcDict.pop(funcName)
         #func.deregister()
-    
+
     #def eval(self, *args):
         #"""Evaluate an arbitrary tcl expression and return the result"""
         #return self._tkWdg.tk.eval(*args)
@@ -176,9 +176,9 @@ class TclFunc:
     """Register a python function as a tcl function.
     Based on Tkinter's _register method (which, being private,
     I prefer not to use explicitly).
-    
+
     If the function call fails, a traceback is printed.
-    
+
     Please call deregister when you no longer
     want the tcl function to exist.
     """
@@ -196,14 +196,14 @@ class TclFunc:
         if self.debug:
             print("registering tcl function %s for python function %s" % (self.tclFuncName, func))
         self.tkApp.createcommand(self.tclFuncName, self)
-    
+
     def __call__(self, *args):
         try:
             self.func(*args)
         except Exception as e:
             sys.stderr.write("tcl function %s failed: %s\n" % (self.tclFuncName, e))
             traceback.print_exc(file=sys.stderr)
-        
+
     def deregister(self):
         """Deregister callback and delete reference to python function.
         Safe to call if already deregistered.
@@ -221,16 +221,16 @@ class TclFunc:
                 print("deregistering failed: %r" % (e,))
             pass
         self.func = None
-    
+
     def __repr__(self):
         return "%s(%s)" % (self.__class__.__name__, self.tclFuncName)
-    
+
     def __str__(self):
         return self.tclFuncName
 
 class Geometry(object):
     """A class representing a tk geometry
-    
+
     Fields include the following two-element tuples:
     - offset: x,y offset of window relative to screen; see also offsetFlipped
     - offsetFlipped: is the meaning of x,y offset flipped?
@@ -243,7 +243,7 @@ class Geometry(object):
     - screenExtent: x,y extent of all screens put together
         (if the screens are not the same size and arranged side by side
         then the area will include pixels that are not visible)
-    
+
     WARNING: on some platforms offsetFlipped < 0 is not handled properly.
     In particular on Mac OS X with Tk 8.4:
     - the offset is actually relative to the top or right offset of the window,
@@ -261,10 +261,10 @@ class Geometry(object):
     _geomRE = re.compile(
         r"((?P<width>\d+)x(?P<height>\d+))?(?P<xsign>[+-])(?P<x>[-]?\d+)(?P<ysign>[+-])(?P<y>[-]?\d+)$",
         re.IGNORECASE)
-        
+
     def __init__(self, offset, offsetFlipped, extent):
         """Create a new Geometry
-        
+
         Inputs (each is a sequence of two values):
         - offset: x,y offset of window relative to screen; see also offsetFlipped
         - offsetFlipped: is the meaning of x,y offset flipped?
@@ -296,7 +296,7 @@ class Geometry(object):
     @classmethod
     def fromTkStr(cls, geomStr):
         """Create a Geometry from a tk geometry string
-        
+
         Inputs:
         - geomStr: tk geometry string
         """
@@ -319,10 +319,10 @@ class Geometry(object):
         - constrainExtent: if True then the extent and offset position are both constrained
             else only the offset position is constrained
         - defExtent: the extent to assume if the extent is not known; ignored if the extent is known
-        
+
         Returns:
         - a geometry string (not a Geometry, but you can trivially convert it to one)
-        
+
         Warnings:
         - If the user has multiple screens and they are not the same size or lined up side by side
           then the resulting geometry may not be entirely visible, or even partially visiable.
@@ -336,17 +336,17 @@ class Geometry(object):
             corner_ii = self.offset[ii]
             minCorner_ii = self.minCorner[ii]
             usableScreenExtent_ii = self.screenExtent[ii] - minCorner_ii
-            
+
             tooLarge_ii = extent_ii > usableScreenExtent_ii
-            
+
             if tooLarge_ii and constrainExtent:
                 extent_ii = usableScreenExtent_ii
-            
+
             if self.offsetFlipped[ii]:
                 # offset is distance from bottom/right of window to bottom/right of screen
                 # to avoid tk bugs, the constrained result will NOT use this convention
                 corner_ii = usableScreenExtent_ii - (corner_ii + extent_ii)
-    
+
             if tooLarge_ii:
                 corner_ii = minCorner_ii
             elif corner_ii < minCorner_ii:
@@ -364,7 +364,7 @@ class Geometry(object):
     @property
     def hasExtent(self):
         return None not in self.extent
-        
+
     @property
     def screenExtent(self):
         if not self._root:
@@ -373,7 +373,7 @@ class Geometry(object):
 
     def toTkStr(self, includeExtent=None):
         """Return the geometry as a tk geometry string
-        
+
         Inputs:
         - includeExtent: include extent information? One of:
             - None: include if available, else omit
@@ -438,10 +438,10 @@ class Timer(object):
         self._timerID = None
         if sec is not None:
             self.start(sec, callFunc, *args, **kwargs)
-    
+
     def start(self, sec, callFunc, *args, **kwargs):
         """Start or restart the timer, cancelling a pending timer if present
-        
+
         Inputs:
         - sec: interval, in seconds (float)
         - callFunc: function to call when timer fires
@@ -449,7 +449,7 @@ class Timer(object):
         **kwargs: keyword arguments for callFunc; must not include "sec" or "callFunc"
         """
         self.cancel()
-        
+
         def doit(args=args, kwargs=kwargs):
             self._timerID = None
             callFunc(*args, **kwargs)
@@ -458,7 +458,7 @@ class Timer(object):
 
     def cancel(self):
         """Cancel the timer; a no-op if the timer is not active
-        
+
         Return True if timer was running, False otherwise
         """
         if self._timerID is not None:
@@ -466,9 +466,9 @@ class Timer(object):
             self._timerID = None
             return True
         return False
-    
+
     @property
-    def isActive(self): 
+    def isActive(self):
         """True if timer is active, False otherwise
         """
         return self._timerID is not None
@@ -494,7 +494,7 @@ if __name__ == "__main__":
         print("geomStr=%s; constrainedGeomStr=%s" % (geomStr, constrainedGeom))
         root.geometry(constrainedGeom.toTkStr())
         root.after(2000, setGeometry, geomStrList)
-        
+
     setGeometry([
         "20000x200+0+0",
         "200x20000-0-0",

@@ -6,13 +6,13 @@ __all__ = ["getDescr"]
 
 def getDescr(bitInfo, intVal):
     """Return information about the bits in an integer
-    
+
     Inputs:
     - bitInfo   a sequence (list or tuple) of sequences:
         - bit number, 0 is the least significant bit
         - info: string describing the associated bit
     - intVal    an integer whose bits are to be described
-    
+
     Returns:
     - infoList  a list of info strings, one for each bit that is set
         in intVal and has a corresponding entry in bitInfo.
@@ -28,7 +28,7 @@ if __name__ == "__main__":
         (3, "Bit 3"),
         (0, "Bit 0"),
     )
-    
+
     print("starting test")
     for i in range(17):
         print(i, getDescr(bitInfo, i))

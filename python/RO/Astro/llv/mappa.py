@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-"""  
-History:    
+"""
+History:
 P.T.Wallace Starlink    21 July 1994
 2002-07-11 ROwen    Converted to Python.
 2007-04-24 ROwen    Removed unused import of Numeric
@@ -24,17 +24,17 @@ def mappa (eq, tdb):
     """
     Compute star-independent parameters in preparation for
     conversions between mean place and geocentric apparent place.
-    
+
     The parameters produced by this routine are required in the
     parallax, light deflection, aberration, and precession/nutation
     parts of the mean/apparent transformations.
-    
+
     The reference frames and timescales used are post IAU 1976.
-    
+
     Inputs:
     - eq    epoch of mean equinox to be used (Julian)
     - tdb   TDB as a modified Julian date (JD-2400000.5)
-    
+
     Returned a tuple containing the following
     star-independent mean-to-apparent parameters:
     - time interval for proper motion (Julian years)
@@ -44,24 +44,24 @@ def mappa (eq, tdb):
     - bvc: barycentric velocity of Earth in units of c
     - sqrt(1-v**2) where v=modulus(bvc)
     - precession/nutation (3,3) matrix
-    
+
     References:
     1984 Astronomical Almanac, pp b39-b41.
     (also Lederle & Schwan, Astron. Astrophys. 134,
     1-6, 1984)
-    
+
     Notes:
-    
+
     1)  For tdb, the distinction between the required TDB and TT
     is always negligible.  Moreover, for all but the most
     critical applications UTC is adequate.
-    
+
     2)  The accuracy of the routines using the parameters amprms is
     limited by the routine EVP, used here to compute the
     Earth position and velocity by the methods of Stumpff.
     The maximum error in the resulting aberration corrections is
     about 0.3 milliarcsecond.
-    
+
     3)  The barycentric position of the Earth and
     heliocentric direction of the Earth are referred to
     the mean equinox and equator of epoch eq.
@@ -79,22 +79,22 @@ def mappa (eq, tdb):
     return (
         # Time interval for proper motion correction (years)
         epj(tdb)-eq,
-    
+
         # Barycentric position of Earth (au)
         bPos,
-    
+
         # Heliocentric direction of earth
         hDir,
 
         # Light deflection parameter
         _GR2/hDist,
-        
+
         # Barycentric velocity of Earth, in units of C
         vbc,
-        
+
         # sqrt(1-v**2) where v=modulus(bvc)
         sqrt(1.0 - (vbcMag * vbcMag)),
-    
+
         # Precession/nutation matrix
         prenut(eq,tdb),
     )

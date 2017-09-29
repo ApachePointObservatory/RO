@@ -21,13 +21,13 @@ def angSep(posA, posB):
                 longitude (increasing x to y), latitude,
                 e.g. (RA, Dec), (-HA, Dec) or (Az, Alt)
     - posB(2)   the other spherical coordinate (deg)
-    
+
     Returns:
     - angSep    the angular separation between the two points (deg)
-    
+
     Error Conditions:
     (none)
-        
+
     Details:
     Convert to Cartesian vectors and go from there.
     The simplest method is to take the arc cosine of the dot product,
@@ -35,16 +35,16 @@ def angSep(posA, posB):
     construct a triangle from the origin to one of the vectors
     to the halfway point between the vectors, then use atan2
     to compute the angle at the origin (half the desired angle)
-    
+
     Based on Pat Wallace's SEP routine.
     """
     # convert from sherical to Cartesian coordinates
     vecA = dcFromSC(posA)
     vecB = dcFromSC(posB)
-    
+
     # compute the magnitude squared of half the difference vector
     diffMagSqQuarter = numpy.sum((vecA - vecB)**2) * 0.25
-    
+
     # compute the angle
     return 2.0 * RO.MathUtil.atan2d (
         math.sqrt(diffMagSqQuarter),

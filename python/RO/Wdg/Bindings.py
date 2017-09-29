@@ -26,7 +26,7 @@ in a Mac-like way is difficult.
 2004-08-11 ROwen    Define __all__ to restrict import.
 2005-06-17 ROwen    Modified stdBindings to use TkUtil. Also, may have improved
                     stdBindings's disabling of <<Paste-Selection>> on Windows.
-                
+
 2005-06-27 ROwen    Removed unused import of sys.
 2005-07-07 ROwen    Modified for moved RO.TkUtil.
 2005-07-14 ROwen    Fixed bug in makeReadOnly: was not trappling button-release-2
@@ -39,7 +39,7 @@ in a Mac-like way is difficult.
 2009-07-09 ROwen    Removed unused internal function doSelectAll (found by pychecker).
 2009-08-25 ROwen    Control-ButtonPress-1/2/3 events on X11 are no longer blocked.
                     These events were blocked for the sake of Macs with 1-button mice running X11 Tcl/Tk,
-                    but that is now too obscure a case to justify blocking control-click events. 
+                    but that is now too obscure a case to justify blocking control-click events.
 """
 __all__ = ['makeReadOnly', 'stdBindings', 'stopEvent']
 
@@ -65,14 +65,14 @@ AppEventDict = {
     RO.TkUtil.WSysWin: (
         ("<<Select-All>>", "<Control-Key-a>"),
     )
-}   
+}
 
 def makeReadOnly(tkWdg):
     """Makes a Tk widget (typically an Entry or Text) read-only,
     in the sense that the user cannot modify the text (but it can
     still be set programmatically). The user can still select and copy text
     and key bindings for <<Copy>> and <<Select-All>> still work properly.
-    
+
     Inputs:
     - tkWdg: a Tk widget
     """
@@ -88,11 +88,11 @@ def makeReadOnly(tkWdg):
     tkWdg.bind("<<Clear>>", stopEvent)
     tkWdg.bind("<Key>", stopEvent)
     tkWdg.bind("<ButtonRelease-2>", stopEvent)
-    
+
     # restore copy and select all
     for evt in tkWdg.event_info("<<Copy>>"):
         tkWdg.bind(evt, doCopy)
-    
+
     # restore other behaviors
     # note: binding specific events avoids introducing
     # events that might cause editing (for example some control keys)
@@ -103,9 +103,9 @@ def makeReadOnly(tkWdg):
 
 def stdBindings(root, debug=False):
     """Sets up standard key bindings for each platform"""
-    
+
     btnNums = RO.TkUtil.getButtonNumbers()
-    winSys = RO.TkUtil.getWindowingSystem() 
+    winSys = RO.TkUtil.getWindowingSystem()
 
     # platform-specific bindings
     if winSys == RO.TkUtil.WSysX11:
@@ -126,9 +126,9 @@ def stdBindings(root, debug=False):
         else:
             if debug:
                 print("Windows key bindings")
-        
+
         """Disable <<Paste-Selection>>
-        
+
         By default Tkinter uses <ButtonRelease-2> to paste the selection
         on the Mac this is reserved for bringing up a contextual menu.
         Unfortunately, I'm not sure where this event is bound;
@@ -139,7 +139,7 @@ def stdBindings(root, debug=False):
         Anyway, without knowing that I couldn't just unbind
         an existing event. Instead I had to bind a new method stopEvent
         to stop the event from propogating.
-        
+
         Using bind_all to stopEvent did not work; apparently the
         normal binding is run first (so it must be at the class level?)
         before the all binding is run. Sigh.
@@ -161,12 +161,12 @@ def stdBindings(root, debug=False):
     root.bind_class("Entry", "<<Select-All>>", _entrySelectAll)
     root.bind_all("<<Close>>", doWithdraw)
     root.bind_all("<<Quit>>", doQuit)
-    
+
     # application events
     appEvents = AppEventDict.get(winSys, ())
     for virtualEvent, eventKey in appEvents:
         root.event_add(virtualEvent, eventKey)
-    
+
 def stopEvent(evt):
     """stop an event from propogating"""
     #print "stopped an event"
@@ -180,7 +180,7 @@ def _textSelectAll(evt):
     """Handles <<Select-All>> virtual event for Text widgets.
     The - 1 char prevents adding an extra \n at the end of the selection"""
     evt.widget.tag_add("sel", "1.0", "end - 1 char")
-    
+
 def _entrySelectAll(evt):
     """Handles <<Select-All>> virtual event for Entry widgets."""
     evt.widget.selection_range("0", "end")
@@ -196,7 +196,7 @@ def _entryGoToRightEdge(evt):
 if __name__ == "__main__":
     root = tkinter.Tk()
     stdBindings(root, debug=1)
-    
+
     t = tkinter.Text(root, width=20, height=5)
     tr = tkinter.Text(root, width=20, height=5)
     tr.insert("end", "here is some test text for the read only text widget")
@@ -205,6 +205,6 @@ if __name__ == "__main__":
     t.pack()
     tr.pack()
     e.pack()
-    
-    
+
+
     root.mainloop()

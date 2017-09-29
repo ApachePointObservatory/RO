@@ -38,7 +38,7 @@ History:
 2011-08-01 ROwen    Added support for recursion.
                     Added arguments patterns, exclPatterns, dirPatterns, exclDirPatterns, recursionDepth and processDirs.
                     Call update_idletasks after each file is processed so messages are more likely to be logged as they arrive.
-2011-10-07 ROwen    Added doneMsg argument. 
+2011-10-07 ROwen    Added doneMsg argument.
                     Bug fix: the default for recursionDepth was False, which is not a valid value; changed to None.
 """
 __all__ = ["DropletApp"]
@@ -53,9 +53,9 @@ from . import LogWdg
 
 class DropletApp(tkinter.Frame):
     """Run an application as a droplet (an application onto which you drop files)
-    
+
     You must subclass this class and override processFile.
-    
+
     Your typical code will look like the example at the end.
     """
     def __init__(self,
@@ -73,7 +73,7 @@ class DropletApp(tkinter.Frame):
         doneMsg = "Done",
     ):
         """Construct a DropletApp
-        
+
         Inputs:
         - master: master widget; this should almost certainly be the root window
         - width: width of log widget
@@ -109,7 +109,7 @@ class DropletApp(tkinter.Frame):
         self.recursionDepth = recursionDepth
         self.processDirs = bool(processDirs)
         self.doneMsg = doneMsg + "\n"
-        
+
         self.logWdg = LogWdg.LogWdg(
             master = self,
             width = width,
@@ -123,15 +123,15 @@ class DropletApp(tkinter.Frame):
 
         if RO.OS.PlatformName == "mac":
             self.tk.createcommand('::tk::mac::OpenDocument', self._macOpenDocument)
-    
+
     def processFile(self, filePath):
         """Override this method.
         """
         raise RuntimeError("Subclass must override")
-    
+
     def _processNextFile(self, filePathList):
         """Helper for processFileList
-        
+
         The main purpose of this helper is to yield some time between each file
         so the log window can update (without using update_idletasks).
         """
@@ -149,14 +149,14 @@ class DropletApp(tkinter.Frame):
             Timer(0.001, self._processNextFile, remFilePathList)
         elif self.doneMsg:
             self.logWdg.addOutput(self.doneMsg, severity=RO.Constants.sevNormal)
-    
+
     def processFileList(self, filePathList):
         """Find and process a list of files
-        
+
         Inputs:
         - filePathList: a sequence of file and/or directory paths;
             these are searched using the patterns specified during construction
-        
+
         Includes basic error handling: if an error is raised,
         prints a message to the log window and goes on to the next file.
         """
@@ -169,7 +169,7 @@ class DropletApp(tkinter.Frame):
             recursionDepth = self.recursionDepth,
             returnDirs = self.processDirs,
         )
-        
+
         self._processNextFile(filteredPathList)
 
     def _macOpenDocument(self, *filePathList):
@@ -185,17 +185,17 @@ if __name__ == "__main__":
         filePathList = filePathList[1:]
 
     root = tkinter.Tk()
-    
+
     class TestApp(DropletApp):
         def __init__(self, master):
             DropletApp.__init__(self, master=master, width=135, height=20)
-            
+
             self.logWdg.addOutput("Test Droplet\n")
 
-    
+
         def processFile(self, filePath):
             self.logWdg.addOutput("Processing %s\n" % (filePath))
-    
+
     app = TestApp(root)
     app.pack(side="left", expand=True, fill="both")
 

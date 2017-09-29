@@ -8,7 +8,7 @@ History:
 2003-11-19 ROwen    Modified header: keywords with no values may have an '='.
                     Added "noValKey=" to test cases as it caused an infinite loop.
 2004-05-18 ROwen    Modified test code to use astr instead of str.
-2014-09-17 ROwen    Modified to test for Exception instead of StandardError 
+2014-09-17 ROwen    Modified to test for Exception instead of StandardError
 2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
 __all__ = ["parseKeyValueData"]
@@ -23,7 +23,7 @@ def parseKeyValueData(astr):
     returning an RO.Alg.OrderedDict of the form:
         {keyword1:(value11, value12,...), keyword2:(value21, value22, ...),
          keyword3: (), keyword4: (), ...}
-        
+
     Inputs:
     - astr: the string to parse, of the form:
         keyword1=value11, value12,...; keyword2=value21, value22...
@@ -38,7 +38,7 @@ def parseKeyValueData(astr):
             should be escaped by doubling or preceding with a backslash
     - Each keyword may have zero or more comma-separated values;
         if it has zero values then the equals sign may be omitted.
-    
+
     Returns dataDict, an RO.Alg.OrderedDict of keyword: valueTuple entries,
     one for each keyword. Details:
     - The keywords are given in the order they were specified in the message.

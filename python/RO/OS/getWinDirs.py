@@ -57,12 +57,12 @@ def getStandardDir(dirType):
     """Return a path to the specified standard directory or None if not found.
 
     The path is in the form expected by the os.path module.
-    
+
     Inputs:
     - dirType: one of CSID constants, as found in the win32com.shellcon module,
         such as CSIDL_APPDATA or CSIDL_COMMON_APPDATA.
         If dirType is None, then returns None.
-        
+
     Note: in theory one can create the directory by adding CSILD_FLAG_CREATE
     to dirType, but in practice this constant is NOT defined in win32com.shellcon,
     so it is risky (you'd have to specify an explicit integer and hope it did not change).
@@ -82,11 +82,11 @@ def getStandardDir(dirType):
 def getAppDirs(inclNone = False):
     """Return up to two paths: the user's private and shared applications directory.
     On Windows only the shared one exists.
-    
+
     Inputs:
     - inclNone  if True, paths to missing folders are set to None;
                 if False (the default) paths to missing folders are omitted
-    
+
     A typical return on English system with inclNone True is:
     [None
     C:\Program Files]
@@ -96,15 +96,15 @@ def getAppDirs(inclNone = False):
         path = getStandardDir(dirType)
         if (path is not None) or inclNone:
             retDirs.append(path)
-    return retDirs      
+    return retDirs
 
 def getAppSuppDirs(inclNone = False):
     """Return up to two paths: the user's private and shared application support directory.
-    
+
     Inputs:
     - inclNone  if True, paths to missing folders are set to None;
                 if False (the default) paths to missing folders are omitted
-    
+
     A typical return on English system is:
     [C:\Documents and Settings\<username>\Application Data,
     C:\Documents and Settings\All Users\Application Data]
@@ -129,7 +129,7 @@ def getDocsDir():
 def getPrefsDirs(inclNone = False):
     """Return up to two paths: the user's private and shared preferences directory.
     On Windows this is actually the application data directory.
-    
+
     Inputs:
     - inclNone  if True, paths to missing folders are set to None;
                 if False (the default) paths to missing folders are omitted

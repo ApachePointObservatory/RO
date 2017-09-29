@@ -394,7 +394,7 @@ if __name__ == '__main__':
 
             self.wdg1 = Entry.StrEntry(self)
             gr.gridWdg("Widget 1", self.wdg1)
-            
+
             self.wdg2 = Entry.FloatEntry(self)
             gr.gridWdg("Widget 2", self.wdg2)
 

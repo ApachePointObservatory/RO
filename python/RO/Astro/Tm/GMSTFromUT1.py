@@ -12,7 +12,7 @@ def gmstFromUT1(ut1):
     to Greenwich mean sidereal time, in degrees
 
     Based on Pat Wallace's GMST, whose comments follow:
-    
+
     The IAU 1982 expression (see page S15 of 1984 Astronomical
     Almanac) is used, but rearranged to reduce rounding errors.
     This expression is always described as giving the GMST at
@@ -23,12 +23,12 @@ def gmstFromUT1(ut1):
     standard formula, and the fractional part of the UT is
     added separately;  note that the factor 1.0027379... does
     not appear.
-    
+
     See also the routine GMSTA, which delivers better numerical
     precision by accepting the UT date and time as separate arguments.
-    
+
     P.T.Wallace   Starlink   14 September 1995
-    
+
     History:
     2002-20-12 ROwen    Removed an extra + sign that was doing nothing (thanks to pychecker).
     2014-04-25 ROwen    Add from __future__ import division, absolute_import.

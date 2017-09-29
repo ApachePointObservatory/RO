@@ -10,17 +10,17 @@ _MinAlt = 3.0
 
 def airmass(alt):
     """Computes the airmass at a given altitude.
-    
+
     Inputs:
     - alt   the observed altitude, as affected by refraction (deg)
-    
+
     Returns an estimate of the air mass, in units of that at the zenith.
 
-    Warnings:   
+    Warnings:
     - Alt < _MinAlt is treated as _MinAlt to avoid arithmetic overflow.
 
     Adapted from AIRMAS by Pat Wallace, whose notes follow:
-    
+
     Uses Hardie's (1962) polynomial fit to Bemporad's data for
     the relative air mass, X, in units of thickness at the zenith
     as tabulated by Schoenberg (1929). This is adequate for all
@@ -29,13 +29,13 @@ def airmass(alt):
     values are unlikely to be trustworthy to such accuracy
     because of variations in density, pressure and other
     conditions in the atmosphere from those assumed in his work.
-    
+
     References:
     - Hardie, R.H., 1962, in "Astronomical Techniques"
       ed. W.A. Hiltner, University of Chicago Press, p180.
     - Schoenberg, E., 1929, Hdb. d. Ap.,
       Berlin, Julius Springer, 2, 268.
-    
+
     History:
     Original code by P.W.Hill, St Andrews
     Adapted by P.T.Wallace, Starlink, 5 December 1990

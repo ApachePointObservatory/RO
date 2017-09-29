@@ -17,7 +17,7 @@ def coordConv(
     """
     Converts position, velocity, and unit position offset
     from one coordinate system to another.
-    
+
     Inputs:
     - fromPos(2)    input position (deg)
     - fromSys       coord. system from which to convert (e.g. "ICRS");
@@ -33,7 +33,7 @@ def coordConv(
     - refCo(2)      refraction coefficients; required if fromSys or toSys is Observed;
                     ignored otherwise.
     - fromDir       input reference direction (deg); input axis 1 = 0, axis 2 = 90
-    
+
     Returns:
     - toPos(2)      converted position
     - toPM(2)       converted proper motion
@@ -54,20 +54,20 @@ def coordConv(
     Geocentric   now        UT1 (MJD)
     Topocentric  now        UT1 (MJD)
     Observed     now        UT1 (MJD)
-    
+
     **Setting proper motion, parallax and radial velocity all zero implies
     the object is fixed. This slighly affects conversion to or from FK4,
     which has fictitious proper motion.
     These inputs are ignored for conversion from apparent coordinate systems.
     ***Besselian for the FK4 system, Julian for all others
-    
+
     Error Conditions:
     - If obsData or refCo are absend and are required, raises ValueError.
     - If the object is very far away: atInf is set true,
       toParlax is set to 0.0 and toRadVel = fromRadVel.
     - If toPos is too near the pole: atPole is set 1
       and toPos[0], toPM[0] and toDir are incorrect.
-    
+
     Details:
     Sph.CoordConv is simply a front end to Cnv.CoordConv (which see)
     with the added support for measuring angle and scale factor.
@@ -78,22 +78,22 @@ def coordConv(
     are converted. The resulting difference is then turned into a direction
     (toDir) and a length (ScaleChange = toOffMag/fromMag). This is used to track
     the effects of the conversion on orientation, for driving the rotator.
-    
+
     In most cases, one may set fromDir = 0, ignore ScaleChange,
     and use toDir as the change in orientation.
-    
+
     However, for drift scanning, you should set fromDir to the direction
     you are moving. This allows you to compensate velocity for refraction
     to keep the stars moving at the same rate across the CCD.
     Current scan velocity = scaleFactor * desired constant scan rate on sky.
-    
+
     Note: actually implementing such a scan can be a headache as it mixes
     path length as seen at the telescope with a path whose direction
     is given in mean sky coordinates. On the TCCs I end up doing
     a bit of iteration and keeping track of accumulated path length.
     If you have a small enough field of view you may be able to skip
     this step and put up with the resulting slight image blur.
-    
+
     History:
     2002-08-23 ROwen  Untested beta. Converted to Python from the TCC's sph_CoordConv 6-4
     """
@@ -102,7 +102,7 @@ def coordConv(
     # convert RA, Dec, etc to cartesian coordinates
     fromP, fromV, fromOffP, atInf = ccFromSCPVOff (
         fromPos, fromPM, fromParlax, fromRadVel, fromDir, Const.OffMag)
-        
+
 #   print "Sph.CoordConv: fromP=%s, fromV=%s, fromOffP=%s, atInf=%s" % (fromP, fromV, fromOffP, atInf)
 
     # convert coordinates
@@ -110,7 +110,7 @@ def coordConv(
     toOffP, dumV = Cnv.coordConv(fromOffP, fromV, fromSys, fromDate, toSys, toDate, obsData, refCo)
 
 #   print "Sph.CoordConv: toP=%s, toV=%s, toOffP=%s" % (toP, toV, toOffP)
-    
+
     toPos, toPM, toParlax, toRadVel, toDir, toOffMag, atPole = scFromCCPVOff (toP, toV, toOffP)
 
     # put toDir into same wrap as fromDir

@@ -33,11 +33,11 @@ import RO.SeqUtil
 def delDir(dirPath):
     """Delete dirPath and all contents
     (including symbolic links, but does not follow those links).
-    
+
     Deprecated: use shutil.rmtree instead.
-    
+
     Warning: use with caution; this function can be very destructive.
-    
+
     Based on sample code in the documentation for os.walk.
     """
     if os.path.islink(dirPath):
@@ -86,12 +86,12 @@ def findFiles(
     patWarn = False,
 ):
     """Search for files that match a given pattern, returning a list of unique paths.
-    
+
     paths may include files and/or directories.
     - All matching directories in paths, and matching subdirectories of same (to the specified recursion depth)
         are searched for files. Matching directories are also included in the output list if returnDirs is true.
     - All matching files in paths or in searched directories are included in the output list.
-    
+
     One use is to handle a list of files that has been dragged and dropped on an applet.
 
     Inputs:
@@ -114,12 +114,12 @@ def findFiles(
     - patWarn: print to sys.stderr names of files and directories that don't match the pattern
 
     Returns a list of unique paths.
-    
+
     Notes:
     - Pattern matching is applied to files and directories in the paths argument,
       as well as files and directories in subdirectories.
     - Duplicate paths are removed
-    
+
     Pattern special characters are those for fnmatch:
     *       match any sequence of 0 or more characters
     ?       match any single character
@@ -182,25 +182,25 @@ def findFiles(
             sys.stderr.write("Warning: file does not exist: %s\n" % path)
         else:
             sys.stderr.write("Skipping non-file, non-directory: %s\n" % path)
-    
+
     return removeDupPaths(foundPathList)
 
 def getResourceDir(pkg, *args):
     """Return a directory of resources for a package,
     assuming the following layout:
-    
+
     For source code in <pkgRoot>:
     - The resources are in <pkgRoot>/pkg/arg0/arg1...
-    
+
     For a py2app or py2exe distribution <distRoot>:
     - The package is in <distRoot>/<something>.zip/pkg
     - The resources are in <distRoot>/pkg/arg0/arg1/...
-    
+
     For a pyinstaller distribution <distRoot>:
     - sys.executable points to <distRoot>/<executable>
       (but see warning below)
     - The resources are in <distRoot>/pkg/arg0/arg1/...
-    
+
     Warning for pyinstaller users:
     pyinstaller uses sys.executable to find modules
     (because <module>.__file__ is wrong in pyinstaller 1.3).
@@ -208,7 +208,7 @@ def getResourceDir(pkg, *args):
     which means it will be wrong if you change the
     current working directory.
     To be safe, always start your program with:
-    
+
     # hack for pyinstaller 1.3
     sys.executable = os.path.abspath(sys.executable)
     """
@@ -256,9 +256,9 @@ def splitPath(path):
     """Splits a path into its component pieces.
     Similar to os.path.split but breaks the path completely apart
     instead of into just two pieces.
-    
+
     My code with a correction from a Python Cookbook recipe by Trent Mick
-    
+
     Note: pathList is built backwards and then reversed because
     inserting is much more expensive than appending to lists.
     """
@@ -272,7 +272,7 @@ def splitPath(path):
             if end:
                 pathList.append(end)
             break
-            
+
         pathList.append(tail)
         path = head
     pathList.reverse()
@@ -321,13 +321,13 @@ class _Inf:
 
 def _nameMatch(path, patterns, exclPatterns):
     """Check if file name matches a set of patterns.
-    
+
     Returns True if baseName matches any pattern in patterns
     and does not match any pattern in exclPatterns.
     Matching is done by fnmatch.fnmatch.
-    
+
     Also returns True if there are no patterns or exclPatterns.
-    
+
     Does no verification of any input.
     """
 #   print "_nameMatch(%r, %r, %r)" % (path, patterns, exclPatterns)
@@ -338,4 +338,4 @@ def _nameMatch(path, patterns, exclPatterns):
                 if fnmatch.fnmatch(baseName, exclPat):
                     return False
             return True
-    return False    
+    return False

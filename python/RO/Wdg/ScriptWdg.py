@@ -52,7 +52,7 @@ _StateSevDict[RO.ScriptRunner.Failed] = RO.Constants.sevError
 class _Blank(object):
     def __init__(self):
         object.__init__(self)
-        
+
 class _FakeButton:
     def noop(self, *args, **kargs):
         return
@@ -65,7 +65,7 @@ class BasicScriptWdg(RO.AddCallback.BaseMixin):
     """Handles button enable/disable and such for a ScriptRunner.
     You are responsible for creating and displaying the status bar(s)
     and start, pause and cancel buttons.
-    
+
     Inputs:
     - master        master widget; the script functions may pack or grid stuff into this
     - name          script name; used to report status
@@ -81,7 +81,7 @@ class BasicScriptWdg(RO.AddCallback.BaseMixin):
     - cancelButton  button to cancel the script
     - stateFunc     function to call when the script runner changes state.
                     The function receives one argument: the script runner.
-    
+
     Notes:
     - The text of the Pause button is automatically set (to Pause or Resume, as appropriate).
     - You must set the text of the start and cancel buttons.
@@ -107,36 +107,36 @@ class BasicScriptWdg(RO.AddCallback.BaseMixin):
 
         self.name = name
         self.dispatcher = dispatcher
-        
+
         self.scriptRunner = None
-        
+
         if not pauseButton:
             pauseButton = _FakeButton()
 
         if not cancelButton:
             cancelButton = _FakeButton()
-        
+
         self.scriptStatusBar = statusBar
         self.cmdStatusBar = cmdStatusBar or statusBar
-        
+
         self.startButton = startButton
         self.pauseButton = pauseButton
         self.cancelButton = cancelButton
-        
+
         self.startButton["command"] = self._doStart
         self.pauseButton["command"] = self._doPause
         self.cancelButton["command"] = self._doCancel
-    
+
         self._makeScriptRunner(master,
             scriptClass = scriptClass,
             initFunc = initFunc,
             runFunc = runFunc,
             endFunc = endFunc,
         )
-        
+
         if stateFunc:
             self.addCallback(stateFunc)
-    
+
     def _makeScriptRunner(self, master, scriptClass=None, initFunc=None, runFunc=None, endFunc=None):
         """Create a new script runner.
         See ScriptRunner for the meaning of the arguments.
@@ -152,30 +152,30 @@ class BasicScriptWdg(RO.AddCallback.BaseMixin):
             stateFunc = self._stateFunc,
             statusBar = self.scriptStatusBar,
             cmdStatusBar = self.cmdStatusBar,
-        )   
+        )
 
         self._setButtonState()
-    
+
     def _doCancel(self):
         """Cancel the script.
         """
         self.scriptRunner.cancel()
-    
+
     def _doPause(self):
         """Pause or resume script (depending on Pause button's text).
-        
+
         Note: the pause button's text is updated by _stateFunc.
         """
         if self.pauseButton["text"] == "Resume":
             self.scriptRunner.resume()
         else:
             self.scriptRunner.pause()
-    
+
     def _doStart(self):
         """Start script.
         """
         self.scriptRunner.start()
-    
+
     def _setButtonState(self):
         """Set the state of the various buttons.
         """
@@ -192,13 +192,13 @@ class BasicScriptWdg(RO.AddCallback.BaseMixin):
             self._setPauseText("Resume")
         else:
             self._setPauseText("Pause")
-    
+
     def _setPauseText(self, text):
         """Set the text and help text of the pause button.
         """
         self.pauseButton["text"] = text
         self.pauseButton.helpText = "%s the script" % text
-    
+
     def _stateFunc(self, *args):
         """Script state function callback.
         """
@@ -207,25 +207,25 @@ class BasicScriptWdg(RO.AddCallback.BaseMixin):
             msgStr = "%s: %s" % (stateStr, reason)
         else:
             msgStr = stateStr
-        
+
         if state == RO.ScriptRunner.Paused:
             self.pauseButton["text"] = "Resume"
         else:
-            self.pauseButton["text"] = "Pause"          
-        
+            self.pauseButton["text"] = "Pause"
+
         severity = _StateSevDict.get(state, RO.Constants.sevNormal)
 
         self.scriptStatusBar.setMsg(msgStr, severity)
         self._setButtonState()
-        
+
         if self.scriptRunner.isDone():
             if stateStr == RO.ScriptRunner.Failed:
                 self.scriptStatusBar.playCmdFailed()
             else:
                 self.scriptStatusBar.playCmdDone()
-        
+
         self._doCallbacks()
-    
+
     def _doCallbacks(self):
         """Execute the callback functions, passing the script runner as the argument.
         """
@@ -234,9 +234,9 @@ class BasicScriptWdg(RO.AddCallback.BaseMixin):
 
 class _BaseUserScriptWdg(tkinter.Frame, BasicScriptWdg):
     """Base class widget that runs a function via a ScriptRunner.
-    
+
     Subclasses must override _getScriptFuncs.
-    
+
     Inputs:
     - master        master Tk widget; when that widget is destroyed
                     the script function is cancelled.
@@ -251,12 +251,12 @@ class _BaseUserScriptWdg(tkinter.Frame, BasicScriptWdg):
     **kargs):
         tkinter.Frame.__init__(self, master, **kargs)
 
-        
+
         srArgs = self._getScriptFuncs(isFirst=True)
         helpURL = srArgs.pop("HelpURL", None)
 
         row = 0
-        
+
         self.scriptFrame = tkinter.Frame(self)
         self.scriptFrame.grid(row=row, column=0, sticky="news")
         self.scriptFrameRow = row
@@ -271,7 +271,7 @@ class _BaseUserScriptWdg(tkinter.Frame, BasicScriptWdg):
         )
         scriptStatusBar.grid(row=row, column=0, sticky="ew")
         row += 1
-        
+
         cmdStatusBar = StatusBar.StatusBar(
             master = self,
             dispatcher = dispatcher,
@@ -281,7 +281,7 @@ class _BaseUserScriptWdg(tkinter.Frame, BasicScriptWdg):
         )
         cmdStatusBar.grid(row=row, column=0, sticky="ew")
         row += 1
-        
+
         buttonFrame = tkinter.Frame(self)
         startButton = Button.Button(
             master = buttonFrame,
@@ -312,7 +312,7 @@ class _BaseUserScriptWdg(tkinter.Frame, BasicScriptWdg):
         cancelButton.ctxSetConfigFunc(self._setCtxMenu)
         scriptStatusBar.ctxSetConfigFunc(self._setCtxMenu)
         cmdStatusBar.ctxSetConfigFunc(self._setCtxMenu)
-        
+
         BasicScriptWdg.__init__(self,
             master = self.scriptFrame,
             name = name,
@@ -323,7 +323,7 @@ class _BaseUserScriptWdg(tkinter.Frame, BasicScriptWdg):
             pauseButton = pauseButton,
             cancelButton = cancelButton,
         **srArgs)
-    
+
     def reload(self):
         """Create or recreate the script frame and script runner.
         """
@@ -332,13 +332,13 @@ class _BaseUserScriptWdg(tkinter.Frame, BasicScriptWdg):
         try:
             srArgs = self._getScriptFuncs(isFirst = False)
             srArgs.pop("HelpURL", None) # don't send HelpURL arg to _makeScriptRunner
-    
+
             # destroy the script frame,
             # which also cancels the script and its state callback
             self.scriptFrame.grid_forget()
             self.scriptFrame.destroy()
             self.scriptRunner = None
-    
+
             self.scriptFrame = tkinter.Frame(self)
             self.scriptFrame.grid(row=self.scriptFrameRow, column=0, sticky="news")
             self._makeScriptRunner(self.scriptFrame, **srArgs)
@@ -346,8 +346,8 @@ class _BaseUserScriptWdg(tkinter.Frame, BasicScriptWdg):
         except Exception as e:
             self.scriptStatusBar.setMsg("Reload failed: %s" % (e,), RO.Constants.sevError)
             raise
-            
-    
+
+
     def _getScriptFuncs(self, isFirst):
         """Return a dictionary containing either scriptClass
         or one or more of initFunc, runFunc, endFunc;
@@ -361,7 +361,7 @@ class _BaseUserScriptWdg(tkinter.Frame, BasicScriptWdg):
         - scriptObj.end or endFunc is called when runFunc ends for any reason
             (finishes, fails or is cancelled); used for cleanup
         where scriptObj represents the instantiated script class.
-        
+
         Specify None for init or end if undefined (run is required).
 
         All functions receive one argument: sr, a ScriptRunner object.
@@ -371,15 +371,15 @@ class _BaseUserScriptWdg(tkinter.Frame, BasicScriptWdg):
 
         Inputs:
         - isFirst   True if the first execution
-        
+
         Warning: only the run function may call sr methods that wait.
         The other functions may only run non-waiting code.
-        
+
         Must be defined by all subclasses.
         """
         raise RuntimeError("Class %s must define _getScriptFuncs" % \
             (self.__class__.__name__,))
-    
+
     def _setCtxMenu(self, menu):
         """Set the contextual menu for the status bar,
         backgound frame and control buttons.
@@ -396,7 +396,7 @@ class ScriptModuleWdg(_BaseUserScriptWdg):
         dispatcher,
     ):
         """Widget that runs a script from a module.
-        
+
         The module must contain either:
         - a script class named ScriptClass
             with a run method and an optional end method
@@ -405,10 +405,10 @@ class ScriptModuleWdg(_BaseUserScriptWdg):
         - "init", if present, will be run once as the module is read
         - "end", if present, will be run whenever "run" ends
             (whether it succeeded, failed or was cancelled)
-        
+
         run, init and end all receive one argument: sr, an RO.ScriptRunner
         object. See RO.ScriptRunner for more information.
-        
+
         ScriptClass.__init__ or init may populate sr.master with widgets.
         sr.master is an empty frame above the status bar intended for this purpose.
         (The run and end functions probably should NOT populate sr.master
@@ -416,14 +416,14 @@ class ScriptModuleWdg(_BaseUserScriptWdg):
         may be executed multiple times)
         """
         self.module = module
-        
+
         _BaseUserScriptWdg.__init__(
             self,
             master = master,
             name = module.__name__,
             dispatcher = dispatcher,
         )
-    
+
     def _getScriptFuncs(self, isFirst):
         """Return a dictionary containing either scriptClass
         or one or more of initFunc, runFunc, endFunc;
@@ -435,7 +435,7 @@ class ScriptModuleWdg(_BaseUserScriptWdg):
         scriptClass = getattr(self.module, "ScriptClass", None)
         if scriptClass:
             return {"scriptClass": scriptClass}
-        
+
         retDict = {}
         for attrName in ("run", "init", "end", "HelpURL"):
             attr = getattr(self.module, attrName, None)
@@ -456,7 +456,7 @@ class ScriptFileWdg(_BaseUserScriptWdg):
     ):
         """Widget that runs a script python source code file
         (a python module, but one that need not be on the python path).
-        
+
         The file must contain either:
         - a script class named ScriptClass
             with a run method and an optional end method
@@ -465,16 +465,16 @@ class ScriptFileWdg(_BaseUserScriptWdg):
         - "init", if present, will be run once as the module is read
         - "end", if present, will be run whenever "run" ends
             (whether it succeeded, failed or was cancelled)
-        
+
         run, init and end all receive one argument: sr, an RO.ScriptRunner
         object. See RO.ScriptRunner for more information.
-        
+
         ScriptClass.__init__ or init may populate sr.master with widgets.
         sr.master is an empty frame above the status bar intended for this purpose.
         (The run and end functions probably should NOT populate sr.master
         with widgets because they are not initially executed and they
         may be executed multiple times)
-        
+
         The file name must end in .py (any case)
         """
 #       print "ScriptFileWdg(%r, %r, %r)" % (master, filename, dispatcher)
@@ -485,7 +485,7 @@ class ScriptFileWdg(_BaseUserScriptWdg):
         scriptName, fileExt = os.path.splitext(baseName)
         if fileExt.lower() != ".py":
             raise RuntimeError("file name %r does not end in '.py'" % (self.filename,))
-        
+
         _BaseUserScriptWdg.__init__(
             self,
             master = master,
@@ -493,7 +493,7 @@ class ScriptFileWdg(_BaseUserScriptWdg):
             dispatcher = dispatcher,
             helpURL = helpURL,
         )
-    
+
     def copyPath(self):
         """Copy path to the clipboard.
         """
@@ -510,7 +510,7 @@ class ScriptFileWdg(_BaseUserScriptWdg):
         menu.add_command(label = "Copy Path", command = self.copyPath)
         menu.add_command(label = "Reload", command = self.reload)
         return True
-    
+
     def _getScriptFuncs(self, isFirst=None):
         """Return a dictionary containing either scriptClass
         or one or more of initFunc, runFunc, endFunc;
@@ -519,7 +519,7 @@ class ScriptFileWdg(_BaseUserScriptWdg):
 #       print "_getScriptFuncs(%s)" % isFirst
         scriptLocals = {"__file__": self.fullPath}
         exec(compile(open(self.filename).read(), self.filename, 'exec'), scriptLocals)
-        
+
         retDict = {}
         helpURL = scriptLocals.get("HelpURL")
         if helpURL:
@@ -529,7 +529,7 @@ class ScriptFileWdg(_BaseUserScriptWdg):
         if scriptClass:
             retDict["scriptClass"] = scriptClass
             return retDict
-        
+
         for attrName in ("run", "init", "end"):
             attr = scriptLocals.get(attrName)
             if attr:
@@ -545,9 +545,9 @@ if __name__ == "__main__":
     from . import TestScriptWdg
     root = PythonTk.PythonTk()
     root.title('Script 1 (root)')
-    
+
     dispatcher = RO.KeyDispatcher.KeyDispatcher()
-    
+
     testTL1 = root
     sr1 = ScriptModuleWdg(
         master = testTL1,
@@ -558,7 +558,7 @@ if __name__ == "__main__":
     testTL1.title(sr1.scriptRunner.name)
     testTL1.resizable(False, False)
 
-    
+
     testTL2 = tkinter.Toplevel()
     sr2 = ScriptFileWdg(
         master = testTL2,
@@ -568,5 +568,5 @@ if __name__ == "__main__":
     sr2.pack()
     testTL2.title(sr2.scriptRunner.name)
     root.resizable(False, False)
-    
+
     root.mainloop()

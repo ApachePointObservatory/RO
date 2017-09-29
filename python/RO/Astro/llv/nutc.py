@@ -11,22 +11,22 @@ _ArcSecPerRev  =  RO.PhysConst.ArcSecPerDeg * 360.0
 def nutc(tdb):
     """
     Computes nutation and obliquity using the IAU 1980 theory.
-    
+
     Inputs:
      -  tdb: TDB date (mjd)
-    
+
     Returns a tuple of three elements:
      -  nutation in longitude (rad)
      -  nutation in obliquity (rad)
      -  mean obliquity (rad)
-     
+
     Based on Pat Wallace's NUTC.
 
     References:
     - Final report of the IAU Working Group on Nutation,
       chairman P.K.Seidelmann, 1980.
     - Kaplan,G.H., 1981, USNO circular no. 163, pA3 - 6.
-    
+
     History:
     P.T.Wallace Starlink    September 1987
     2002-07-11 ROwen  Converted to Python

@@ -27,23 +27,23 @@ def topoFromObs(obsP, refCo):
     """
     Removes correction for refraction,
     i.e. converts observed coordinates to apparent topocentric.
-    
+
     Inputs:
     - obsP(3)       observed cartesian position (au) (az/alt)
     - refCo(2)      refraction coefficients A and B (degrees)
-    
+
     Returns a tuple containing:
     - appTopoP(3)   apparent topocentric cartesian position (au) (az/alt), a numpy.array;
                     the magnitude will be slightly different than obsP
     - tooLow        log true => position too near horizon; a max correction applied
-    
+
     Error Conditions:
     If the unrefracted zenith distance > _MaxZDU the tooLow flag is set true
     and the correction applied is that computed at _MaxZDU.
-    
+
     Raises a ValueError if if the magnitude of the input position vector is so small
     that the computation may overflow.
-    
+
     Details:
     Uses the model:
       zdu = zdr + A tan zdr + B (tan zdr)^3
@@ -70,14 +70,14 @@ def topoFromObs(obsP, refCo):
     if rxysq * RO.SysConst.FAccuracy <= RO.SysConst.FSmallNum:
         if rmag * RO.SysConst.FAccuracy <= RO.SysConst.FSmallNum:
             #  |R| is too small to use -- probably a bug in the calling software
-            raise ValueError('obsP %r too small' % obsP) 
+            raise ValueError('obsP %r too small' % obsP)
         #  at zenith; set output = input
         appTopoP = numpy.array(obsP, copy=True, dtype=float)
     else:
 
         #  refracted zenith distance
         zdr = RO.MathUtil.atan2d (rxymag, rz)
-    
+
         #  Compute the refraction correction. Compute it at the refracted zenith distance,
         #  unless that zd is too large, in which case compute the correction at the
         #  maximum UNrefracted zd (this provides reversibility with cnv_Refract).
@@ -90,7 +90,7 @@ def topoFromObs(obsP, refCo):
             zdu = zdr + (refA * tanzd) + (refB * tanzd**3)
             if zdu > _MaxZDU:
                 tooLow = 1
-    
+
         if tooLow:
             #  compute correction at zdu = _MaxZDU and use that instead
             #  (iteration is required because we want the correction
@@ -104,11 +104,11 @@ def topoFromObs(obsP, refCo):
                 zdr_u -= ((zdr_u + refA * tanzd + refB * tanzd**3) /  \
                     (1.0 + (RO.PhysConst.RadPerDeg * (refA + 3.0 * refB * tanzd**2) / coszd**2)))
                 zdu = zdr - zdr_u
-    
+
         #  compute unrefracted position as a cartesian vector
         uz = rxymag * RO.MathUtil.tand (90.0 - zdu)
         appTopoP = numpy.array((rx, ry, uz))
-        
+
     return (appTopoP, tooLow)
 
 

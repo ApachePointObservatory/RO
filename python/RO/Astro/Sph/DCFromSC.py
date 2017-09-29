@@ -16,10 +16,10 @@ def dcFromSC(pos):
     - pos(2)    spherical coordinates (deg):
                 longitude (increasing x to y), latitude,
                 e.g. (RA, Dec), (-HA, Dec) or (Az, Alt)
-    
+
     Returns:
     - dc(3)     direction cosines (rad), as a numpy.array
-    
+
     Error Conditions:
       (none)
     """

@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 
 """
 History:
@@ -15,18 +15,18 @@ def euler(axisAngSet):
     """
     Form a rotation matrix from successive rotations
     about specified Cartesian axes.
-    
+
     Inputs:
     - axisAngSet    a list of axis, angle lists, where:
       - axis is the index of the axis (0 for x, 1 for y, 2 for z)
       - angle is the angle of rotation (rad)
-    
+
     Returns:
     - rMat          the rotation matrix as a 3x3 numpy.array
-     
+
     Rotation is via the right-hand rule. For example: a positive
     rotation about x is from y to z.
-    
+
     Based on EULER by Pat Wallace.
     """
     # Initialise result matrix
@@ -44,14 +44,14 @@ def euler(axisAngSet):
                 [0.0,  ca,  sa],
                 [0.0, -sa,  ca],
             ])
-    
+
         elif axis == 1:  # y axis
             currRotMat = numpy.array([
                 [ ca, 0.0, -sa],
                 [0.0, 1.0, 0.0],
                 [ sa, 0.0,  ca],
             ])
-    
+
         elif axis == 2: # z axis
             currRotMat = numpy.array([
                 [ ca,  sa, 0.0],
@@ -61,12 +61,12 @@ def euler(axisAngSet):
 
         else:
             raise RuntimeError("unknown axis %s; must be one of 0, 1, 2" % (axis,))
-        
+
         # Apply the current rotation (currRotMat x netRotMat)
         netRotMat = numpy.dot(currRotMat, netRotMat)
 
     return netRotMat
-    
+
 if __name__ == "__main__":
     print("testing euler")
     # test data is formatted as follows:
