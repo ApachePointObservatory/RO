@@ -28,7 +28,7 @@ History:
 """
 __all__ = ['CmdWdg']
 
-import tkinter
+from six.moves import tkinter
 from . import Entry
 
 class CmdWdg (Entry.StrEntry):

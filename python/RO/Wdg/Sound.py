@@ -18,7 +18,7 @@ __all__ = ['bell', 'BellPlay', 'SoundPlayer', 'NoPlay']
 
 import os
 import sys
-import tkinter
+from six.moves import tkinter
 import RO.StringUtil
 try:
     import pygame.mixer

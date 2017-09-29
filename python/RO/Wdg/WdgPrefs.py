@@ -22,7 +22,7 @@ History:
 """
 __all__ = []
 
-import tkinter
+from six.moves import tkinter
 import RO.Constants
 import RO.TkUtil
 import RO.Prefs.PrefVar

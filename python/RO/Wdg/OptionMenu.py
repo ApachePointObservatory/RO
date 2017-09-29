@@ -107,7 +107,7 @@ History:
 """
 __all__ = ['OptionMenu']
 
-import tkinter
+from six.moves import tkinter
 import RO.AddCallback
 import RO.Alg
 import RO.SeqUtil

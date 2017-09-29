@@ -45,7 +45,7 @@ __all__ = ["DropletApp"]
 
 import sys
 import traceback
-import tkinter
+from six.moves import tkinter
 import RO.OS
 import RO.Constants
 from RO.TkUtil import Timer

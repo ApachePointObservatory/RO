@@ -12,7 +12,7 @@ History:
 __all__ = ["InputContPresetsWdg"]
 
 import functools
-import tkinter
+from six.moves import tkinter
 
 import RO.TkUtil
 from . import Entry

@@ -1,7 +1,7 @@
 #!/usr/local/bin/Python
 
 """Displays the keysym for each KeyPress event as you type."""
-import tkinter
+from six.moves import tkinter
 
 root = tkinter.Tk()
 root.title("Keysym Logger")

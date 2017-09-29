@@ -34,7 +34,7 @@ History:
 __all__ = ['BasicScriptWdg', 'ScriptModuleWdg', 'ScriptFileWdg']
 
 import os.path
-import tkinter
+from six.moves import tkinter
 import RO.Constants
 import RO.AddCallback
 import RO.ScriptRunner

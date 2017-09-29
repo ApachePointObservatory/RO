@@ -26,7 +26,7 @@ History:
 """
 __all__ = ['ModalDialogBase']
 
-import tkinter
+from six.moves import tkinter
 
 from . import Button
 

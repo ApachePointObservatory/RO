@@ -15,7 +15,7 @@ History:
 """
 __all__ = ['Text']
 
-import tkinter
+from six.moves import tkinter
 import RO.CnvUtil
 import RO.StringUtil
 import RO.MathUtil

@@ -37,7 +37,7 @@ History:
 """
 __all__ = ["PrefWin", "PrefWdg"]
 
-import tkinter
+from six.moves import tkinter
 from . import PrefVar
 from . import PrefEditor
 import RO.Constants

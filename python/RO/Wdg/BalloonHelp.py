@@ -15,7 +15,7 @@ History:
 """
 __all__ = ['enableBalloonHelp']
 
-import tkinter
+from six.moves import tkinter
 from RO.TkUtil import Timer
 
 _HelpObj = None

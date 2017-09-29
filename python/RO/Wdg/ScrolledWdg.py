@@ -12,7 +12,7 @@ History:
 """
 __all__ = ['ScrolledWdg']
 
-import tkinter
+from six.moves import tkinter
 
 class ScrolledWdg(tkinter.Frame):
     """Scroll a widget such as a frame.

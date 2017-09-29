@@ -174,7 +174,7 @@ History:
 __all__ = ["ann_Circle", "ann_Plus", "ann_X", "ann_Line", "ann_Text", "MaskInfo", "GrayImageWdg"]
 
 import weakref
-import tkinter
+from six.moves import tkinter
 import math
 import numpy
 try:

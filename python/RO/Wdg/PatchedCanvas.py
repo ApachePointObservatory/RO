@@ -15,7 +15,7 @@ History:
 __all__ = ['PatchedCanvas']
 
 import warnings
-import tkinter
+from six.moves import tkinter
 
 class PatchedCanvas(tkinter.Canvas):
     def __init__(self, *args, **kargs):

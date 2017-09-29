@@ -26,7 +26,7 @@ History:
 """
 __all__ = ['PythonTk']
 
-import tkinter
+from six.moves import tkinter
 from . import Bindings
 from . import PythonWdg
 

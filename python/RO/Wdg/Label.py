@@ -55,7 +55,7 @@ History:
 __all__ = ['Label', 'BoolLabel', 'StrLabel', 'IntLabel', 'FloatLabel', 'DMSLabel']
 
 import sys
-import tkinter
+from six.moves import tkinter
 import RO.Constants
 import RO.MathUtil
 import RO.StringUtil
@@ -65,7 +65,7 @@ from .IsCurrentMixin import IsCurrentMixin
 
 class Label(tkinter.Label, CtxMenu.CtxMenuMixin, IsCurrentMixin, SeverityMixin):
     """Base class for labels (display ROWdgs); do not use directly.
-    
+
     Inputs:
     - formatStr: formatting string; if omitted, formatFunc is used.
         Displayed value is formatStr % value.
@@ -77,11 +77,11 @@ class Label(tkinter.Label, CtxMenu.CtxMenuMixin, IsCurrentMixin, SeverityMixin):
     - severity  one of RO.Constants.sevNormal, sevWarning or sevError
     - **kargs: all other keyword arguments go to Tkinter.Label;
         the defaults are anchor="e", justify="right"
-        
+
     Inherited methods include:
     getIsCurrent, setIsCurrent
     getSeverity, setSeverity
-        
+
     Note: if display formatting fails (raises an exception)
     then "?%r?" % value is displayed.
     """
@@ -89,7 +89,7 @@ class Label(tkinter.Label, CtxMenu.CtxMenuMixin, IsCurrentMixin, SeverityMixin):
     def __init__ (self,
         master,
         formatStr = None,
-        formatFunc = str,       
+        formatFunc = str,
         helpText = None,
         helpURL = None,
         isCurrent = True,
@@ -97,13 +97,13 @@ class Label(tkinter.Label, CtxMenu.CtxMenuMixin, IsCurrentMixin, SeverityMixin):
     **kargs):
         kargs.setdefault("anchor", "e")
         kargs.setdefault("justify", "right")
-        
+
         tkinter.Label.__init__(self, master, **kargs)
-        
+
         CtxMenu.CtxMenuMixin.__init__(self, helpURL=helpURL)
-        
+
         IsCurrentMixin.__init__(self, isCurrent)
-        
+
         SeverityMixin.__init__(self, severity)
 
         self._formatStr = formatStr
@@ -116,16 +116,16 @@ class Label(tkinter.Label, CtxMenu.CtxMenuMixin, IsCurrentMixin, SeverityMixin):
 
     def get(self):
         """Return a tuple consisting of (set value, isCurrent).
-        
+
         If the value is None then it is invalid or unknown.
         If isCurrent is false then the value is suspect
         Otherwise the value is valid and current.
         """
         return (self._value, self._isCurrent)
-    
+
     def getFormatted(self):
         """Return a tuple consisting of the (displayed value, isCurrent).
-        
+
         If the value is None then it is invalid.
         If isCurrent is false then the value is suspect
         Otherwise the value is valid and current.
@@ -134,12 +134,12 @@ class Label(tkinter.Label, CtxMenu.CtxMenuMixin, IsCurrentMixin, SeverityMixin):
             return (None, self._isCurrent)
         else:
             return (self["text"], self._isCurrent)
-    
+
     def clear(self, isCurrent=1):
         """Clear the display; leave severity unchanged.
         """
         self.set(value="", isCurrent=isCurrent)
-    
+
     def set(self,
         value,
         isCurrent = True,
@@ -151,9 +151,9 @@ class Label(tkinter.Label, CtxMenu.CtxMenuMixin, IsCurrentMixin, SeverityMixin):
         - value: the new value
         - isCurrent: is value current (if not, display with bad background color)
         - severity: the new severity, one of: RO.Constants.sevNormal, sevWarning or sevError;
-          if omitted, the severity is left unchanged          
+          if omitted, the severity is left unchanged
         kargs is ignored; it is only present for compatibility with KeyVariable callbacks.
-        
+
         Raises an exception if the value cannot be coerced.
         """
         # print "RO.Wdg.Label.set called: value=%r, isCurrent=%r, **kargs=%r" % (value, isCurrent, kargs)
@@ -162,14 +162,14 @@ class Label(tkinter.Label, CtxMenu.CtxMenuMixin, IsCurrentMixin, SeverityMixin):
         if severity is not None:
             self.setSeverity(severity)
         self._updateText()
-    
+
     def setNotCurrent(self):
         """Mark the data as not current.
-        
+
         To mark the value as current again, set a new value.
         """
         self.setIsCurrent(False)
-    
+
     def _formatFromStr(self, value):
         """Format function based on formatStr.
         """
@@ -231,7 +231,7 @@ class StrLabel(Label):
         **kargs
     ):
         kargs.setdefault("formatFunc", str)
-        
+
         Label.__init__(self,
             master,
             helpText = helpText,
@@ -253,7 +253,7 @@ class IntLabel(Label):
     ):
         kargs.setdefault("formatStr", "%d")
         assert "formatFunc" not in kargs, "formatFunc not allowed for %s" % self.__class__.__name__
-        
+
         Label.__init__(self,
             master,
             helpText = helpText,
@@ -264,12 +264,12 @@ class IntLabel(Label):
 
 class FloatLabel(Label):
     """Label to display floating point data.
-    
+
     If you specify a format string, that is used and the specified is ignored
     else you must specify a precision, in which case the data is displayed
     as without an exponent and with "precision" digits past the decimal.
     The default precision is 2 digits.
-    
+
     Inputs:
     - precision: number of digits past the decimal point; ignored if formatStr specified
     The other inputs are those for Label but formatFunc is forbidden.
@@ -287,7 +287,7 @@ class FloatLabel(Label):
         # handle default format string
         if formatStr is None:
             formatStr = "%." + str(precision) + "f"
-            
+
         # test and set format string
         try:
             formatStr % (1.1,)
@@ -307,7 +307,7 @@ class DMSLabel(Label):
     """Label to display floating point data as dd:mm:ss.ss.
     Has the option to store data in degrees but display in hh:mm:ss.ss;
     this option can be changed at any time and the display updates correctly.
-    
+
     Inputs:
     - precision: number of digits past the decimal point
     - nFields: number of sexagesimal fields to display
@@ -325,7 +325,7 @@ class DMSLabel(Label):
     **kargs):
         assert "formatStr" not in kargs, "formatStr not allowed for %s" % self.__class__.__name__
         assert "formatFunc" not in kargs, "formatFunc not allowed for %s" % self.__class__.__name__
-        
+
         self.precision = precision
         self.nFields = nFields
         self.cvtDegToHrs = cvtDegToHrs
@@ -337,7 +337,7 @@ class DMSLabel(Label):
             helpURL = helpURL,
             isCurrent = isCurrent,
         **kargs)
-    
+
     def formatFunc(self, value):
         if self.cvtDegToHrs and value is not None:
             value = value / 15.0
@@ -346,7 +346,7 @@ class DMSLabel(Label):
             precision = self.precision,
             nFields = self.nFields,
         )
-    
+
     def setCvtDegToHrs(self, cvtDegToHrs):
         if RO.MathUtil.logNE(self.cvtDegToHrs, cvtDegToHrs):
             self.cvtDegToHrs = cvtDegToHrs
@@ -393,7 +393,7 @@ if __name__ == "__main__":
     )
     for wdg in wdgSet:
         wdg.pack(fill=tkinter.X)
-    
+
     # a list of (value, isCurrent) pairs
     testData = [
         ("some text", True),
@@ -411,7 +411,7 @@ if __name__ == "__main__":
         (-0.001, True),
         (-1.9, False),
     ]
-    
+
     ind = 0
     def displayNext():
         global ind, testData
@@ -423,5 +423,5 @@ if __name__ == "__main__":
         if ind < len(testData):
             Timer(1.2, displayNext)
     Timer(1.2, displayNext)
-            
+
     root.mainloop()

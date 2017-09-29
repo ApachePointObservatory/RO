@@ -43,7 +43,7 @@ in a Mac-like way is difficult.
 """
 __all__ = ['makeReadOnly', 'stdBindings', 'stopEvent']
 
-import tkinter
+from six.moves import tkinter
 import RO.TkUtil
 
 def doQuit(evt):

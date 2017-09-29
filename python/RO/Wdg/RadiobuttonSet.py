@@ -45,7 +45,7 @@ History:
 """
 __all__ = ['RadiobuttonSet']
 
-import tkinter
+from six.moves import tkinter
 import RO.AddCallback
 import RO.Alg
 import RO.SeqUtil

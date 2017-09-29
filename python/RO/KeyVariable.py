@@ -1112,7 +1112,7 @@ class KeyVarFactory(object):
 
 
 if __name__ == "__main__":
-    import tkinter
+    from six.moves import tkinter
     doBasic = True
     doFmt = True
     import RO.Astro.Tm

@@ -8,7 +8,7 @@ Based on code in John Grayson's "Python and Tkinter Programming"
 """
 import sys
 import os
-import tkinter
+from six.moves import tkinter
 RORoot = os.path.join(os.path.dirname(os.path.abspath(os.path.dirname(__file__))), "python")
 sys.path.append(RORoot)
 import RO.Wdg

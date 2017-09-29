@@ -16,7 +16,7 @@ Here are some examples:
 
 1) Using Tkinter with the Tcl event loop (no Twisted)
 
-import Tkinter
+from six.moves import tkinter
 root = Tkinter.Tk()
 
 import RO.Comm.Generic
@@ -41,7 +41,7 @@ reactor.run()
 
 3) Using Twisted framework with Tkinter
 
-import Tkinter
+from six.moves import tkinter
 import twisted.internet.tksupport
 root = Tkinter.Tk()
 twisted.internet.tksupport.install(root)
@@ -166,7 +166,7 @@ class WaitForTCPServer(object):
 
 
 if __name__ == "__main__":
-    import tkinter
+    from six.moves import tkinter
     root = tkinter.Tk()
     root.withdraw()
     setFramework("tk") # since it is almost always installed

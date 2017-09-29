@@ -41,8 +41,8 @@ __all__ = ['PythonWdg']
 
 import os
 import re
-import tkinter
-import tkinter.filedialog
+from six.moves import tkinter
+from six.moves import tkinter.filedialog
 import RO.CnvUtil
 import RO.OS
 from . import Text

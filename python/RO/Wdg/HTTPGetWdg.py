@@ -34,7 +34,7 @@ import sys
 import traceback
 import weakref
 from . import Bindings
-import tkinter
+from six.moves import tkinter
 import RO.AddCallback
 import RO.Constants
 import RO.MathUtil

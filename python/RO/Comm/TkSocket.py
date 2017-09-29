@@ -95,7 +95,7 @@ __all__ = ["TCPSocket", "TCPServer"]
 import re
 import sys
 import traceback
-import tkinter
+from six.moves import tkinter
 import RO.TkUtil
 from RO.Comm.BaseSocket import BaseSocket, BaseServer, nullCallback
 

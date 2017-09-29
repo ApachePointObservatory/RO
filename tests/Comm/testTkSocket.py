@@ -1,6 +1,6 @@
 # -*- test-case-name: tests.Comm.testTkSocket -*-
 
-import tkinter
+from six.moves import tkinter
 from twisted.trial import unittest
 from twisted.internet.defer import Deferred
 import twisted.internet.tksupport

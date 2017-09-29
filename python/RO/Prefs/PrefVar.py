@@ -97,8 +97,8 @@ __all__ = ["PrefVar", "StrPrefVar", "DirectoryPrefVar", "FilePrefVar", "SoundPre
 import os.path
 import re
 import sys
-import tkinter
-import tkinter.font
+from six.moves import tkinter
+from six.moves import tkinter.font
 import RO.Alg
 import RO.CnvUtil
 import RO.MathUtil

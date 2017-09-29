@@ -27,7 +27,7 @@ History:
 """
 __all__ = ['OptionPanelControl']
 
-import tkinter
+from six.moves import tkinter
 from .Checkbutton import Checkbutton
 from .CtxMenu import CtxMenuMixin
 

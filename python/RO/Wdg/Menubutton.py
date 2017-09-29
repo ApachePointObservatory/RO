@@ -7,7 +7,7 @@ History:
 """
 __all__ = ['Menubutton']
 
-import tkinter
+from six.moves import tkinter
 import RO.Constants
 from . import CtxMenu
 

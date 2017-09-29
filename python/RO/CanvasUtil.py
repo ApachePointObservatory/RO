@@ -22,7 +22,7 @@ History:
 __all__ = ["ctrCircle", "ctrPlus", "ctrX", "radialLine", "Spiral"]
 
 import math
-import tkinter
+from six.moves import tkinter
 import RO.MathUtil
 
 def ctrCircle(cnv, xpos, ypos, rad, width = 1, **kargs):

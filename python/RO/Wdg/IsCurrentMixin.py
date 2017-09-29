@@ -226,7 +226,7 @@ class AutoIsCurrentMixin(object):
     
     
 if __name__ == "__main__":
-    import tkinter
+    from six.moves import tkinter
     from . import PythonTk
     root = PythonTk.PythonTk()
     

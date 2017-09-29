@@ -62,7 +62,7 @@ __all__ = ["DropletRunner"]
 import sys
 import os.path
 import subprocess
-import tkinter
+from six.moves import tkinter
 import RO.OS
 import RO.Constants
 from RO.TkUtil import Timer

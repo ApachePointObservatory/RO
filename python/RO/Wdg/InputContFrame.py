@@ -14,7 +14,7 @@ History:
 """
 __all__ = ['InputContFrame']
 
-import tkinter
+from six.moves import tkinter
 
 class InputContFrame(tkinter.Frame):
     """A convenience class for widgets containing an RO.InputCont container class.

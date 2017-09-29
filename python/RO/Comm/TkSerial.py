@@ -31,7 +31,7 @@ __all__ = ["TkSerial", "NullSerial"]
 
 import sys
 import traceback
-import tkinter
+from six.moves import tkinter
 import RO.SeqUtil
 import RO.TkUtil
 try:

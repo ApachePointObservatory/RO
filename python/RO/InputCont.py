@@ -914,7 +914,7 @@ class ContList(WdgCont):
 
 
 if __name__ == "__main__":
-    import tkinter
+    from six.moves import tkinter
     import RO.Wdg
     root = RO.Wdg.PythonTk()
     

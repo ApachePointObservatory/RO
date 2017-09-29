@@ -198,7 +198,7 @@ class NullConnection(TCPConnection):
 
 
 if __name__ == "__main__":
-    import tkinter
+    from six.moves import tkinter
     root = tkinter.Tk()
 
     host = "tccdev"

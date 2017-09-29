@@ -47,7 +47,7 @@ History:
 """
 __all__ = ['CtxMenu', 'CtxMenuMixin', 'addCtxMenu']
 
-import tkinter
+from six.moves import tkinter
 import RO.Comm.BrowseURL
 import RO.Constants
 import RO.OS

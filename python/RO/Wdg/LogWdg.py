@@ -70,7 +70,7 @@ History:
 """
 __all__ = ['LogWdg']
 
-import tkinter
+from six.moves import tkinter
 import RO.Alg
 from . import Text
 

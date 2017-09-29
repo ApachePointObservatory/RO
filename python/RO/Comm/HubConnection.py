@@ -230,7 +230,7 @@ class NullConnection(HubConnection):
 
 
 if __name__ == "__main__":
-    import tkinter
+    from six.moves import tkinter
     import RO.Wdg
     root = tkinter.Tk()
 

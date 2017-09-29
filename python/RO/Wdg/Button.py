@@ -20,7 +20,7 @@ History:
 """
 __all__ = ['Button', 'Radiobutton']
 
-import tkinter
+from six.moves import tkinter
 import RO.AddCallback
 import RO.Constants
 import RO.TkUtil

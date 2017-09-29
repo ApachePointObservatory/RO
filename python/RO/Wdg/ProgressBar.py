@@ -32,7 +32,7 @@ __all__ = ['ProgressBar', 'TimeBar']
 import time
 import RO.SeqUtil
 from RO.TkUtil import Timer
-import tkinter
+from six.moves import tkinter
 from . import Button
 from . import Entry
 from . import Gridder

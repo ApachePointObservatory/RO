@@ -62,9 +62,9 @@ History:
 """
 import sys
 from . import PrefVar
-import tkinter
-import tkinter.colorchooser
-import tkinter.font
+from six.moves import tkinter
+from six.moves import tkinter.colorchooser
+from six.moves import tkinter.font
 import RO.Alg
 import RO.Wdg
 from RO.TkUtil import Timer

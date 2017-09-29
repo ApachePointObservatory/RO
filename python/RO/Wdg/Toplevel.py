@@ -69,7 +69,7 @@ import json
 import os.path
 import sys
 import traceback
-import tkinter
+from six.moves import tkinter
 import RO.CnvUtil
 import RO.OS
 import RO.SeqUtil

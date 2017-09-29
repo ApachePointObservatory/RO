@@ -81,7 +81,7 @@ import datetime
 import time
 
 import numpy
-import tkinter
+from six.moves import tkinter
 import matplotlib
 import matplotlib.dates
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg

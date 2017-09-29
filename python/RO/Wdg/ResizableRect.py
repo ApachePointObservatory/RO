@@ -29,7 +29,7 @@ History:
 """
 __all__ = ["ResizableRect"]
 
-import tkinter
+from six.moves import tkinter
 import RO.SeqUtil
 import RO.AddCallback
 from RO.Alg import GenericCallback

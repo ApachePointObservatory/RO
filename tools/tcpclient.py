@@ -6,7 +6,7 @@ History:
 2009-07-10 ROwen    Removed an inline conditional statement to be Python 2.4 compatible.
 """
 import sys
-import tkinter
+from six.moves import tkinter
 import RO.Comm.Generic
 RO.Comm.Generic.setFramework("tk")
 import RO.Comm.TCPConnection

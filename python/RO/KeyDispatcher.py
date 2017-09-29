@@ -687,7 +687,7 @@ class KeyDispatcher(object):
 
 if __name__ == "__main__":
     print("\nTesting RO.KeyDispatcher\n")
-    import tkinter
+    from six.moves import tkinter
     root = tkinter.Tk()
 
     kdb = KeyDispatcher()

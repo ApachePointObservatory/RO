@@ -5,7 +5,7 @@ Type and press <return> in the entry field along the bottom to send data
 """
 import sys
 import os
-import tkinter
+from six.moves import tkinter
 RORoot = os.path.join(os.path.dirname(os.path.abspath(os.path.dirname(__file__))), "python")
 sys.path.append(RORoot)
 import RO.CnvUtil

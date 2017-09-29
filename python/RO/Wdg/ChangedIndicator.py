@@ -15,7 +15,7 @@ History:
 """
 __all__ = ['ChangedIndicator']
 
-import tkinter
+from six.moves import tkinter
 import RO.SeqUtil
 from . import CtxMenu
 

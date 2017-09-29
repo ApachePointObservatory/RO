@@ -19,7 +19,7 @@ History:
 """
 __all__ = ['HistoryMenu']
 
-import tkinter
+from six.moves import tkinter
 import RO.Alg
 from . import CtxMenu
 

@@ -72,7 +72,7 @@ History:
 """
 __all__ = ['Checkbutton']
 
-import tkinter
+from six.moves import tkinter
 import RO.AddCallback
 import RO.CnvUtil
 import RO.MathUtil

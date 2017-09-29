@@ -26,8 +26,8 @@ History:
 __all__ = ["DirWdg", "FileWdg"]
 
 import os
-import tkinter
-import tkinter.filedialog
+from six.moves import tkinter
+from six.moves import tkinter.filedialog
 import RO.AddCallback
 import RO.Constants
 from . import CtxMenu
