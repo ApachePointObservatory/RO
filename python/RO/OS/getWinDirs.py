@@ -1,4 +1,4 @@
-from __future__ import absolute_import, division, print_function
+
 """Determine the application data directory for Windows.
 
 Requires Mark Hammond's win32 extensions

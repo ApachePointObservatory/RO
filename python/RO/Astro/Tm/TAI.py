@@ -1,4 +1,4 @@
-from __future__ import division, absolute_import
+
 """Functions to convert to/from TAI
 
 History:

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import absolute_import, division, print_function
+
 """A dictionary in which the order of adding items is preserved.
 
 Replacing an existing item replaces it at its current location.
@@ -50,7 +50,7 @@ class OrderedDict(dict):
         if seqOrDict is None:
             return
         elif hasattr(seqOrDict, "iteritems"):
-            for key, val in seqOrDict.iteritems():
+            for key, val in seqOrDict.items():
                 self[key] = val
         else:
             for key, val in seqOrDict:
@@ -67,7 +67,7 @@ class OrderedDict(dict):
         return iter(self.__keyList)
     
     def itervalues(self):
-        for key in self.iterkeys():
+        for key in self.keys():
             yield self[key]
     
     def iteritems(self):
@@ -123,11 +123,11 @@ class OrderedDict(dict):
     def update(self, aDict):
         """Add all items from dictionary aDict to self (in order if aDict is an ordered dictionary).
         """
-        for key, value in aDict.iteritems():
+        for key, value in aDict.items():
             self[key] = value
  
     def values(self):
-        return [self[key] for key in self.iterkeys()]
+        return [self[key] for key in self.keys()]
     
     def _checkIntegrity(self):
         """Perform an internal consistency check and raise an AssertionError if anything is wrong.
@@ -136,7 +136,7 @@ class OrderedDict(dict):
         """
         assert len(self) == len(self.__keyList), \
             "length of dict %r != length of key list %r" % (len(self), len(self.__keyList))
-        for key in self.iterkeys():
+        for key in self.keys():
             assert key in self, \
                 "key %r in key list missing from dictionary" % (key,)
     
@@ -145,16 +145,16 @@ class OrderedDict(dict):
         self.__keyList.remove(key)
     
     def __iter__(self):
-        return self.iterkeys()
+        return iter(self.keys())
     
     def __repr__(self):
-        return "%s([%s])" % (self.__class__.__name__, ', '.join(["(%r, %r)" % item for item in self.iteritems()]))
+        return "%s([%s])" % (self.__class__.__name__, ', '.join(["(%r, %r)" % item for item in self.items()]))
 
     def __str__(self):
-        return "{%s}" % (', '.join(["(%r, %r)" % item for item in self.iteritems()]),)
+        return "{%s}" % (', '.join(["(%r, %r)" % item for item in self.items()]),)
     
     def __setitem__(self, key, value):
-        if not self.has_key(key):
+        if key not in self:
             self.__keyList.append(key)
         dict.__setitem__(self, key, value)
 
@@ -188,7 +188,7 @@ class ReverseOrderedDict(OrderedDict):
         return revCopy
     
     def __repr__(self):
-        descrList = ["(%r, %r)" % item for item in self.iteritems()]
+        descrList = ["(%r, %r)" % item for item in self.items()]
         descrList.reverse()
         return "%s([%s])" % (self.__class__.__name__, ', '.join(descrList))
 
@@ -209,10 +209,10 @@ if __name__ == "__main__":
 
     def testDict(desKeys, desValues, theDict):
         """Test an ordered dictionary, given the expected keys and values (in order)"""
-        actKeys = theDict.keys()
+        actKeys = list(theDict.keys())
         assert desKeys == actKeys, "keys() failed; keys %r != %r" % (desKeys, actKeys)
         
-        actValues = theDict.values()
+        actValues = list(theDict.values())
         assert desValues == actValues, "values() failed; values %r != %r" % (desValues, actValues)
         
         assert len(theDict) == len(desKeys), "len() failed: %r != %r" % (len(desKeys), len(theDict))
@@ -221,11 +221,11 @@ if __name__ == "__main__":
         actKeys = [key for key in theDict]
         assert desKeys == actKeys, "__iter__() failed; keys %r != %r" % (desKeys, actKeys)
     
-        actValues = [v for v in theDict.itervalues()]
+        actValues = [v for v in theDict.values()]
         assert desValues == actValues, "itervalues() failed; values %r != %r" % (desValues, actValues)
         
-        desKeyValues = map(lambda key, v: (key, v), desKeys, desValues)
-        actKeyValues = [kv for kv in theDict.iteritems()]
+        desKeyValues = list(map(lambda key, v: (key, v), desKeys, desValues))
+        actKeyValues = [kv for kv in theDict.items()]
         assert desKeyValues == actKeyValues, "iteritems() failed; values %r != %r" % (desKeyValues, actKeyValues)
     
         theDict._checkIntegrity()   
@@ -273,11 +273,11 @@ if __name__ == "__main__":
     
     # test copying
     dictCopy = oDict.copy()
-    assert dictCopy.keys() == oDict.keys(), "copy failed; keys %r != %r" % (dictCopy.keys(), testDict.keys())
+    assert list(dictCopy.keys()) == list(oDict.keys()), "copy failed; keys %r != %r" % (list(dictCopy.keys()), list(testDict.keys()))
     
-    testKey = dictCopy.keys()[0]
+    testKey = list(dictCopy.keys())[0]
     dictCopy[testKey] = "changed value"
-    assert dictCopy.values() != oDict.values(), "copy failed; changing a value in one affected the other"
+    assert list(dictCopy.values()) != list(oDict.values()), "copy failed; changing a value in one affected the other"
     
     # add a new item to dictCopy and make sure the integrity of both are preserved
     # (verifies that the __keyList lists in each dictionary are separate entities)

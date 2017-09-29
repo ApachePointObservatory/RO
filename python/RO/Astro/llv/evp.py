@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 """
 History:
 P.t.Wallace Starlink    21 November 1994
@@ -10,8 +10,8 @@ __all__ = ["evp"]
 
 from math import sin, cos, pi, sqrt, fmod
 import numpy
-from prec import prec
-from epj import epj
+from .prec import prec
+from .epj import epj
 
 # Constants
 TWOPI = pi * 2.0

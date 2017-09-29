@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 """Obtains all values (0 or more) associated with a keyword.
 
 History:
@@ -17,7 +17,7 @@ History:
 __all__ = ["getValues"]
 
 import re
-import GetString
+from . import GetString
 
 _StartRE = re.compile(r"\s*(?P<first>[=;])\s*(?:(?P<next>\S)|$)")
 

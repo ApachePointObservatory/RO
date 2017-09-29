@@ -1,4 +1,4 @@
-from __future__ import absolute_import, division, print_function
+
 """Utilities for finding standard Mac directories.
 
 History:

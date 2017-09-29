@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 """
 A widget showing a set of options as checkbuttons.
 
@@ -36,10 +36,10 @@ History:
 __all__ = ['OptionButtons']
 
 import RO.InputCont
-import Button
-import Checkbutton
-import InputContFrame
-import Label
+from . import Button
+from . import Checkbutton
+from . import InputContFrame
+from . import Label
 
 class OptionButtons(InputContFrame.InputContFrame):
     def __init__ (self,
@@ -178,7 +178,7 @@ class OptionButtons(InputContFrame.InputContFrame):
             wdg.pack(side="top", anchor="nw")
     
 if __name__ == "__main__":
-    import PythonTk
+    from . import PythonTk
     root = PythonTk.PythonTk()
 
     def doPrint():

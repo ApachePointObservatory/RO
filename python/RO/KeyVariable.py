@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import absolute_import, division, print_function
+
 """KeyVar and its cousins are used monitor data from the keyword dispatcher.
 Keyword data may trigger callbacks or automatically update RO.Wdg widgets.
 
@@ -163,7 +163,7 @@ TypeDict = {
     ":":("finished", RO.Constants.sevNormal),
 }
 # all message types
-AllTypes = "".join(TypeDict.keys())
+AllTypes = "".join(list(TypeDict.keys()))
 # useful other message types
 DoneTypes = ":f!"
 FailTypes = "f!"
@@ -399,7 +399,7 @@ class KeyVar(RO.AddCallback.BaseMixin):
             class callWdgSet(object):
                 def __init__(self, wdgSet):
                     self.wdgSet = wdgSet
-                    self.wdgInd = range(len(wdgSet))
+                    self.wdgInd = list(range(len(wdgSet)))
                 def __call__(self, valueList, isCurrent, keyVar):
                     for wdg, val in zip(self.wdgSet, valueList):
                         wdg.setDefault(val, isCurrent=isCurrent, keyVar=keyVar)
@@ -407,7 +407,7 @@ class KeyVar(RO.AddCallback.BaseMixin):
             class callWdgSet(object):
                 def __init__(self, wdgSet):
                     self.wdgSet = wdgSet
-                    self.wdgInd = range(len(wdgSet))
+                    self.wdgInd = list(range(len(wdgSet)))
                 def __call__(self, valueList, isCurrent, keyVar):
                     for wdg, val in zip(self.wdgSet, valueList):
                         wdg.set(val, isCurrent=isCurrent, keyVar=keyVar)
@@ -659,7 +659,7 @@ class PVTKeyVar(KeyVar):
         class callWdgSet(object):
             def __init__(self, wdgSet):
                 self.wdgSet = wdgSet
-                self.wdgInd = range(len(wdgSet))
+                self.wdgInd = list(range(len(wdgSet)))
             def __call__(self, valueList, isCurrent, keyVar):
                 for ind in self.wdgInd:
                     wdgSet[ind].set(valueList[ind].getPos(), isCurrent=isCurrent, keyVar=keyVar)
@@ -1095,7 +1095,7 @@ class KeyVarFactory(object):
         In case key variables with more than one actor have been produced,
         those for each actor get their own command.
         """
-        for actor, keyVars in self._actorKeyVarsRefreshDict.iteritems():
+        for actor, keyVars in self._actorKeyVarsRefreshDict.items():
             if getAllKeys:
                 refreshCmd = "getFor=%s" % (actor,)
             else:
@@ -1112,12 +1112,12 @@ class KeyVarFactory(object):
 
 
 if __name__ == "__main__":
-    import Tkinter
+    import tkinter
     doBasic = True
     doFmt = True
     import RO.Astro.Tm
     
-    root = Tkinter.Tk()
+    root = tkinter.Tk()
 
     if doBasic:
         print("\nrunning basic variables test")

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 """Mixin classes that add an "isCurrent" flag
 and adjust the widget background color based on that flag.
 
@@ -22,7 +22,7 @@ History:
 """
 __all__ = ["IsCurrentMixin", "IsCurrentActiveMixin", "IsCurrentCheckbuttonMixin", "AutoIsCurrentMixin"]
 
-import WdgPrefs
+from . import WdgPrefs
 
 class IsCurrentMixin(object):
     """Mixin classes that add an "isCurrent" flag
@@ -226,33 +226,33 @@ class AutoIsCurrentMixin(object):
     
     
 if __name__ == "__main__":
-    import Tkinter
-    import PythonTk
+    import tkinter
+    from . import PythonTk
     root = PythonTk.PythonTk()
     
-    class ColorButton(Tkinter.Button, IsCurrentActiveMixin):
+    class ColorButton(tkinter.Button, IsCurrentActiveMixin):
         def __init__(self, *args, **kargs):
-            Tkinter.Button.__init__(self, *args, **kargs)
+            tkinter.Button.__init__(self, *args, **kargs)
             IsCurrentActiveMixin.__init__(self)
 
-    class ColorCheckbutton(Tkinter.Checkbutton, IsCurrentActiveMixin):
+    class ColorCheckbutton(tkinter.Checkbutton, IsCurrentActiveMixin):
         def __init__(self, *args, **kargs):
-            Tkinter.Checkbutton.__init__(self, *args, **kargs)
+            tkinter.Checkbutton.__init__(self, *args, **kargs)
             IsCurrentActiveMixin.__init__(self)
 
-    class ColorEntry(Tkinter.Entry, IsCurrentMixin):
+    class ColorEntry(tkinter.Entry, IsCurrentMixin):
         def __init__(self, *args, **kargs):
-            Tkinter.Entry.__init__(self, *args, **kargs)
+            tkinter.Entry.__init__(self, *args, **kargs)
             IsCurrentMixin.__init__(self)
 
-    class ColorLabel(Tkinter.Label, IsCurrentMixin):
+    class ColorLabel(tkinter.Label, IsCurrentMixin):
         def __init__(self, *args, **kargs):
-            Tkinter.Label.__init__(self, *args, **kargs)
+            tkinter.Label.__init__(self, *args, **kargs)
             IsCurrentMixin.__init__(self)
 
-    class ColorOptionMenu(Tkinter.OptionMenu, IsCurrentActiveMixin):
+    class ColorOptionMenu(tkinter.OptionMenu, IsCurrentActiveMixin):
         def __init__(self, *args, **kargs):
-            Tkinter.OptionMenu.__init__(self, *args, **kargs)
+            tkinter.OptionMenu.__init__(self, *args, **kargs)
             IsCurrentActiveMixin.__init__(self)
 
     def setIsCurrent(*args):
@@ -261,14 +261,14 @@ if __name__ == "__main__":
         for wdg in wdgSet:
             wdg.setIsCurrent(isCurrent)
     
-    isCurrentVar = Tkinter.BooleanVar()
+    isCurrentVar = tkinter.BooleanVar()
     isCurrentVar.set(True)
     isCurrentVar.trace_variable("w", setIsCurrent)
 
-    stateVar = Tkinter.StringVar()
+    stateVar = tkinter.StringVar()
     stateVar.set("Normal")
     
-    entryVar = Tkinter.StringVar()
+    entryVar = tkinter.StringVar()
     entryVar.set("Entry")
     wdgSet = (
         ColorCheckbutton(root,
@@ -292,6 +292,6 @@ if __name__ == "__main__":
         ),
     )
     for wdg in wdgSet:
-        wdg.pack(fill=Tkinter.X)
+        wdg.pack(fill=tkinter.X)
             
     root.mainloop()

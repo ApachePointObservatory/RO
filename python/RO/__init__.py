@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 """Various utilities written, adapted or borrowed by Russell Owen
 
 See ../README.txt and ../docs of source code

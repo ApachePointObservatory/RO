@@ -1,20 +1,20 @@
 #!/usr/bin/env python
-from __future__ import absolute_import, division, print_function
+
 """Example trivial telnet client using RO.Comm.TCPConnection
 
 History:
 2009-07-10 ROwen    Removed an inline conditional statement to be Python 2.4 compatible.
 """
 import sys
-import Tkinter
+import tkinter
 import RO.Comm.Generic
 RO.Comm.Generic.setFramework("tk")
 import RO.Comm.TCPConnection
 import RO.Wdg
 
-class TCPClient(Tkinter.Frame):
+class TCPClient(tkinter.Frame):
     def __init__(self, master, addr, port=None):
-        Tkinter.Frame.__init__(self, master)
+        tkinter.Frame.__init__(self, master)
         self.logWdg = RO.Wdg.LogWdg(
             master = self,
             maxLines = 1000,
@@ -73,7 +73,7 @@ if __name__ == "__main__":
     else:
         port = 23
     
-    root = Tkinter.Tk()
+    root = tkinter.Tk()
     root.geometry("400x200")
     client = TCPClient(root, addr, port)
     client.pack(side="top", expand=True, fill="both")

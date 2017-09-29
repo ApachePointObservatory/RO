@@ -1,4 +1,4 @@
-from __future__ import absolute_import, division, print_function
+
 """
 
 History:
@@ -14,9 +14,9 @@ History:
 """
 __all__ = ['InputContFrame']
 
-import Tkinter
+import tkinter
 
-class InputContFrame(Tkinter.Frame):
+class InputContFrame(tkinter.Frame):
     """A convenience class for widgets containing an RO.InputCont container class.
     You must store the container list in instance variable self.inputCont and all the
     important calls automatically work.
@@ -25,7 +25,7 @@ class InputContFrame(Tkinter.Frame):
     changes in InputCont, but avoids cluttering up your class with attributes.
     """
     def __init__(self, master, stateTracker=None, **kargs):
-        Tkinter.Frame.__init__(self, master, **kargs)
+        tkinter.Frame.__init__(self, master, **kargs)
         self._stateTracker = stateTracker
     
     def addCallback(self, callFunc, callNow=False):

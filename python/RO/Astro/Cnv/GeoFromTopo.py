@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 """
 History:
 2002-07-22 ROwen    Converted to Python from the TCC's cnv_AppTopo2AppGeo 3-3.
@@ -12,7 +12,7 @@ __all__ = ["geoFromTopo"]
 import numpy
 import RO.MathUtil
 from RO.Astro import llv
-from HADecFromAzAlt import haDecFromAzAlt
+from .HADecFromAzAlt import haDecFromAzAlt
 
 def geoFromTopo(appTopoP, last, obsData):
     """
@@ -64,7 +64,7 @@ def geoFromTopo(appTopoP, last, obsData):
 
 if __name__ == "__main__":
     import RO.SeqUtil
-    from ObserverData import ObserverData
+    from .ObserverData import ObserverData
     print("testing geoFromTopo")
     # test data is formatted as follows:
     # a list of entries, each consisting of:

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 """A menu showing a history of recent events.
 Saves arbitrary data associated with each event
 and calls a user-specified callback when any item is selected.
@@ -19,11 +19,11 @@ History:
 """
 __all__ = ['HistoryMenu']
 
-import Tkinter
+import tkinter
 import RO.Alg
-import CtxMenu
+from . import CtxMenu
 
-class HistoryMenu (Tkinter.Menubutton, CtxMenu.CtxMenuMixin):
+class HistoryMenu (tkinter.Menubutton, CtxMenu.CtxMenuMixin):
     """A menu showing a history of recent events.
     
     Inputs:
@@ -49,7 +49,7 @@ class HistoryMenu (Tkinter.Menubutton, CtxMenu.CtxMenuMixin):
         helpText = None,
         helpURL = None,
     ):
-        Tkinter.Menubutton.__init__(self,
+        tkinter.Menubutton.__init__(self,
             master=master,
             text="History",
             indicatoron=1,
@@ -65,7 +65,7 @@ class HistoryMenu (Tkinter.Menubutton, CtxMenu.CtxMenuMixin):
         self.helpText = helpText
 
         # basic menu
-        self.__menu = Tkinter.Menu(self, tearoff=0)
+        self.__menu = tkinter.Menu(self, tearoff=0)
         self["menu"] = self.__menu
     
         self.dataDict = {}
@@ -115,7 +115,7 @@ class HistoryMenu (Tkinter.Menubutton, CtxMenu.CtxMenuMixin):
         
 
 if __name__ == "__main__":
-    import PythonTk
+    from . import PythonTk
     root = PythonTk.PythonTk()
     
     def doAdd(*args):
@@ -126,9 +126,9 @@ if __name__ == "__main__":
     def doPrint(name, data):
         print("name=%r, data=%r" % (name, data))
     
-    Tkinter.Label(root, text="Name of new entry (type <CR> to accept it):").pack()
-    nameVar = Tkinter.StringVar()
-    nameWdg = Tkinter.Entry(root, textvariable=nameVar)
+    tkinter.Label(root, text="Name of new entry (type <CR> to accept it):").pack()
+    nameVar = tkinter.StringVar()
+    nameWdg = tkinter.Entry(root, textvariable=nameVar)
     nameWdg.bind("<Return>", doAdd)
     nameWdg.pack()
     testFrame = HistoryMenu(root,

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 """
 History:
 P.T.Wallace Starlink    30 December 1992
@@ -11,7 +11,7 @@ __all__ = ["prebn"]
 
 import numpy
 import RO.PhysConst
-from euler import euler
+from .euler import euler
 
 def prebn(bep0, bep1):
     """

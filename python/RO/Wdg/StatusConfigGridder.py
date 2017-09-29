@@ -1,4 +1,4 @@
-from __future__ import division, print_function
+
 """Tools for gridding widgets
 
 History:
@@ -26,7 +26,7 @@ History:
 """
 __all__ = ['StatusConfigGridder']
 
-import Gridder
+from . import Gridder
 
 ConfigCat = "config"
 

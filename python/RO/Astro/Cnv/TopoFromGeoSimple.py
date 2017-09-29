@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 """
 History:
 2002-07-22 ROwen    Converted to Python from the TCC's cnv_AppGeo2AppTopo.
@@ -8,7 +8,7 @@ History:
 __all__ = ["topoFromGeoSimple"]
 
 import RO.MathUtil
-from AzAltFromHADec import azAltFromHADec
+from .AzAltFromHADec import azAltFromHADec
 
 # needs test code
 

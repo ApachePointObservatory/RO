@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 """Basic dialog class(es). The dialog's window is shown when the object is created
 and destroyed when the user exits the dialog. The result is contained in dialog.result
 and is None if the dialog is cancelled.
@@ -26,11 +26,11 @@ History:
 """
 __all__ = ['ModalDialogBase']
 
-import Tkinter
+import tkinter
 
-import Button
+from . import Button
 
-class ModalDialogBase(Tkinter.Toplevel):
+class ModalDialogBase(tkinter.Toplevel):
     """Base class for modal dialogs.
     
     The result is returned in self.result
@@ -41,7 +41,7 @@ class ModalDialogBase(Tkinter.Toplevel):
     def __init__(self, master = None, title = None):
         """Create and display a modal dialog.
         """
-        Tkinter.Toplevel.__init__(self, master)
+        tkinter.Toplevel.__init__(self, master)
         self.resizable(False, False)
 
         if title:
@@ -49,16 +49,16 @@ class ModalDialogBase(Tkinter.Toplevel):
 
         self.result = None
         
-        self.doneVar = Tkinter.BooleanVar()
+        self.doneVar = tkinter.BooleanVar()
         
         # widget that had focus before this dialog opened
         self.prevFocus = self.focus_get() or master
         
-        buttonFrame = Tkinter.Frame(self)
+        buttonFrame = tkinter.Frame(self)
         self.buttons(master = buttonFrame)
         buttonFrame.pack(side="bottom")
 
-        bodyFrame = Tkinter.Frame(self)
+        bodyFrame = tkinter.Frame(self)
         # create dialog body and save widget that should
         # initially get focus in this dialog
         self.initialFocus = self.body(master = bodyFrame)
@@ -78,18 +78,18 @@ class ModalDialogBase(Tkinter.Toplevel):
         # it's just a best-effort attempt to grab (make the dialog box modal).
         try:
             self.wait_visibility()
-        except Tkinter.TclError:
+        except tkinter.TclError:
             pass
         try:
             self.grab_set()
-        except Tkinter.TclError:
+        except tkinter.TclError:
             pass
 
         self.wait_variable(self.doneVar)
 
         try:
             self.grab_release()
-        except Tkinter.TclError:
+        except tkinter.TclError:
             pass
 
         if self.prevFocus:
@@ -152,11 +152,11 @@ if __name__ == "__main__":
     class TestDialog(ModalDialogBase):
         def body(self, master):
     
-            Tkinter.Label(master, text="Name:").grid(row=0)
-            Tkinter.Label(master, text="Password:").grid(row=1)
+            tkinter.Label(master, text="Name:").grid(row=0)
+            tkinter.Label(master, text="Password:").grid(row=1)
     
-            self.e1 = Tkinter.Entry(master)
-            self.e2 = Tkinter.Entry(master, show="*")
+            self.e1 = tkinter.Entry(master)
+            self.e2 = tkinter.Entry(master, show="*")
     
             self.e1.grid(row=0, column=1)
             self.e2.grid(row=1, column=1)
@@ -172,12 +172,12 @@ if __name__ == "__main__":
         l["text"] = "Result: %s" % (d.result,)
         print(d.result)
             
-    root = Tkinter.Tk()
-    e = Tkinter.Entry(root)
+    root = tkinter.Tk()
+    e = tkinter.Entry(root)
     e.pack()
-    l = Tkinter.Label(root)
+    l = tkinter.Label(root)
     l.pack()
-    b = Tkinter.Button(root, text="Dialog", command=doDialog)
+    b = tkinter.Button(root, text="Dialog", command=doDialog)
     b.pack()
     e.focus_set()
 

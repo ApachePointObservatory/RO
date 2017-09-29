@@ -1,4 +1,4 @@
-from __future__ import division, print_function
+
 """Variant on Menubutton that adds callback and severity functionality
 
 History:
@@ -7,11 +7,11 @@ History:
 """
 __all__ = ['Menubutton']
 
-import Tkinter
+import tkinter
 import RO.Constants
-import CtxMenu
+from . import CtxMenu
 
-class Menubutton(Tkinter.Menubutton, CtxMenu.CtxMenuMixin):
+class Menubutton(tkinter.Menubutton, CtxMenu.CtxMenuMixin):
     def __init__(self,
         master,
         helpText = None,
@@ -33,7 +33,7 @@ class Menubutton(Tkinter.Menubutton, CtxMenu.CtxMenuMixin):
         """
         self.helpText = helpText
 
-        Tkinter.Menubutton.__init__(self, master = master, **kwArgs)
+        tkinter.Menubutton.__init__(self, master = master, **kwArgs)
 
         CtxMenu.CtxMenuMixin.__init__(self, helpURL = helpURL)
     
@@ -46,13 +46,13 @@ class Menubutton(Tkinter.Menubutton, CtxMenu.CtxMenuMixin):
         Warning: if you want the state to be "active" you must set that explicitly.
         """
         if doEnable:
-            self["state"] = Tkinter.NORMAL
+            self["state"] = tkinter.NORMAL
         else:
-            self["state"] = Tkinter.DISABLED
+            self["state"] = tkinter.DISABLED
     
     def getEnable(self):
         """Return True if widget is enabled, False otherwise
 
         Enabled is defined as the state is not "disabled" (thus "enabled" or "active").
         """
-        return self["state"] != Tkinter.DISABLED
+        return self["state"] != tkinter.DISABLED

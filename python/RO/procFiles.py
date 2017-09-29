@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import absolute_import, division, print_function
+
 """procFiles calls a user-supplied function "func" to process a set of files one by one.
 The processed data is typically concatenated into one output file, but this behavior
 is controlled by outPath.
@@ -161,7 +161,7 @@ def procFiles (
 ):
     # make sure func is callable
     if not callable(func):
-        raise RuntimeError, "supplied function is not callable"
+        raise RuntimeError("supplied function is not callable")
 
     # handle case of inPathList being a single string
     inPathList = RO.SeqUtil.asSequence(inPathList)
@@ -212,7 +212,7 @@ def procFiles (
             sys.stdout = file(outPath, 'w')
         except ImportError:
             # unknown platform; use standard prompt
-            outFile = raw_input(
+            outFile = input(
                 "output file relative to %r [stdout]: " % outDir)
 
             # generate outPath, and if it's a file, open it and redirect stdout

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 """Code to run scripts that can wait for various things without messing up the main event loop
 (and thus starving the rest of your program).
 
@@ -92,7 +92,7 @@ __all__ = ["ScriptError", "ScriptRunner"]
 
 import sys
 import threading
-import Queue
+import queue
 import traceback
 import RO.AddCallback
 import RO.Constants
@@ -246,8 +246,8 @@ class ScriptRunner(RO.AddCallback.BaseMixin):
           which is needlessly inefficient.
         """
         if self.master:
-            import Tkinter
-            self._privateWdg = Tkinter.Frame(self.master)
+            import tkinter
+            self._privateWdg = tkinter.Frame(self.master)
             self._privateWdg.bind("<Destroy>", self.__del__)
 
         if stateFunc:
@@ -736,7 +736,7 @@ class ScriptRunner(RO.AddCallback.BaseMixin):
             cmdDescr = "%s %s..." % (cmdVar.actor, cmdVar.cmdStr[0:MaxLen])
         else:
             cmdDescr = "%s %s" % (cmdVar.actor, cmdVar.cmdStr)
-        for key, values in msgDict.get("data", {}).iteritems():
+        for key, values in msgDict.get("data", {}).items():
             if key.lower() in _ErrKeys:
                 reason = values[0]
                 break
@@ -1168,7 +1168,7 @@ class _WaitThread(_WaitBase):
         if not callable(func):
             raise ValueError("%r is not callable" % func)
 
-        self.queue = Queue.Queue()
+        self.queue = queue.Queue()
         self.func = func
 
         self.threadObj = threading.Thread(target=self.threadFunc, args=args, kwargs=kargs)
@@ -1198,11 +1198,11 @@ class _WaitThread(_WaitBase):
 
 
 if __name__ == "__main__":
-    import Tkinter
+    import tkinter
     import RO.KeyDispatcher
     import time
 
-    root = Tkinter.Tk()
+    root = tkinter.Tk()
     
     dispatcher = RO.KeyDispatcher.KeyDispatcher()
     

@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 """Time routines for Astronomy
 
 The heart of these routines is software written by Pat Wallace.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import absolute_import, division, print_function
+
 """
 History:
 2004-05-18 ROwen    Modified test code to use astr instead of str

@@ -1,4 +1,4 @@
-from __future__ import absolute_import, division, print_function
+
 """Serial connections optimized for use with Tkinter GUIs.
 
 Known issues:
@@ -31,7 +31,7 @@ __all__ = ["TkSerial", "NullSerial"]
 
 import sys
 import traceback
-import Tkinter
+import tkinter
 import RO.SeqUtil
 import RO.TkUtil
 try:
@@ -95,7 +95,7 @@ class TkBaseSerial(object):
         Called just after the serial is closed.
         """
         #print "%s._clearCallbacks()" % (self,)
-        for tclFunc in self._tkCallbackDict.itervalues():
+        for tclFunc in self._tkCallbackDict.values():
             tclFunc.deregister()
         self._tkCallbackDict = dict()
         self._stateCallback = None
@@ -185,7 +185,7 @@ class TkSerial(TkBaseSerial):
         )
         self._readCallback = readCallback
         
-        self._tk = Tkinter.StringVar()._tk
+        self._tk = tkinter.StringVar()._tk
 
         self._chanID = 0
         try:
@@ -196,7 +196,7 @@ class TkSerial(TkBaseSerial):
             cfgArgs = [
                 "-blocking", 0,
             ]
-            for key, value in chanKArgs.iteritems():
+            for key, value in chanKArgs.items():
                 cfgArgs += ["-" + key, value]
             cfgArgs += ["-mode", "%s,%s,%s,%s" % (int(baud), parity, int(dataBits), int(stopBits))]
             if buffering is not None:
@@ -212,7 +212,7 @@ class TkSerial(TkBaseSerial):
             # and is just used to detect state
             self._setSockCallback(self._doRead)
 
-        except Tkinter.TclError as e:
+        except tkinter.TclError as e:
             raise RuntimeError(e)
 
     def close(self, isOK=True, reason=None):
@@ -368,7 +368,7 @@ class TkSerial(TkBaseSerial):
         
         try:
             self._tk.call('fileevent', self._chanID, typeStr, tkFuncName)
-        except Tkinter.TclError as e:
+        except tkinter.TclError as e:
             if tclFunc:
                 tclFunc.deregister()
             raise RuntimeError(e)

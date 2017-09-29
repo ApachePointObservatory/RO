@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import absolute_import, division, print_function
+
 """
 History
 2002-07-23 ROwen  Converted from TCC's sph_SC2CC 1-1.

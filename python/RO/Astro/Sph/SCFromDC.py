@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 
 __all__ = ["scFromDC"]
 
-from SCFromCC import scFromCC
+from .SCFromCC import scFromCC
 
 def scFromDC(p):
     """Convert direction cosines or any cartesian vector to spherical coordinates.

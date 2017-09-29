@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 """A window (Tk Toplevel widget) for setting preferences.
 
 To Do:
@@ -37,9 +37,9 @@ History:
 """
 __all__ = ["PrefWin", "PrefWdg"]
 
-import Tkinter
-import PrefVar
-import PrefEditor
+import tkinter
+from . import PrefVar
+from . import PrefEditor
 import RO.Constants
 import RO.Wdg
 
@@ -53,10 +53,10 @@ class PrefWin(RO.Wdg.Toplevel):
     ):
         RO.Wdg.Toplevel.__init__(self, master, title=title, *args, **kwargs)
         self.prefWdg = PrefWdg(self, prefSet)
-        self.prefWdg.pack(fill=Tkinter.BOTH, expand=Tkinter.YES)
+        self.prefWdg.pack(fill=tkinter.BOTH, expand=tkinter.YES)
         
 
-class PrefWdg(Tkinter.Frame):
+class PrefWdg(tkinter.Frame):
     """Frame for editing preferences."""
 
     def __init__(self,
@@ -65,15 +65,15 @@ class PrefWdg(Tkinter.Frame):
         helpURL = None,
     ):
         self.prefSet = prefSet
-        Tkinter.Frame.__init__(self, master)
+        tkinter.Frame.__init__(self, master)
         
         self.prefsByCat = self.prefSet.getCategoryDict()
         catList = self.getCategories()
     
         # create the list of categories
-        catListFrame = Tkinter.Frame(self)
-        catListScroll = Tkinter.Scrollbar(catListFrame, orient="vertical")
-        self.catListWdg = Tkinter.Listbox(
+        catListFrame = tkinter.Frame(self)
+        catListScroll = tkinter.Scrollbar(catListFrame, orient="vertical")
+        self.catListWdg = tkinter.Listbox(
             catListFrame,
             selectmode="browse",
             yscrollcommand = catListScroll.set,
@@ -93,10 +93,10 @@ class PrefWdg(Tkinter.Frame):
         self.statusBar.grid(row=1, column=0, columnspan=2, sticky="ew")
         
         # create the button panel
-        self.buttonWdg = Tkinter.Frame(self)
+        self.buttonWdg = tkinter.Frame(self)
         buttonList = (
             self._getShowMenu(self.buttonWdg, helpURL=helpURL),
-            Tkinter.Frame(self.buttonWdg, width=10),
+            tkinter.Frame(self.buttonWdg, width=10),
             RO.Wdg.Button(self.buttonWdg, text="Apply", command=self.applyPrefs, helpURL=helpURL),
             RO.Wdg.Button(self.buttonWdg, text="Save", command=self.writeToFile, helpURL=helpURL),
         )
@@ -109,16 +109,16 @@ class PrefWdg(Tkinter.Frame):
         
         
         # create a frame for displaying the preferences for a given category
-        self.editFrame = Tkinter.Frame(self, relief="ridge", border=1)
+        self.editFrame = tkinter.Frame(self, relief="ridge", border=1)
         self.editFrame.grid(row=0, column=1, sticky="nsew")
         # pack a tiny frame so it shrinks to fit
-        Tkinter.Frame(self.editFrame, height=0, width=0).pack()
+        tkinter.Frame(self.editFrame, height=0, width=0).pack()
         # self.editFrame.grid_rowconfigure(0, weight=1)
         # self.editFrame.grid_columnconfigure(0, weight=1)
         self.paneDict = {}
         self.prefEditorList = []
-        for cat, prefs in self.prefsByCat.iteritems():
-            prefFrame = Tkinter.Frame(self.editFrame)
+        for cat, prefs in self.prefsByCat.items():
+            prefFrame = tkinter.Frame(self.editFrame)
             self.paneDict[cat] = prefFrame
             row = 0
             column = 0
@@ -174,7 +174,7 @@ class PrefWdg(Tkinter.Frame):
     
     def getCategories(self):
         """Return a list of preference categories"""
-        return self.prefsByCat.keys()
+        return list(self.prefsByCat.keys())
 
     def showCategory(self, catName):
         """Show the specified category.
@@ -227,7 +227,7 @@ class PrefWdg(Tkinter.Frame):
         return result
 
     def _getShowMenu(self, master, helpURL=None):
-        mbut = Tkinter.Menubutton(master,
+        mbut = tkinter.Menubutton(master,
             indicatoron=1,
             direction="below",
             borderwidth=2,
@@ -236,7 +236,7 @@ class PrefWdg(Tkinter.Frame):
             text="Show",
         )
         RO.Wdg.addCtxMenu(mbut, helpURL=helpURL)
-        mnu = Tkinter.Menu(mbut, tearoff=0)
+        mnu = tkinter.Menu(mbut, tearoff=0)
         mnu.add_command(label="Current", command=self.showCurrentValue)
         mnu.add_command(label="Initial", command=self.showInitialValue)
         mnu.add_command(label="Default", command=self.showDefaultValue)
@@ -248,9 +248,9 @@ if __name__ == "__main__":
     from RO.Wdg.PythonTk import PythonTk
     root = PythonTk()
     
-    defMainWdg = Tkinter.Label()
-    entryWdg = Tkinter.Entry()
-    menuWdg = Tkinter.Menu()
+    defMainWdg = tkinter.Label()
+    entryWdg = tkinter.Entry()
+    menuWdg = tkinter.Menu()
     
     pvList = (
         PrefVar.FontPrefVar(
@@ -277,14 +277,14 @@ if __name__ == "__main__":
         PrefVar.ColorPrefVar(
             name = "Background Color",
             category = "colors",
-            defValue = Tkinter.Label().cget("background"),
+            defValue = tkinter.Label().cget("background"),
             wdgOption = "background",
             helpText = "background color for most widgets",
         ),
         PrefVar.ColorPrefVar(
             name = "Foreground Color",
             category = "colors",
-            defValue = Tkinter.Label().cget("foreground"),
+            defValue = tkinter.Label().cget("foreground"),
             wdgOption = "foreground",
             helpText = "foreground color for most widgets",
         ),
@@ -347,7 +347,7 @@ if __name__ == "__main__":
             name = "Int4",
             category = "ints",
             defValue = 4,
-            validValues = range(8, -10, -2),
+            validValues = list(range(8, -10, -2)),
             minValue = -9,
             maxValue =  9,
             helpText = "int with range of [-9, 9]",
@@ -428,7 +428,7 @@ if __name__ == "__main__":
         print("could not read prefs:", e)
 
     testFrame = PrefWdg (root, prefSet = prefSet)
-    testFrame.pack(fill=Tkinter.BOTH, expand=Tkinter.YES)
+    testFrame.pack(fill=tkinter.BOTH, expand=tkinter.YES)
     
     testFrame.showCategory("colors")
 

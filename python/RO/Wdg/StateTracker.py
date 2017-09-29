@@ -1,4 +1,4 @@
-from __future__ import absolute_import, division, print_function
+
 """Track the state of a collection of widgets
 
 Intended for use with RO.Wdg.Toplevel in saving and restoring state
@@ -98,7 +98,7 @@ class StateTracker(object):
     def getState(self):
         """Get the state of all items as a dictionary of name: value
         """
-        stateDict = dict((name, item.getFunc()) for name, item in self._itemDict.iteritems())
+        stateDict = dict((name, item.getFunc()) for name, item in self._itemDict.items())
         return stateDict
     
     def setState(self, stateDict):
@@ -107,7 +107,7 @@ class StateTracker(object):
         Unknown and missing keys are ignored.
         If there is an error setting the state of an item a message is printed using logFunc.
         """
-        for name, val in stateDict.iteritems():
+        for name, val in stateDict.items():
             item = self._itemDict.get(name)
             if item is not None:
                 try:

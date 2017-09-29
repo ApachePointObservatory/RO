@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import absolute_import, division, print_function
+
 """A version of the Canvas class that draws correctly
 on unix, MacOS and MacOS X.
 
@@ -15,11 +15,11 @@ History:
 __all__ = ['PatchedCanvas']
 
 import warnings
-import Tkinter
+import tkinter
 
-class PatchedCanvas(Tkinter.Canvas):
+class PatchedCanvas(tkinter.Canvas):
     def __init__(self, *args, **kargs):
-        Tkinter.Canvas.__init__(self, *args, **kargs)
+        tkinter.Canvas.__init__(self, *args, **kargs)
         
         warnings.warn("RO.Wdg.PatchedCanvas is obsolete; please use Tkinter.Canvas instead.",
             category = DeprecationWarning,
@@ -28,7 +28,7 @@ class PatchedCanvas(Tkinter.Canvas):
 
 
 if __name__ == "__main__":
-    root = Tkinter.Tk()
+    root = tkinter.Tk()
     c = PatchedCanvas(root, width=200, height=200)
     c.pack()
     

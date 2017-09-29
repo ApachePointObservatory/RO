@@ -1,4 +1,4 @@
-from __future__ import division, print_function
+
 """Constants for the RO package, especially RO.Wdg.
 
 Supplies the following constants:
@@ -26,7 +26,7 @@ History:
 """
 __all__ = ['sevDebug', 'sevNormal', 'sevWarning', 'sevError', 'sevCritical', 'SevNameDict', 'NameSevDict']
 
-import urlparse
+import six.moves.urllib.parse as parse
 from collections import OrderedDict
 
 # severity constants; numeric value increases with severity
@@ -46,7 +46,7 @@ SevNameDict = OrderedDict((
 ))
 
 # ordered dictionary of severity name (lowercase): severity; order is least to most severe
-NameSevDict = OrderedDict(zip(SevNameDict.values(), SevNameDict.keys()))
+NameSevDict = OrderedDict(list(zip(list(SevNameDict.values()), list(SevNameDict.keys()))))
 
 # Call setHelpURLBase if you want to specify URLs relative to a base
 _HelpURLBase = ""
@@ -59,7 +59,7 @@ def _joinHelpURL(urlSuffix=""):
 #   print "_joinHelpURL(urlSuffix=%r)" % (urlSuffix,)
     global _HelpURLBase, _gotHelpURLBase
     _gotHelpURLBase = True
-    return urlparse.urljoin(_HelpURLBase, urlSuffix)
+    return parse.urljoin(_HelpURLBase, urlSuffix)
 
 def _setHelpURLBase(urlBase):
     """Set the base url for help urls.

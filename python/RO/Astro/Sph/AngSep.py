@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 """
 History:
 6/01 ROwen  Initial release.
@@ -11,7 +11,7 @@ __all__ = ["angSep"]
 import math
 import numpy
 import RO.MathUtil
-from DCFromSC import dcFromSC
+from .DCFromSC import dcFromSC
 
 def angSep(posA, posB):
     """Computes the angular separation between two points on a sphere.

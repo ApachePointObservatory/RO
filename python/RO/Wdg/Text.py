@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 """Variant of Tkinter.Text that includes a few extra features, including:
 - read-only support (can still copy data)
 - contextual menu with cut/copy/paste and URL-based help
@@ -15,15 +15,15 @@ History:
 """
 __all__ = ['Text']
 
-import Tkinter
+import tkinter
 import RO.CnvUtil
 import RO.StringUtil
 import RO.MathUtil
-import Bindings
-import CtxMenu
-import WdgPrefs
+from . import Bindings
+from . import CtxMenu
+from . import WdgPrefs
 
-class Text (Tkinter.Text, CtxMenu.CtxMenuMixin):
+class Text (tkinter.Text, CtxMenu.CtxMenuMixin):
     """Text widget
 
     Inputs:
@@ -52,7 +52,7 @@ class Text (Tkinter.Text, CtxMenu.CtxMenuMixin):
         self._readOnly = readOnly
         self._isCurrent = bool(isCurrent)
         
-        Tkinter.Text.__init__(self, master, **kargs)
+        tkinter.Text.__init__(self, master, **kargs)
 
         CtxMenu.CtxMenuMixin.__init__(self, helpURL = helpURL)
 
@@ -70,7 +70,7 @@ class Text (Tkinter.Text, CtxMenu.CtxMenuMixin):
             self._updateBGColor()
         
         if useStateTags:
-            for severity, pref in self._sevPrefDict.iteritems():
+            for severity, pref in self._sevPrefDict.items():
                 if severity == RO.Constants.sevNormal:
                     # normal foreground color is already automatically updated
                     continue
@@ -91,7 +91,7 @@ class Text (Tkinter.Text, CtxMenu.CtxMenuMixin):
         dataPresent = (self.get("1.0", "3.0") not in ("\n", ""))
         try:
             selPresent = (self.get("sel.first", "sel.last") != "")
-        except Tkinter.TclError:
+        except tkinter.TclError:
             selPresent = False
         if self._readOnly or not self.getEnable():
             menu.add_command(
@@ -103,7 +103,7 @@ class Text (Tkinter.Text, CtxMenu.CtxMenuMixin):
 
         try:
             clipPresent = (self.selection_get(selection="CLIPBOARD") != "")
-        except Tkinter.TclError:
+        except tkinter.TclError:
             clipPresent = False
 
         menu.add_command(
@@ -157,7 +157,7 @@ class Text (Tkinter.Text, CtxMenu.CtxMenuMixin):
         """Returns False if the state is disabled,
         True otherwise (state is normal or active)
         """
-        return self["state"] != Tkinter.DISABLED
+        return self["state"] != tkinter.DISABLED
     
     def getIsCurrent(self):
         """Return True if value is current, False otherwise.
@@ -227,7 +227,7 @@ class Text (Tkinter.Text, CtxMenu.CtxMenuMixin):
 
 if __name__ == "__main__":
     from RO.Wdg.PythonTk import PythonTk
-    import StatusBar
+    from . import StatusBar
     root = PythonTk()
 
     text1 = Text(root, "text widget", height=5, width=20)

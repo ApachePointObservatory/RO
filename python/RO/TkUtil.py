@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import absolute_import, division, print_function
+
 """Tkinter utilities
 
 History:
@@ -28,7 +28,7 @@ __all__ = ['addColors', 'colorOK', 'EvtNoProp', 'getWindowingSystem', 'getTclVer
 import re
 import sys
 import traceback
-import Tkinter
+import tkinter
 import RO.OS
 
 # windowing system constants
@@ -66,7 +66,7 @@ def colorOK(colorStr):
 
     try:
         tkWdg.winfo_rgb(colorStr)
-    except Tkinter.TclError:
+    except tkinter.TclError:
         return False
     return True
 
@@ -126,7 +126,7 @@ def getWindowingSystem():
         tkWdg = _getTkWdg()
         try:
             g_winSys = tkWdg.tk.call("tk", "windowingsystem")
-        except Tkinter.TclError:
+        except tkinter.TclError:
             # windowingsystem not supported; take a best guess
             if RO.OS.PlatformName == "win":
                 g_winSys = "win32"
@@ -216,7 +216,7 @@ class TclFunc:
             return
         try:
             self.tkApp.deletecommand(self.tclFuncName)
-        except Tkinter.TclError as e:
+        except tkinter.TclError as e:
             if self.debug:
                 print("deregistering failed: %r" % (e,))
             pass
@@ -478,11 +478,11 @@ def _getTkWdg():
     """Return a Tk widget"""
     global g_tkWdg
     if not g_tkWdg:
-        g_tkWdg = Tkinter.Frame()
+        g_tkWdg = tkinter.Frame()
     return g_tkWdg
 
 if __name__ == "__main__":
-    root = Tkinter.Tk()
+    root = tkinter.Tk()
 
     def setGeometry(geomStrList):
         if not geomStrList:

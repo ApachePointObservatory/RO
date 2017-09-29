@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import absolute_import, division, print_function
+
 """A simple TCP echo server.
 Based on the SocketServer example in Python Essential Reference.
 
@@ -9,9 +9,9 @@ History:
 2004-07-09 ROwen
 2007-01-03 ROwen    Fixed execution code.
 """
-import SocketServer
+import socketserver
 
-class _EchoHandler(SocketServer.BaseRequestHandler):
+class _EchoHandler(socketserver.BaseRequestHandler):
     def handle(self):
         f = self.request.makefile()
         for line in f:
@@ -30,7 +30,7 @@ def startServer(port, multi=False):
             else just serves one user and quits
             when that user is done
     """
-    serv = SocketServer.TCPServer(("", port), _EchoHandler)
+    serv = socketserver.TCPServer(("", port), _EchoHandler)
     if multi:
         print("Starting multiple-user echo server on port", port)
         print("Send 'quit' to end a connection")

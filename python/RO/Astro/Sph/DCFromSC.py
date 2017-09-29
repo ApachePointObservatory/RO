@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 """
 History:
 2002-07-23 R Owen.
@@ -7,7 +7,7 @@ History:
 """
 __all__ = ["dcFromSC"]
 
-from CCFromSC import ccFromSC
+from .CCFromSC import ccFromSC
 
 def dcFromSC(pos):
     """Convert spherical coordinates to direction cosines, i.e. a unit vector.

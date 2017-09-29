@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 """Operating system utilties including:
 - Extensions to os.path for splitting a path into component pieces
   and searching for lists of files that match a particular criteria.

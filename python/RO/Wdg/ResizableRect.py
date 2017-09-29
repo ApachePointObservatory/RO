@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 """A rectangle that the user can resize or drag around.
 
 Tkinter implementation of Keith Vetter's "PrintBox" with some refinements.
@@ -29,7 +29,7 @@ History:
 """
 __all__ = ["ResizableRect"]
 
-import Tkinter
+import tkinter
 import RO.SeqUtil
 import RO.AddCallback
 from RO.Alg import GenericCallback
@@ -129,7 +129,7 @@ class ResizableRect(RO.AddCallback.BaseMixin):
                 tags = tags,
             )
 
-        for regionName, cursor in self.cursorDict.iteritems():
+        for regionName, cursor in self.cursorDict.items():
             regionID = self.idDict[regionName]
             self.cnv.tag_bind(regionID, "<Enter>", GenericCallback(self._setCursor, cursor))
             self.cnv.tag_bind(regionID, "<Leave>", self._restoreDefaultCursor)
@@ -329,10 +329,10 @@ class ResizableRect(RO.AddCallback.BaseMixin):
 
 
 if __name__ == "__main__":
-    import PythonTk
+    from . import PythonTk
     root = PythonTk.PythonTk()
-    cnvFrame = Tkinter.Frame(root, borderwidth=2, relief="solid")
-    cnv = Tkinter.Canvas(
+    cnvFrame = tkinter.Frame(root, borderwidth=2, relief="solid")
+    cnv = tkinter.Canvas(
         cnvFrame,
         selectborderwidth = 0,
         highlightthickness = 0,

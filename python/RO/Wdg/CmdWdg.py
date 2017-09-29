@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 """Entry widget for commands, with history.
 
 History:
@@ -28,8 +28,8 @@ History:
 """
 __all__ = ['CmdWdg']
 
-import Tkinter
-import Entry
+import tkinter
+from . import Entry
 
 class CmdWdg (Entry.StrEntry):
     """Entry field for one-line text commands, with history.
@@ -109,11 +109,11 @@ class CmdWdg (Entry.StrEntry):
         if self.histIndex > 0:
             self.histIndex -= 1
             self.set(self.cmdHistory[self.histIndex])
-            self.icursor(Tkinter.END)
+            self.icursor(tkinter.END)
         elif self.histIndex == 0:
             self.set(self.currText)
             self.histIndex = -1
-            self.icursor(Tkinter.END)
+            self.icursor(tkinter.END)
         return "break" # prevent event from being propogated            
     
     def _doHistUp(self, *args, **kargs):
@@ -130,7 +130,7 @@ class CmdWdg (Entry.StrEntry):
         if self.histIndex < len(self.cmdHistory) - 1:
             self.histIndex += 1
             self.set(self.cmdHistory[self.histIndex])
-            self.icursor(Tkinter.END)
+            self.icursor(tkinter.END)
         else:
             self.histIndex = len(self.cmdHistory)
             self.set("")
@@ -158,6 +158,6 @@ if __name__ == "__main__":
         cmdFunc=doCmd,
         width = 40,
     )
-    testFrame.pack(fill=Tkinter.BOTH, expand=Tkinter.YES)
+    testFrame.pack(fill=tkinter.BOTH, expand=tkinter.YES)
 
     root.mainloop()

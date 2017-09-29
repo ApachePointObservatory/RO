@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 """
 Astronomical math, including numerous coordinate conversions,
 in cartesian coordinates.

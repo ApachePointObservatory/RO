@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import absolute_import, division, print_function
+
 """Support for reading and writing preferences and preference files.
 
 Subclasses of PrefVar store preferences of various types and offer:
@@ -97,8 +97,8 @@ __all__ = ["PrefVar", "StrPrefVar", "DirectoryPrefVar", "FilePrefVar", "SoundPre
 import os.path
 import re
 import sys
-import Tkinter
-import tkFont
+import tkinter
+import tkinter.font
 import RO.Alg
 import RO.CnvUtil
 import RO.MathUtil
@@ -279,7 +279,7 @@ class PrefVar(object):
         
     def setValue (self, rawValue):
         """Accepts values of the correct type or a string representation"""
-        if isinstance(rawValue, basestring):
+        if isinstance(rawValue, str):
             value = self.asValue(rawValue)
         else:
             value = rawValue
@@ -746,10 +746,10 @@ class ColorUpdate(object):
     def setColor(self, *args):
         # if we haven't gotten a widget yet, now is the time
         if not self.wdg:
-            self.wdg = Tkinter.Label()
+            self.wdg = tkinter.Label()
 
         colorDict = {}
-        for option, var in self.varDict.iteritems():
+        for option, var in self.varDict.items():
             colorDict[option] = var.getValue()
 
         # background is required; make sure we have it
@@ -776,7 +776,7 @@ class ColorPrefVar(PrefVar):
         kargs = kargs.copy()    # prevent modifying a passed-in dictionary
 
         # create an arbitrary Tk widget we can query to convert colors
-        self.colorCheckWdg = Tkinter.Label()
+        self.colorCheckWdg = tkinter.Label()
 
         kargs["formatStr"] = "%s"
         kargs["cnvFunc"] = str
@@ -797,7 +797,7 @@ class ColorPrefVar(PrefVar):
         """
         try:
             self.colorCheckWdg.winfo_rgb(value)
-        except Tkinter.TclError as e:
+        except tkinter.TclError as e:
             raise ValueError(RO.StringUtil.strFromException(e))
 
 class FontPrefVar(PrefVar):
@@ -844,7 +844,7 @@ class FontPrefVar(PrefVar):
     ):
         kargs = kargs.copy()    # prevent modifying a passed-in dictionary
 
-        self.font = font or tkFont.Font()
+        self.font = font or tkinter.font.Font()
         kargs["formatStr"] = "%r"
         kargs["cnvFunc"] = dict # a function that parsed string representations of a dict would be nicer
 
@@ -867,7 +867,7 @@ class FontPrefVar(PrefVar):
             netDefValue.update(font.configure())
         if defWdg:
             # the following is the only way I know to obtain a font dictionary from a widget
-            wdgFontDict = tkFont.Font(font=defWdg.cget("font")).configure()
+            wdgFontDict = tkinter.font.Font(font=defWdg.cget("font")).configure()
             netDefValue.update(wdgFontDict)
         if defValue:
             # defValue is the only one likely to have a bogus value; check it before applying it
@@ -884,7 +884,7 @@ class FontPrefVar(PrefVar):
 
         # if optionPatterns supplied, add font to option database
         for ptn in optionPatterns:
-            Tkinter.Label().option_add(ptn, self.font)
+            tkinter.Label().option_add(ptn, self.font)
     
     def getDefValue(self):
         """Return the current default value"""
@@ -896,7 +896,7 @@ class FontPrefVar(PrefVar):
     def locCheckValue(self, value):
         """Test that the value is valid.
         """
-        badKeys = [key for key in value.iterkeys() if key not in self._internalDefFontDict]
+        badKeys = [key for key in value.keys() if key not in self._internalDefFontDict]
         if badKeys:
             raise ValueError("Invalid key(s) %s in font dictionary %r" % (badKeys, value))
 
@@ -982,7 +982,7 @@ class FontSizePrefVar(PrefVar):
     ):
         kargs = kargs.copy()    # prevent modifying a passed-in dictionary
 
-        self.font = tkFont.Font()
+        self.font = tkinter.font.Font()
         kargs["formatStr"] = "%s"
         kargs["cnvFunc"] = int
         
@@ -992,7 +992,7 @@ class FontSizePrefVar(PrefVar):
             netDefValue = font.cget("size")
         if defWdg:
             # the following is the only way I know to obtain a font dictionary from a widget
-            netDefValue = tkFont.Font(font=defWdg.cget("font")).cget("size")
+            netDefValue = tkinter.font.Font(font=defWdg.cget("font")).cget("size")
         if defValue:
             # defValue is the only one likely to have a bogus value; check it before applying it
             self.locCheckValue(defValue)
@@ -1007,7 +1007,7 @@ class FontSizePrefVar(PrefVar):
 
         # if optionPatterns supplied, add font to option database
         for ptn in optionPatterns:
-            Tkinter.Label().option_add(ptn, self.font)
+            tkinter.Label().option_add(ptn, self.font)
     
     def locCheckValue(self, value):
         """Test that the value is valid.
@@ -1063,7 +1063,7 @@ class PrefSet(object):
                 self.addPrefVar(prefVar)
         self.oldPrefDict = {}
         if oldPrefInfo:
-            for oldPrefName, newPrefName in oldPrefInfo.iteritems():
+            for oldPrefName, newPrefName in oldPrefInfo.items():
                 if newPrefName:
                     if newPrefName.lower() not in self.prefDict:
                         raise RuntimeError("Invalid oldPrefInfo %s: %s; nonexistent new pref name" %
@@ -1090,14 +1090,14 @@ class PrefSet(object):
         """
         catDict = RO.Alg.OrderedDict()
         
-        for prefVar in self.prefDict.itervalues():
+        for prefVar in self.prefDict.values():
             catDict.setdefault(prefVar.category, []).append(prefVar)
         return catDict
     
     def restoreDefault(self):
         """Restores all preferences to their default value.
         """
-        for pref in self.prefDict.itervalues():
+        for pref in self.prefDict.values():
             pref.restoreDefault()
     
     def readFromFile(self, fileName=None):
@@ -1202,7 +1202,7 @@ class PrefSet(object):
                     else:
                         # line does not being with a comment; prepend "# "
                         outFile.write("# %s\n" % headerLine)
-            for prefVar in self.prefDict.itervalues():
+            for prefVar in self.prefDict.values():
                 if maskDefault and prefVar.value == prefVar.defValue:
                     outFile.write("# %s = %r\n" % (prefVar.name, prefVar.getValue()))
                 else:

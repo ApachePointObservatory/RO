@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 """
 A wrapper around Tkinter.Tk that puts up a separate Python
 debugging window and then returns root. Optionally reads options
@@ -26,11 +26,11 @@ History:
 """
 __all__ = ['PythonTk']
 
-import Tkinter
-import Bindings
-import PythonWdg
+import tkinter
+from . import Bindings
+from . import PythonWdg
 
-class PythonTk (Tkinter.Tk):
+class PythonTk (tkinter.Tk):
     """Creates a Tkinter application with standard menus and such"""
     def __init__(self, **kargs):
         """Creates a new application with some standard menus and such
@@ -49,12 +49,12 @@ class PythonTk (Tkinter.Tk):
         # first parse PythonTk-specific options
         # but do not try to apply them yet if they require Tk to be initialized
         optionfile = None
-        if kargs and kargs.has_key("optionfile"):
+        if kargs and "optionfile" in kargs:
             optionfile = kargs["optionfile"]
             del(kargs["optionfile"])
 
         # basic initialization
-        Tkinter.Tk.__init__(self, **kargs)
+        tkinter.Tk.__init__(self, **kargs)
         
         # if the user supplied an option file, load it
         if optionfile:
@@ -64,11 +64,11 @@ class PythonTk (Tkinter.Tk):
                 print("cannot read option file; error:", e)
         
         # create and display a Python script window
-        self.pyToplevel = Tkinter.Toplevel()
+        self.pyToplevel = tkinter.Toplevel()
         self.pyToplevel.geometry("+0+450")
         self.pyToplevel.title("Python")
         pyFrame = PythonWdg.PythonWdg(self.pyToplevel)
-        pyFrame.pack(expand=Tkinter.YES, fill=Tkinter.BOTH)
+        pyFrame.pack(expand=tkinter.YES, fill=tkinter.BOTH)
         
         # set up standard bindings
         Bindings.stdBindings(self)
@@ -76,12 +76,12 @@ class PythonTk (Tkinter.Tk):
 
 if __name__ == "__main__":
     root = PythonTk()
-    aText = Tkinter.Text(root, width=30, height=2)
-    aText.insert(Tkinter.END, "some text to manipulate")
-    aText.grid(row=0, column=0, sticky=Tkinter.NSEW)
-    anEntry = Tkinter.Entry(root)
+    aText = tkinter.Text(root, width=30, height=2)
+    aText.insert(tkinter.END, "some text to manipulate")
+    aText.grid(row=0, column=0, sticky=tkinter.NSEW)
+    anEntry = tkinter.Entry(root)
     anEntry.insert(0, "more text")
-    anEntry.grid(row=1, column=0, sticky=Tkinter.EW)
+    anEntry.grid(row=1, column=0, sticky=tkinter.EW)
     root.grid_rowconfigure(0, weight=1)
     root.grid_columnconfigure(0, weight=1)
     root.mainloop()

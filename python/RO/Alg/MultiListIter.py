@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import absolute_import, division, print_function
+
 """
 An iterator over multiple lists or other collections.
 Stops at the end of the shortest list.
@@ -13,18 +13,18 @@ __all__ = ["MultiListIter"]
 
 class MultiListIter(object):
     def __init__(self, *lists):
-        self.iters = map(iter, lists)
+        self.iters = list(map(iter, lists))
     
     def __iter__(self):
         return self
     
-    def next(self):
+    def __next__(self):
         return [next(elem) for elem in self.iters]
 
 
 if __name__ == "__main__":
     print("MultiListIter example")
-    a = range(5)
+    a = list(range(5))
     b = [x**2 for x in a]
     print(("a = %r" % a))
     print(("b = %r" % b))

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 """Reconnectable versions of TCPSocket.
 
 All permit disconnection and reconnection and the base class offers support for
@@ -415,8 +415,8 @@ class TCPConnection(object):
 if __name__ == "__main__":
     """Demo using a simple echo server.
     """
-    import Tkinter
-    root = Tkinter.Tk()
+    import tkinter
+    root = tkinter.Tk()
     root.withdraw()
     from RO.Comm.Generic import TCPServer
     from RO.TkUtil import Timer
@@ -432,7 +432,7 @@ if __name__ == "__main__":
         "string with 3 quoted nulls: 1 \\0 2 \\0 3 \\0 end",
         '"quoted string followed by carriage return"\r',
         '',
-        u"unicode string",
+        "unicode string",
         "string with newline: \n end",
         "string with carriage return: \r end",
         "quit",

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 """
 History:
 P.T.Wallace Starlink    April 1987
@@ -9,9 +9,9 @@ P.T.Wallace Starlink    April 1987
 __all__ = ["prenut"]
 
 import numpy
-from prec import prec
-from nut import nut
-from epj import epj
+from .prec import prec
+from .nut import nut
+from .epj import epj
 
 def prenut(epoch, mjd):
     """

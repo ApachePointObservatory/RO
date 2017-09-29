@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import absolute_import, division, print_function
+
 """
 History:
 2002-07-22 ROwen    Converted to Python from the TCC's cnv_Gal2J 4-1.

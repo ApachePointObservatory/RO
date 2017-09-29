@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 """Get useful directories for Mac (X or Classic), unix
 or modern versions of Windows. Defines:
 
@@ -86,12 +86,12 @@ PlatformName = None
 
 try:
     # try Mac
-    from getMacDirs import getAppDirs, getAppSuppDirs, getDocsDir, getPrefsDirs
+    from .getMacDirs import getAppDirs, getAppSuppDirs, getDocsDir, getPrefsDirs
     PlatformName = 'mac'
 except ImportError:
     # try Windows
     try:
-        from getWinDirs import getAppDirs, getAppSuppDirs, getDocsDir, getPrefsDirs
+        from .getWinDirs import getAppDirs, getAppSuppDirs, getDocsDir, getPrefsDirs
         PlatformName = 'win'
     except ImportError:
         # assume Unix
