@@ -34,7 +34,7 @@ History:
 try:
     from UserString import UserString
 except ImportError:
-    import collections.UserString as UserString
+    from collections import UserString
 
 from six import string_types
 
