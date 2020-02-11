@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 """Parses a message of the form: header keywordValueData
 returning a dictionary.
 
@@ -11,8 +11,8 @@ returning a dictionary.
 """
 __all__ = ["parseHubMsg"]
 
-from GetHeader import getHubHeader
-from ParseData import parseKeyValueData
+from .GetHeader import getHubHeader
+from .ParseData import parseKeyValueData
 
 def parseHubMsg(astr):
     """Parses one message of the form:

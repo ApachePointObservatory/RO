@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 """Various enhancements to Tkinter """
 from .BalloonHelp import *
 from .Bindings import *

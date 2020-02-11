@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 """FTP download with Tkinter-based progress reporting
 
 Downloads files given the url and destination path.
@@ -49,6 +49,7 @@ History:
 2012-08-01 ROwen    Updated for changes to FTPGet.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
+2020-02-10 DGatlin  Modified imports for Python 3
 """
 __all__ = ['FTPLogWdg']
 
@@ -56,15 +57,15 @@ import atexit
 import sys
 import traceback
 import weakref
-import Bindings
-import Tkinter
+from . import Bindings
+import tkinter
 import RO.AddCallback
 import RO.Constants
 import RO.MathUtil
 from RO.TkUtil import Timer
 from RO.Comm.FTPGet import FTPGet
 import RO.Wdg
-import CtxMenu
+from .CtxMenu import addCtxMenu
 
 _StatusInterval = 0.200 # time between status checks (sec)
 
@@ -99,7 +100,7 @@ class FTPCallback(object):
         self.callFunc = None
     
 
-class FTPLogWdg(Tkinter.Frame):
+class FTPLogWdg(tkinter.Frame):
     """A widget to initiate file get via ftp, to display the status
     of the transfer and to allow users to abort the transfer.
     
@@ -120,7 +121,7 @@ class FTPLogWdg(Tkinter.Frame):
         maxLines = 500,
         helpURL = None,
     **kargs):
-        Tkinter.Frame.__init__(self, master = master, **kargs)
+        tkinter.Frame.__init__(self, master = master, **kargs)
         self._memDebugDict = {}
         
         self.maxLines = maxLines
@@ -132,11 +133,11 @@ class FTPLogWdg(Tkinter.Frame):
 
         self._timer = Timer()
         
-        self.yscroll = Tkinter.Scrollbar (
+        self.yscroll = tkinter.Scrollbar (
             master = self,
             orient = "vertical",
         )
-        self.text = Tkinter.Text (
+        self.text = tkinter.Text (
             master = self,
             yscrollcommand = self.yscroll.set,
             wrap = "none",
@@ -149,7 +150,7 @@ class FTPLogWdg(Tkinter.Frame):
         self.yscroll.grid(row=0, column=1, sticky="ns")
         Bindings.makeReadOnly(self.text)
         if helpURL:
-            CtxMenu.addCtxMenu(
+            addCtxMenu(
                 wdg = self.text,
                 helpURL = helpURL + "#LogDisplay",
             )
@@ -157,7 +158,7 @@ class FTPLogWdg(Tkinter.Frame):
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
         
-        detFrame = Tkinter.Frame(self)
+        detFrame = tkinter.Frame(self)
             
         gr = RO.Wdg.Gridder(detFrame, sticky="ew")
         
@@ -443,7 +444,7 @@ class FTPLogWdg(Tkinter.Frame):
 
 
 if __name__ == "__main__":
-    from PythonTk import PythonTk
+    from .PythonTk import PythonTk
     root = PythonTk()
 
     row = 0
@@ -454,9 +455,9 @@ if __name__ == "__main__":
     testFrame.grid(row=row, column=0, columnspan=2, sticky="nsew")
     row += 1
 
-    overwriteVar = Tkinter.BooleanVar()
+    overwriteVar = tkinter.BooleanVar()
     overwriteVar.set(True)
-    overwriteWdg = Tkinter.Checkbutton(
+    overwriteWdg = tkinter.Checkbutton(
         master=root,
         text="Overwrite",
         variable=overwriteVar,
@@ -464,14 +465,14 @@ if __name__ == "__main__":
     overwriteWdg.grid(row=row, column=1, sticky="w")
     row += 1
 
-    Tkinter.Label(root, text="ToPath:").grid(row=row, column=0, sticky="e")
-    toPathWdg = Tkinter.Entry(root)
+    tkinter.Label(root, text="ToPath:").grid(row=row, column=0, sticky="e")
+    toPathWdg = tkinter.Entry(root)
     toPathWdg.insert(0, "tempfile")
     toPathWdg.grid(row=row, column=1, sticky="ew")
     row += 1
     
-    Tkinter.Label(root, text="FromURL:").grid(row=row, column=0, sticky="e")
-    fromURLWdg = Tkinter.Entry(root)
+    tkinter.Label(root, text="FromURL:").grid(row=row, column=0, sticky="e")
+    fromURLWdg = tkinter.Entry(root)
     fromURLWdg.grid(row=row, column=1, sticky="ew")
     row += 1
 

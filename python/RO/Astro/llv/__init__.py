@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 """Low-level routines.
 
 Most of these were written by Pat Wallace in FORTRAN

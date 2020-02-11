@@ -1,4 +1,4 @@
-from __future__ import absolute_import, division, print_function
+
 """PVT implements a class to describe (position, velocity, time) triplets.
 
 History:

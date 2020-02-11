@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 """Variant of Tkinter.Text that includes a few extra features, including:
 - read-only support (can still copy data)
 - contextual menu with cut/copy/paste and URL-based help
@@ -12,18 +12,21 @@ History:
 2005-01-05 ROwen    Changed _statePrefDict to _sevPrefDict.
 2006-10-24 ROwen    Added search method with elide argument
                     because Tkinter's Text.search doesn't yet support elide.
+2020-02-10 DGatlin  Modified imports for Python 3
 """
 __all__ = ['Text']
 
-import Tkinter
-import RO.CnvUtil
-import RO.StringUtil
-import RO.MathUtil
-import Bindings
-import CtxMenu
-import WdgPrefs
+import tkinter
 
-class Text (Tkinter.Text, CtxMenu.CtxMenuMixin):
+import RO.CnvUtil
+import RO.MathUtil
+import RO.StringUtil
+from . import Bindings
+from . import WdgPrefs
+from .CtxMenu import CtxMenuMixin
+
+
+class Text (tkinter.Text, CtxMenuMixin):
     """Text widget
 
     Inputs:
@@ -52,9 +55,9 @@ class Text (Tkinter.Text, CtxMenu.CtxMenuMixin):
         self._readOnly = readOnly
         self._isCurrent = bool(isCurrent)
         
-        Tkinter.Text.__init__(self, master, **kargs)
+        tkinter.Text.__init__(self, master, **kargs)
 
-        CtxMenu.CtxMenuMixin.__init__(self, helpURL = helpURL)
+        CtxMenuMixin.__init__(self, helpURL = helpURL)
 
         self._prefDict = WdgPrefs.getWdgPrefDict()
         self._sevPrefDict = WdgPrefs.getSevPrefDict()
@@ -70,7 +73,7 @@ class Text (Tkinter.Text, CtxMenu.CtxMenuMixin):
             self._updateBGColor()
         
         if useStateTags:
-            for severity, pref in self._sevPrefDict.iteritems():
+            for severity, pref in self._sevPrefDict.items():
                 if severity == RO.Constants.sevNormal:
                     # normal foreground color is already automatically updated
                     continue
@@ -91,7 +94,7 @@ class Text (Tkinter.Text, CtxMenu.CtxMenuMixin):
         dataPresent = (self.get("1.0", "3.0") not in ("\n", ""))
         try:
             selPresent = (self.get("sel.first", "sel.last") != "")
-        except Tkinter.TclError:
+        except tkinter.TclError:
             selPresent = False
         if self._readOnly or not self.getEnable():
             menu.add_command(
@@ -103,7 +106,7 @@ class Text (Tkinter.Text, CtxMenu.CtxMenuMixin):
 
         try:
             clipPresent = (self.selection_get(selection="CLIPBOARD") != "")
-        except Tkinter.TclError:
+        except tkinter.TclError:
             clipPresent = False
 
         menu.add_command(
@@ -157,7 +160,7 @@ class Text (Tkinter.Text, CtxMenu.CtxMenuMixin):
         """Returns False if the state is disabled,
         True otherwise (state is normal or active)
         """
-        return self["state"] != Tkinter.DISABLED
+        return self["state"] != tkinter.DISABLED
     
     def getIsCurrent(self):
         """Return True if value is current, False otherwise.
@@ -227,7 +230,7 @@ class Text (Tkinter.Text, CtxMenu.CtxMenuMixin):
 
 if __name__ == "__main__":
     from RO.Wdg.PythonTk import PythonTk
-    import StatusBar
+    from . import StatusBar
     root = PythonTk()
 
     text1 = Text(root, "text widget", height=5, width=20)

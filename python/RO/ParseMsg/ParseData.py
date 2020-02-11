@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 """Parse a keyword-value message.
 
 History:
@@ -13,8 +13,8 @@ History:
 """
 __all__ = ["parseKeyValueData"]
 
-from GetKeyword import getKeyword
-from GetValues import getValues
+from .GetKeyword import getKeyword
+from .GetValues import getValues
 import RO.Alg
 
 def parseKeyValueData(astr):
@@ -73,7 +73,7 @@ if __name__ == '__main__':
         try:
             dataDict = parseKeyValueData(astr)
             print("parseHubMsg(%r) = {" % (astr,))
-            for key, value in dataDict.iteritems():
+            for key, value in dataDict.items():
                 print("    %r: %r" % (key, value))
             print("}")
         except Exception as e:

@@ -1,12 +1,12 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 
 __all__ = ["ccFromSCPVOff"]
 
 import RO.MathUtil
-from AngSideAng import angSideAng
-from CCFromSC import ccFromSC
-from CCFromSCPV import ccFromSCPV
+from .AngSideAng import angSideAng
+from .CCFromSC import ccFromSC
+from .CCFromSCPV import ccFromSCPV
 
 def ccFromSCPVOff(pos, pm, parlax, radVel, offDir, offMag):
     """

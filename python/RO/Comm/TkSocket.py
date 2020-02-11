@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import absolute_import, division, print_function
+
 """Sockets optimized for use with Tkinter GUIs.
 
 TkSocket allows nonblocking event-driven operation:
@@ -95,7 +95,7 @@ __all__ = ["TCPSocket", "TCPServer"]
 import re
 import sys
 import traceback
-import Tkinter
+import tkinter
 import RO.TkUtil
 from RO.Comm.BaseSocket import BaseSocket, BaseServer, nullCallback
 
@@ -120,7 +120,7 @@ class _TkSocketWrapper(object):
         # typeStr is one of "readable" or "writable"
         # tclFunc is a tcl-wrapped function, an instance of RO.TkUtil.TclFunc
         self._callbackDict = dict()
-        self._readVar = Tkinter.StringVar()
+        self._readVar = tkinter.StringVar()
         self._tk = self._readVar._tk
 
         if tkSock:
@@ -128,7 +128,7 @@ class _TkSocketWrapper(object):
         elif sockArgs:
             try:
                 self._tkSocket = self._tk.call('socket', *sockArgs)
-            except Tkinter.TclError as e:
+            except tkinter.TclError as e:
                 raise RuntimeError(e)
         else:
             raise RuntimeError("Must specify tkSock or sockArgs")
@@ -143,7 +143,7 @@ class _TkSocketWrapper(object):
 
             #print "name=%s, configArgs=%s" % (name, configArgs)
             self._tk.call('fconfigure', self._tkSocket, *configArgs)
-        except Tkinter.TclError as e:
+        except tkinter.TclError as e:
             raise RuntimeError(e)
 
     @property
@@ -180,7 +180,7 @@ class _TkSocketWrapper(object):
         """Clear any callbacks added by this class.
         Called just after the socket is closed.
         """
-        for tclFunc in self._callbackDict.itervalues():
+        for tclFunc in self._callbackDict.values():
             tclFunc.deregister()
         self._callbackDict = dict()
 
@@ -206,7 +206,7 @@ class _TkSocketWrapper(object):
 
         try:
             self._tk.call('fileevent', self._tkSocket, typeStr, tkFuncName)
-        except Tkinter.TclError as e:
+        except tkinter.TclError as e:
             if tclFunc:
                 tclFunc.deregister()
             raise RuntimeError(e)
@@ -301,7 +301,7 @@ class TCPSocket(BaseSocket):
             # and is just used to detect state
             self._tkSocketWrapper.setCallback(self._doRead, doWrite=False)
             self._tkSocketWrapper.setCallback(self._doConnect, doWrite=True)
-        except Tkinter.TclError as e:
+        except tkinter.TclError as e:
             raise RuntimeError(e)
 
         self._setState(self.Connecting)
@@ -549,7 +549,7 @@ class TCPServer(BaseServer):
 if __name__ == "__main__":
     """Demo using a simple echo server.
     """
-    root = Tkinter.Tk()
+    root = tkinter.Tk()
     root.withdraw()
     from RO.TkUtil import Timer
 

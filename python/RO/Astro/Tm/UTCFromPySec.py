@@ -1,4 +1,4 @@
-from __future__ import division, absolute_import
+
 """Functions to convert python seconds <-> UTC and to compensate for clock error.
 
 History:

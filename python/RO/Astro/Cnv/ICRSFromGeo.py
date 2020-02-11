@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 """
 History:
 2002-07-22 ROwen    Converted to Python from cnv_AppGeo2J 4-2.
@@ -96,7 +96,7 @@ def icrsFromGeo(appGeoP, agData):
 
 if __name__ == "__main__":
     import RO.SeqUtil
-    from AppGeoData import AppGeoData
+    from .AppGeoData import AppGeoData
     print("testing icrsFromGeo")
     # test data is formatted as follows:
     # a list of entries, each consisting of:

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 """A dictionary that stores a list of values for each key.
 
 Note: one could subclass dict but this requires writing
@@ -16,9 +16,9 @@ History
 """
 __all__ = ["ListDict", "SetDict"]
 
-import UserDict
+from collections import UserDict
 
-class ListDict(UserDict.UserDict):
+class ListDict(UserDict):
     """A dictionary whose values are a list of items.
     """
     def __setitem__(self, key, val):

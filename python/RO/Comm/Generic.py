@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 """Generic classes for event-based communication and timing.
 Generic in the sense that it supports both Twisted framework and Tcl sockets.
 
@@ -166,8 +166,8 @@ class WaitForTCPServer(object):
 
 
 if __name__ == "__main__":
-    import Tkinter
-    root = Tkinter.Tk()
+    import tkinter
+    root = tkinter.Tk()
     root.withdraw()
     setFramework("tk") # since it is almost always installed
     clientSocket = None

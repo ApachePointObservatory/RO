@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import absolute_import, division, print_function
+
 import argparse
 import numpy
 import pyfits
@@ -15,14 +15,14 @@ def fitsInfo(filePath, hduList=None, showHeader=True, showStats=True):
     fitsFile = pyfits.open(filePath)
     print("*** FITS file %r:" % (filePath,))
     if hduList is None:
-        hduList = range(len(fitsFile))
+        hduList = list(range(len(fitsFile)))
 
     for hduInd in hduList:
         print("*** HDU %s header:" % (hduInd,))
         fitsExt = fitsFile[hduInd]
         hdr = fitsExt.header
         if showHeader:
-            for key, value in hdr.iteritems():
+            for key, value in hdr.items():
                 if key.upper() == "COMMENT":
                     print("%s %s" % (key, value))
                 elif isinstance(value, bool):

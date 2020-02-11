@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 """
 A widget showing a set of options as checkbuttons.
 
@@ -32,16 +32,17 @@ History:
 2005-06-03 ROwen    Fixed one indentation quirk (space tab -> tab).
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 2015-11-05 ROwen    Changed ==/!= True/False to is/is not True/False to modernize the code.
+2020-02-10 DGatlin  Modified imports for Python 3
 """
 __all__ = ['OptionButtons']
 
 import RO.InputCont
-import Button
-import Checkbutton
-import InputContFrame
-import Label
+from . import Button
+from . import Checkbutton
+from .InputContFrame import InputContFrame
+from .Label import Label
 
-class OptionButtons(InputContFrame.InputContFrame):
+class OptionButtons(InputContFrame):
     def __init__ (self,
         master,
         name,
@@ -90,14 +91,14 @@ class OptionButtons(InputContFrame.InputContFrame):
             The default format is RO.InputCont.BasicFmt.
         **kargs: keyword arguments for Frame
         """
-        InputContFrame.InputContFrame.__init__(self, master, **kargs)
+        InputContFrame.__init__(self, master, **kargs)
 
         # optional header
         if headerText:
             helpURL = helpURLPrefix
             if helpURL and helpURL.endswith("#"):
                 helpURL = helpURL[:-1]
-            Label.Label(
+            Label(
                 master = self,
                 text = headerText,
                 helpURL = helpURL,
@@ -178,7 +179,7 @@ class OptionButtons(InputContFrame.InputContFrame):
             wdg.pack(side="top", anchor="nw")
     
 if __name__ == "__main__":
-    import PythonTk
+    from . import PythonTk
     root = PythonTk.PythonTk()
 
     def doPrint():

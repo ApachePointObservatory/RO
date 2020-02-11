@@ -1,4 +1,4 @@
-from __future__ import absolute_import, division, print_function
+
 """From Scott David Daniels <http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/52549>.
 My changes include:
 - Used a name suggested by Eric Brunel

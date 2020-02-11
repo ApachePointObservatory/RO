@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 """RO.Wdg.Label widgets are display widgets that store data in its most basic form,
 yet know how to format it for display. These widgets consider their data to be bad
 (and display it with a bad background color) if the value is None or the value is not current.
@@ -51,19 +51,20 @@ History:
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 2015-11-05 ROwen    Stop using dangerous bare "except:".
+2020-02-10 DGatlin  Modified imports for Python 3
 """
 __all__ = ['Label', 'BoolLabel', 'StrLabel', 'IntLabel', 'FloatLabel', 'DMSLabel']
 
 import sys
-import Tkinter
+import tkinter
 import RO.Constants
 import RO.MathUtil
 import RO.StringUtil
-import CtxMenu
-from SeverityMixin import SeverityMixin
-from IsCurrentMixin import IsCurrentMixin
+from .CtxMenu import CtxMenu, CtxMenuMixin
+from .SeverityMixin import SeverityMixin
+from .IsCurrentMixin import IsCurrentMixin
 
-class Label(Tkinter.Label, CtxMenu.CtxMenuMixin, IsCurrentMixin, SeverityMixin):
+class Label(tkinter.Label, CtxMenuMixin, IsCurrentMixin, SeverityMixin):
     """Base class for labels (display ROWdgs); do not use directly.
     
     Inputs:
@@ -89,7 +90,7 @@ class Label(Tkinter.Label, CtxMenu.CtxMenuMixin, IsCurrentMixin, SeverityMixin):
     def __init__ (self,
         master,
         formatStr = None,
-        formatFunc = unicode,       
+        formatFunc = str,       
         helpText = None,
         helpURL = None,
         isCurrent = True,
@@ -98,9 +99,9 @@ class Label(Tkinter.Label, CtxMenu.CtxMenuMixin, IsCurrentMixin, SeverityMixin):
         kargs.setdefault("anchor", "e")
         kargs.setdefault("justify", "right")
         
-        Tkinter.Label.__init__(self, master, **kargs)
+        tkinter.Label.__init__(self, master, **kargs)
         
-        CtxMenu.CtxMenuMixin.__init__(self, helpURL=helpURL)
+        CtxMenuMixin.__init__(self, helpURL=helpURL)
         
         IsCurrentMixin.__init__(self, isCurrent)
         
@@ -354,7 +355,7 @@ class DMSLabel(Label):
 
 
 if __name__ == "__main__":
-    import PythonTk
+    from . import PythonTk
     from RO.TkUtil import Timer
     root = PythonTk.PythonTk()
 
@@ -392,7 +393,7 @@ if __name__ == "__main__":
         ),
     )
     for wdg in wdgSet:
-        wdg.pack(fill=Tkinter.X)
+        wdg.pack(fill=tkinter.X)
     
     # a list of (value, isCurrent) pairs
     testData = [

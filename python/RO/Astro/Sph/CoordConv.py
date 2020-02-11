@@ -1,13 +1,13 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 
 __all__ = ["coordConv"]
 
-import Const
+from . import Const
 from RO.Astro import Cnv
 import RO.MathUtil
-from CCFromSCPVOff import ccFromSCPVOff
-from SCFromCCPVOff import scFromCCPVOff
+from .CCFromSCPVOff import ccFromSCPVOff
+from .SCFromCCPVOff import scFromCCPVOff
 
 def coordConv(
         fromPos, fromSys, fromDate, toSys, toDate,

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import absolute_import, division, print_function
+
 """Preferences for the RO.Wdg package.
 
 Note: call 
@@ -22,7 +22,7 @@ History:
 """
 __all__ = []
 
-import Tkinter
+import tkinter
 import RO.Constants
 import RO.TkUtil
 import RO.Prefs.PrefVar
@@ -118,7 +118,7 @@ class WdgPrefs(object):
     """
     def __init__(self, prefSet = None):
         # use a widget that has the activebackground attribute
-        self._tkWdg = Tkinter.Button()
+        self._tkWdg = tkinter.Button()
         self.prefDict = {}
         self._activeBackScale = 1.0
 
@@ -151,7 +151,7 @@ class WdgPrefs(object):
         sevNamePrefNameDict = {"normal": "foreground"}
         self.sevPrefDict = RO.Alg.OrderedDict(
             (sev, self.prefDict["%s Color" % sevNamePrefNameDict.get(sevName, sevName).title()])
-            for sev, sevName in RO.Constants.SevNameDict.iteritems())
+            for sev, sevName in RO.Constants.SevNameDict.items())
 
         # add activebackground color (could do the same for activeforeground,
         # but it doesn't seem to be used).  
@@ -229,7 +229,7 @@ if __name__ == "__main__":
     print()
     print("sevPrefDict:")
     sevPrefDict = getSevPrefDict()
-    severities = sevPrefDict.keys()
+    severities = list(sevPrefDict.keys())
     severities.sort()
     for severity in severities:
         print("  %s: %r" % (severity, sevPrefDict[severity].getValue()))

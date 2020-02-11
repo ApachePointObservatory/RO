@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 """String utilities, with an emphasis on support for sexagesimal numbers
 (e.g. degrees:minutes:seconds).
 
@@ -54,11 +54,11 @@ History:
 import re
 import numpy
 
-AngstromStr = u"\N{ANGSTROM SIGN}"
-DegStr = u"\N{DEGREE SIGN}"
-DMSStr = DegStr + u"'\""
-LambdaStr = u"\u00c5" # for some reason this fails: u"\N{GREEK SMALL LETTER LAMBDA}"
-MuStr = u"\N{GREEK SMALL LETTER MU}"
+AngstromStr = "\N{ANGSTROM SIGN}"
+DegStr = "\N{DEGREE SIGN}"
+DMSStr = DegStr + "'\""
+LambdaStr = "\u00c5" # for some reason this fails: u"\N{GREEK SMALL LETTER LAMBDA}"
+MuStr = "\N{GREEK SMALL LETTER MU}"
 
 def dmsStrFromDeg (decDeg, nFields=3, precision=1, omitExtraFields = False):
     """Convert a number to a sexagesimal string with 1-3 fields.
@@ -334,7 +334,7 @@ def prettyDict(aDict, entrySepStr = "\n", keyValSepStr = ": "):
     
     Returns a string containing the pretty-printed dictionary
     """
-    sortedKeys = aDict.keys()
+    sortedKeys = list(aDict.keys())
     sortedKeys.sort()
     eltList = []
     for aKey in sortedKeys:
@@ -361,7 +361,7 @@ def splitDMSStr (dmsStr):
     error conditions:
         raises ValueError if the string cannot be parsed
     """
-    assert isinstance(dmsStr, basestring)
+    assert isinstance(dmsStr, str)
     m = _DegRE.match(dmsStr) or _DegMinRE.match(dmsStr) or _DegMinSecRE.match(dmsStr)
     if m is None:
         raise ValueError("splitDMSStr cannot parse %s as a sexagesimal string" % (dmsStr))
@@ -446,7 +446,7 @@ def strFromException(exc):
         return str(exc)
     except Exception:
         try:
-            return ",".join([unicode(s) for s in exc.args])
+            return ",".join([str(s) for s in exc.args])
         except Exception:
             # in case exc is some unexpected type
             return repr(exc)

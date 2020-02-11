@@ -1,5 +1,5 @@
 #!/usr/bin/env python 
-from __future__ import division, print_function
+
 """
 History:
 P.T.Wallace   Starlink   10 July 1994
@@ -9,7 +9,7 @@ P.T.Wallace   Starlink   10 July 1994
 __all__ = ["prec"]
 
 import RO.PhysConst
-from euler import euler
+from .euler import euler
 
 def prec(begEpoch, endEpoch):
     """

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 """An interactive Python session and simple script file editor/runner
 that may be used from Tkinter scripts. Before running a script,x=Tk() is replaced with x=Toplevel() and mainloop() is eliminated. Hence some Tk scripts
 may be safely run. Presumably there are limitations. I suspect that mucking about
@@ -41,13 +41,13 @@ __all__ = ['PythonWdg']
 
 import os
 import re
-import Tkinter
-import tkFileDialog
+import tkinter
+import tkinter.filedialog
 import RO.CnvUtil
 import RO.OS
-import Text
+from . import Text
 
-class PythonWdg(Tkinter.Frame):
+class PythonWdg(tkinter.Frame):
     """A frame containing text window into which you may enter Python code.
     
     Inputs:
@@ -60,7 +60,7 @@ class PythonWdg(Tkinter.Frame):
         filePath = None,
         helpURL = None,
     **kargs):
-        Tkinter.Frame.__init__(self, master, **kargs)
+        tkinter.Frame.__init__(self, master, **kargs)
 
         self.master=master
         self.filePath = filePath
@@ -71,39 +71,39 @@ class PythonWdg(Tkinter.Frame):
             height = 10,
             helpURL = helpURL
         )
-        self.inputWdg.grid(row=0, column=0, sticky=Tkinter.NSEW)
+        self.inputWdg.grid(row=0, column=0, sticky=tkinter.NSEW)
         self.inputWdg.bind("<Key-Escape>", self.run)
 
-        self.scroll = Tkinter.Scrollbar(self, command=self.inputWdg.yview)
+        self.scroll = tkinter.Scrollbar(self, command=self.inputWdg.yview)
         self.inputWdg.configure(yscrollcommand=self.scroll.set)
-        self.scroll.grid(row=0, column=1, sticky=Tkinter.NS)
+        self.scroll.grid(row=0, column=1, sticky=tkinter.NS)
 
         if self.filePath:
             fd = RO.OS.openUniv(self.filePath)
             try:
-                self.inputWdg.delete(1.0, Tkinter.END)
+                self.inputWdg.delete(1.0, tkinter.END)
                 for line in fd.readlines():
-                    self.inputWdg.insert(Tkinter.END, line)
+                    self.inputWdg.insert(tkinter.END, line)
             finally:
                 fd.close()
 
-        self.cmdbar = Tkinter.Frame(self, borderwidth=2, relief=Tkinter.SUNKEN)
-        self.open = Tkinter.Button(self.cmdbar, text='Open...', command=self.open)
-        self.open.pack(side=Tkinter.LEFT, expand=0, padx=3, pady=3)
-        self.save = Tkinter.Button(self.cmdbar, text='Save...', command=self.save)
-        self.save.pack(side=Tkinter.LEFT, expand=0, padx=3, pady=3)
-        self.clr  = Tkinter.Button(self.cmdbar, text='Clear', command=self.clr)
-        self.clr.pack(side=Tkinter.LEFT, expand=0, padx=3, pady=3)
-        self.run  =Tkinter.Button(self.cmdbar, text='Run', command=self.run)
-        self.run.pack(side=Tkinter.RIGHT, expand=0, padx=3, pady=3)
-        self.cmdbar.grid(row=1, column=0, columnspan=2, sticky=Tkinter.EW)
+        self.cmdbar = tkinter.Frame(self, borderwidth=2, relief=tkinter.SUNKEN)
+        self.open = tkinter.Button(self.cmdbar, text='Open...', command=self.open)
+        self.open.pack(side=tkinter.LEFT, expand=0, padx=3, pady=3)
+        self.save = tkinter.Button(self.cmdbar, text='Save...', command=self.save)
+        self.save.pack(side=tkinter.LEFT, expand=0, padx=3, pady=3)
+        self.clr  = tkinter.Button(self.cmdbar, text='Clear', command=self.clr)
+        self.clr.pack(side=tkinter.LEFT, expand=0, padx=3, pady=3)
+        self.run  =tkinter.Button(self.cmdbar, text='Run', command=self.run)
+        self.run.pack(side=tkinter.RIGHT, expand=0, padx=3, pady=3)
+        self.cmdbar.grid(row=1, column=0, columnspan=2, sticky=tkinter.EW)
 
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
         self.inputWdg.focus_set()
 
     def run(self, evt=None, globs=None, locs=None):
-        script = self.inputWdg.get(1.0, Tkinter.END)
+        script = self.inputWdg.get(1.0, tkinter.END)
 
         # replace x = Tk() with x = Toplevel()
         tkPat = re.compile(r"^(.*=\s*)(:?ROStd)?Tk\(\)(.*)$", re.MULTILINE)
@@ -118,26 +118,26 @@ class PythonWdg(Tkinter.Frame):
             globs = __main__.__dict__
         if locs is None:
             locs = globs
-        exec script in globs, locs
+        exec(script, globs, locs)
 
     def open(self):
-        filePath = tkFileDialog.askopenfilename()
+        filePath = tkinter.filedialog.askopenfilename()
         if not filePath:
             return
         filePath = RO.CnvUtil.asStr(filePath)
-        top = Tkinter.Toplevel(self.master, )
+        top = tkinter.Toplevel(self.master, )
         top.title(os.path.basename(filePath))
         frame = PythonWdg(top, filePath=filePath)
-        frame.pack(expand=Tkinter.YES, fill=Tkinter.BOTH)
+        frame.pack(expand=tkinter.YES, fill=tkinter.BOTH)
 
     def save(self, forPrt=None):
-        script = self.inputWdg.get(1.0, Tkinter.END)
+        script = self.inputWdg.get(1.0, tkinter.END)
         if not script:
             return
         if forPrt:
             filePath = 'prt.tmp'
         else:
-            filePath = tkFileDialog.asksaveasfilename(initialfile=self.filePath)
+            filePath = tkinter.filedialog.asksaveasfilename(initialfile=self.filePath)
             if not filePath:
                 return
             self.filePath = RO.CnvUtil.asStr(filePath)
@@ -152,10 +152,10 @@ class PythonWdg(Tkinter.Frame):
 
 
 if __name__ == '__main__':
-    root = Tkinter.Tk()
+    root = tkinter.Tk()
     
     testFrame = PythonWdg(root)
     root.geometry("+0+450")
-    testFrame.pack(expand=Tkinter.YES, fill=Tkinter.BOTH)
+    testFrame.pack(expand=tkinter.YES, fill=tkinter.BOTH)
 
     root.mainloop()

@@ -1,4 +1,4 @@
-from __future__ import division, print_function
+
 """An indicator that shows if one or more ROEntry widgets
 have been set to nondefault values.
 
@@ -12,14 +12,15 @@ History:
 2004-08-11 ROwen    Define __all__ to restrict import.
 2004-09-14 ROwen    Tweaked the imports.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
+2020-02-10 DGatlin  Modified imports for Python 3
 """
 __all__ = ['ChangedIndicator']
 
-import Tkinter
+import tkinter
 import RO.SeqUtil
-import CtxMenu
+from .CtxMenu import CtxMenu, CtxMenuMixin
 
-class ChangedIndicator (Tkinter.Label, CtxMenu.CtxMenuMixin):
+class ChangedIndicator (tkinter.Label, CtxMenuMixin):
     def __init__(self,
         master,
         wdgOrSet,
@@ -39,7 +40,7 @@ class ChangedIndicator (Tkinter.Label, CtxMenu.CtxMenuMixin):
         - all remaining keyword arguments are used to configure the Menu
         """
         if var is None:
-            var = Tkinter.StringVar()       
+            var = tkinter.StringVar()       
         self.__var = var
         self.__inputCont = None
         self.wdgSet = []
@@ -49,11 +50,11 @@ class ChangedIndicator (Tkinter.Label, CtxMenu.CtxMenuMixin):
         
         kargs.setdefault("width", 1)
 
-        Tkinter.Label.__init__(self,
+        tkinter.Label.__init__(self,
             master = master,
             textvariable = self.__var,
         **kargs)
-        CtxMenu.CtxMenuMixin.__init__(self,
+        CtxMenuMixin.__init__(self,
             helpURL = helpURL,
         )
         

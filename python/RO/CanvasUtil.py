@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 """Utilities to help in use of Tk canvasses.
 
 History:
@@ -22,7 +22,7 @@ History:
 __all__ = ["ctrCircle", "ctrPlus", "ctrX", "radialLine", "Spiral"]
 
 import math
-import Tkinter
+import tkinter
 import RO.MathUtil
 
 def ctrCircle(cnv, xpos, ypos, rad, width = 1, **kargs):
@@ -256,7 +256,7 @@ if __name__ == '__main__':
     from RO.Wdg.PythonTk import PythonTk
     root = PythonTk()
 
-    cnv = Tkinter.Canvas (root, width=201, height=201)
+    cnv = tkinter.Canvas (root, width=201, height=201)
     cnv.pack()
     ctrPlus  (cnv,  80,  80, 10, 5)
     ctrPlus  (cnv, 100,  80, 10, 5, 5)

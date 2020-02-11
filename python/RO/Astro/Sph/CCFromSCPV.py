@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 
 __all__ = ["ccFromSCPV"]
 
 import RO.PhysConst
 import RO.MathUtil
-from CCFromSC import ccFromSC
+from .CCFromSC import ccFromSC
 
 # Magic Numbers
 # if parallax is less than _MinParallax,

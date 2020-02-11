@@ -1,15 +1,15 @@
 #!/usr/local/bin/Python
-from __future__ import absolute_import, division, print_function
-"""Displays the keysym for each KeyPress event as you type."""
-import Tkinter
 
-root = Tkinter.Tk()
+"""Displays the keysym for each KeyPress event as you type."""
+import tkinter
+
+root = tkinter.Tk()
 root.title("Keysym Logger")
 
 def reportEvent(event):
         print('keysym=%r, keysym_num=%s' % (event.keysym, event.keysym_num))
         
-text  = Tkinter.Text(root, width=20, height=5, highlightthickness=2)
+text  = tkinter.Text(root, width=20, height=5, highlightthickness=2)
 
 text.bind('<KeyPress>', reportEvent)
 

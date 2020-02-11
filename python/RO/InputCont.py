@@ -1,5 +1,5 @@
 #!/usr/bin/env python2
-from __future__ import absolute_import, division, print_function
+
 """Containers (wrappers) for RO.Wdg input widgets, including Entry,
 Checkbutton and OptionMenu.
 
@@ -476,7 +476,7 @@ class WdgCont(RO.AddCallback.BaseMixin):
         
         # we want just one callback instead of one per container, so disable callbacks until finished
         with self._disableCallbacksContext():
-            for wdg, val in itertools.izip(self._wdgList, valList):
+            for wdg, val in zip(self._wdgList, valList):
                 wdg.set(val)
         self._doCallbacks()
 
@@ -550,7 +550,7 @@ class BoolNegCont(WdgCont):
                 raise ValueError('invalid widget name %r; cannot start with negStr=%r' % (name, self._negStr))
         
         # generate widget dict and widget name getter
-        self._wdgDict = RO.Alg.OrderedDict(zip(self._wdgNames, self._wdgList))
+        self._wdgDict = RO.Alg.OrderedDict(list(zip(self._wdgNames, self._wdgList)))
         self._wdgNameGetter = RO.Alg.MatchList(wdgNames, abbrevOK=True, ignoreCase=True)
     
     def getDefValueList(self):
@@ -561,7 +561,7 @@ class BoolNegCont(WdgCont):
                 return name
             else:
                 return self._negStr + name
-        return [fmtFunc(name, wdg) for name, wdg in self._wdgDict.iteritems()]
+        return [fmtFunc(name, wdg) for name, wdg in self._wdgDict.items()]
 
     def getValueList(self, omitDef=None):
         """Get the value as a list: [name1, negStr + name2, ...].
@@ -578,10 +578,10 @@ class BoolNegCont(WdgCont):
             else:
                 return self._negStr + name
         if omitDef:
-            return [fmtFunc(name, wdg) for name, wdg in self._wdgDict.iteritems() \
+            return [fmtFunc(name, wdg) for name, wdg in self._wdgDict.items() \
                 if wdg.getDefault() != wdg.getString()]
         else:
-            return [fmtFunc(name, wdg) for name, wdg in self._wdgDict.iteritems()]
+            return [fmtFunc(name, wdg) for name, wdg in self._wdgDict.items()]
     
     def getWdgByName(self, name):
         """Return a widget given its name.
@@ -670,11 +670,11 @@ class BoolOmitCont(WdgCont):
         self._wdgNames = wdgNames
 
         # generate widget dict and widget name getter
-        self._wdgDict = RO.Alg.OrderedDict(zip(self._wdgNames, self._wdgList))
+        self._wdgDict = RO.Alg.OrderedDict(list(zip(self._wdgNames, self._wdgList)))
         self._wdgNameGetter = RO.Alg.MatchList(wdgNames, abbrevOK=True, ignoreCase=True)
         
         # verify that all widgets have default=checked
-        for name, wdg in self._wdgDict.iteritems():
+        for name, wdg in self._wdgDict.items():
             if not wdg.getDefBool():
                 raise ValueError("widget %s does not have default=checked" % (name,))
 
@@ -688,7 +688,7 @@ class BoolOmitCont(WdgCont):
         """
         if omitDef is None:
             omitDef = self._omitDef
-        valList = [name for name, wdg in self._wdgDict.iteritems()
+        valList = [name for name, wdg in self._wdgDict.items()
             if wdg.getBool()]
         if omitDef and len(valList) == len(self._wdgList):
             return []
@@ -914,7 +914,7 @@ class ContList(WdgCont):
 
 
 if __name__ == "__main__":
-    import Tkinter
+    import tkinter
     import RO.Wdg
     root = RO.Wdg.PythonTk()
     
@@ -946,22 +946,22 @@ if __name__ == "__main__":
         doEnable = enableVar.get()
         cList.setEnable(doEnable)
     
-    hideVar = Tkinter.IntVar()
+    hideVar = tkinter.IntVar()
     hideVar.set(False)
     hideVar.trace_variable('w', doHide)
-    hideButton = Tkinter.Checkbutton (root, variable=hideVar, text='hide')
+    hideButton = tkinter.Checkbutton (root, variable=hideVar, text='hide')
     hideButton.pack()
     
-    enableVar = Tkinter.IntVar()
+    enableVar = tkinter.IntVar()
     enableVar.set(1)
     enableVar.trace_variable('w', setEnable)
-    enableButton = Tkinter.Checkbutton (root, variable=enableVar, text='Enable')
+    enableButton = tkinter.Checkbutton (root, variable=enableVar, text='Enable')
     enableButton.pack()
     
-    getButton = Tkinter.Button (root, command=printOptions, text='Print Options')
+    getButton = tkinter.Button (root, command=printOptions, text='Print Options')
     getButton.pack()
     
-    wdgFrame = Tkinter.Frame(root)
+    wdgFrame = tkinter.Frame(root)
     
     conts = (
         WdgCont (
@@ -995,10 +995,10 @@ if __name__ == "__main__":
         callFunc = printCallback,
     )
     
-    clearButton = Tkinter.Button (root, command=cList.clear, text='Clear')
+    clearButton = tkinter.Button (root, command=cList.clear, text='Clear')
     clearButton.pack()
     
-    defButton = Tkinter.Button (root, command=cList.restoreDefault, text='Default')
+    defButton = tkinter.Button (root, command=cList.restoreDefault, text='Default')
     defButton.pack()
     
     flatWdgList = cList.getWdgList()

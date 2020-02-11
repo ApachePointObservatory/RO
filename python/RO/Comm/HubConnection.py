@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 """A version of RO.TCPConnection that can negotiate a connection with the APO Hub.
 
 This is a good example of the sort of connection used by KeyDispatcher.
@@ -40,7 +40,7 @@ except ImportError:
     shaClass = sha.sha
 import sys
 
-from TCPConnection import TCPConnection
+from .TCPConnection import TCPConnection
 import RO.ParseMsg
 import RO.StringUtil
 
@@ -230,9 +230,9 @@ class NullConnection(HubConnection):
 
 
 if __name__ == "__main__":
-    import Tkinter
+    import tkinter
     import RO.Wdg
-    root = Tkinter.Tk()
+    root = tkinter.Tk()
 
     host = "hub35m.apo.nmsu.edu"
     port = 9877
@@ -257,12 +257,12 @@ if __name__ == "__main__":
         class PasswordDialog(RO.Wdg.ModalDialogBase):
             def body(self, master):
         
-                Tkinter.Label(master, text="Program ID:").grid(row=0, column=0)
-                Tkinter.Label(master, text="Password  :").grid(row=1, column=0)
+                tkinter.Label(master, text="Program ID:").grid(row=0, column=0)
+                tkinter.Label(master, text="Password  :").grid(row=1, column=0)
         
-                self.nameEntry = Tkinter.Entry(master)
+                self.nameEntry = tkinter.Entry(master)
                 self.nameEntry.grid(row=0, column=1)
-                self.pwdEntry = Tkinter.Entry(master, show="*")
+                self.pwdEntry = tkinter.Entry(master, show="*")
                 self.pwdEntry.grid(row=1, column=1)
                 return self.nameEntry # return the item that gets initial focus
         
@@ -282,15 +282,15 @@ if __name__ == "__main__":
             )
 
 
-    Tkinter.Label(text="Send:").pack(side="left")
-    sendText = Tkinter.Entry(root)
+    tkinter.Label(text="Send:").pack(side="left")
+    sendText = tkinter.Entry(root)
     sendText.pack(fill="x", expand="yes", side="left")
     sendText.focus_set()
 
     def sendCmd (evt):
         try:
             astr = sendText.get()
-            sendText.delete(0,Tkinter.END)
+            sendText.delete(0,tkinter.END)
             myConn.writeLine(astr)
         except Exception as e:
             sys.stderr.write ("Could not extract or send: %s\nError: %s\n" % (astr, e))

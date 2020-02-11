@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import absolute_import, division, print_function
+
 """Sends commands (of type RO.KeyVariable.CmdVar) and dispatches replies
 to key variables (RO.KeyVariable.KeyVar and subclasses).
 
@@ -248,7 +248,7 @@ class KeyDispatcher(object):
         
         # iterate over a copy of the values
         # so we can modify the dictionary while checking command timeouts
-        cmdVarIter = iter(self.cmdDict.values())
+        cmdVarIter = iter(list(self.cmdDict.values()))
         self._checkRemCmdTimeouts(cmdVarIter)
         
     def dispatch(self, msgDict):
@@ -279,7 +279,7 @@ class KeyDispatcher(object):
             keyActor = actor[5:]
         else:
             keyActor = actor
-        for keywd, valueTuple in dataDict.iteritems():
+        for keywd, valueTuple in dataDict.items():
             dictKey = (keyActor, keywd.lower())
             keyVarList = self.keyVarListDict.get(dictKey, [])
             for keyVar in keyVarList:
@@ -482,7 +482,7 @@ class KeyDispatcher(object):
             # clear the refresh command dict
             # and invalidate all keyVars
             # (leave pending refresh commands alone; they will time out)
-            for keyVarList in self.keyVarListDict.values():
+            for keyVarList in list(self.keyVarListDict.values()):
                 for keyVar in keyVarList:
                     keyVar.setNotCurrent()
         
@@ -527,7 +527,7 @@ class KeyDispatcher(object):
         """Update the cache of refresh commands by scanning the keyVars.
         """
         self.refreshCmdDict = {}
-        for keyVarList in self.keyVarListDict.itervalues():
+        for keyVarList in self.keyVarListDict.values():
             for keyVar in keyVarList:
                 if keyVar.hasRefreshCmd():
                     refreshInfo = keyVar.getRefreshInfo()
@@ -663,7 +663,7 @@ class KeyDispatcher(object):
 
         if refreshCmdItemIter is None:
             self._updateRefreshCmds()
-            refreshCmdItemIter = self.refreshCmdDict.iteritems()
+            refreshCmdItemIter = iter(self.refreshCmdDict.items())
 
         try:
             refreshCmdInfo, keyVarSet = next(refreshCmdItemIter)
@@ -687,8 +687,8 @@ class KeyDispatcher(object):
 
 if __name__ == "__main__":
     print("\nTesting RO.KeyDispatcher\n")
-    import Tkinter
-    root = Tkinter.Tk()
+    import tkinter
+    root = tkinter.Tk()
 
     kdb = KeyDispatcher()
 

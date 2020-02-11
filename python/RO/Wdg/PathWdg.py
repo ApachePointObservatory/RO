@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 """Widgets for selecting files and directories.
 
 To do:
@@ -22,18 +22,19 @@ History:
 2012-07-09 ROwen    Modified to treat path="" as path=None. This fixes a problem with file and path prefs.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
+2020-02-10 DGatlin  Modified imports for Python 3
 """
 __all__ = ["DirWdg", "FileWdg"]
 
 import os
-import Tkinter
-import tkFileDialog
+import tkinter
+import tkinter.filedialog
 import RO.AddCallback
 import RO.Constants
-import CtxMenu
-from SeverityMixin import SeverityActiveMixin
+from .CtxMenu import CtxMenu, CtxMenuMixin
+from .SeverityMixin import SeverityActiveMixin
 
-class BasePathWdg (Tkinter.Button, RO.AddCallback.BaseMixin, CtxMenu.CtxMenuMixin,
+class BasePathWdg (tkinter.Button, RO.AddCallback.BaseMixin, CtxMenuMixin,
     SeverityActiveMixin):
     def __init__(self,
         master,
@@ -71,14 +72,14 @@ class BasePathWdg (Tkinter.Button, RO.AddCallback.BaseMixin, CtxMenu.CtxMenuMixi
         self.leftChar = 0
         self.rightChar = (self.maxChar - self.leftChar) - 1
 
-        Tkinter.Button.__init__(self,
+        tkinter.Button.__init__(self,
             master = master,
             command = self._doChoose,
         **kargs)
         
         RO.AddCallback.BaseMixin.__init__(self)
         
-        CtxMenu.CtxMenuMixin.__init__(self,
+        CtxMenuMixin.__init__(self,
             helpURL = helpURL,
         )
         SeverityActiveMixin.__init__(self, severity)
@@ -123,16 +124,16 @@ class BasePathWdg (Tkinter.Button, RO.AddCallback.BaseMixin, CtxMenu.CtxMenuMixi
         Warning: if you want the state to be "active" you must set that explicitly.
         """
         if doEnable:
-            self["state"] = Tkinter.NORMAL
+            self["state"] = tkinter.NORMAL
         else:
-            self["state"] = Tkinter.DISABLED
+            self["state"] = tkinter.DISABLED
     
     def getEnable(self):
         """Return True if widget is enabled, False otherwise
 
         Enabled is defined as the state is not "disabled" (thus "enabled" or "active").
         """
-        return self["state"] != Tkinter.DISABLED
+        return self["state"] != tkinter.DISABLED
         
     def setPath(self, path):
         """Set self.path to normalized version of path.
@@ -151,7 +152,7 @@ class BasePathWdg (Tkinter.Button, RO.AddCallback.BaseMixin, CtxMenu.CtxMenuMixi
             if len(path) > self.maxChar:
                 dispStr = "".join((
                     path[0:self.leftChar],
-                    u"\N{HORIZONTAL ELLIPSIS}",
+                    "\N{HORIZONTAL ELLIPSIS}",
                     path[-self.rightChar:],
                 ))
             else:
@@ -222,7 +223,7 @@ class DirWdg(BasePathWdg):
         kargs = {}
         if self.fileTypes:
             kargs["filetypes"] = self.fileTypes
-        newPath = tkFileDialog.askdirectory(
+        newPath = tkinter.filedialog.askdirectory(
             initialdir = startDir,
             mustexist = True,
             title = self.helpText,
@@ -267,7 +268,7 @@ class FileWdg(BasePathWdg):
         kargs = {}
         if self.fileTypes:
             kargs["filetypes"] = self.fileTypes
-        newPath = tkFileDialog.askopenfilename(
+        newPath = tkinter.filedialog.askopenfilename(
             initialdir = startDir,
             initialfile = startFile,
             title = self.helpText,

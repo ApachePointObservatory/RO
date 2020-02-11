@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 """Run an application as a droplet (an application onto which you drop file) with a log window.
 
 To build a Mac droplet using py2app, in the PList specify the sorts of files that can be dropped, e.g.:
@@ -45,13 +45,13 @@ __all__ = ["DropletApp"]
 
 import sys
 import traceback
-import Tkinter
+import tkinter
 import RO.OS
 import RO.Constants
 from RO.TkUtil import Timer
-import LogWdg
+from . import LogWdg
 
-class DropletApp(Tkinter.Frame):
+class DropletApp(tkinter.Frame):
     """Run an application as a droplet (an application onto which you drop files)
     
     You must subclass this class and override processFile.
@@ -100,7 +100,7 @@ class DropletApp(Tkinter.Frame):
             If None then no final message is printed.
             If supplied then a final \n is also added.
         """
-        Tkinter.Frame.__init__(self, master)
+        tkinter.Frame.__init__(self, master)
         self.printTraceback = bool(printTraceback)
         self.patterns = patterns
         self.exclPatterns = exclPatterns
@@ -184,7 +184,7 @@ if __name__ == "__main__":
     if filePathList and filePathList[0].startswith("-"):
         filePathList = filePathList[1:]
 
-    root = Tkinter.Tk()
+    root = tkinter.Tk()
     
     class TestApp(DropletApp):
         def __init__(self, master):

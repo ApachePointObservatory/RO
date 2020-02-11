@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 """ 
 History:    
 P.T.Wallace Starlink    1 January 1993
@@ -8,8 +8,8 @@ P.T.Wallace Starlink    1 January 1993
 """
 __all__ = ["nut"]
 
-from nutc import nutc
-from euler import euler
+from .nutc import nutc
+from .euler import euler
 
 def nut(tdb):
     """

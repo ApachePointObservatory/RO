@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import absolute_import, division, print_function
+
 """A script to release a new version of RO Python Package and upload it to PyPI
 
 To use:
@@ -18,7 +18,7 @@ PkgDir = os.path.join(PkgRoot, PkgName)
 sys.path.insert(0, PkgDir)
 import Version
 queryStr = "Version from RO.Version = %s; is this OK? (y/[n]) " % (Version.__version__,)
-versOK = raw_input(queryStr)
+versOK = input(queryStr)
 if not versOK.lower() == "y":
     sys.exit(0)
 
@@ -39,7 +39,7 @@ print("Status of git repository:")
 
 subprocess.call(["git", "status"])
 
-versOK = raw_input("Is the git repository up to date? (y/[n]) ")
+versOK = input("Is the git repository up to date? (y/[n]) ")
 if not versOK.lower() == "y":
     sys.exit(0)
 

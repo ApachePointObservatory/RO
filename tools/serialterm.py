@@ -1,20 +1,20 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 """Simple serial terminal.
 Type and press <return> in the entry field along the bottom to send data
 """
 import sys
 import os
-import Tkinter
+import tkinter
 RORoot = os.path.join(os.path.dirname(os.path.abspath(os.path.dirname(__file__))), "python")
 sys.path.append(RORoot)
 import RO.CnvUtil
 import RO.Comm.TkSerial
 import RO.Wdg
 
-class SerialTerminal(Tkinter.Frame):
+class SerialTerminal(tkinter.Frame):
     def __init__(self, master, portName, localEcho=False, **serialOptions):
-        Tkinter.Frame.__init__(self, master)
+        tkinter.Frame.__init__(self, master)
         self.localEcho = RO.CnvUtil.asBool(localEcho)
         
         self.conn = RO.Comm.TkSerial.TkSerial(portName, readCallback=self.doRead, **serialOptions)
@@ -56,6 +56,6 @@ localEcho: True or False (default: False)
     for argInd in range(2, nArgs, 2):
         serialOptions[sys.argv[argInd]] = sys.argv[argInd+1]
     
-    root = Tkinter.Tk()
+    root = tkinter.Tk()
     serTerm = SerialTerminal(root, portName, **serialOptions)
     root.mainloop()

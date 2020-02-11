@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import absolute_import, division, print_function
+
 """
 cheol:  change end of line character
 Copyright (C) 2000-2001 Gordon Worley

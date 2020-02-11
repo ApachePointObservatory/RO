@@ -1,12 +1,12 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 
 __all__ = ["haDecFromAzAlt"]
 
 import RO.MathUtil
 import RO.SysConst
-from DCFromSC import dcFromSC
-from SCFromDC import scFromDC
+from .DCFromSC import dcFromSC
+from .SCFromDC import scFromDC
 from RO.Astro import Cnv
 
 def haDecFromAzAlt (azAlt, lat):
@@ -50,7 +50,7 @@ def haDecFromAzAlt (azAlt, lat):
 
 
 if __name__ == "__main__":
-    from AngSep import angSep
+    from .AngSep import angSep
     MaxErrArcSec = 1e-6 # max error on sky, in arc seconds
     print("testing haDecFromAzAlt")
     # test data is formatted as follows:

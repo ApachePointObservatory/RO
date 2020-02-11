@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 """A widget to display a scrolling log of information. Log entries
 may be categorized and each category may be displayed in a different color.
 Each category may be individually shown or hidden.
@@ -70,18 +70,18 @@ History:
 """
 __all__ = ['LogWdg']
 
-import Tkinter
+import tkinter
 import RO.Alg
-import Text
+from . import Text
 
 _AllTextTag = "__alltext"
 
 _SevTagDict = RO.Alg.OrderedDict(
-    (sev, "__sev_%s" % (name,)) for sev, name in RO.Constants.SevNameDict.iteritems())
+    (sev, "__sev_%s" % (name,)) for sev, name in RO.Constants.SevNameDict.items())
 _SevTagListDict = RO.Alg.OrderedDict(
-    (sev, _SevTagDict.values()[ind:]) for ind, sev in enumerate(_SevTagDict.iterkeys()))
+    (sev, list(_SevTagDict.values())[ind:]) for ind, sev in enumerate(_SevTagDict.keys()))
 
-class LogWdg(Tkinter.Frame):
+class LogWdg(tkinter.Frame):
 
     def __init__(self,
         master,
@@ -106,12 +106,12 @@ class LogWdg(Tkinter.Frame):
             (if already at end of text) by default.
         - **kargs: additional keyword arguments for Frame
         """
-        Tkinter.Frame.__init__(self, master=master, **kargs)
+        tkinter.Frame.__init__(self, master=master, **kargs)
         
         self.maxLineIndex = maxLines + 1
         self.doAutoScroll = bool(doAutoScroll)
         
-        self.yscroll = Tkinter.Scrollbar (
+        self.yscroll = tkinter.Scrollbar (
             master = self,
             orient = "vertical",
         )
@@ -134,7 +134,7 @@ class LogWdg(Tkinter.Frame):
 
         # set up severity tags and tie them to color preferences
         self._severityPrefDict = RO.Wdg.WdgPrefs.getSevPrefDict()
-        for sev, sevTag in _SevTagDict.iteritems():
+        for sev, sevTag in _SevTagDict.items():
             pref = self._severityPrefDict[sev]
             if sev == RO.Constants.sevNormal:
                 # normal color is already automatically updated
@@ -143,7 +143,7 @@ class LogWdg(Tkinter.Frame):
                 continue
             pref.addCallback(RO.Alg.GenericCallback(self._updSevTagColor, sevTag), callNow=True)
         
-        self.findCountVar = Tkinter.IntVar()
+        self.findCountVar = tkinter.IntVar()
 
         self.rowconfigure(1, weight=1)
         self.columnconfigure(0, weight=1)
@@ -507,7 +507,7 @@ class LogWdg(Tkinter.Frame):
 if __name__ == '__main__':
     import random
     import sys
-    import PythonTk
+    from . import PythonTk
     root = PythonTk.PythonTk()
     
     testFrame = LogWdg (
@@ -516,9 +516,9 @@ if __name__ == '__main__':
     )
     testFrame.grid(row=0, column=0, sticky="nsew")
 
-    severityList = RO.Constants.SevNameDict.keys()
+    severityList = list(RO.Constants.SevNameDict.keys())
     
-    entry = Tkinter.Entry(root)
+    entry = tkinter.Entry(root)
     entry.grid(row=1, column=0, sticky="nsew")
     
     def addMsg(msgStr):

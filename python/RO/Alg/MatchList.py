@@ -1,4 +1,4 @@
-from __future__ import absolute_import, division, print_function
+
 """
 History:
 2003-10-23 ROwen    Renamed from GetByPrefix and enhanced.
@@ -59,7 +59,7 @@ class MatchList(object):
         If more than one key in fromDict has the same match, raises ValueError
         """
         toDict = {}
-        for fromKey, val in fromDict.iteritems():
+        for fromKey, val in fromDict.items():
             toKey = self.getUniqueMatch(fromKey)
             if toKey in toDict:
                 raise ValueError("%r contains multiple keys that match %s" % (fromDict, toKey,))

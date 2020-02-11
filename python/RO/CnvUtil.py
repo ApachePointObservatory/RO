@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 """Value conversion functions.
 
 These are mostly used for converting string representations of values
@@ -20,7 +20,7 @@ History:
 2009-07-19 ROwen    Added posFromPVT.
 2015-09-24 ROwen    Replace "== None" with "is None" to future-proof array tests and modernize the code.
 """
-import SeqUtil
+from . import SeqUtil
 
 _FalseValues = set((False, 0, "0", "f", "false", "no", "off", None))
 _TrueValues  = set((True,  1, "1", "t", "true",  "yes", "on"))
@@ -41,7 +41,7 @@ def asASCII(val):
     """
     # The inner "str" converts objects with str representations to strings.
     # The outer str converts the unicode string to a normal string.
-    return str(unicode(str(val), "ascii"))
+    return str(str(str(val), "ascii"))
 
 def asBool(val):
     """Converts typical human-readable boolean values to True or False
@@ -261,7 +261,7 @@ def asStr(val):
     try:
         return str(val)
     except ValueError:
-        return unicode(val)
+        return str(val)
 
 class StrCnv(object):
     """Similar to str but with an optional substitution dictionary.
@@ -291,7 +291,7 @@ class StrCnvNoCase(object):
         """
         self.subsDict = {}
         if subsDict:
-            for key, val in subsDict.iteritems():
+            for key, val in subsDict.items():
                 self.subsDict[key.lower()] = val
 
     def __call__(self, key):

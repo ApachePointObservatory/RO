@@ -6,7 +6,7 @@ History:
 2004-05-18 ROwen    Modified test code to use astr instead of str.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 """
-from __future__ import absolute_import, division, print_function
+
 import sys
 
 __all__ = ["getString"]

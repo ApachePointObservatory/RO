@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 """Utilities for non-string-like collections of objects.
 
 The following definitions are used in this module:
@@ -30,7 +30,7 @@ History:
 2007-04-24 ROwen    Changed Numeric to numpy in a doc string.
 2010-06-28 ROwen    Modified to require Python 2.4 by assuming set is a builtin type.
 """
-import UserString
+import collections
 import RO.MathUtil
 
 def asCollection(item):
@@ -121,7 +121,7 @@ def isString(item):
     
     From Python Cookbook, 2nd ed.
     """
-    return isinstance(item, (basestring, UserString.UserString))
+    return isinstance(item, (str, collections.UserString))
 
 def oneOrNAsList (
     oneOrNVal,
@@ -189,9 +189,9 @@ if __name__ == '__main__':
             (False, False),
             (5, False),
             (7.5, False),
-            (u'unicode string', False),
+            ('unicode string', False),
             ('regular string', False),
-            (UserString.UserString("user string"), False),
+            (collections.UserString("user string"), False),
             (dict(), False),
             (set(), False),
             (list(), True),
@@ -203,9 +203,9 @@ if __name__ == '__main__':
             (False, False),
             (5, False),
             (7.5, False),
-            (u'unicode string', False),
+            ('unicode string', False),
             ('regular string', False),
-            (UserString.UserString("user string"), False),
+            (collections.UserString("user string"), False),
             (dict(), True),
             (set(), True),
             (list(), True),
@@ -217,16 +217,16 @@ if __name__ == '__main__':
             (False, False),
             (5, False),
             (7.5, False),
-            (u'unicode string', True),
+            ('unicode string', True),
             ('regular string', True),
-            (UserString.UserString("user string"), True),
+            (collections.UserString("user string"), True),
             (dict(), False),
             (set(), False),
             (list(), False),
             ((), False),
         ),
     }
-    for func, dataList in dataDict.iteritems():
+    for func, dataList in dataDict.items():
         funcName = func.__name__
         print("testing", funcName)
         for dataItem, expectTrue in dataList:
@@ -236,5 +236,5 @@ if __name__ == '__main__':
                 print("%s(%r) failed; should be %r" % (funcName, dataItem, expectTrue))
 
     print("testing flatten")
-    f = (((),("abc",)), u"abc", ["a", "b", "c"])
-    assert flatten(f) == ["abc", u"abc", "a", "b", "c"]
+    f = (((),("abc",)), "abc", ["a", "b", "c"])
+    assert flatten(f) == ["abc", "abc", "a", "b", "c"]

@@ -1,4 +1,4 @@
-from __future__ import division, print_function
+
 """Tools for gridding widgets
 
 History:
@@ -23,14 +23,15 @@ History:
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 2015-11-05 ROwen    Changed ==/!= True/False to is/is not True/False to modernize the code.
+2020-02-10 DGatlin  Modified imports for Python 3
 """
 __all__ = ['StatusConfigGridder']
 
-import Gridder
+from .Gridder import Gridder, _BaseGridSet
 
 ConfigCat = "config"
 
-class StatusConfigGridder(Gridder.Gridder):
+class StatusConfigGridder(Gridder):
     ConfigCat = ConfigCat
     def __init__(self,
         master,
@@ -53,7 +54,7 @@ class StatusConfigGridder(Gridder.Gridder):
                         and your code will still work if you add status widgets that use more columns.
                         
         """
-        Gridder.Gridder.__init__(self,
+        Gridder.__init__(self,
             master = master,
             row = row,
             col = col,
@@ -123,7 +124,7 @@ class StatusConfigGridder(Gridder.Gridder):
         return gs
 
 
-class _StatusConfigGridSet(Gridder._BaseGridSet):
+class _StatusConfigGridSet(_BaseGridSet):
     def __init__ (self,
         master,
         label = None,
@@ -187,7 +188,7 @@ class _StatusConfigGridSet(Gridder._BaseGridSet):
         if numStatusCols is not None:
             numStatusCols = int(numStatusCols)
 
-        Gridder._BaseGridSet.__init__(self,
+        _BaseGridSet.__init__(self,
             master,
             row,
             col,

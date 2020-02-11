@@ -1,4 +1,4 @@
-from __future__ import division, print_function
+
 """Utility functions for working with SQL databases
 and with data files in FMPro "merge" format.
 
@@ -184,7 +184,7 @@ def insertRow(dbCursor, table, dataDict, fieldsToAdd=None, fieldsToCheck=None):
         raise RuntimeError("a matching entry already exists")
     
     if fieldsToAdd is None:
-        fieldsToAdd = dataDict.keys()
+        fieldsToAdd = list(dataDict.keys())
     
     addFieldStr = ", ".join(fieldsToAdd)
     addValueList = ["%%(%s)s" % (fieldName,) for fieldName in fieldsToAdd]
@@ -227,7 +227,7 @@ def insertMany(dbCursor, table, dataDict, arrayFields, scalarFields=None):
     # with values in the same order as allFields = scalarFields + arrayFields
     listOfLists = [[dataDict[fieldName]]*numEntries for fieldName in scalarFields] \
         + [dataDict[fieldName] for fieldName in arrayFields]
-    zippedList = zip(*listOfLists)
+    zippedList = list(zip(*listOfLists))
     allFields = scalarFields + arrayFields
     
     # set up the query as:
@@ -253,7 +253,7 @@ def rowExists(dbCursor, table, dataDict, fieldsToCheck=None):
     - fieldsToCheck: list of fields to check; if None (default) then check all fields
     """
     if fieldsToCheck is None:
-        fieldsToCheck = dataDict.keys()
+        fieldsToCheck = list(dataDict.keys())
 
     # generate the sql command:
     # select * from table where (fieldName1=%(fieldName1)s, fieldName2=%(fieldName2)s,...)
@@ -283,7 +283,7 @@ class NullDBCursor (object):
     def execute(self, sqlCmd, dataDict=None):
         print("%s.execute %s" % (self, sqlCmd))
         if dataDict:
-            keys = dataDict.keys()
+            keys = list(dataDict.keys())
             keys.sort()
             for key in keys:
                 valStr = repr(dataDict[key])

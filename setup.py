@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 """Install the RO package. Requires setuptools.
 
 To use:

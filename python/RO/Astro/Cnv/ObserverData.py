@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import absolute_import, division, print_function
+
 """
 History:
 2007-04-24 ROwen    Converted from Numeric to numpy.

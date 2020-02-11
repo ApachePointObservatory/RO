@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import absolute_import, division, print_function
+
 """Code to handle imager windowing (subimage) and binning.
 
 Note: uses the expansionist or inclusive philosophy.

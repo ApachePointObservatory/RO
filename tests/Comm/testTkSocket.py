@@ -1,12 +1,12 @@
 # -*- test-case-name: tests.Comm.testTkSocket -*-
-from __future__ import absolute_import, division, print_function
-import Tkinter
+
+import tkinter
 from twisted.trial import unittest
 from twisted.internet.defer import Deferred
 import twisted.internet.tksupport
 from RO.Comm.TkSocket import TCPSocket, TCPServer
 
-root = Tkinter.Tk()
+root = tkinter.Tk()
 
 Port = 2210
 

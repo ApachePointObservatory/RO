@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 """A menu showing a history of recent events.
 Saves arbitrary data associated with each event
 and calls a user-specified callback when any item is selected.
@@ -16,14 +16,15 @@ History:
 2004-08-11 ROwen    Define __all__ to restrict import.
 2004-09-14 ROwen    Test code no longer imports RO.Wdg to avoid circular import.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
+2020-02-10 DGatlin  Modified imports for Python 3
 """
 __all__ = ['HistoryMenu']
 
-import Tkinter
+import tkinter
 import RO.Alg
-import CtxMenu
+from .CtxMenu import CtxMenu, CtxMenuMixin
 
-class HistoryMenu (Tkinter.Menubutton, CtxMenu.CtxMenuMixin):
+class HistoryMenu (tkinter.Menubutton, CtxMenuMixin):
     """A menu showing a history of recent events.
     
     Inputs:
@@ -49,14 +50,14 @@ class HistoryMenu (Tkinter.Menubutton, CtxMenu.CtxMenuMixin):
         helpText = None,
         helpURL = None,
     ):
-        Tkinter.Menubutton.__init__(self,
+        tkinter.Menubutton.__init__(self,
             master=master,
             text="History",
             indicatoron=1,
             relief="raised",
 #           state="disabled",
         )
-        CtxMenu.CtxMenuMixin.__init__(self, helpURL = helpURL)
+        CtxMenuMixin.__init__(self, helpURL = helpURL)
 
         self.__callFunc = callFunc
         self.__removeAdjDup = removeAdjDup
@@ -65,7 +66,7 @@ class HistoryMenu (Tkinter.Menubutton, CtxMenu.CtxMenuMixin):
         self.helpText = helpText
 
         # basic menu
-        self.__menu = Tkinter.Menu(self, tearoff=0)
+        self.__menu = tkinter.Menu(self, tearoff=0)
         self["menu"] = self.__menu
     
         self.dataDict = {}
@@ -115,7 +116,7 @@ class HistoryMenu (Tkinter.Menubutton, CtxMenu.CtxMenuMixin):
         
 
 if __name__ == "__main__":
-    import PythonTk
+    from . import PythonTk
     root = PythonTk.PythonTk()
     
     def doAdd(*args):
@@ -126,9 +127,9 @@ if __name__ == "__main__":
     def doPrint(name, data):
         print("name=%r, data=%r" % (name, data))
     
-    Tkinter.Label(root, text="Name of new entry (type <CR> to accept it):").pack()
-    nameVar = Tkinter.StringVar()
-    nameWdg = Tkinter.Entry(root, textvariable=nameVar)
+    tkinter.Label(root, text="Name of new entry (type <CR> to accept it):").pack()
+    nameVar = tkinter.StringVar()
+    nameWdg = tkinter.Entry(root, textvariable=nameVar)
     nameWdg.bind("<Return>", doAdd)
     nameWdg.pack()
     testFrame = HistoryMenu(root,

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+
 """Sets up standard key bindings for each platform.
 Supplements Tk's defaults and handles readonly text widgets.
 
@@ -43,7 +43,7 @@ in a Mac-like way is difficult.
 """
 __all__ = ['makeReadOnly', 'stdBindings', 'stopEvent']
 
-import Tkinter
+import tkinter
 import RO.TkUtil
 
 def doQuit(evt):
@@ -194,14 +194,14 @@ def _entryGoToRightEdge(evt):
     evt.widget.icursor("end")
 
 if __name__ == "__main__":
-    root = Tkinter.Tk()
+    root = tkinter.Tk()
     stdBindings(root, debug=1)
     
-    t = Tkinter.Text(root, width=20, height=5)
-    tr = Tkinter.Text(root, width=20, height=5)
+    t = tkinter.Text(root, width=20, height=5)
+    tr = tkinter.Text(root, width=20, height=5)
     tr.insert("end", "here is some test text for the read only text widget")
     makeReadOnly(tr)
-    e = Tkinter.Entry(root)
+    e = tkinter.Entry(root)
     t.pack()
     tr.pack()
     e.pack()

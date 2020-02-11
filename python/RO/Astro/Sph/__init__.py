@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 """
 Astronomical math in spherical coordinates.
 Most coordinate conversions are in the Cnv package,
