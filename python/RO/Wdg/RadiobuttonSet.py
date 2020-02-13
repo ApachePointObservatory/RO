@@ -42,6 +42,7 @@ History:
                     Moved fix for Aqua Tk 8.5 width bug to RO.Wdg.Radiobutton.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
+2020-02-10 DGatlin  Updated imports for Python 3
 """
 __all__ = ['RadiobuttonSet']
 
@@ -51,7 +52,7 @@ import RO.Alg
 import RO.SeqUtil
 import RO.StringUtil
 import RO.TkUtil
-from . import Button
+from .Button import Radiobutton
 from .IsCurrentMixin import AutoIsCurrentMixin, IsCurrentActiveMixin
 
 class RadiobuttonSet (RO.AddCallback.TkVarMixin,
@@ -160,7 +161,7 @@ class RadiobuttonSet (RO.AddCallback.TkVarMixin,
         helpURLList = RO.SeqUtil.oneOrNAsList(helpURL, nButtons, "helpURL list")
         self.wdgSet = []
         for ii in range(nButtons):
-            wdg = Button.Radiobutton(
+            wdg = Radiobutton(
                 master = master,
                 variable = self._var,
                 text = textList[ii],
