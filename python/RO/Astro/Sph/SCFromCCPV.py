@@ -15,11 +15,11 @@ def scFromCCPV(p, v):
     """
     Converts cartesian position and velocity to spherical coordinates
     (if you just want to convert position, use sph_CC2SC).
-    
+
     Inputs:
     p(3)    cartesian position (au)
     v(3)    cartesian velocity (au per year)
-    
+
     Returns a tuple containing:
     pos(2)  spherical position (degrees)
             ranges: pos[0]: [0, 360), pos[1]: [-90,90]
@@ -28,28 +28,28 @@ def scFromCCPV(p, v):
     parallax    parallax (arcsec)
     radVel  radial velocity (km/s, positive receding)
     atPole  true if at a pole; see "Error Cond." for implications
-    
+
     Error Conditions:
     Raises valueError if |p| is too small
-    
+
     If p is very near a pole, atPole is set true and pos[1], pm[0] and pm[1]
     are set to zero; pos[0], parallax and radVel are computed correctly
     (pos[0] is +/-90.0, as appropriate).
-    
+
     If inputs are too large, overflows are possible--roughly if
     p^2 or v^2 overflows.
-    
+
     History
     2002-07-08 ROwen  Converted from TCC's sph_SCPV2CC 1-1.
     """
     x, y, z = p
     vX, vY, vZ = v
-    
+
     pos, magP, atPole = scFromCC(p)
-    
+
     #  warning: test atPole after computing radial velocity and parallax
     #  since they can be correctly computed even at the pole
-    
+
     #  compute parallax; note that arcsec = 1 / parsec;
     #  the division is safe because magP must have some reasonable
     #  minimum value, else scFromCC would have raised an exception
@@ -58,7 +58,7 @@ def scFromCCPV(p, v):
     #  compute radial velocity in (au/year) and convert to (km/s)
     radVel = float ((x * vX) + (y * vY) + (z * vZ)) / magP
     radVel *= _KMPerSec_Per_AUPerYear
-    
+
     #  now that parallax and radial velocity have been computed
     #  handle the "at pole" case
     if atPole:
@@ -69,7 +69,7 @@ def scFromCCPV(p, v):
         magPxySq  = float((x * x) + (y * y))
         magPxy = math.sqrt (magPxySq)
         magPSq = magPxySq + z * z
-    
+
         #  compute proper motion in rad per year,
         #  then convert to arcsec per century;
         #  the divisions are save because:

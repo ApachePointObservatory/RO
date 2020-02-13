@@ -14,6 +14,10 @@ History:
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
+
+from __future__ import print_function
+
+
 __all__ = ["getValues"]
 
 import re
@@ -87,7 +91,7 @@ Exceptions:
 #           print "char at nextInd =", astr[nextInd]
 #       else:
 #           print ""
-        
+
         if nextInd is None:
             # done with line
             break

@@ -13,7 +13,7 @@ __all__ = ["MatchList"]
 class MatchList(object):
     """Find matches for a string in a list of strings,
     optionally allowing abbreviations and ignoring case.
-    
+
     Inputs:
     - valueList: a list of values; non-string entries are ignored
     - abbrevOK: allow abbreviations?
@@ -26,7 +26,7 @@ class MatchList(object):
     ):
         self.abbrevOK = bool(abbrevOK)
         self.ignoreCase = bool(ignoreCase)
-        
+
         self.setList(valueList)
 
     def getAllMatches(self, prefix):
@@ -37,7 +37,7 @@ class MatchList(object):
         if self.abbrevOK:
             return [valItem[-1] for valItem in self.valueList if valItem[0].startswith(prefix)]
         else:
-            return [valItem[-1] for valItem in self.valueList if valItem[0] == prefix]       
+            return [valItem[-1] for valItem in self.valueList if valItem[0] == prefix]
 
     def getUniqueMatch(self, prefix):
         """If there is a unique match, return it, else raise ValueError.
@@ -51,10 +51,10 @@ class MatchList(object):
             else:
                 errList = [val[-1] for val in self.valueList]
                 raise ValueError("no matches for %r in %r" % (prefix, errList))
-    
+
     def matchKeys(self, fromDict):
         """Returns a copy of fromDict with keys replaced by their unique match.
-        
+
         If any key does not have a unique match in the list, raises ValueError.
         If more than one key in fromDict has the same match, raises ValueError
         """
@@ -65,7 +65,7 @@ class MatchList(object):
                 raise ValueError("%r contains multiple keys that match %s" % (fromDict, toKey,))
             toDict[toKey] = val
         return toDict
-    
+
     def setList(self, valueList):
         """Set the list of values to match.
         Non-string-like items are silently ignored.

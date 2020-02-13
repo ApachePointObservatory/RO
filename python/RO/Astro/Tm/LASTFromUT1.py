@@ -17,7 +17,7 @@ def lastFromUT1(ut1, longitude):
 
     Returns:
     - last      local apparent sideral time (deg)
-    
+
     History:
     2002-08-05 ROwen    First version, loosely based on the TCC's tut_LAST.
     2014-04-25 ROwen    Add from __future__ import division, absolute_import and use relative import.

@@ -38,7 +38,7 @@ class Button(tkinter.Button, RO.AddCallback.TkButtonMixin, CtxMenuMixin, Severit
         severity = RO.Constants.sevNormal,
     **kwArgs):
         """Creates a new Button.
-        
+
         Inputs:
         - helpText  text for hot help
         - helpURL   URL for longer help
@@ -68,7 +68,7 @@ class Button(tkinter.Button, RO.AddCallback.TkButtonMixin, CtxMenuMixin, Severit
         
         CtxMenuMixin.__init__(self, helpURL = helpURL)
         SeverityActiveMixin.__init__(self, severity)
-    
+
     def setEnable(self, doEnable):
         """Enable or disable widget
 
@@ -98,7 +98,7 @@ class Radiobutton(tkinter.Radiobutton, CtxMenuMixin, SeverityActiveMixin):
         severity=RO.Constants.sevNormal,
     **kwArgs):
         """Creates a new Button.
-        
+
         Inputs:
         - helpText  text for hot help
         - helpURL   URL for longer help
@@ -110,4 +110,3 @@ class Radiobutton(tkinter.Radiobutton, CtxMenuMixin, SeverityActiveMixin):
         tkinter.Radiobutton.__init__(self, master = master, **kwArgs)
         CtxMenuMixin.__init__(self, helpURL = helpURL)
         SeverityActiveMixin.__init__(self, severity)
-    

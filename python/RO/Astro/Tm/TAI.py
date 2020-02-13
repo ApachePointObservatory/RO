@@ -15,7 +15,7 @@ _UTCMinusTAIDays = -35 / float(RO.PhysConst.SecPerDay) # a reasonable value corr
 
 def getUTCMinusTAI():
     """Return UTC - TAI (in seconds).
-    
+
     Warning: the value will only be correct if it was properly set by setUTCMinusTAI
     """
     return _UTCMinusTAIDays * RO.PhysConst.SecPerDay

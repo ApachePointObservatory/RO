@@ -18,7 +18,7 @@ __all__ = ["ImageWindow"]
 
 class ImageWindow(object):
     """Class to handle imager windowing and binning.
-    
+
     Users typically prefer to specify windows (subregions) in binned coordinates,
     but then what happens if the user changes the bin factor? This class offers
     functions that help handle such changes.
@@ -38,7 +38,7 @@ class ImageWindow(object):
             raise ValueError("imSize must be two integers; imSize = %r" % (imSize,))
         self.imSize = tuple([int(mc) for mc in imSize])
         self.isInclusive = bool(isInclusive)
-        
+
         if self.isInclusive:
             urPosAdj = 0
             ubUROff = 0
@@ -47,7 +47,7 @@ class ImageWindow(object):
             urPosAdj = 1
             ubUROff = 1
             binUROff = 0
-        
+
         def posToWin(xyPos, urOff):
             return tuple(xyPos) + tuple([val + urOff for val in xyPos])
 
@@ -61,25 +61,25 @@ class ImageWindow(object):
 
         self.binWinOffset = posToWin(imLL, ubUROff)
         self.ubWinOffset = posToWin(imLL, binUROff)
-            
+
     def binWindow(self, ubWin, binFac):
         """Converts unbinned window to binned.
-        
+
         The output is constrained to be in range for the given bin factor,
         though this is only an issue if ubWin is out of range.
 
         Inputs:
         - ubWin: unbinned window coords (LL x, LL y, UR x, UR y)
-        
+
         Returns binned window coords (LL x, LL y, UR x, UR y)
-        
+
         If any element of ubWin or binFac is None, all returned elements are None.
         """
         if None in ubWin or None in binFac:
             return (None,)*4
         ubWin = self._getWin(ubWin, "ubWin")
         binXYXY = self._getBinXYXY(binFac)
-        
+
         # bin window, ignoring limits
         binWin = [int(math.floor(self.binWinOffset[ind] + ((ubWin[ind] - self.binWinOffset[ind]) / float(binXYXY[ind]))))
             for ind in range(4)]
@@ -89,17 +89,17 @@ class ImageWindow(object):
 
 #       print "binWindow(ubWin=%r, binFac=%r) = %r" % (ubWin, binFac, binWin)
         return binWin
-    
+
     def unbinWindow(self, binWin, binFac):
         """Converts binned window to unbinned.
-        
+
         The output is constrained to be in range for the given bin factor.
 
         Inputs:
         - binWin: binned window coords (LL x, LL y, UR x, UR y)
-        
+
         Returns unbinned window coords: (LL x, LL y, UR x, UR y)
-        
+
         If any element of ubWin or binFac is None, all returned elements are None.
         """
         if None in binWin or None in binFac:
@@ -112,16 +112,16 @@ class ImageWindow(object):
         # unbin window, ignoring limits
         ubWin = [((binWin[ind] - self.ubWinOffset[ind]) * binXYXY[ind]) + self.ubWinOffset[ind]
             for ind in range(len(binWin))]
-        
+
         # apply limits
         ubWin = [min(max(ubWin[ind], self.minWin[ind]), self.maxUBWin[ind])
             for ind in range(4)]
 #       print "unbinWindow(binWin=%r, binFac=%r) = %r" % (binWin, binFac, ubWin)
         return ubWin
-    
+
     def getMinWindow(self):
         """Return the minimum window coords (which is independent of bin factor).
-        
+
         Returns [LL x, LL y, UR x, UR y]
         """
         return list(self.minWin)
@@ -138,7 +138,7 @@ class ImageWindow(object):
 
     def getFullBinWindow(self, binFac=(1,1)):
         """Return the full binned window coords
-        
+
         Returns [LL x, LL y, UR x, UR y]
         """
         return self.getMinWindow()[0:2] + self.getMaxBinWindow(binFac)[2:]
@@ -180,4 +180,4 @@ if __name__ == "__main__":
                 if newUnbWin != (1, 1, bfx, bfx):
                     raise RuntimeError("Test failed; newUnbWin=%s != (1, 1, %s, %s), binWin=%s; binFac=%s" % \
                         (newUnbWin, bfx, bfx, binWin, binFac))
-    print ("OK")            
+    print ("OK")

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-History:    
+History:
 P.T.Wallace Starlink    November 1984
 2002-07-11 ROwen    Rewrote in Python.
 2007-04-24 ROwen    Converted from Numeric to numpy.
@@ -15,26 +15,26 @@ import RO.SysConst
 def vn(vec):
     """
     Normalises a vector.
-    
+
     Inputs:
     - vec   vector
-    
+
     Returns a tuple containing:
     - the unit vector as a numpy.array
     - the magnitude of the vector
-    
+
     If the magnitude of vec is too small to compute,
     the unit vector is all zeros and the magnitude is zero.
     """
     vec = numpy.asarray(vec, dtype=float)
-    
+
     vecMag = RO.MathUtil.vecMag(vec)
-    
+
     if vecMag < RO.SysConst.FSmallNum:
         # this odd construct is a silly way of
         # returning the correct number of zeros
         return (vec * 0.0, 0.0)
-    
+
     return (vec / vecMag, vecMag)
 
 

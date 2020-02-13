@@ -51,7 +51,7 @@ Here is detailed information about "func", the user-supplied function.
   if outFile is "" then outPath only includes outDir and is a directory.
 
 "func" is called once for each input file. It is expected to process the entire file
-before returning (more on this below). 
+before returning (more on this below).
 
 EXAMPLE 1: ALL OUTPUT TO ONE FILE
 In this case procFiles manages the output file for you
@@ -94,11 +94,11 @@ def func(inPath, isFirst, isLast, outPath):
     # generate the output file
     myOutName = "foo"
     myOutPath = os.path.join(outPath, myOutName)
-    
+
     # you can write directly to the file or redirect stdout;
     # here is an example of the latter:
     sys.stdout = open(outPath, "w")
-    
+
     # it is safest to close the files yourself; try/finally works nicely for this:
     try:
         if isFirst:
@@ -165,7 +165,7 @@ def procFiles (
 
     # handle case of inPathList being a single string
     inPathList = RO.SeqUtil.asSequence(inPathList)
-    
+
     # Recurse into directories, choosing files that match the pattern
     # rejecting nonexistent files with a message to stderr
     # and filtering out duplicates.
@@ -195,7 +195,7 @@ def procFiles (
             raise RuntimeError("directory %r does not exist" % (outDir,))
     else:
         outDir = os.curdir
-    
+
     # open outFile (if outFile is None, ask user for output file first)
     if outFile is None:
         # ask user for output file name
@@ -226,19 +226,19 @@ def procFiles (
         sys.stdout = file(outPath, 'w')
     else:
         outPath = outDir
-    
+
     # stdout now points to outfile; make sure to undo this
     try:
         # loop over input files; continue with the next file if one fails
         isFirst = True
         for inPath in inPathList:
             sys.stderr.write("\nProcessing file: %r\n" % inPath)
-    
+
             try:
                 try:
                     # open input file (in universal newline mode if possible) and redirect input
                     sys.stdin = RO.OS.openUniv(inPath)
-    
+
                     # call user-supplied function to process file
                     isLast  = (inPath == inPathList[-1])
                     func(inPath, isFirst, isLast, outPath)
@@ -251,14 +251,14 @@ def procFiles (
             except (KeyboardInterrupt, SystemExit):
                 sys.stderr.write ("Aborted during file %r\n" % (inPath,))
                 break
-            
+
             except RuntimeError as e:
                 sys.stderr.write ("Failed on file %r with error: %s\n" % (inPath, e))
-    
+
             except Exception:
                 sys.stderr.write ("Failed on file %r with error:\n" % (inPath,))
                 traceback.print_exc(file=sys.stdout)
-    
+
     finally:
         # close output file and restore standard output
         if sys.stdout != sys.__stdout__:

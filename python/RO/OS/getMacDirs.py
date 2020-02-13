@@ -22,11 +22,11 @@ import MacOS
 
 def getStandardDir(domain, dirType, doCreate=False):
     """Return a path to the specified standard directory or None if not found.
-    
+
     The path is in unix notation for MacOS X native python
     and Mac colon notation for Carbon python,
     i.e. the form expected by the os.path module.
-    
+
     Inputs:
     - domain: one of the domain constants found in Carbon.Folders,
         such as kUserDomain, kLocalDomain or kSystemDomain.
@@ -45,12 +45,12 @@ def getStandardDir(domain, dirType, doCreate=False):
 
 def getMacUserSharedDirs(dirType, inclNone = False):
     """Return the path to the user and shared folder of a particular type.
-    
+
     Inputs:
     - dirType   one of the Carbon.Folders constants
     - inclNone  if True, paths to missing folders are set to None;
                 if False (the default) paths to missing folders are omitted
-    """ 
+    """
     retDirs = []
     for domain in Carbon.Folders.kUserDomain, Carbon.Folders.kLocalDomain:
         path = getStandardDir(
@@ -68,7 +68,7 @@ def getMacUserDir(dirType):
 
     Inputs:
     - dirType   one of the Carbon.Folders constants
-    """ 
+    """
     return getStandardDir(
         domain = Carbon.Folders.kUserDomain,
         dirType = dirType,
@@ -83,10 +83,10 @@ def getAppDirs(inclNone = False):
                 if False (the default) paths to missing folders are omitted
     """
     return getMacUserSharedDirs(Carbon.Folders.kApplicationsFolderType, inclNone = inclNone)
-    
+
 def getAppSuppDirs(inclNone = False):
     """Return up to two paths: the user's private and shared application support directory.
-    
+
     Inputs:
     - inclNone  if True, paths to missing folders are set to None;
                 if False (the default) paths to missing folders are omitted
@@ -95,14 +95,14 @@ def getAppSuppDirs(inclNone = False):
 
 def getDocsDir():
     """Return the path to the user's documents directory.
-    
+
     Return None if the directory does not exist.
     """
     return getMacUserDir(Carbon.Folders.kDocumentsFolderType)
 
 def getPrefsDirs(inclNone = False):
     """Return up to two paths: the user's local and shared preferences directory.
-    
+
     Inputs:
     - inclNone  if True, paths to missing folders are set to None;
                 if False (the default) paths to missing folders are omitted

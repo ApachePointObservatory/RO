@@ -14,7 +14,7 @@ from RO.Astro import Tm
 class AppGeoData(object):
     """Position-independent data for conversion
     between ICRS and apparent geocentric coordinates.
-    
+
     The fields are:
     - dtPM: time interval for proper motion correction (Julian years)
     - bPos: barycentric position of Earth (au)

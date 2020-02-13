@@ -82,17 +82,17 @@ def safeCall2(descr, func, *args, **kwargs):
 
 class _DisableCallbacksContext(object):
     """Context object to temporarily disable callbacks
-    
+
     After the with statement finishes, _enableCallbacks is returned to its initial state
     """
     def __init__(self, callbackObj):
         self.callbackObj = callbackObj
-    
+
     def __enter__(self):
         self.initialCallbacksEnabled = self.callbackObj._enableCallbacks
         self.callbackObj._enableCallbacks = False
 #        print "%s.__enter__; _enableCallbacks %s -> %s" % (self.callbackObj, self.initialCallbacksEnabled, self.callbackObj._enableCallbacks)
-    
+
     def __exit__(self, type, value, traceback):
 #        temp = self.callbackObj._enableCallbacks
         self.callbackObj._enableCallbacks = self.initialCallbacksEnabled
@@ -101,14 +101,14 @@ class _DisableCallbacksContext(object):
 
 class BaseMixin(object):
     """Add support for callback functions.
-    
+
     Inputs:
     - callFunc      see addCallback
     - callNow       see addCallback
     - defCallNow    default for callNow
 
     Subclasses may wish to override _doCallbacks
-    
+
     Adds the following attributes:
     _enableCallbacks: a boolean: normally True; set False to disable all callbacks
         warning: is always False while callbacks are running
@@ -123,7 +123,7 @@ class BaseMixin(object):
         self._enableCallbacks = True
         if callFunc is not None:
             self.addCallback(callFunc, callNow)
-    
+
     def addCallback(self,
         callFunc,
         callNow = None,
@@ -131,14 +131,14 @@ class BaseMixin(object):
         """Add a callback function to the list.
 
         If the callback is already present, it is not re-added.
-        
+
         Inputs:
         - callFunc  a callback function.
             It will receive one argument: self (the object doing the calling);
             If None, no callback function is added.
         - callNow   if True, calls the function immediately
                     if omitted or None, the default is used
-        
+
         Raises ValueError if callFunc is not callable
         """
         if callFunc is None:
@@ -146,11 +146,11 @@ class BaseMixin(object):
 
         if not callable(callFunc):
             raise ValueError("callFunc %r is not callable" % (callFunc,))
-        
+
         # add new function
         if callFunc not in self._callbacks:
             self._callbacks.append(callFunc)
-        
+
         # if wanted, call the new function
         if callNow or (callNow is None and self._defCallNow):
             # use _doCallbacks in case it was overridden,
@@ -162,7 +162,7 @@ class BaseMixin(object):
 
     def callbacksEnabled(self):
         """Are callbacks enabled?
-        
+
         False if executing callbacks (and possibly other reasons if using _disableCallbacksContext).
         """
         return self._enableCallbacks
@@ -176,7 +176,7 @@ class BaseMixin(object):
 
         Return:
         - True if successful, raise error or return False otherwise.
-        
+
         If doRaise true:
         - Raises ValueError if callback not found
         - Raises RuntimeError if executing callbacks when called
@@ -189,7 +189,7 @@ class BaseMixin(object):
             if doRaise:
                 raise ValueError("Callback %r not found" % callFunc)
             return False
-    
+
     def _basicDoCallbacks(self, *args, **kwargs):
         """Execute the callbacks, passing *args and **kwargs to the callback functions.
 
@@ -205,25 +205,25 @@ class BaseMixin(object):
                 safeCall2(str(self), func, *args, **kwargs)
         finally:
             self._enableCallbacks = True
-    
+
     def _disableCallbacksContext(self):
         """Return a context (for a "with" statement) that temporarily disables callbacks.
-    
+
         After the with statement _enableCallbacks is returned to its initial state.
-        
+
         To use:
         with self._disableCallbacksContext():
             # perform operations with callbacks disabled
         """
         return _DisableCallbacksContext(self)
-    
+
     def _doCallbacks(self):
         """Execute the callback functions, passing self as the argument.
-        
+
         Subclass this to return something else.
         """
         self._basicDoCallbacks(self)
-    
+
     def _removeAllCallbacks(self):
         """Remove all callbacks.
         If you know there will be no more callbacks
@@ -236,7 +236,7 @@ class TkButtonMixin(BaseMixin):
     """Add support for callback functions triggered by a Tk button's command.
     Use instead of TkVarMixin for Tk buttons so the callback is fired
     at the right time (when the button's "command" is executed).
-    
+
     Inputs:
     - callFunc  a callback function.
         It will receive one argument: self (the object doing the calling);
@@ -269,10 +269,10 @@ class TkButtonMixin(BaseMixin):
                 return command()
             self.addCallback(doCommand)
 
-            
+
 class TkVarMixin(BaseMixin):
     """Add support for callback functions triggered by a tk variable.
-    
+
     The functions are called whenever the specified tk variable changes.
     The user may also call _doCallback when desired.
 
@@ -282,7 +282,7 @@ class TkVarMixin(BaseMixin):
         It will receive one argument: self (the object doing the calling);
         If None, no callback function is added.
     - callNow   if True, calls the function immediately
-    
+
     Adds the following attribute:
     _var: the tk variable
     """

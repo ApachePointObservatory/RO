@@ -22,7 +22,7 @@ def mjdFromPyTuple(timeTuple):
     2014-04-25 ROwen    Add from __future__ import division, absolute_import.
     """
     year, month, day, hour, minute, sec = timeTuple[0:6]
-    
+
     # I'm not sure where I originally found this algorithm
     # but one source is Eric Weisstein's World of Astronomy:
     # <http://scienceworld.wolfram.com/astronomy/JulianDate.html>
@@ -32,7 +32,7 @@ def mjdFromPyTuple(timeTuple):
         + math.floor(275.0 * month / 9.0) \
         + day \
         + 1721028.5
-    
+
     return (jd - RO.PhysConst.JDMinusMJD) + (((((sec / 60.0) + minute) / 60.0) + hour) / 24.0)
 
 

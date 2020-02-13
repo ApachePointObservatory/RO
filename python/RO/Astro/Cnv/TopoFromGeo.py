@@ -17,19 +17,19 @@ def topoFromGeo(appGeoP, last, obsData):
     """
     Converts apparent geocentric coordinates to apparent topocentric coordinates
     (not corrected for refraction).
-    
+
     Inputs:
     - appGeoP(3)    current app. geocentric cartesian position (au) (RA/Dec)
     - last          local apparent sidereal time, as an angle (deg)
     - obsData       an ObserverData object
-    
+
     Returns:
     - appTopo(3)    apparent topocentric cartesian position (au) (az/alt), a numpy.array
-    
+
     Details:
     The following approximation is used:
     - pole wander is ignored
-    
+
     References:
     P.T. Wallace, "Proposals for Keck Tel. Pointing Algorithms", 1986 (unpub)
     """
@@ -73,7 +73,7 @@ if __name__ == "__main__":
     # (no adjustment for pole wander)
     # and using the position of the APO 3.5m telescope
     obsData = ObserverData(
-        latitude  =   32.780361, 
+        latitude  =   32.780361,
         longitude = -105.820417,
         elevation =    2.788,
     )

@@ -26,31 +26,31 @@ def galFromICRS (icrsP, icrsV, galEpoch):
     - icrsV(3)  mean ICRS cartesian velocity (au/year)
     - galEpoch  epoch of measurement (Julian years);
                 used only to correct velocity
-    
+
     Returns:
     - galP(3)   mean galactic cartesian position (au), a numpy.array
     - galV(3)   galactic cartesian velocity (au/year), a numpy.array
 
     Warnings:
     Uses the approximation that ICRS = FK5 J2000.
-    
+
     Error Conditions:
     none
-    
+
     References:
     P.T. Wallace's EqGal routine
     Blaauw et al, Mon.Not.R.Astron.Soc.,121,123 (1960)
     """
     icrsP = numpy.asarray(icrsP, dtype=float)
     icrsV = numpy.asarray(icrsV, dtype=float)
-    
+
     # correct for velocity (proper motion and radial velocity)
     velAdjP = icrsP + icrsV * (galEpoch - 2000.0)
-    
+
     # convert position and velocity to galactic coordinates
     galP = numpy.dot (_RMat, velAdjP)
     galV = numpy.dot (_RMat,  icrsV)
-    
+
     return (galP, galV)
 
 

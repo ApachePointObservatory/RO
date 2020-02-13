@@ -8,9 +8,9 @@ PlatformName: one of 'mac', 'win' or 'unix'
 
 getAppDirs(inclNone = False):
     Return up to two paths: the user's private and shared application support directory.
-    
+
     If a directory does not exist, its path is set to None.
-    
+
     A typical return on English system with inclNone True is:
     - MacOS X: [/Users/<username>/Library/Application Support,
         /Library/Application Support]
@@ -21,9 +21,9 @@ getAppDirs(inclNone = False):
 
 getAppSuppDirs(inclNone = False):
     Return up to two paths: the user's private and shared application support directory.
-    
+
     If a directory does not exist, its path is set to None.
-    
+
     A typical return on English system is:
     - MacOS X: [/Users/<username>/Library/Application Support,
         /Library/Application Support]
@@ -36,7 +36,7 @@ getDocsDir():
     Return the path to the user's documents directory.
 
     Return None if the directory does not exist.
-    
+
     A typical return on English system is:
     - MacOS X: /Users/<username>/Documents
     - Mac Classic: ?
@@ -50,7 +50,7 @@ getPrefsDirs(inclNone = False):
     Return up to two paths: the user's private and shared preferences directory.
 
     Return None if the directory does not exist.
-    
+
     A typical return on English system is:
     - MacOS X: [/Users/<username>/Library/Preferences,
         /Library/Preferences]
@@ -102,7 +102,7 @@ except ImportError:
                 return [None, None]
             else:
                 return []
-                
+
         def getAppSuppDirs(inclNone = False):
             return getPrefsDirs(inclNone = inclNone)
 
@@ -122,7 +122,7 @@ def getHomeDir():
     """Return the path to the user's home directory.
 
     Return None if the directory cannot be determined.
-    
+
     A typical return on English system is:
     - MacOS X: /Users/<username>
     - Mac Classic: ?

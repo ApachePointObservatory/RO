@@ -21,23 +21,23 @@ def obsFromTopo(appTopoP, refCo):
     """
     Corrects for refraction, i.e. converts apparent topocentric
     coordinates to observed coordinates.
-    
+
     Inputs:
     - appTopoP(3)   apparent topocentric cartesian position (any units) (az/alt)
     - refCo(2)      refraction coefficients A and B (degrees)
-    
+
     Returns a tuple consisting of:
     - obsP(3)       observed cartesian position (arb. units) (az/alt), a numpy.array;
                     the magnitude will be slightly different than appTopoP
     - tooLow        true => position too near horizon; a max correction applied
-    
+
     Error Conditions:
     If the unrefracted zenith distance > _MaxZDU the tooLow flag is set true
     and the correction applied is that computed at _MaxZDU.
-    
+
     Raises ValueError if the magnitude of the input position vector is so small
     that the computation may overflow.
-    
+
     Details:
     Based on Pat Wallace's RefV, it uses two iterations to invert the simple
     A tan Z + B tan^3 model. Unlike RefV, it does not switch to a higher-accuracy
@@ -68,7 +68,7 @@ def obsFromTopo(appTopoP, refCo):
         #  normal calculation...
         # unrefracted zenith distance
         zdu = RO.MathUtil.atan2d (uxymag, uz)
-    
+
         #  Compute the refraction correction using an iterative approximation (see details).
         #  Compute it at the unrefracted zenith distance, unless that zd is too large,
         #  in which case compute the correction at the max unrefracted zenith distance.
@@ -83,7 +83,7 @@ def obsFromTopo(appTopoP, refCo):
             tanZD = RO.MathUtil.tand (zdrIter)
             zdr_u -= ((zdr_u + refA * tanZD + refB * tanZD**3) /  \
                 (1.0 + (RO.PhysConst.RadPerDeg * (refA + 3.0 * refB * tanZD**2) / cosZD**2)))
-    
+
         #  compute refracted position as a cartesian vector
         zdr = zdu + zdr_u
         rz = uxymag * RO.MathUtil.tand (90.0 - zdr)
@@ -105,27 +105,27 @@ if __name__ == "__main__":
     # Longitude = -105.820417   # longitude east, deg
     # Elevation =    2.788  # elevation, km
     testData = (
-        (((1.00000000000000, 2.00000000000000, 3.00000000000000), 
-                (1.000000000000000E-002, -1.000000000000000E-005)), 
-                ((1.00000000000000, 2.00000000000000, 3.00081395588335), 0)), 
-        (((1.00000000000000, 2.00000000000000, 0.100000000000000), 
-                (1.000000000000000E-002, -1.000000000000000E-005)), 
-                ((1.00000000000000, 2.00000000000000, 0.103832878680326), 1)), 
-        (((1.00000000000000, 2.00000000000000, 1.000000000000000E-004), 
-                (1.000000000000000E-002, -1.000000000000000E-005)), 
-                ((1.00000000000000, 2.00000000000000, 3.924935899097769E-003), 1)), 
-        (((1.00000000000000, 2.00000000000000, 0.500000000000000), 
-                (1.000000000000000E-002, -1.000000000000000E-005)), 
-                ((1.00000000000000, 2.00000000000000, 0.501790102482220), 0)), 
-        (((1.00000000000000, 2.00000000000000, 0.500000000000000), 
-                (1.000000000000000E-002, -1.000000000000000E-002)), 
-                ((1.00000000000000, 2.00000000000000, 0.452932945642090), 0)), 
-        (((1.00000000000000, 2.00000000000000, 0.500000000000000), 
-                (5.000000000000000E-002, -1.000000000000000E-002)), 
-                ((1.00000000000000, 2.00000000000000, 0.464185334828288), 0)), 
-        (((1.00000000000000, 2.00000000000000, 1.00000000000000), 
-                (0.100000000000000, -1.000000000000000E-002)), 
-                ((1.00000000000000, 2.00000000000000, 1.00526762120880), 0)), 
+        (((1.00000000000000, 2.00000000000000, 3.00000000000000),
+                (1.000000000000000E-002, -1.000000000000000E-005)),
+                ((1.00000000000000, 2.00000000000000, 3.00081395588335), 0)),
+        (((1.00000000000000, 2.00000000000000, 0.100000000000000),
+                (1.000000000000000E-002, -1.000000000000000E-005)),
+                ((1.00000000000000, 2.00000000000000, 0.103832878680326), 1)),
+        (((1.00000000000000, 2.00000000000000, 1.000000000000000E-004),
+                (1.000000000000000E-002, -1.000000000000000E-005)),
+                ((1.00000000000000, 2.00000000000000, 3.924935899097769E-003), 1)),
+        (((1.00000000000000, 2.00000000000000, 0.500000000000000),
+                (1.000000000000000E-002, -1.000000000000000E-005)),
+                ((1.00000000000000, 2.00000000000000, 0.501790102482220), 0)),
+        (((1.00000000000000, 2.00000000000000, 0.500000000000000),
+                (1.000000000000000E-002, -1.000000000000000E-002)),
+                ((1.00000000000000, 2.00000000000000, 0.452932945642090), 0)),
+        (((1.00000000000000, 2.00000000000000, 0.500000000000000),
+                (5.000000000000000E-002, -1.000000000000000E-002)),
+                ((1.00000000000000, 2.00000000000000, 0.464185334828288), 0)),
+        (((1.00000000000000, 2.00000000000000, 1.00000000000000),
+                (0.100000000000000, -1.000000000000000E-002)),
+                ((1.00000000000000, 2.00000000000000, 1.00526762120880), 0)),
     )
     for testInput, expectedOutput in testData:
         actualOutput = obsFromTopo(*testInput)

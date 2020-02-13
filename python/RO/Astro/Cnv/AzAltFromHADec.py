@@ -12,14 +12,14 @@ import RO.MathUtil
 
 def azAltFromHADec (haDec, lat):
     """Converts cartesian HA/Dec position to alt/az.
-    
+
     Inputs:
     - haDec(3)  cartesian hour angle, declination (any units)
     - lat       observers latitude north (deg)
-    
+
     Returns:
     - azAlt(3)  cartesian hour angle, declination (same units as haDec), a numpy.array
-    
+
     Sign convention:
     increasing azAlt[0] is south-ish
     increasing azAlt[1] is east
@@ -43,16 +43,16 @@ if __name__ == "__main__":
     # - the input argument
     # - the expected result
     testData = (
-        (((1, 0, 0), 25), 
-            (0.422618261740699, 0.000000000000000, 0.906307787036650)), 
-        (((0, 1, 0), 25), 
-            (0.000000000000000, 1.00000000000000, 0.000000000000000)), 
-        (((0, 0, 1), 25), 
-            (-0.906307787036650, 0.000000000000000, 0.422618261740699)), 
-        (((1, 2, 3), 25), 
-            (-2.29630509936925, 2.00000000000000, 2.17416257225875)), 
-        (((-3, -2, -1), -25), 
-            (2.17416257225875, -2.00000000000000, -2.29630509936925)), 
+        (((1, 0, 0), 25),
+            (0.422618261740699, 0.000000000000000, 0.906307787036650)),
+        (((0, 1, 0), 25),
+            (0.000000000000000, 1.00000000000000, 0.000000000000000)),
+        (((0, 0, 1), 25),
+            (-0.906307787036650, 0.000000000000000, 0.422618261740699)),
+        (((1, 2, 3), 25),
+            (-2.29630509936925, 2.00000000000000, 2.17416257225875)),
+        (((-3, -2, -1), -25),
+            (2.17416257225875, -2.00000000000000, -2.29630509936925)),
     )
     for testInput, expectedOutput in testData:
         actualOutput = azAltFromHADec(*testInput)

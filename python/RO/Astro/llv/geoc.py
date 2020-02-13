@@ -19,23 +19,23 @@ _MPerAU = 1.49597870e11
 def geoc(lat, ht):
     """
     Convert geodetic position to geocentric
-    
+
     Inputs:
     - lat   latitude (geodetic, radians)
     - ht    height above reference spheroid (geodetic, metres)
-    
+
     Returns a tuple containing:
     - distance from Earth axis (au)
     - distance from plane of Earth equator (au)
-    
+
     Notes:
     1)  Geocentric latitude can be obtained by evaluating atan2(Z,R).
     2)  IAU 1976 constants are used.
-    
+
     Reference:
     Green,R.M., Spherical Astronomy, cup 1985, p98.
-    
-    History:    
+
+    History:
     lat.T.Wallace   Starlink    4th October 1989
     2002-07-11 ROwen  Converted to Python.
     """

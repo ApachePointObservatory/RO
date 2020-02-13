@@ -13,13 +13,13 @@ import RO.MathUtil
 def ccFromSC(pos, magP):
     """
     Converts a spherical position to cartesian coordinates.
-    
+
     Inputs:
     - pos(2)    sherical position (deg)
                 longitude (increasing x to y) and latitude,
                 e.g. (RA, Dec), (-HA, Dec) or (Az, Alt)
     - magP      desired magnitude of the cartesian position vector
-    
+
     Returns:
     - p(3)      cartesian position (same units as magP), a numpy.array
     """

@@ -22,17 +22,17 @@ _HelpObj = None
 
 class _BalloonHelp:
     """Show balloon help for any widget that has a helpText attribute
-    
+
     Help is shown delayMS after the mouse enters a widget or moves within a widget.
     If help was showing within 0.6 sec of moving to a new widget then the help
     for the new widget is shown immediately.
-    
+
     Help is hidden if the user clicks or types. However, the help timer is started again
     if the mouse moves within the widget.
     """
     def __init__(self, delayMS = 600):
         """Construct a _BalloonHelp
-        
+
         Inputs:
         - delayMS: delay time before help is shown
         """
@@ -51,10 +51,10 @@ class _BalloonHelp:
         self._msgWdg.bind_all('<KeyPress>', self._stop)
         self._msgWdg.bind_all('<Tab>', self._stop, add=True)
         self._msgWin.bind("<Configure>", self._configure)
-    
+
     def _configure(self, evt=None):
         """Callback for window Configure event
-        
+
         Using this flickers less than calling this from show (even using a short time delay).
         Note: using self._isShowing is paranoia; the <Configure> event is only triggered
         by show (which changes the message).
@@ -62,14 +62,14 @@ class _BalloonHelp:
         if self._isShowing:
             self._msgWin.tkraise()
             self._msgWin.deiconify()
-    
+
     def _leave(self, evt=None):
         """Mouse has left a widget; start the leave timer if help is showing and stop showing help
         """
         if self._isShowing:
             self._leaveTimer.start(0.6, self._leaveDone)
         self._stop()
-    
+
     def _leaveDone(self):
         """No-op for leave timer; can add a print statement for diagnostics
         """
@@ -77,7 +77,7 @@ class _BalloonHelp:
 
     def _start(self, evt):
         """Start a timer to show the help in a bit.
-        
+
         If the help window is already showing, redisplay it immediately
         """
         if self._isShowing:
@@ -97,7 +97,7 @@ class _BalloonHelp:
                 self._showTimer.start(delay, self._show, evt)
         except AttributeError:
             pass
-    
+
     def _show(self, evt):
         """Show help
         """
@@ -105,14 +105,14 @@ class _BalloonHelp:
         x, y = evt.x_root, evt.y_root
         self._msgWin.geometry("+%d+%d" % (x+10, y+10))
         self._msgWdg["text"] = evt.widget.helpText
-    
+
     def _stop(self, evt=None):
         """Stop the timer and hide the help
         """
         self._isShowing = False
         self._showTimer.cancel()
         self._msgWin.withdraw()
-        
+
 
 def enableBalloonHelp(delayMS = 1000):
     """Enable balloon help application-wide
@@ -125,10 +125,10 @@ def enableBalloonHelp(delayMS = 1000):
 
 
 if __name__ == '__main__':
-    from . import OptionMenu
-    root = tkinter.Tk()
+    from .OptionMenu import OptionMenu
+    root = Tkinter.Tk()
     
-    l0 = tkinter.Label(text="Data")
+    l0 = Tkinter.Label(text="Data")
     l0.grid(row=0, column=0, sticky="e")
     l0.helpText = "Help for the Data label"
     e0 = tkinter.Entry(width=10)
@@ -141,7 +141,7 @@ if __name__ == '__main__':
     l2 = tkinter.Label(text="Option Menu")
     l2.helpText = "Help for the option menu label"
     l2.grid(row=2, column=0)
-    m2 = OptionMenu.OptionMenu(root,
+    m2 = OptionMenu(root,
         items = ("Item 1", "Item 2", "Etc"),
         defValue = "Item 1",
         helpText = "Help for the menu button",
@@ -149,5 +149,5 @@ if __name__ == '__main__':
     m2.grid(row=2, column=1)
 
     ph = enableBalloonHelp()
-    
+
     root.mainloop()

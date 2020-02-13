@@ -6,15 +6,15 @@ __all__ = ["epb"]
 def epb(mjd):
     """
     Converts Modified Julian Date to Besselian Epoch
-    
+
     Inputs:
     - mjd   Modified Julian Date (JD - 2400000.5)
-    
+
     Returns the Besselian Epoch.
-    
+
     Reference:
     Lieske,J.H., 1979. Astron.Astrophys.,73,282.
-    
+
     History:
     P.T.Wallace Starlink    February 1984
     2002-07-11 ROwen  Converted EPB2D to Python.

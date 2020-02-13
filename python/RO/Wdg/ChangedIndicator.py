@@ -18,7 +18,7 @@ __all__ = ['ChangedIndicator']
 
 import tkinter
 import RO.SeqUtil
-from .CtxMenu import CtxMenu, CtxMenuMixin
+from .CtxMenu import CtxMenuMixin
 
 class ChangedIndicator (tkinter.Label, CtxMenuMixin):
     def __init__(self,
@@ -31,7 +31,7 @@ class ChangedIndicator (tkinter.Label, CtxMenuMixin):
         defMenu = "Default",
     **kargs):
         """Creates a new ChangedIndicator.
-        
+
         Inputs:
         - wdgOrSet  one or more ROEntry widgets
         - var       variable to contain current value ("" or "!")
@@ -40,14 +40,14 @@ class ChangedIndicator (tkinter.Label, CtxMenuMixin):
         - all remaining keyword arguments are used to configure the Menu
         """
         if var is None:
-            var = tkinter.StringVar()       
+            var = tkinter.StringVar()
         self.__var = var
         self.__inputCont = None
         self.wdgSet = []
         self.helpText = helpText
         self.clearMenu = clearMenu
         self.defMenu = defMenu
-        
+
         kargs.setdefault("width", 1)
 
         tkinter.Label.__init__(self,
@@ -57,7 +57,7 @@ class ChangedIndicator (tkinter.Label, CtxMenuMixin):
         CtxMenuMixin.__init__(self,
             helpURL = helpURL,
         )
-        
+
         if wdgOrSet:
             self.addWdg(wdgOrSet)
 
@@ -69,7 +69,7 @@ class ChangedIndicator (tkinter.Label, CtxMenuMixin):
             return
 
         wdgSet = RO.SeqUtil.asList(wdgOrSet)
-        
+
         self.wdgSet += wdgSet
 
         for wdg in wdgSet:
@@ -78,23 +78,23 @@ class ChangedIndicator (tkinter.Label, CtxMenuMixin):
             except AttributeError:
                 var = wdg.getVar()
                 var.trace_variable('w', self._wdgChanged)
-        
+
     def ctxConfigMenu(self, menu):
         if self.clearMenu:
             menu.add_command(label = self.clearMenu, command = self.clear)
         if self.defMenu:
             menu.add_command(label = self.defMenu, command = self.restoreDefault)
         return True
-    
+
     def getVar(self):
         return self.__var
-    
+
     def getString(self):
         return str(self.__var.get())
-    
+
     def isChanged(self):
         return bool(self.__var.get())
-    
+
     def setEnable(self, doEnable):
         """Changes the enable state
         """
@@ -102,19 +102,19 @@ class ChangedIndicator (tkinter.Label, CtxMenuMixin):
             self.configure(state="normal")
         else:
             self.configure(state="disabled")
-    
+
     def restoreDefault(self):
         """Restores all controlled widgets to their default values.
         """
         for wdg in self.wdgSet:
             wdg.restoreDefault()
-        
+
     def clear(self):
         """Restores all controlled widgets to their default values.
         """
         for wdg in self.wdgSet:
             wdg.clear()
-        
+
     def _wdgChanged(self, *args, **kargs):
         """Called when any widget is changed"""
         isChanged = False

@@ -20,7 +20,7 @@ class SavedDict(collections.MutableMapping):
     """
     def __init__(self, filePath):
         """Create a SavedDict and load data from the file, if found
-        
+
         Inputs:
         - filePath: default file path
         """

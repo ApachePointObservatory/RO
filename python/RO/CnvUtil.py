@@ -49,7 +49,7 @@ def asBool(val):
     Valid values:
     returns False for: False, 0, "0", "f", "false", "no", None
     returns True for:  True,  1, "1", "t", "true",  "yes"
-    
+
     String values are not case-sensitive.
     Due to the fact that 1.0 == 1 and 0.0 == 0, the floating point versions also work.
 
@@ -66,12 +66,12 @@ def asBool(val):
 def asBoolOrNone(val):
     """Converts typical human-readable boolean values to True, False
     or None.
-    
+
     Valid values:
     returns False for: False, 0, "0", "f", "false", "no"
     returns True for:  True,  1, "1", "t", "true",  "yes"
     returns None for:  None, "?", "NaN"
-    
+
     String values are not case-sensitive.
     Due to the fact that 1.0 == 1 and 0.0 == 0, the floating point versions also work.
 
@@ -95,9 +95,9 @@ class BoolOrNoneFromStr(object):
         defaults to items in _TrueValues that are strings and not in badStrs
     - falseStrs: one or more strings for which False will be returned
         defaults to items in _FalseValues that are strings and not in badStrs
-    
+
     Note: all str comparisons are case-blind.
-    
+
     Raises ValueError at instantiation if there is any overlap between
     badStrs, trueStrs and falseStrs.
     Raises ValueError if the input string is not in badStrs, trueStrs or falseStrs.
@@ -116,7 +116,7 @@ class BoolOrNoneFromStr(object):
             self.trueStrs = set([s.lower() for s in SeqUtil.asCollection(trueStrs)])
             if self.trueStrs & self.badStrs:
                 raise ValueError("One or more bad values and true values overlap")
-        
+
         if falseStrs is None:
             self.falseStrs = set([v.lower() for v in _FalseValues if hasattr(v, "lower")])
             self.falseStrs -= self.badStrs
@@ -124,10 +124,10 @@ class BoolOrNoneFromStr(object):
             self.falseStrs = set([s.lower() for s in SeqUtil.asCollection(falseStrs)])
             if self.falseStrs & self.badStrs:
                 raise ValueError("One or more bad values and true values overlap")
-        
+
         if self.trueStrs & self.falseStrs:
             raise ValueError("One or more true and false values overlap")
-        
+
     def __call__(self, strVal):
         try:
             lowVal = strVal.lower()
@@ -167,18 +167,18 @@ def asFloatOrNone(val):
 
 class FloatOrNoneFromStr(object):
     """Convert a string to a float, or None if a specified bad value.
-    
+
     Unlike asFloatOrNone:
     - The value is  (case-blind) compared to a user-specified set of bad values
     - Only strings (or string-like objects) are accepted as input.
       This is to avoid the problem of dealing with bad values
       that may be strings or may be numbers, and also to avoid comparing
       bad values that have no exact floating point representation.
-    
+
     Inputs:
     - badStrs: a string or collection of strings representing bad values.
         Case is ignored.
-    
+
     Raise TypeError if string is not in badStrs and is not a valid representation of a float.
     """
     def __init__(self, badStrs=("NaN", "?")):
@@ -186,7 +186,7 @@ class FloatOrNoneFromStr(object):
             self.badStrs = set([badStrs.lower()])
         else:
             self.badStrs = set([bs.lower() for bs in badStrs])
-        
+
     def __call__(self, strVal):
         try:
             if strVal.lower() in self.badStrs:
@@ -226,13 +226,13 @@ def asIntOrNone(val):
 
 class IntOrNoneFromStr(object):
     """Convert a string to an int, or None if a specified bad value.
-    
+
     Unlike asIntOrNone:
     - The value is (case-blind) compared to a user-specified set of bad values
     - Only strings (or string-like objects) are accepted as input.
       This is to avoid the problem of dealing with bad values
       that may be strings or may be numbers.
-    
+
     Inputs:
     - badStrs: a string or collection of strings representing bad values.
         Case is ignored.
@@ -244,7 +244,7 @@ class IntOrNoneFromStr(object):
             self.badStrs = set([badStrs.lower()])
         else:
             self.badStrs = set([bs.lower() for bs in badStrs])
-        
+
     def __call__(self, strVal):
         try:
             if strVal.lower() in self.badStrs:
@@ -300,10 +300,10 @@ class StrCnvNoCase(object):
 
 def posFromPVT(pvt):
     """Return the position of a PVT, or None if pvt is None or has no valid position.
-    
+
     Inputs:
     - PVT: an RO.PVT.PVT position, velocity, time object.
-    
+
     This is a convenience function to handle the case that the input is None
     """
     if pvt is None:
@@ -320,7 +320,7 @@ if __name__ == "__main__":
     import RO.SysConst
     import RO.MathUtil
     print("running CnvUtil test")
-    
+
     def tryFunc(func, arg, desVal):
         try:
             if isinstance(desVal, float):
@@ -331,7 +331,7 @@ if __name__ == "__main__":
                 print("error: %s(%r) != %r" % (funcName(func), arg, desVal))
         except Exception as e:
             print("error: %s(%r) failed with: %s" % (funcName(func), arg, e))
-            
+
     def failFunc(func, arg):
         """Call to test arguments that should fail"""
         try:
@@ -343,14 +343,14 @@ if __name__ == "__main__":
         except Exception as e:
             print("%s(%r) should have raised ValueError or TypeError, but raised %s = %s" % \
                 (funcName(func), arg, e.__class__.__name__, e))
-    
+
     def funcName(func):
         """Returns the name of a function or class"""
         try:
             return func.__name__
         except AttributeError:
             return func.__class__.__name__
-            
+
     func = asBool
     print("testing %s" % (funcName(func),))
 
@@ -404,7 +404,7 @@ if __name__ == "__main__":
     for badVal in ("NaN", "NAN", "hello", (), [], {}, object):
         failFunc(func, badVal)
 
-    
+
     func = asFloatOrNone
     print("testing %s" % (funcName(func),))
 
@@ -418,7 +418,7 @@ if __name__ == "__main__":
     for badVal in ("hello", "1.2.3", (), [], {}, object):
         failFunc(func, badVal)
 
-    
+
     BadFloatStr = "9999.9"
     func = FloatOrNoneFromStr(["NaN", BadFloatStr])
     print("testing %s" % (funcName(func),))
@@ -435,7 +435,7 @@ if __name__ == "__main__":
     for badVal in ("hello", "1.2.3", (), [], {}, object):
         failFunc(func, badVal)
 
-    
+
     func = asInt
     print("testing %s" % (funcName(func),))
     for ii in range(1000):
@@ -446,7 +446,7 @@ if __name__ == "__main__":
     for badVal in ("NaN", "NAN", "hello", "1.2", (), [], {}, object):
         failFunc(func, badVal)
 
-    
+
     func = asIntOrNone
     print("testing %s" % (funcName(func),))
     for ii in range(1000):
@@ -459,7 +459,7 @@ if __name__ == "__main__":
     for badVal in ("hello", "1.2", (), [], {}, object):
         failFunc(func, badVal)
 
-    
+
     BadIntStr = "9999"
     func = IntOrNoneFromStr(["NaN", BadIntStr])
     print("testing %s" % (funcName(func),))

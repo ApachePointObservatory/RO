@@ -16,14 +16,14 @@ from .epj import epj
 def prenut(epoch, mjd):
     """
     Form the matrix of precession and nutation (IAU1976/fk5)
-    
+
     Inputs:
     - epoch     Julian Epoch for mean coordinates
     - mjd       Modified Julian Date (jd-2400000.5) for true coordinates
-    
+
     Returns:
     - pnMat     the combined precession/nutation matrix, a 3x3 numpy.array.
-    
+
     Notes:
     - The epoch and MJD are TDB (loosely ET).
     - The matrix is in the sense V(true) = pnMat * V(mean)

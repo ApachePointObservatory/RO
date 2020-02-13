@@ -77,12 +77,12 @@ def compareFloats(a, b, rtol=1.0e-5, atol=RO.SysConst.FAccuracy):
     Returns 0 if the values are approximately equals, i.e.:
     - |a - b| < atol + (rtol * |a + b|)
     Else 1 if a > b, -1 if a < b
-    
+
     Inputs:
     - a, b: scalars to be compared (int or float)
     - atol: absolute tolerance
     - rtol: relative tolerance
-    
+
     The algorithm used is the same one used by numpy.allclose.
     """
     if abs(a - b) < (atol + (rtol * abs(float(a + b)))):
@@ -139,19 +139,19 @@ def logNE(a, b):
 
 def rot2D(xyVec, angDeg):
     """Rotates a 2-dimensional vector by a given angle.
-    
+
     Inputs:
     - xyVec     x,y vector to be rotated
     - angDeg    angle (degrees, 0 along x, 90 along y)
-    
+
     Outputs:
     rotVec  x,y rotated vector
-    
+
     Error Conditions:
     Raises ValueError if:
     - xyVec is not two numbers
     - angDeg is not a number
-    
+
     Details:
     Changing coordinate systems:
     Given a point P whose position in coordinate system A is P_A_xy
@@ -159,7 +159,7 @@ def rot2D(xyVec, angDeg):
     and whose position with respect to A is B_A_xy,
     then P_B_xy, the position of P in coordinate system B is:
     P_B_xy = (P_A_xy - B_A_xy) rotated by -B_A_ang
-    
+
     History:
     2003-04-01 Converted to Python from TCC cnv_Rot2D
     """
@@ -174,10 +174,10 @@ def rot2D(xyVec, angDeg):
 
 def rThetaFromXY(xy):
     """Returns the magnitude and angle of a 2-dim vector.
-    
+
     Inputs:
     - xy: cartesian coordinates
-    
+
     Returns:
     - r: radius
     - theta: theta (deg); NaN if cannot be reliably computed

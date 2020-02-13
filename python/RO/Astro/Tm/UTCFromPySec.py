@@ -16,10 +16,10 @@ _TimeError = 0.0 # time reported by your computer's clock - actual time (seconds
 
 def setClockError(timeError):
     """Set clock error.
-    
+
     Inputs:
     - timeError: computer clock error (seconds): time reported by your computer's clock - actual time
-    
+
     This module starts out with a time error of 0, which is correct for most computers
     (any with a functioning NTP time server pointing to a normal time server).
     Two occasions when you might wish to set a nonzero value:
@@ -30,10 +30,10 @@ def setClockError(timeError):
     """
     global _TimeError
     _TimeError = float(timeError)
-    
+
 def getClockError():
     """Get clock error
-    
+
     Return computer clock error (seconds): time reported by your computer's clock - actual time
     """
     global _TimeError
@@ -41,7 +41,7 @@ def getClockError():
 
 def getCurrPySec(uncorrTime=None):
     """Get current python time with time error correction applied
-    
+
     Input:
     - uncorrTime: python time without correction applied; if None then current time is used
     """
@@ -56,12 +56,12 @@ def utcFromPySec(pySec = None):
 
     if pySec is None:
         pySec = getCurrPySec()
-    
+
     # python time (in seconds) corresponding to 2000-01-01 00:00:00
     # this is probably constant, but there's some chance
     # that on some computer systems it varies with daylights savings time
     pySecJ2000 = time.mktime(_TimeTupleJ2000) - time.timezone
-    
+
     return RO.PhysConst.MJDJ2000 + ((pySec - pySecJ2000) / RO.PhysConst.SecPerDay)
 
 def pySecFromUTC(utcDays):

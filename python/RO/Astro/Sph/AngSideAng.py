@@ -10,26 +10,26 @@ def angSideAng(side_aa, ang_B, side_cc):
     """
     Solves a spherical triangle for two angles and the side connecting them,
     given the remaining quantities.
-    
+
     Inputs:
     - side_aa   side  aa; range of sides:  [0, 180]
     - ang_B     angle b; range of angles: [0, 360)
     - side_cc   side  cc
-    
+
     Returns a tuple containing:
     - ang_A     angle a
     - side_bb   side  bb
     - ang_C     angle c
     - unknownAng   if true, angle A and angle C could not be computed
                     (and are both set to 90); bb will be 0 or 180
-    
+
     Error Conditions:
     - If the inputs are too small to allow computation, raises ValueError
     - If side bb is near 0 or 180 (see Special Cases below for when this occurs)
       then angles a and c cannot be computed. In this case "unknownAng" = true,
       ang_A = ang_C = 90.0. Also side_bb = 0.0, which is essentially correct.
       Note that the sum ang_A + ang_C is 180, which is also essentially correct.
-    
+
     Special Cases (in the order they are handled):
     side_aa  ang_B   side_cc     ang_A       side_bb        ang_C
     ----------------------------------------------------------------
@@ -47,20 +47,20 @@ def angSideAng(side_aa, ang_B, side_cc):
       any     ~0   ~=side_aa  unknown(90)       0        unknown(90)
       any     ~0    <side_aa      180       side_aa-cc        0
       any     ~0    >side_aa       0        side_cc-aa       180
-    
+
     where:
     - !pole means not nearly 0 and not nearly 180 (modulo 360)
     - unknown(90) means unknownAng is set True and the angle is unknown and is
       abitrarily set to 90 degrees. The sum of ang_A and ang_C is correct
       and the value of side_bb is correct to within epsilon.
     - all relations are modulo 360. For example ~0 means approximately zero, 360, etc.
-    
+
     Warnings:
     Allowing angles in the 3rd and 4th quadrants is unusual.
-    
+
     References:
     Selby, Standard Math Tables, crc, 15th ed, 1967, p161 (Spherical Trig.)
-    
+
     History:
     2002-07-22 ROwen    Converted from TCC's sph_AngSideAng 1-6.
     2010-07-30 ROwen    Changed output zero_bb to unknownAng; side_bb may be 180 instead of 0.
@@ -83,7 +83,7 @@ def angSideAng(side_aa, ang_B, side_cc):
     cos_h_aa = RO.MathUtil.cosd(side_aa * 0.5)
     sin_h_cc = RO.MathUtil.sind(side_cc * 0.5)
     cos_h_cc = RO.MathUtil.cosd(side_cc * 0.5)
-    
+
     if abs(sin_h_aa) < RO.SysConst.FAccuracy:
         # side_aa is nearly zero (modulo 360)
         if abs(sin_h_cc) < RO.SysConst.FAccuracy:
@@ -137,36 +137,36 @@ def angSideAng(side_aa, ang_B, side_cc):
         # +
         #  compute angles a and c using Napier's analogies
         # -
-        
+
         #  compute sin((aa +/- cc) / 2) and cos((aa +/- cc) / 2)
         sin_h_sum_aacc  = sin_h_aa * cos_h_cc + cos_h_aa * sin_h_cc
         sin_h_diff_aacc = sin_h_aa * cos_h_cc - cos_h_aa * sin_h_cc
         cos_h_sum_aacc  = cos_h_aa * cos_h_cc - sin_h_aa * sin_h_cc
         cos_h_diff_aacc = cos_h_aa * cos_h_cc + sin_h_aa * sin_h_cc
-    
+
         #  compute numerator and denominator, where tan((a +/- c) / 2) = num/den
         num1 = cos_h_B * cos_h_diff_aacc
         den1 = sin_h_B * cos_h_sum_aacc
         num2 = cos_h_B * sin_h_diff_aacc
         den2 = sin_h_B * sin_h_sum_aacc
-    
+
         #  if numerator and denominator are too small
         #  to accurately determine angle = atan2 (num, den), give up
         if (((abs (num1) <= RO.SysConst.FAccuracy) and (abs (den1) <= RO.SysConst.FAccuracy))
             or ((abs (num2) <= RO.SysConst.FAccuracy) and (abs (den2) <= RO.SysConst.FAccuracy))):
             raise RuntimeError("Bug: can't compute ang_A and C with side_aa=%s, ang_B=%s, side_cc=%s" % (side_aa, ang_B, side_cc))
-    
+
         #  compute (a +/- c) / 2, and use to compute angles a and c
         h_sum_AC = RO.MathUtil.atan2d (num1, den1)
         h_diff_AC = RO.MathUtil.atan2d (num2, den2)
-    
+
 #         print "sin_h_B, cos_h_B =", sin_h_B, cos_h_B
 #         print "sin_h_aa, cos_h_aa =", sin_h_aa, cos_h_aa
 #         print "sin_h_cc, cos_h_cc =",sin_h_cc, cos_h_cc
 #         print "sin_h_diff_aacc, sin_h_sum_aacc =", sin_h_diff_aacc, sin_h_sum_aacc
 #         print "num1, den1, num2, den2 =", num1, den1, num2, den2
 #         print "h_sum_AC, h_diff_AC =", h_sum_AC, h_diff_AC
-    
+
         ang_A = h_sum_AC + h_diff_AC
         ang_C = h_sum_AC - h_diff_AC
 
@@ -181,15 +181,15 @@ def angSideAng(side_aa, ang_B, side_cc):
         sin_h_diff_BA = sin_h_B * cos_h_A - cos_h_B * sin_h_A
         cos_h_sum_BA  = cos_h_B * cos_h_A - sin_h_B * sin_h_A
         cos_h_diff_BA = cos_h_B * cos_h_A + sin_h_B * sin_h_A
-    
+
         #  numerator and denominator for analogy for bb - aa
         num3 = sin_h_cc * sin_h_diff_BA
         den3 = cos_h_cc * sin_h_sum_BA
-    
+
         #  numerator and denominator for analogy for bb + aa
         num4 = sin_h_cc * cos_h_diff_BA
         den4 = cos_h_cc * cos_h_sum_BA
-    
+
         #  compute side bb
         if abs (num3) + abs (den3) > abs (num4) + abs (den4):
             #  use Napier's analogy for bb - aa
@@ -204,7 +204,7 @@ def angSideAng(side_aa, ang_B, side_cc):
 if __name__ == "__main__":
     import RO.SeqUtil
     print("testing angSideAng")
-    
+
     Eps = 1.0e-15
     EpsTest = Eps * 1.001
     testData = []
@@ -258,7 +258,7 @@ if __name__ == "__main__":
                 else:
                     expRes = (180.0 - ang_B, side_aa, 0.0)
                 testData.append(((side_aa, ang_B, side_cc), expRes))
-    
+
     # c ~ 180, B = various, a various:
     # if a nearly 0 (modulo 360): expect C = 90, b = 180, A = 90, unknownAng
     # if a nearly 180 (modulo 360): expect C = 90, b = 0, A = 90, unknownAng
@@ -304,7 +304,7 @@ if __name__ == "__main__":
                 expRes = (0.0, side_cc - side_aa, 180.0)
             for ang_B in (-Eps, 0.0, Eps):
                 testData.append(((side_aa, ang_B, side_cc), expRes))
-    
+
     # right triangle: B = 90, a and c vary but avoid poles
     # tan C = tan c / sin a
     # tan c = (tan a / sinA * sinb)
@@ -327,14 +327,14 @@ if __name__ == "__main__":
     testData += [
         # 90/90/90 triangle
         ((90, 90, 90), (90, 90, 90)),
-        
+
         # inputs that might cause side_bb < 0, (but should not)
         ((45, 1, 45), (89.6464421219342, 0.707102293688337, 89.6464421219342)),
         ((45, -1, 45), (270.353557878066, 0.707102293688337, 270.353557878066)),
         ((135, 1, 135), (90.3535578780658, 0.707102293688337, 90.3535578780658)),
         ((135, -1, 135), (269.646442121934, 0.707102293688308, 269.646442121934)),
     ]
-    
+
     def processOutput(outputVec):
         return (
             RO.MathUtil.sind(outputVec[0]), RO.MathUtil.cosd(outputVec[0]),
@@ -342,7 +342,7 @@ if __name__ == "__main__":
             RO.MathUtil.sind(outputVec[2]), RO.MathUtil.cosd(outputVec[2]),
             outputVec[3],
         )
-    
+
     for testInput, expectedOutput in testData:
         if len(expectedOutput) < 4:
             expectedOutput = expectedOutput + (False,)

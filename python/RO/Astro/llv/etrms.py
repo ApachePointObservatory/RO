@@ -16,21 +16,21 @@ def etrms(bep):
     """
     Compute the e-terms (elliptic component of annual aberration)
     vector (double precision)
-    
+
     Inputs:
     - bep       Besselian epoch
-    
+
     Returns:
     - etrms     the e-terms (dx, dy, dz) as a numpy.array.
-    
+
     Converted from Pat Wallace's ETRMS. His notes follow:
-    
+
     Note the use of the J2000 aberration constant (20.49552 arcsec).
     This is a reflection of the fact that the e-terms embodied in
     existing star catalogues were computed from a variety of
     aberration constants.  Rather than adopting one of the old
     constants the latest value is used here.
-    
+
     References:
     1  Smith, C.A. et al., 1989.  Astr.j. 97, 265.
     2  Yallop, B.D. et al., 1989.  Astr.j. 97, 274.

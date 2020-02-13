@@ -23,23 +23,23 @@ _Accuracy = 1.0e-10
 def icrsFromGeo(appGeoP, agData):
     """
     Converts apparent geocentric coordinates to ICRS.
-    
+
     Inputs:
     - appGeoP(3)    apparent geocentric cartesian position (au)
     - agData        an AppGeoData object containing star-independent
                     apparent geocentric data
-    
+
     Returns
     - icrsP         ICRS cartesian position (au), a numpy.array
-    
+
     Warnings:
     - Uses the approximation ICRS = FK5 J2000.0
     - Not fully accurate for solar system objects.
     - Requires iteration, so it will be slower than GeoFromICRS
-    
+
     Error Conditions:
     Raises RuntimeError if iteration fails to converge.
-    
+
     Details:
     The following approximations have been used:
     - The annual aberration correction is only appropriate for stellar objects;
@@ -47,15 +47,15 @@ def icrsFromGeo(appGeoP, agData):
     - No correction is applied for the bending of light by sun's gravity.
       This introduces errors on the order of 0.02"
       at a distance of 20 degrees from the sun (Wallace, 1986)
-    
+
     icrsFromGeo performs the inverse transform of geoFromICRS.
     Unfortunately, some of the equations (e.g. annual aberration)
     are not invertable, so they have been solved by iteration.
     To make the code easier to follow, the symbols used here are identical
     to those used in GeoFromICRS.
-    
+
     The convergence criterion is set by the magic numbers _MaxIter and _Accuracy.
-    
+
     References:
     GeoFromICRS
     aberat, an APPLE (J2000) subroutine; U.S. Naval Observatory
@@ -103,24 +103,24 @@ if __name__ == "__main__":
     # - the input argument
     # - the expected result
     testData = (
-        (((10000, 20000, 30000), AppGeoData(1950)), 
+        (((10000, 20000, 30000), AppGeoData(1950)),
             (9632.55084436298, 20111.7895401981, 30046.3855040227)
-        ), 
-        (((10000, 20000, 0), AppGeoData(1950)), 
+        ),
+        (((10000, 20000, 0), AppGeoData(1950)),
             (9776.84807379959, 20110.7726234825, 47.8531284647973)
-        ), 
-        (((10000, 0, 0), AppGeoData(1950)), 
+        ),
+        (((10000, 0, 0), AppGeoData(1950)),
             (9999.07116248488, 112.986538740346, 49.1091751895581)
-        ), 
-        (((0, 0, 30000), AppGeoData(1950)), 
+        ),
+        (((0, 0, 30000), AppGeoData(1950)),
             (-143.177682840613, 1.80039994129501, 30000.0445088086)
-        ), 
-        (((10000, 20000, 30000), AppGeoData(2000)), 
+        ),
+        (((10000, 20000, 30000), AppGeoData(2000)),
             (10001.0754863063, 20000.4650112102, 30000.2437263796)
-        ), 
-        (((10000, 20000, 30000), AppGeoData(2050)), 
+        ),
+        (((10000, 20000, 30000), AppGeoData(2050)),
             (10373.9666646492, 19885.2991035402, 29950.1310196054)
-        ), 
+        ),
     )
     for testInput, expectedOutput in testData:
         actualOutput = icrsFromGeo(*testInput)

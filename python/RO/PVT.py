@@ -25,12 +25,12 @@ import RO.PhysConst
 
 class PVT(object):
     """Defines a position, velocity, time triplet, where time is in TAI.
-    
+
     Inputs:
     - pos   position
     - vel   velocity (in units of position/sec)
     - time  TAI, MJD seconds
-    
+
     Each value must be one of: a float, a string representation of a float,
     "NaN" (any case) or None. "NaN" and None mean "unknown" and are stored as None.
 
@@ -56,9 +56,9 @@ class PVT(object):
 
         if t is None:
             t = RO.Astro.Tm.taiFromPySec() * RO.PhysConst.SecPerDay
-    
+
         return self.pos + (self.vel * (t - self.t))
-    
+
     def hasVel(self):
         """Return True if velocity is known and nonzero.
         """
@@ -93,7 +93,7 @@ class PVT(object):
 
 if __name__ == "__main__":
     print("\nrunning PVT test")
-    
+
     currTAI = RO.Astro.Tm.taiFromPySec() * RO.PhysConst.SecPerDay
 
     varList = (

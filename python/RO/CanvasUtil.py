@@ -27,7 +27,7 @@ import RO.MathUtil
 
 def ctrCircle(cnv, xpos, ypos, rad, width = 1, **kargs):
     """Draws a centered circle on the specified canvas.
-    
+
     Inputs:
     - cnv: canvas on which to draw
     - xpos: x position
@@ -43,11 +43,11 @@ def ctrCircle(cnv, xpos, ypos, rad, width = 1, **kargs):
         ypos + rad,
         width = width,
         **kargs)
-        
+
 
 def ctrPlus(cnv, xpos, ypos, rad, holeRad = 0, width=1, **kargs):
     """Draws a centered + on the specified canvas.
-    
+
     Inputs:
     - cnv: canvas on which to draw
     - xpos: x position
@@ -76,7 +76,7 @@ def ctrPlus(cnv, xpos, ypos, rad, holeRad = 0, width=1, **kargs):
 
 def ctrX(cnv, xpos, ypos, rad, holeRad = 0, width=1, **kargs):
     """Draws a centered X on the specified canvas.
-    
+
     Inputs:
     - cnv: canvas on which to draw
     - xpos: x position
@@ -108,7 +108,7 @@ def ctrX(cnv, xpos, ypos, rad, holeRad = 0, width=1, **kargs):
 
 def radialLine(cnv, xpos, ypos, rad, angle, width=1, **kargs):
     """Draws a line of specified length and direction
-    
+
     Inputs:
     - cnv: canvas on which to draw
     - xpos: x starting position
@@ -118,7 +118,7 @@ def radialLine(cnv, xpos, ypos, rad, angle, width=1, **kargs):
     - holeRad: radius of hole in center of symbol (0 for none)
     - width: thickness of line
     - kargs are arguments for create_line
-    
+
     Useful keyword arguments include:
     - arrow = "last" for arrow at end, "first" for arrow at start
     - arrowshape = (d1, d2, d3):
@@ -149,7 +149,7 @@ class Spiral(object):
         """Draws a spiral on the specified canvas.
         Allows easy redrawing.
         Allows easy computing of position for drawing objects along the spiral.
-        
+
         Inputs:
         cnv:    the canvas on which to draw
         xctr, yctr: x and y positions of center of spiral
@@ -187,13 +187,13 @@ class Spiral(object):
         self.drawKArgs = defKArgs
         self.drawKArgs.update(kargs)
         self.drawKArgs["fill"] = color
-        
+
         self.draw()
-    
+
     def getAngLim(self):
         """Returns (beginning angle, ending angle)"""
         return (self.begAng, self.endAng)
-    
+
     def setAngOffScale(self, angOff, angScale, redraw=1):
         self.angOff = angOff
         self.angScale = angScale
@@ -207,7 +207,7 @@ class Spiral(object):
         self.endAng = endAng
         if redraw:
             self.draw()
-    
+
     def setGeom(self, xctr, yctr, begRad, endRad, redraw=1):
         self.xctr = xctr
         self.yctr = yctr
@@ -215,7 +215,7 @@ class Spiral(object):
         self.endRad = endRad
         if redraw:
             self.draw()
-    
+
     def draw(self):
         if self.cnvID is not None:
             self.cnv.delete(self.cnvID)
@@ -228,7 +228,7 @@ class Spiral(object):
             self.angToXY(self.begAng + (ind*self.dAng)) for ind in range(nPts)
         ]
         self.cnvID = self.cnv.create_line(*lineCoords, **self.drawKArgs)
-    
+
     def angToXY(self, ang, doLimit=1):
         """Returns x,y pixel coordinates for an angle along a spiral.
         Angle 0 is +x (right), 90 is -y (up).
@@ -268,15 +268,15 @@ if __name__ == '__main__':
     ctrCircle(cnv, 120,  80, 10)
     ctrPlus  (cnv, 120,  80, 10, holeRad = 5)
     ctrX     (cnv, 120,  80, 10, holeRad = 5)
-    
+
     ctrCircle(cnv, 120, 100, 10, width = 5)
     ctrPlus  (cnv, 120, 100, 10, holeRad = 5, width = 5)
     ctrX     (cnv, 120, 100, 10, holeRad = 5, width = 5)
-    
+
     radialLine(cnv, 130, 130, 20, 30)
     radialLine(cnv, 130, 130, 20, -30, arrow="last")
     radialLine(cnv, 130, 130, 20, 75, width=3, arrow="last")
-    
+
     aSpiral = Spiral(
         cnv = cnv,
         xctr = 100, yctr = 100,

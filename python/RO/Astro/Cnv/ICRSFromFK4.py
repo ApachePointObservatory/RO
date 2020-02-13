@@ -21,8 +21,8 @@ _MatPP = numpy.array((
     (+0.485794672118600E-02, -0.271474264980000E-04, +0.999988199738770E+00),
 ))
 _MatPV = numpy.array ((
-    (+0.499975613405255E+02, -0.559114316616731E+00, -0.242908945412769E+00), 
-    (+0.559114316616731E+00, +0.499981514022567E+02, -0.135874878467212E-02), 
+    (+0.499975613405255E+02, -0.559114316616731E+00, -0.242908945412769E+00),
+    (+0.559114316616731E+00, +0.499981514022567E+02, -0.135874878467212E-02),
     (+0.242908966039250E+00, -0.135755244879589E-02, +0.500006874693025E+02),
 ))
 _MatVP = numpy.array((
@@ -31,8 +31,8 @@ _MatVP = numpy.array((
     (-0.211432713109975E-07, +0.594337564639027E-09, +0.102737391643701E-09),
 ))
 _MatVV = numpy.array ((
-    (+0.999947035154614E+00, -0.111825061218050E-01, -0.485766968495900E-02), 
-    (+0.111825060072420E-01, +0.999958833818833E+00, -0.271844713710000E-04), 
+    (+0.999947035154614E+00, -0.111825061218050E-01, -0.485766968495900E-02),
+    (+0.111825060072420E-01, +0.999958833818833E+00, -0.271844713710000E-04),
     (+0.485766994865000E-02, -0.271373095390000E-04, +0.100000956036356E+01),
 ))
 
@@ -40,31 +40,31 @@ def icrsFromFK4 (fk4P, fk4V, fk4Epoch):
     """
     Converts mean catalog FK4 equatorial coordinates to ICRS coordinates.
     Uses the approximation that ICRS is FK5 J2000.
-    
+
     Inputs:
     - fk4Epoch  TDB date of fk4 coordinates (Besselian epoch)
                 note: TDT will always do and UTC is usually adequate
     - fk4P(3)   mean catalog fk4 cartesian position (au)
     - fk4V(3)   mean FK4 cartesian velocity (au per Besselian year),
                 i.e. proper motion and radial velocity
-    
+
     Returns a tuple containg:
     - icrsP(3)  mean ICRS cartesian position (au), a numpy.array
     - icrsV(3)  mean ICRS cartesian velocity (au/year), a numpy.array
-    
+
     Error Conditions:
     none
-    
+
     Warnings:
     The FK4 date is in Besselian years.
-    
+
     The FK4 proper motion is in au/Besselian year,
     whereas the FK5 J2000 proper motion is in au/Julian year.
-    
+
     The FK4 system refers to a specific set of precession constants;
     not all Besselian-epoch data was precessed using these constants
     (especially data for epochs before B1950).
-    
+
     References:
     P.T. Wallace's routine FK425
     """
@@ -108,7 +108,7 @@ if __name__ == "__main__":
             (   929683.244963302     ,   2026616.27886940     ,   3015395.98838120     ),
             (   38.3286807625452     ,   50.8858334065567     ,   60.3627612257013     ),
         )),
-        (((1000000, 0, 0), (40, 0, 0), 1900),              
+        (((1000000, 0, 0), (40, 0, 0), 1900),
         (
             (   1003703.41007840     ,   22442.8991233262     ,   9755.09375276802     ),
             (   39.9889184862787     ,  0.905706818443208     ,  0.367459579186115     ),

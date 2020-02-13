@@ -54,14 +54,14 @@ class _CnvObj (object):
     """
     An object that can convert between coordinate systems. To use,
     create one of these objects and then call its "coordConv" method.
-    
+
     This code is a slightly awkward mix of functional and object-oriented programming.
     Some data is stored as instance variables purely for ease of passing to functions,
     but at present the caching serves no other purpose. In the future I hope to figure out an
     interface whereby the user can save some data and repeatedly ask for conversions.
     For instance one could create an object and then repeatedly ask for its current
     observed position. Then CnvObj would start to feel more like a normal object.
-    
+
     Also, the method dictionary really should be saved as a class variable, but these
     are relatively new to Python and clumsy, and I'm not yet sure I want to bother
     (especially as it makes the code incompatible with older versions of Python).
@@ -79,13 +79,13 @@ class _CnvObj (object):
         #     - the "from" coordinate system
         # Each method dictionary gives a chain of methods that stretches from a given
         # starting "from" coordinate system to all other coordinate systems
-        
+
         def addMethods(methDict, fromSys):
             """Recursively add all methods to a method dictionary
             starting from a given "from" coordinate system.
-            
+
             For the first call, set methDict = {}
-            
+
             Inputs:
             - methDict: the method dictionary
             - a "from" coordinate system
@@ -93,7 +93,7 @@ class _CnvObj (object):
             # if first execution, set entry for "from" = "to":
             if methDict == {}:
                 methDict[fromSys] = (None, None)
-            
+
             # add an entry for each "to" coordinate system
             for toSys in _CSysList:
                 if toSys == fromSys:
@@ -105,7 +105,7 @@ class _CnvObj (object):
                     methDict[toSys] = (getattr(_CnvObj, funcName), fromSys)
                     #print "methDict[%s] = %r" % (toSys, methDict[toSys])
                     addMethods(methDict, toSys)
-        
+
         # pre-compute conversion dictionaries for every possible starting coordinate system
         # (which so far includes all in RO.CoordSys except Physical and Mount)
         methDictDict = {}
@@ -116,7 +116,7 @@ class _CnvObj (object):
             assert len(methDict) == len(_CSysList), "incomplete function list; check your conversion functions"
             methDictDict[_whatGiven] = methDict
             #print "methDictDict[%s] = %r" % (_whatGiven, methDictDict[_whatGiven])
-    
+
         self.methDictDict = methDictDict
 
     def coordConv(self, fromP, fromV, fromSys, fromDate, toSys, toDate, obsData=None, refCo=None):
@@ -128,7 +128,7 @@ class _CnvObj (object):
             fromDate = RO.CoordSys.getSysConst(fromSys).currDefaultDate()
         if toDate is None:
             toDate = RO.CoordSys.getSysConst(toSys).currDefaultDate()
-        
+
         self.fromDate = fromDate
         self.toDate = toDate
         self.obsData = obsData
@@ -136,11 +136,11 @@ class _CnvObj (object):
             self.refCo = refCo[:]
         else:
             refCo = None
-        
+
         # convert to ICRS from fromSys
         icrsP, icrsV = self._getItem("ICRS2000", self.methDictDict[fromSys], fromP, fromV)
         #print "Cnv.coordConv: icrsP=%s, icrsV=%s" % (icrsP, icrsV)
-        
+
         # convert to toSys from ICRS
         toP, toV = self._getItem(toSys, self.methDictDict["ICRS2000"], icrsP, icrsV)
         #print "Cnv.coordConv: toP=%s, toV=%s" % (toP, toV)
@@ -152,9 +152,9 @@ class _CnvObj (object):
 
         To perform a full conversion, first convert fromP, fromV, fromSys, fromDate to ICRS
         and then convert ICRS to toP, toV, toSys, toDate.
-        
+
         Before calling, set self.fromDate, self.toDate, self.obsData and self.refCo.
-                
+
         Inputs:
         - csys      desired coordinate system
         - methDict  _MethodDict[initSys], where initSys is the initial coordinate system
@@ -176,7 +176,7 @@ class _CnvObj (object):
     # conversion functions
     def ICRSFromICRS2000(self, fromP, fromV):
         return (fromP + (numpy.asarray(fromV, dtype=float) * (self.toDate - 2000.0)), fromV)
-        
+
     def ICRS2000FromICRS(self, fromP, fromV):
         return (fromP + (numpy.asarray(fromV, dtype=float) * (2000.0 - self.fromDate)), fromV)
 
@@ -185,30 +185,30 @@ class _CnvObj (object):
 
     def ICRS2000FromFK5(self, fromP, fromV):
         return fk5Prec(fromP, fromV, self.fromDate, 2000.0)
-    
+
     def FK4FromICRS2000(self, fromP, fromV):
         return fk4FromICRS (fromP, fromV, self.toDate)
-    
+
     def ICRS2000FromFK4(self, fromP, fromV):
         if tuple(fromV) == (0.0, 0.0, 0.0):
             return (icrsFromFixedFK4 (fromP, self.fromDate), _CnvObj.ZeroV)
         else:
             return icrsFromFK4(fromP, fromV, self.fromDate)
-    
+
     def GalacticFromICRS2000(self, fromP, fromV):
         return galFromICRS (fromP, fromV, self.toDate)
-    
+
     def ICRS2000FromGalactic(self, fromP, fromV):
         return icrsFromGal(fromP, fromV, self.fromDate)
-    
+
     def GeocentricFromICRS2000(self, fromP, fromV):
         agData = AppGeoData(Tm.epJFromMJD(self.toDate))
         return (geoFromICRS(fromP, fromV, agData), _CnvObj.ZeroV)
-    
+
     def ICRS2000FromGeocentric(self, fromP, dumV):
         agData = AppGeoData(Tm.epJFromMJD(self.fromDate))
         return (icrsFromGeo(fromP, agData), _CnvObj.ZeroV)
-    
+
     def TopocentricFromGeocentric(self, fromP, dumV):
         if self.obsData is None:
             raise ValueError("must specify obsData to cnvert to Topocentric from Geocentric")
@@ -216,7 +216,7 @@ class _CnvObj (object):
             topoFromGeo(fromP, Tm.lastFromUT1(self.toDate, self.obsData.longitude), self.obsData),
             _CnvObj.ZeroV,
         )
-    
+
     def GeocentricFromTopocentric(self, fromP, dumV):
         if self.obsData is None:
             raise ValueError("must specify obsData to convert to Geocentric from Topocentric")
@@ -224,13 +224,13 @@ class _CnvObj (object):
             geoFromTopo(fromP, Tm.lastFromUT1(self.fromDate, self.obsData.longitude), self.obsData),
             _CnvObj.ZeroV,
         )
-    
+
     def ObservedFromTopocentric(self, fromP, dumV):
         if self.refCo is None:
             raise ValueError("must specify refCo to convert to Observed from Topocentric")
         pos, tooLow = obsFromTopo(fromP, self.refCo)
         return (pos, _CnvObj.ZeroV)
-    
+
     def TopocentricFromObserved(self, fromP, dumV):
         if self.refCo is None:
             raise ValueError("must specify refCo to convert to Topocentric from Observed")
@@ -243,7 +243,7 @@ _TheCnvObj = _CnvObj()
 # this is the only public function defined in this file
 def coordConv(fromP, fromV, fromSys, fromDate, toSys, toDate, obsData=None, refCo=None):
         """Converts a position from one coordinate system to another.
-        
+
         Inputs:
         - fromP(3)  cartesian position (au)
         - fromV(3)  cartesian velocity (au/year); ignored if fromSys
@@ -257,7 +257,7 @@ def coordConv(fromP, fromV, fromSys, fromDate, toSys, toDate, obsData=None, refC
                     is Topocentric or Observed; ignored otherwise.
         - refCo(2)  refraction coefficients; required if fromSys or toSys is Observed;
                     ignored otherwise.
-        
+
         Returns:
         - toP(3)    converted cartesian position (au)
         - toV(3)    converted cartesian velocity (au/year)
@@ -274,21 +274,21 @@ def coordConv(fromP, fromV, fromSys, fromDate, toSys, toDate, obsData=None, refC
 
         **Setting fromV all zero means the object is fixed. This slighly affects
         conversion to or from FK4, which has fictitious proper motion.
-        
+
         Error Conditions:
         - If obsData or refCo are absent and are required, raises ValueError.
-        
-        Details:        
+
+        Details:
         The conversion is performed in two stages:
         - fromP/fromSys/fromDate -> ICRS
         - ICRS -> toP/toSys/toDate
 
         Each of these two stages is performed using the following graph:
-        
+
         FK5 ------\
         FK4 ------ ICRS --- Geocentric -*- Topocentric -**- Observed
         Galactic--/
-        
+
         * obsData required
         ** refCo required
         """

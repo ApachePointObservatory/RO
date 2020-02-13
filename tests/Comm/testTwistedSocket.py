@@ -21,18 +21,18 @@ class TestRunner(object):
             sockStateCallback = self.echoSocketState,
             name = "echo",
         )
-    
+
     @property
     def isDone(self):
         return self.endState is not None
-    
+
     def close(self):
         if self.clientSocket:
             self.clientSocket.close()
         if self.serverSocket:
             self.serverSocket.close()
         self.echoServer.close()
-    
+
     def endIfDone(self):
         if self.endState is not None:
             if self.clientSocket and self.clientSocket.isDone \
@@ -45,7 +45,7 @@ class TestRunner(object):
                     deferred.callback(reason)
                 else:
                     deferred.errback(reason)
-    
+
     def clientState(self, sock):
         if sock.isReady:
             self.writeNext()
@@ -64,18 +64,18 @@ class TestRunner(object):
             )
         else:
             self.writeNext()
-    
+
     def echoState(self, server):
         if server.isReady:
             self.makeClient()
         elif server.isDone and not self.isDone:
             self.end(False, "Echo server failed")
         self.endIfDone()
-    
+
     def echoSocketState(self, sock):
         self.serverSocket = sock
         self.endIfDone()
-    
+
     def echoSocketRead(self, sock):
         if self.binaryServer:
             data = sock.read()
@@ -85,11 +85,11 @@ class TestRunner(object):
             data = sock.readLine(default=None)
             if data is not None:
                 sock.writeLine(data)
-    
+
     def end(self, isOK, reason=None):
         self.endState = (isOK, reason)
         self.close()
-    
+
     def makeClient(self):
         self.clientSocket = TCPSocket(
             host = "localhost",
@@ -130,7 +130,7 @@ class TestTkSocket(unittest.TestCase):
             ("two lines\nin one write", True, "two lines", True),
             (None, True, "in one write", True),
         )
-        self.testRunner = TestRunner(sendRcvList)        
+        self.testRunner = TestRunner(sendRcvList)
         return self.testRunner.deferred
 
     def testBinaryServer(self):

@@ -6,16 +6,16 @@ __all__ = ["epj2d"]
 def epj2d(epj):
     """
     Converts Julian epoch to Modified Julian Date.
-    
+
     Inputs:
     - epj   Julian epoch
-    
+
     Returns:
     - mjd   Modified Julian Date (JD - 2400000.5).
-    
+
     Reference:
     Lieske,J.H., 1979. Astron.Astrophys.,73,282.
-    
+
     History:
     P.T.Wallace Starlink    February 1984
     2002-07-11 ROwen  Converted EPJ2D to Python and renamed.
