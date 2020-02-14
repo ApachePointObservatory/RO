@@ -1141,7 +1141,7 @@ class PrefSet(object):
             return
 
         try:
-            inFile = file(fileName, 'rU')
+            inFile = open(fileName, 'rU')
         except Exception as e:
             sys.stderr.write("Could not open preference file %r; error: %s\n" % (fileName, e))
             return
