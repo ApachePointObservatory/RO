@@ -9,7 +9,9 @@ History:
 __all__ = ["haDecFromAzAlt"]
 
 import numpy
+
 import RO.MathUtil
+
 
 def haDecFromAzAlt(azAlt, lat):
     """Converts alt/az position to HA/Dec position.

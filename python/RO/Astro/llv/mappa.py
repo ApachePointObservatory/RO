@@ -9,10 +9,11 @@ P.T.Wallace Starlink    21 July 1994
 __all__ = ["mappa"]
 
 from math import sqrt
-from .vn import vn
+
+from .epj import epj
 from .evp import evp
 from .prenut import prenut
-from .epj import epj
+from .vn import vn
 
 # Constants
 # Light time for 1 au (sec)

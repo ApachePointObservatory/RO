@@ -4,7 +4,9 @@
 __all__ = ["mjdFromPyTuple"]
 
 import math
+
 import RO.PhysConst
+
 
 def mjdFromPyTuple(timeTuple):
     """Converts a python time tuple to Modified Julian Date.

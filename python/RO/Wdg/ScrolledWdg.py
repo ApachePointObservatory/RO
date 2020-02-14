@@ -162,8 +162,8 @@ class ScrolledWdg(tkinter.Frame):
 
 
 if __name__ == '__main__':
-    from . import PythonTk
-    root = PythonTk.PythonTk()
+    from .PythonTk import PythonTk
+    root = PythonTk()
     
     root.resizable(False, True)
     

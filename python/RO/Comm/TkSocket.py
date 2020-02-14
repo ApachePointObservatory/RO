@@ -94,10 +94,12 @@ __all__ = ["TCPSocket", "TCPServer"]
 
 import re
 import sys
-import traceback
 import tkinter
+import traceback
+
 import RO.TkUtil
 from RO.Comm.BaseSocket import BaseSocket, BaseServer, nullCallback
+
 
 class _TkSocketWrapper(object):
     """Convenience wrapper around a Tk socket

@@ -47,6 +47,7 @@ History:
 __all__ = ['RadiobuttonSet']
 
 import tkinter
+
 import RO.AddCallback
 import RO.Alg
 import RO.SeqUtil
@@ -54,6 +55,7 @@ import RO.StringUtil
 import RO.TkUtil
 from .Button import Radiobutton
 from .IsCurrentMixin import AutoIsCurrentMixin, IsCurrentActiveMixin
+
 
 class RadiobuttonSet (RO.AddCallback.TkVarMixin,
     AutoIsCurrentMixin, IsCurrentActiveMixin):
@@ -312,9 +314,9 @@ class RadiobuttonSet (RO.AddCallback.TkVarMixin,
         return self.wdgSet[0].winfo_ismapped()
 
 if __name__ == "__main__":
-    from . import PythonTk
+    from .PythonTk import PythonTk
     from .StatusBar import StatusBar
-    root = PythonTk.PythonTk()
+    root = PythonTk()
 
     rbFrame1 = tkinter.Frame()
     rbs1 = RadiobuttonSet(

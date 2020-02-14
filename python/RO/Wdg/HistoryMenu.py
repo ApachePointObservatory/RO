@@ -21,8 +21,10 @@ History:
 __all__ = ['HistoryMenu']
 
 import tkinter
+
 import RO.Alg
-from .CtxMenu import CtxMenu, CtxMenuMixin
+from .CtxMenu import CtxMenuMixin
+
 
 class HistoryMenu (tkinter.Menubutton, CtxMenuMixin):
     """A menu showing a history of recent events.
@@ -116,8 +118,8 @@ class HistoryMenu (tkinter.Menubutton, CtxMenuMixin):
         
 
 if __name__ == "__main__":
-    from . import PythonTk
-    root = PythonTk.PythonTk()
+    from .PythonTk import PythonTk
+    root = PythonTk()
     
     def doAdd(*args):
         name = nameVar.get()

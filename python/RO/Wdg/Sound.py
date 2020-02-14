@@ -19,7 +19,9 @@ __all__ = ['bell', 'BellPlay', 'SoundPlayer', 'NoPlay']
 import os
 import sys
 import tkinter
+
 import RO.StringUtil
+
 try:
     import pygame.mixer
     _PyGameAvail = True

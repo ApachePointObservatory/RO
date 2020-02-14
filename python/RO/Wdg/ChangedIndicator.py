@@ -17,8 +17,10 @@ History:
 __all__ = ['ChangedIndicator']
 
 import tkinter
+
 import RO.SeqUtil
 from .CtxMenu import CtxMenuMixin
+
 
 class ChangedIndicator (tkinter.Label, CtxMenuMixin):
     def __init__(self,

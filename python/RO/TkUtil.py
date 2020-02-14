@@ -27,8 +27,9 @@ __all__ = ['addColors', 'colorOK', 'EvtNoProp', 'getWindowingSystem', 'getTclVer
 
 import re
 import sys
-import traceback
 import tkinter
+import traceback
+
 import RO.OS
 
 # windowing system constants

@@ -134,15 +134,17 @@ __all__ = ["TypeDict", "AllTypes", "DoneTypes", "FailTypes", "KeyVar", "PVTKeyVa
 import sys
 import time
 import traceback
+
 import RO.AddCallback
 import RO.Alg
 import RO.CnvUtil
+import RO.Comm.Generic
 import RO.Constants
 import RO.LangUtil
 import RO.PVT
-import RO.StringUtil
 import RO.SeqUtil
-import RO.Comm.Generic
+import RO.StringUtil
+
 if RO.Comm.Generic.getFramework() is None:
     print("Warning: RO.Comm.Generic framework not set; setting to tk")
     RO.Comm.Generic.setFramework("tk")

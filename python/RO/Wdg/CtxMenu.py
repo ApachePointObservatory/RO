@@ -48,9 +48,11 @@ History:
 __all__ = ['CtxMenu', 'CtxMenuMixin', 'addCtxMenu']
 
 import tkinter
+
 import RO.Comm.BrowseURL
 import RO.Constants
 import RO.OS
+
 
 class CtxMenu(object):
     def __init__(self,
@@ -208,8 +210,8 @@ def addCtxMenu(
 
 if __name__ == "__main__":
     from . import Bindings
-    from . import PythonTk
-    root = PythonTk.PythonTk()
+    from .PythonTk import PythonTk
+    root = PythonTk()
 
     # set up standard binding for <<CtxMenu>>   
     Bindings.stdBindings(root)

@@ -9,7 +9,9 @@ P.T.Wallace   Starlink   November 1988
 __all__ = ["euler"]
 
 import math
+
 import numpy
+
 
 def euler(axisAngSet):
     """

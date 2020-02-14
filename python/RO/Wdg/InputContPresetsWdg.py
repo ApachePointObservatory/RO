@@ -17,12 +17,13 @@ import tkinter
 
 import RO.TkUtil
 from . import Entry
-from .Label import Label, StrLabel
 from . import InputDialog
-from . import OptionMenu
-from . import Menubutton
+from .Menubutton import Menubutton
+from .OptionMenu import OptionMenu
+from .Label import StrLabel
 
-class InputContPresetsWdg(Menubutton.Menubutton):
+
+class InputContPresetsWdg(Menubutton):
     """Widget to manage named presets for an input container list
 
     Manages a list of named presets, with two categories:
@@ -55,7 +56,7 @@ class InputContPresetsWdg(Menubutton.Menubutton):
         - helpURL: URL for on-line help
         - autoUpdate: automatically set text to name of preset that matches inputCont, if there is a match.
             if None then set False if "text" is in kwargs and True otherwise
-        - **kwargs: additional config arguments for Menubutton.Menubutton.
+        - **kwargs: additional config arguments for Menubutton.
 
         Warning: for auto update to work correctly, every value dict in stdPresets must have an entry
         for each input container, and the values must be strings.
@@ -83,7 +84,7 @@ class InputContPresetsWdg(Menubutton.Menubutton):
             "highlightthickness": 2,
         }
         wdgKArgs.update(kwargs)
-        Menubutton.Menubutton.__init__(self, master, helpText=helpText, helpURL=helpURL, **wdgKArgs)
+        Menubutton.__init__(self, master, helpText=helpText, helpURL=helpURL, **wdgKArgs)
         self._menu = tkinter.Menu(self, tearoff=False)
 
         editMenu = tkinter.Menu(
@@ -295,7 +296,7 @@ class SaveDialog(InputDialog.ModalDialogBase):
         StrLabel(master=master, text="Save This Preset As:").grid(row=0, column=0, columnspan=5)
         # Tkinter.Label(master, text="Name:").grid(row=1, column=0)
         self.nameEntry = Entry.StrEntry(master)
-        self.currNameWdg = OptionMenu.OptionMenu(
+        self.currNameWdg = OptionMenu(
             master = master,
             items = self._currNameList,
             label = "",
@@ -327,7 +328,7 @@ class RenameDialog(InputDialog.ModalDialogBase):
     def body(self, master):
         StrLabel(master=master, text="Rename Preset:").grid(row=0, column=0, columnspan=5)
         # Tkinter.Label(master, text="Name:").grid(row=1, column=0)
-        self.oldNameWdg = OptionMenu.OptionMenu(
+        self.oldNameWdg = OptionMenu(
             master = master,
             items = self._currNameList,
         )
@@ -356,7 +357,7 @@ class DeleteDialog(InputDialog.ModalDialogBase):
 
     def body(self, master):
         StrLabel(master=master, text="Delete Preseturation:").grid(row=0, column=0, columnspan=5)
-        self.currNameWdg = OptionMenu.OptionMenu(
+        self.currNameWdg = OptionMenu(
             master = master,
             items = self._currNameList,
         )

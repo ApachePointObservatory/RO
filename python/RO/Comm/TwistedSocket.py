@@ -23,14 +23,17 @@ __all__ = ["Socket", "TCPSocket", "Server", "TCPServer"]
 import re
 import sys
 import traceback
-from twisted.python.failure import Failure
+
+from twisted.internet import reactor
+from twisted.internet.endpoints import TCP4ClientEndpoint, TCP4ServerEndpoint
 from twisted.internet.error import ConnectionDone
 from twisted.internet.protocol import Factory, Protocol
-from twisted.internet.endpoints import TCP4ClientEndpoint, TCP4ServerEndpoint
-from twisted.internet import reactor
 from twisted.python import log
+from twisted.python.failure import Failure
+
 from RO.Comm.BaseSocket import BaseSocket, BaseServer, nullCallback
 from RO.Comm.TwistedTimer import Timer
+
 
 class _SocketProtocol(Protocol):
     """Twisted socket protocol for use with these socket classes

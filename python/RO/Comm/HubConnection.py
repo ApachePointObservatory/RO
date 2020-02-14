@@ -40,9 +40,10 @@ except ImportError:
     shaClass = sha.sha
 import sys
 
-from .TCPConnection import TCPConnection
 import RO.ParseMsg
 import RO.StringUtil
+from .TCPConnection import TCPConnection
+
 
 class HubConnection(TCPConnection):
     """Connection to Apache Point Observatory hub

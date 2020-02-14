@@ -29,9 +29,11 @@ __all__ = ["sind", "cosd", "tand", "asind", "acosd", "atand", "atan2d", "compare
     "nint", "sign", "logEq", "logNE", "rot2D", "rThetaFromXY", "xyFromRTheta", "vecMag", "wrapCtr", "wrapPos"]
 
 import math
+
 import numpy
-from RO.PhysConst import RadPerDeg
+
 import RO.SysConst
+from RO.PhysConst import RadPerDeg
 
 DegPerRad = 1.0 / RadPerDeg
 _TinyFloat = numpy.finfo(float).tiny
@@ -87,7 +89,12 @@ def compareFloats(a, b, rtol=1.0e-5, atol=RO.SysConst.FAccuracy):
     """
     if abs(a - b) < (atol + (rtol * abs(float(a + b)))):
         return 0
-    return cmp(a, b)
+    elif a > b:
+        return 1
+    elif a < b:
+        return -1
+    else:
+        return None
 
 def checkRange(value, minValue, maxValue, valDescr="value"):
     """Checks that value is in range [minValue, maxValue] and raises a ValueError if not.

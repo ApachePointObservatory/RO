@@ -30,8 +30,10 @@ History:
 __all__ = ["VMSTelnet"]
 
 import sys
+
 import RO.Wdg
 from .TCPConnection import TCPConnection
+
 
 class VMSTelnet(TCPConnection):
     """A telnet connection that negotiates the telnet protocol

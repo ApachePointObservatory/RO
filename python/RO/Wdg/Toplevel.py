@@ -68,8 +68,9 @@ __all__ = ['tl_CloseDestroys', 'tl_CloseWithdraws', 'tl_CloseDisabled', 'Topleve
 import json
 import os.path
 import sys
-import traceback
 import tkinter
+import traceback
+
 import RO.CnvUtil
 import RO.OS
 import RO.SeqUtil

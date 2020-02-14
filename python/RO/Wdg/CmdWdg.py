@@ -29,7 +29,9 @@ History:
 __all__ = ['CmdWdg']
 
 import tkinter
+
 from . import Entry
+
 
 class CmdWdg (Entry.StrEntry):
     """Entry field for one-line text commands, with history.

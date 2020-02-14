@@ -8,7 +8,9 @@ History
 __all__ = ["ccFromSC"]
 
 import numpy
+
 import RO.MathUtil
+
 
 def ccFromSC(pos, magP):
     """

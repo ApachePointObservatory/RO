@@ -14,8 +14,9 @@ History:
 """
 __all__ = ['PatchedCanvas']
 
-import warnings
 import tkinter
+import warnings
+
 
 class PatchedCanvas(tkinter.Canvas):
     def __init__(self, *args, **kargs):

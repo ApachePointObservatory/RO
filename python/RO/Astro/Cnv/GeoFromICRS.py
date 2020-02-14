@@ -8,7 +8,9 @@ History:
 __all__ = ["geoFromICRS"]
 
 import numpy
+
 from RO.Astro import llv
+
 
 def geoFromICRS(icrsP, icrsV, agData):
     """

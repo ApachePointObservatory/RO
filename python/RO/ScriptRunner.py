@@ -90,10 +90,11 @@ History:
 """
 __all__ = ["ScriptError", "ScriptRunner"]
 
+import queue
 import sys
 import threading
-import queue
 import traceback
+
 import RO.AddCallback
 import RO.Constants
 import RO.KeyVariable

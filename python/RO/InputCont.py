@@ -95,7 +95,6 @@ History:
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
-import itertools
 import RO.AddCallback
 import RO.SeqUtil
 

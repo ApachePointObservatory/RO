@@ -33,14 +33,15 @@ History:
 """
 __all__ = ['BasicScriptWdg', 'ScriptModuleWdg', 'ScriptFileWdg']
 
+import importlib
 import os.path
 import tkinter
-import RO.Constants
+
 import RO.AddCallback
+import RO.Constants
 import RO.ScriptRunner
-from . import Button
-from . import StatusBar
-import importlib
+from .Button import Button
+from .StatusBar import StatusBar
 
 # compute _StateSevDict which contains
 # state:severity for non-normal severities
@@ -264,7 +265,7 @@ class _BaseUserScriptWdg(tkinter.Frame, BasicScriptWdg):
         self.columnconfigure(0, weight=1)
         row += 1
 
-        scriptStatusBar = StatusBar.StatusBar(
+        scriptStatusBar = StatusBar(
             master = self,
             helpURL = helpURL,
             helpText = "script status and messages",
@@ -272,7 +273,7 @@ class _BaseUserScriptWdg(tkinter.Frame, BasicScriptWdg):
         scriptStatusBar.grid(row=row, column=0, sticky="ew")
         row += 1
         
-        cmdStatusBar = StatusBar.StatusBar(
+        cmdStatusBar = StatusBar(
             master = self,
             dispatcher = dispatcher,
             summaryLen = 30,
@@ -283,19 +284,19 @@ class _BaseUserScriptWdg(tkinter.Frame, BasicScriptWdg):
         row += 1
         
         buttonFrame = tkinter.Frame(self)
-        startButton = Button.Button(
+        startButton = Button(
             master = buttonFrame,
             text = "Start",
             helpText = "Start the script",
             helpURL = helpURL,
         )
         startButton.pack(side="left")
-        pauseButton = Button.Button(
+        pauseButton = Button(
             master = buttonFrame,
             helpURL = helpURL,
         )
         pauseButton.pack(side="left")
-        cancelButton = Button.Button(
+        cancelButton = Button(
             master = buttonFrame,
             text = "Cancel",
             helpText = "Halt the script",
@@ -541,9 +542,9 @@ class ScriptFileWdg(_BaseUserScriptWdg):
 
 if __name__ == "__main__":
     import RO.KeyDispatcher
-    from . import PythonTk
+    from .PythonTk import PythonTk
     from . import TestScriptWdg
-    root = PythonTk.PythonTk()
+    root = PythonTk()
     root.title('Script 1 (root)')
     
     dispatcher = RO.KeyDispatcher.KeyDispatcher()

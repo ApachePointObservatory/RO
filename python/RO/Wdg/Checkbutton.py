@@ -73,6 +73,7 @@ History:
 __all__ = ['Checkbutton']
 
 import tkinter
+
 import RO.AddCallback
 import RO.CnvUtil
 import RO.MathUtil
@@ -80,6 +81,7 @@ import RO.TkUtil
 from .CtxMenu import CtxMenuMixin
 from .IsCurrentMixin import AutoIsCurrentMixin, IsCurrentCheckbuttonMixin
 from .SeverityMixin import SeverityActiveMixin
+
 
 class Checkbutton (tkinter.Checkbutton, RO.AddCallback.TkVarMixin,
     AutoIsCurrentMixin, IsCurrentCheckbuttonMixin, SeverityActiveMixin, CtxMenuMixin):
@@ -389,9 +391,9 @@ class Checkbutton (tkinter.Checkbutton, RO.AddCallback.TkVarMixin,
 
 
 if __name__ == "__main__":
-    from . import PythonTk
+    from .PythonTk import PythonTk
     from .StatusBar import StatusBar
-    root = PythonTk.PythonTk()
+    root = PythonTk()
     
     def btnCallback(btn):
         print("%s state=%s" % (btn["text"], btn.getBool()))

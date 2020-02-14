@@ -31,7 +31,9 @@ History:
 2010-06-28 ROwen    Modified to require Python 2.4 by assuming set is a builtin type.
 """
 import collections
+
 import RO.MathUtil
+
 
 def asCollection(item):
     """Convert one or more items to a Collection.

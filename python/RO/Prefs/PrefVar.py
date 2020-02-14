@@ -91,7 +91,7 @@ History:
 2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
                     Stop using dangerous bare "except:".
 """
-__all__ = ["PrefVar", "StrPrefVar", "DirectoryPrefVar", "FilePrefVar", "SoundPrefVar", "BoolPrefVar", \
+__all__ = ["BasePrefVar", "StrPrefVar", "DirectoryPrefVar", "FilePrefVar", "SoundPrefVar", "BoolPrefVar", \
     "IntPrefVar", "FloatPrefVar", "ColorPrefVar", "FontPrefVar", "FontSizePrefVar", "PrefSet"]
 
 import os.path
@@ -99,6 +99,7 @@ import re
 import sys
 import tkinter
 import tkinter.font
+
 import RO.Alg
 import RO.CnvUtil
 import RO.MathUtil
@@ -106,7 +107,8 @@ import RO.OS
 import RO.StringUtil
 import RO.Wdg
 
-class PrefVar(object):
+
+class BasePrefVar(object):
     """Base class for preference variables. Intended to be subclassed, not used directly.
 
     Inputs:
@@ -316,7 +318,7 @@ class PrefVar(object):
         return ("%s " + self.formatStr) % (self.name, self.value)
 
 
-class StrPrefVar(PrefVar):
+class StrPrefVar(BasePrefVar):
     """String preference variable with optional pattern matching.
 
     Inputs: same as PrefVar, plus:
@@ -347,12 +349,12 @@ class StrPrefVar(PrefVar):
         kargs.setdefault("formatStr", "%s")
         kargs.setdefault("cnvFunc", str)
 
-        PrefVar.__init__(self,
-            name = name,
-            category = category,
-            defValue = defValue,
-            **kargs
-        )
+        BasePrefVar.__init__(self,
+                             name = name,
+                             category = category,
+                             defValue = defValue,
+                             **kargs
+                             )
     
     def locCheckValue(self, value):
         """Test that the string matches the desired pattern, if any.
@@ -526,7 +528,7 @@ class SoundPrefVar(FilePrefVar):
         )
 
 
-class BoolPrefVar(PrefVar):
+class BoolPrefVar(BasePrefVar):
     """A boolean-valued PrefVar.
 
     Inputs: same as PrefVar, but validValues and suggValues are ignored.
@@ -544,12 +546,12 @@ class BoolPrefVar(PrefVar):
         kargs["validValues"] = None
         kargs["suggValues"] = None
         
-        PrefVar.__init__(self,
-            name = name,
-            category = category,
-            defValue = bool(defValue),
-            **kargs
-        )
+        BasePrefVar.__init__(self,
+                             name = name,
+                             category = category,
+                             defValue = bool(defValue),
+                             **kargs
+                             )
 
     def getEditWdg(self, master, var=None, ctxConfigFunc=None):
         """Return a Tkinter widget that allows the user to edit the value of the preference variable.
@@ -584,7 +586,7 @@ class BoolPrefVar(PrefVar):
             return 'False'
     
 
-class IntPrefVar(PrefVar):
+class IntPrefVar(BasePrefVar):
     """An integer-valued PrefVar.
 
     Inputs: same as PrefVar plus:
@@ -607,13 +609,13 @@ class IntPrefVar(PrefVar):
         
         kargs.setdefault("cnvFunc", RO.CnvUtil.asInt)
         
-        PrefVar.__init__(self,
-            name = name,
-            category = category,
-            defValue = defValue,
-            formatStr = formatStr,
-            **kargs
-        )
+        BasePrefVar.__init__(self,
+                             name = name,
+                             category = category,
+                             defValue = defValue,
+                             formatStr = formatStr,
+                             **kargs
+                             )
 
     def locCheckValue(self, value):
         """Raise a ValueError exception if the value is out of range.
@@ -656,7 +658,7 @@ class IntPrefVar(PrefVar):
             return ("[" + self.formatStr + ", " + self.formatStr + "]") % (self.minValue, self.maxValue)
     
 
-class FloatPrefVar(PrefVar):
+class FloatPrefVar(BasePrefVar):
     """A float-valued PrefVar. 
 
     Inputs: same as PrefVar plus:
@@ -682,13 +684,13 @@ class FloatPrefVar(PrefVar):
 
         kargs.setdefault("cnvFunc", RO.CnvUtil.asFloat)
         
-        PrefVar.__init__(self,
-            name = name,
-            category = category,
-            defValue = defValue,
-            formatStr = formatStr,
-            **kargs
-        )
+        BasePrefVar.__init__(self,
+                             name = name,
+                             category = category,
+                             defValue = defValue,
+                             formatStr = formatStr,
+                             **kargs
+                             )
 
     def locCheckValue(self, value):
         """Raise a ValueError exception if the value is out of range.
@@ -760,7 +762,7 @@ class ColorUpdate(object):
 
 theColorUpdater = ColorUpdate()
 
-class ColorPrefVar(PrefVar):
+class ColorPrefVar(BasePrefVar):
     """Tk color preference variable.
 
     Inputs: same as PrefVar, plus:
@@ -781,12 +783,12 @@ class ColorPrefVar(PrefVar):
         kargs["formatStr"] = "%s"
         kargs["cnvFunc"] = str
 
-        PrefVar.__init__(self,
-            name = name,
-            category = category,
-            defValue = defValue,
-            **kargs
-        )
+        BasePrefVar.__init__(self,
+                             name = name,
+                             category = category,
+                             defValue = defValue,
+                             **kargs
+                             )
         if wdgOption:
             global theColorUpdater
             theColorUpdater.addVar(wdgOption, self)
@@ -800,7 +802,7 @@ class ColorPrefVar(PrefVar):
         except tkinter.TclError as e:
             raise ValueError(RO.StringUtil.strFromException(e))
 
-class FontPrefVar(PrefVar):
+class FontPrefVar(BasePrefVar):
     """Tk Font preference variable.
 
     Inputs: same as PrefVar, plus:
@@ -875,12 +877,12 @@ class FontPrefVar(PrefVar):
             netDefValue.update(defValue)
 
         self.value = {}
-        PrefVar.__init__(self,
-            name = name,
-            category = category,
-            defValue = netDefValue,
-            **kargs
-        )
+        BasePrefVar.__init__(self,
+                             name = name,
+                             category = category,
+                             defValue = netDefValue,
+                             **kargs
+                             )
 
         # if optionPatterns supplied, add font to option database
         for ptn in optionPatterns:
@@ -941,7 +943,7 @@ class FontPrefVar(PrefVar):
                 charList.append(charName)
         return " ".join(charList)
 
-class FontSizePrefVar(PrefVar):
+class FontSizePrefVar(BasePrefVar):
     """Tk Font preference variable that controls only the size.
     
     This is useful for graphical elements that you want to display using the default font
@@ -998,12 +1000,12 @@ class FontSizePrefVar(PrefVar):
             self.locCheckValue(defValue)
             netDefValue = defValue
 
-        PrefVar.__init__(self,
-            name = name,
-            category = category,
-            defValue = netDefValue,
-            **kargs
-        )
+        BasePrefVar.__init__(self,
+                             name = name,
+                             category = category,
+                             defValue = netDefValue,
+                             **kargs
+                             )
 
         # if optionPatterns supplied, add font to option database
         for ptn in optionPatterns:
@@ -1226,7 +1228,7 @@ if __name__ == "__main__":
     def callFunc(value, prefVar):
         print("callFunc called with value=%r, prefVar='%s'" % (value, prefVar))
 
-    pv = PrefVar(
+    pv = BasePrefVar(
         name="basicPref",
         category="main",
         defValue=0,

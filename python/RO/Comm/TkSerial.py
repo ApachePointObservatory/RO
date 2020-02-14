@@ -30,14 +30,12 @@ History:
 __all__ = ["TkSerial", "NullSerial"]
 
 import sys
-import traceback
 import tkinter
+import traceback
+
 import RO.SeqUtil
 import RO.TkUtil
-try:
-    set
-except NameError:
-    from sets import Set as set
+
 
 class TkBaseSerial(object):
     """Base class for communication via a serial port using the tcl event loop.

@@ -43,9 +43,11 @@ import os
 import re
 import tkinter
 import tkinter.filedialog
+
 import RO.CnvUtil
 import RO.OS
-from . import Text
+from .Text import Text
+
 
 class PythonWdg(tkinter.Frame):
     """A frame containing text window into which you may enter Python code.
@@ -65,7 +67,7 @@ class PythonWdg(tkinter.Frame):
         self.master=master
         self.filePath = filePath
 
-        self.inputWdg = Text.Text(
+        self.inputWdg = Text(
             master = self,
             width = 60,
             height = 10,

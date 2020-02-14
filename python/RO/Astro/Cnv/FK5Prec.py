@@ -8,7 +8,9 @@ History:
 __all__ = ["fk5Prec"]
 
 import numpy
+
 from RO.Astro import llv
+
 
 def fk5Prec(fromP, fromV, fromDate, toDate):
     """

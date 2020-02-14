@@ -55,16 +55,17 @@ __all__ = ['FTPLogWdg']
 
 import atexit
 import sys
+import tkinter
 import traceback
 import weakref
-from . import Bindings
-import tkinter
+
 import RO.AddCallback
 import RO.Constants
 import RO.MathUtil
-from RO.TkUtil import Timer
-from RO.Comm.FTPGet import FTPGet
 import RO.Wdg
+from RO.Comm.FTPGet import FTPGet
+from RO.TkUtil import Timer
+from . import Bindings
 from .CtxMenu import addCtxMenu
 
 _StatusInterval = 0.200 # time between status checks (sec)

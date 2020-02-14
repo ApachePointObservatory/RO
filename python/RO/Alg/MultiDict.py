@@ -13,10 +13,13 @@ History
                     and added SetDict.
 2010-05-18 ROwen    Modified SetDict to use sets
 2015-09-24 ROwen    Replace "== None" with "is None" to future-proof array tests and modernize the code.
+2020-01-13 DGatlin  Changed set([val]) to set(val) for Python 3
 """
 __all__ = ["ListDict", "SetDict"]
-
-from collections import UserDict
+try:
+    from collections import UserDict
+except ImportError:
+    from UserDict import UserDict
 
 class ListDict(UserDict):
     """A dictionary whose values are a list of items.
@@ -65,7 +68,7 @@ class SetDict(ListDict):
         """
         valSet = self.data.get(key)
         if valSet is None:
-            self.data[key] = set([val])
+            self.data[key] = set(val)
         else:
             valSet.add(val)
     

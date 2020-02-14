@@ -112,8 +112,8 @@ class SeveritySelectMixin(SeverityMixin):
 
 if __name__ == "__main__":
     import tkinter
-    from . import PythonTk
-    root = PythonTk.PythonTk()
+    from .PythonTk import PythonTk
+    root = PythonTk()
     
     class ColorButton(tkinter.Button, SeverityActiveMixin):
         def __init__(self, *args, **kargs):

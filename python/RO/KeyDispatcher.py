@@ -94,11 +94,12 @@ __all__ = ["logToStdOut", "KeyDispatcher"]
 import sys
 import time
 import traceback
+
 import RO.Alg
 import RO.CnvUtil
+import RO.Comm.HubConnection
 import RO.Constants
 import RO.KeyVariable
-import RO.Comm.HubConnection
 import RO.ParseMsg
 import RO.StringUtil
 from RO.Comm.Generic import Timer
@@ -359,7 +360,7 @@ class KeyDispatcher(object):
     
         try:
             fullCmd = "%d %s %s" % (cmdVar.cmdID, cmdVar.actor, cmdVar.cmdStr)
-            self.connection.writeLine (fullCmd)
+            self.connection.writeLine(fullCmd)
 #             self.logMsg (
 #                 msgStr = fullCmd,
 #                 actor = cmdVar.actor,

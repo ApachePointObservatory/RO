@@ -180,8 +180,8 @@ class OptionButtons(InputContFrame):
             wdg.pack(side="top", anchor="nw")
     
 if __name__ == "__main__":
-    from . import PythonTk
-    root = PythonTk.PythonTk()
+    from .PythonTk import PythonTk
+    root = PythonTk()
 
     def doPrint():
         print("getString() = %r" % (optFrame.getString(),))

@@ -27,8 +27,10 @@ History:
 __all__ = ['PythonTk']
 
 import tkinter
+
 from . import Bindings
-from . import PythonWdg
+from .PythonWdg import PythonWdg
+
 
 class PythonTk (tkinter.Tk):
     """Creates a Tkinter application with standard menus and such"""
@@ -67,7 +69,7 @@ class PythonTk (tkinter.Tk):
         self.pyToplevel = tkinter.Toplevel()
         self.pyToplevel.geometry("+0+450")
         self.pyToplevel.title("Python")
-        pyFrame = PythonWdg.PythonWdg(self.pyToplevel)
+        pyFrame = PythonWdg(self.pyToplevel)
         pyFrame.pack(expand=tkinter.YES, fill=tkinter.BOTH)
         
         # set up standard bindings

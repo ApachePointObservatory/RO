@@ -10,9 +10,11 @@ History:
 __all__ = ["geoFromTopo"]
 
 import numpy
+
 import RO.MathUtil
 from RO.Astro import llv
 from .HADecFromAzAlt import haDecFromAzAlt
+
 
 def geoFromTopo(appTopoP, last, obsData):
     """

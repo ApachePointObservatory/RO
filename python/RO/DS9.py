@@ -153,12 +153,14 @@ History:
 """
 __all__ = ["setup", "xpaget", "xpaset", "DS9Win"]
 
-import numpy
 import os
+import subprocess
 import time
 import warnings
+
+import numpy
+
 import RO.OS
-import subprocess
 
 _DebugSetup = False
 
@@ -239,8 +241,8 @@ def _findUnixApp(appName):
         if errMsg:
             fullErrMsg = "'which %s' failed: %s" % (appName, errMsg)
             raise RuntimeError(fullErrMsg)
-        appPath = p.stdout.read().strip(b'\n')
-        if not appPath.startswith(b"/"):
+        appPath = p.stdout.read().strip(b'\n').decode('utf-8')
+        if not appPath.startswith("/"):
             raise RuntimeError("Could not find %s on your PATH" % (appName,))
     finally:
         p.stdout.close()

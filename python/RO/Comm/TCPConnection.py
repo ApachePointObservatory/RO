@@ -58,9 +58,11 @@ History:
 __all__ = ["TCPConnection"]
 
 import sys
-from RO.Comm.BaseSocket import NullTCPSocket
-from RO.AddCallback import safeCall2
+
 import RO.Comm.Generic
+from RO.AddCallback import safeCall2
+from RO.Comm.BaseSocket import NullTCPSocket
+
 if RO.Comm.Generic.getFramework() is None:
     print("Warning: RO.Comm.Generic framework not set; setting to tk")
     RO.Comm.Generic.setFramework("tk")

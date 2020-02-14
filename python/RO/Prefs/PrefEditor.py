@@ -61,15 +61,17 @@ History:
 2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
 import sys
-from . import PrefVar
 import tkinter
 import tkinter.colorchooser
 import tkinter.font
+
 import RO.Alg
 import RO.Wdg
 from RO.TkUtil import Timer
+from . import PrefVar
 
 __all__ = ["getPrefEditor"]
+
 
 def getPrefEditor(
     prefVar,
@@ -90,7 +92,7 @@ def getPrefEditor(
         return FilePrefEditor(prefVar, master, row, column)
     elif isinstance(prefVar, PrefVar.FontPrefVar):
         return FontPrefEditor(prefVar, master, row, column)
-    elif isinstance(prefVar, PrefVar.PrefVar):
+    elif isinstance(prefVar, PrefVar.BasePrefVar):
         return PrefEditor(prefVar, master, row, column)
     else:
         raise ValueError("prefVar is of unknown type")

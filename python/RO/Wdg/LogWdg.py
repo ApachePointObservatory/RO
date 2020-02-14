@@ -71,8 +71,9 @@ History:
 __all__ = ['LogWdg']
 
 import tkinter
+
 import RO.Alg
-from . import Text
+from .Text import Text
 
 _AllTextTag = "__alltext"
 
@@ -115,7 +116,7 @@ class LogWdg(tkinter.Frame):
             master = self,
             orient = "vertical",
         )
-        self.text = Text.Text (
+        self.text = Text(
             master = self,
             yscrollcommand = self.yscroll.set,
             wrap = "word",
@@ -507,8 +508,8 @@ class LogWdg(tkinter.Frame):
 if __name__ == '__main__':
     import random
     import sys
-    from . import PythonTk
-    root = PythonTk.PythonTk()
+    from .PythonTk import PythonTk
+    root = PythonTk()
     
     testFrame = LogWdg (
         master=root,

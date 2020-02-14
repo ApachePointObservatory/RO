@@ -52,13 +52,14 @@ History:
 2015-11-05 ROwen    Stop using dangerous bare "except:".
 """
 import re
+
 import numpy
 
-AngstromStr = "\N{ANGSTROM SIGN}"
-DegStr = "\N{DEGREE SIGN}"
+AngstromStr = u"\N{ANGSTROM SIGN}"
+DegStr = u"\N{DEGREE SIGN}"
 DMSStr = DegStr + "'\""
 LambdaStr = "\u00c5" # for some reason this fails: u"\N{GREEK SMALL LETTER LAMBDA}"
-MuStr = "\N{GREEK SMALL LETTER MU}"
+MuStr = u"\N{GREEK SMALL LETTER MU}"
 
 def dmsStrFromDeg (decDeg, nFields=3, precision=1, omitExtraFields = False):
     """Convert a number to a sexagesimal string with 1-3 fields.
@@ -335,7 +336,18 @@ def prettyDict(aDict, entrySepStr = "\n", keyValSepStr = ": "):
     Returns a string containing the pretty-printed dictionary
     """
     sortedKeys = list(aDict.keys())
-    sortedKeys.sort()
+    # Python 3 doesn't support sort for lists, so this needs to be done by hand
+    ints = []
+    strs = []
+    for key in sortedKeys:
+        if isinstance(key, (int, float)):
+            ints.append(key)
+    ints.sort()
+    for key in sortedKeys:
+        if isinstance(key, str):
+            strs.append(key)
+    strs.sort()
+    sortedKeys = ints + strs
     eltList = []
     for aKey in sortedKeys:
         eltList.append(repr(aKey) + keyValSepStr + repr(aDict[aKey]))

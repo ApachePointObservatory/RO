@@ -57,12 +57,14 @@ __all__ = ['Label', 'BoolLabel', 'StrLabel', 'IntLabel', 'FloatLabel', 'DMSLabel
 
 import sys
 import tkinter
+
 import RO.Constants
 import RO.MathUtil
 import RO.StringUtil
-from .CtxMenu import CtxMenu, CtxMenuMixin
-from .SeverityMixin import SeverityMixin
+from .CtxMenu import CtxMenuMixin
 from .IsCurrentMixin import IsCurrentMixin
+from .SeverityMixin import SeverityMixin
+
 
 class Label(tkinter.Label, CtxMenuMixin, IsCurrentMixin, SeverityMixin):
     """Base class for labels (display ROWdgs); do not use directly.
@@ -355,9 +357,9 @@ class DMSLabel(Label):
 
 
 if __name__ == "__main__":
-    from . import PythonTk
+    from .PythonTk import PythonTk
     from RO.TkUtil import Timer
-    root = PythonTk.PythonTk()
+    root = PythonTk()
 
     wdgSet = (
         BoolLabel(root,

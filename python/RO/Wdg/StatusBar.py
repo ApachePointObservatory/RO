@@ -66,13 +66,15 @@ __all__ = ['StatusBar']
 
 import sys
 import tkinter
+
 import RO.Alg
 import RO.Constants
 import RO.KeyVariable
 import RO.Prefs.PrefVar
 from RO.TkUtil import Timer
-from . import Sound
 from . import Entry
+from . import Sound
+
 
 def _getSound(playCmdSounds, prefs, prefName):
     noPlay = Sound.NoPlay()

@@ -79,13 +79,15 @@ __all__ = ["StripChartWdg"]
 import bisect
 import datetime
 import time
-
-import numpy
 import tkinter
+
 import matplotlib
 import matplotlib.dates
+import numpy
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
 from RO.TkUtil import Timer
+
 
 class StripChartWdg(tkinter.Frame):
     """A widget to changing values in real time as a strip chart

@@ -31,13 +31,15 @@ History:
 __all__ = ['ProgressBar', 'TimeBar']
 
 import time
+import tkinter
+
 import RO.SeqUtil
 from RO.TkUtil import Timer
-import tkinter
-from . import Button
+from .Button import Button
 from . import Entry
 from .Gridder import Gridder
-from .Label import Label, StrLabel
+from .Label import StrLabel
+
 
 class ProgressBar (tkinter.Frame):
     """A bar graph showing a value or fraction of a task performed.
@@ -494,8 +496,8 @@ class TimeBar(ProgressBar):
         
 
 if __name__ == "__main__":
-    from . import PythonTk
-    root = PythonTk.PythonTk()
+    from .PythonTk import PythonTk
+    root = PythonTk()
     
     # horizontal and vertical progress bars
 
@@ -574,10 +576,10 @@ if __name__ == "__main__":
     timeEntry = Entry.IntEntry(root, defValue = 9, width=5)
     gr.gridWdg ("Rem Time", timeEntry)
     gr.gridWdg (False, (
-            Button.Button(root, text="Start", command=startRemTime),
-            Button.Button(root, text="Pause", command=pauseRemTime),
-            Button.Button(root, text="Resume", command=resumeRemTime),
-            Button.Button(root, text="Clear", command=clearRemTime),
+            Button(root, text="Start", command=startRemTime),
+            Button(root, text="Pause", command=pauseRemTime),
+            Button(root, text="Resume", command=resumeRemTime),
+            Button(root, text="Clear", command=clearRemTime),
         ),
     )
 

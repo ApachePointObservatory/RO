@@ -40,9 +40,11 @@ History:
 __all__ = ['Gridder']
 
 import tkinter
+
 import RO.Alg
 import RO.SeqUtil
-from .Label import Label, StrLabel
+from .Label import StrLabel
+
 
 class Gridder(object):
     def __init__(self,
@@ -495,8 +497,8 @@ class _GridSet (_BaseGridSet):
         self._gridWdg(self.unitsWdg, sticky="w", colSpan=1)
 
 if __name__ == "__main__":
-    from . import PythonTk
-    root = PythonTk.PythonTk()
+    from .PythonTk import PythonTk
+    root = PythonTk()
     
     wdgFrame = tkinter.Frame(root)
     gr = Gridder(wdgFrame)

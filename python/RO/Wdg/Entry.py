@@ -163,18 +163,26 @@ History:
 """
 __all__ = ['StrEntry', 'ASCIIEntry', 'FloatEntry', 'IntEntry', 'DMSEntry']
 
-#import os
+# import os
 import re
 import tkinter
+
+# import os
+import RO.AddCallback
 import RO.AddCallback
 import RO.CnvUtil
+import RO.CnvUtil
+import RO.MathUtil
+import RO.MathUtil
+import RO.SeqUtil
 import RO.SeqUtil
 import RO.StringUtil
-import RO.MathUtil
+import RO.StringUtil
 from . import Bindings
 from .CtxMenu import CtxMenuMixin
 from .IsCurrentMixin import AutoIsCurrentMixin, IsCurrentMixin
 from .SeverityMixin import SeveritySelectMixin
+
 
 class _BaseEntry (tkinter.Entry, RO.AddCallback.BaseMixin,
     AutoIsCurrentMixin, IsCurrentMixin, SeveritySelectMixin, CtxMenuMixin):
@@ -1519,7 +1527,7 @@ class DMSEntry (_NumEntry):
 
 if __name__ == "__main__":
     from RO.Wdg.PythonTk import PythonTk
-    from . import StatusBar
+    from .StatusBar import StatusBar
     root = PythonTk()
     
     entryList = []
@@ -1583,7 +1591,7 @@ if __name__ == "__main__":
     degButton = tkinter.Button (root, command=setDeg, text="DMS in deg")
     degButton.pack()
     
-    statusBar = StatusBar.StatusBar(root)
+    statusBar = StatusBar(root)
         
     addEntry (
         "StrEntry AutoIsCurr",

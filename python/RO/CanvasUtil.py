@@ -23,7 +23,9 @@ __all__ = ["ctrCircle", "ctrPlus", "ctrX", "radialLine", "Spiral"]
 
 import math
 import tkinter
+
 import RO.MathUtil
+
 
 def ctrCircle(cnv, xpos, ypos, rad, width = 1, **kargs):
     """Draws a centered circle on the specified canvas.

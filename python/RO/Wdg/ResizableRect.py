@@ -30,8 +30,9 @@ History:
 __all__ = ["ResizableRect"]
 
 import tkinter
-import RO.SeqUtil
+
 import RO.AddCallback
+import RO.SeqUtil
 from RO.Alg import GenericCallback
 
 Debug = False
@@ -329,8 +330,8 @@ class ResizableRect(RO.AddCallback.BaseMixin):
 
 
 if __name__ == "__main__":
-    from . import PythonTk
-    root = PythonTk.PythonTk()
+    from .PythonTk import PythonTk
+    root = PythonTk()
     cnvFrame = tkinter.Frame(root, borderwidth=2, relief="solid")
     cnv = tkinter.Canvas(
         cnvFrame,

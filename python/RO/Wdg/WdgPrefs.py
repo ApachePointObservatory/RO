@@ -23,9 +23,10 @@ History:
 __all__ = []
 
 import tkinter
+
 import RO.Constants
-import RO.TkUtil
 import RO.Prefs.PrefVar
+import RO.TkUtil
 
 # use lazy evaluation to avoid accessing tk root until there is one
 _wdgPrefs = None

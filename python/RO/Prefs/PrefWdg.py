@@ -38,10 +38,12 @@ History:
 __all__ = ["PrefWin", "PrefWdg"]
 
 import tkinter
-from . import PrefVar
-from . import PrefEditor
+
 import RO.Constants
 import RO.Wdg
+from . import PrefEditor
+from . import PrefVar
+
 
 class PrefWin(RO.Wdg.Toplevel):
     def __init__(self,

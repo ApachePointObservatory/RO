@@ -9,8 +9,10 @@ History:
 __all__ = ['Menubutton']
 
 import tkinter
+
 import RO.Constants
-from .CtxMenu import CtxMenu, CtxMenuMixin
+from .CtxMenu import CtxMenuMixin
+
 
 class Menubutton(tkinter.Menubutton, CtxMenuMixin):
     def __init__(self,

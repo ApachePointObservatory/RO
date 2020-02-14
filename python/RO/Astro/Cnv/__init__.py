@@ -34,12 +34,12 @@ from .GalFromICRS import *
 from .GeoFromICRS import *
 from .GeoFromTopo import *
 from .HADecFromAzAlt import *
-from .ICRSFromFixedFK4 import *
 from .ICRSFromFK4 import *
+from .ICRSFromFixedFK4 import *
 from .ICRSFromGal import *
 from .ICRSFromGeo import *
-from .ObserverData import *
 from .ObsFromTopo import *
+from .ObserverData import *
 from .TopoFromGeo import *
 from .TopoFromGeoSimple import *
 from .TopoFromObs import *

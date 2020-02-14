@@ -4,8 +4,9 @@
 __all__ = ["scFromCCPVOff"]
 
 from .AngSideAng import angSideAng
-from .SCFromCCPV import scFromCCPV
 from .SCFromCC import scFromCC
+from .SCFromCCPV import scFromCCPV
+
 
 def scFromCCPVOff(p, v, offP):
     """

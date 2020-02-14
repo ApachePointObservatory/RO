@@ -41,11 +41,11 @@ History:
 """
 __all__ = ['FTPGet']
 
+import ftplib
 import os
 import sys
-import urllib.parse
 import threading
-import ftplib
+import urllib.parse
 
 _Debug = False
 
@@ -274,7 +274,7 @@ class FTPGet:
                 mode = "wb"
             else:
                 mode = "w"
-            self._toFile = file(self.toPath, mode)
+            self._toFile = open(self.toPath, mode)
 
             # open input socket
             if _Debug:

@@ -11,10 +11,12 @@ History:
 __all__ = ["topoFromObs"]
 
 from math import sqrt
+
 import numpy
-import RO.SysConst
-import RO.PhysConst
+
 import RO.MathUtil
+import RO.PhysConst
+import RO.SysConst
 
 # Constants
 #  For zdu > _MaxZDU the correction is computed at _MaxZDU.

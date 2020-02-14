@@ -59,14 +59,16 @@ History:
 """
 __all__ = ["DropletRunner"]
 
-import sys
 import os.path
 import subprocess
+import sys
 import tkinter
-import RO.OS
+
 import RO.Constants
+import RO.OS
 from RO.TkUtil import Timer
-from . import LogWdg
+from .LogWdg import LogWdg
+
 
 class DropletRunner(object):
     """Run a script as a droplet (an application onto which you drop file) with a log window.
@@ -109,7 +111,7 @@ class DropletRunner(object):
         else:
             filePathList = sys.argv[1:]
 
-        self.logWdg = LogWdg.LogWdg(self.tkRoot, **keyArgs)
+        self.logWdg = LogWdg(self.tkRoot, **keyArgs)
         self.logWdg.grid(row=0, column=0, sticky="nsew")
         self.tkRoot.grid_rowconfigure(0, weight=1)
         self.tkRoot.grid_columnconfigure(0, weight=1)

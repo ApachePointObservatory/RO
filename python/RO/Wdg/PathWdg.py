@@ -29,10 +29,12 @@ __all__ = ["DirWdg", "FileWdg"]
 import os
 import tkinter
 import tkinter.filedialog
+
 import RO.AddCallback
 import RO.Constants
-from .CtxMenu import CtxMenu, CtxMenuMixin
+from .CtxMenu import CtxMenuMixin
 from .SeverityMixin import SeverityActiveMixin
+
 
 class BasePathWdg (tkinter.Button, RO.AddCallback.BaseMixin, CtxMenuMixin,
     SeverityActiveMixin):

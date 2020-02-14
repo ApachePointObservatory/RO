@@ -230,12 +230,12 @@ class Text (tkinter.Text, CtxMenuMixin):
 
 if __name__ == "__main__":
     from RO.Wdg.PythonTk import PythonTk
-    from . import StatusBar
+    from .StatusBar import StatusBar
     root = PythonTk()
 
     text1 = Text(root, "text widget", height=5, width=20)
     text2 = Text(root, readOnly=True, helpText = "read only text widget",  height=5, width=20)  
-    statusBar = StatusBar.StatusBar(root)
+    statusBar = StatusBar(root)
     text1.grid(row=0, column=0, sticky="nsew")
     text2.grid(row=1, column=0, sticky="nsew")
     statusBar.grid(row=2, column=0, sticky="ew")

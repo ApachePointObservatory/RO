@@ -109,12 +109,14 @@ History:
 __all__ = ['OptionMenu']
 
 import tkinter
+
 import RO.AddCallback
 import RO.Alg
 import RO.SeqUtil
 from .IsCurrentMixin import AutoIsCurrentMixin, IsCurrentActiveMixin
-from .SeverityMixin import SeverityActiveMixin
 from .Menubutton import Menubutton
+from .SeverityMixin import SeverityActiveMixin
+
 
 class _DoItem:
     def __init__(self, var, value):
@@ -546,9 +548,9 @@ class OptionMenu(Menubutton, RO.AddCallback.TkVarMixin,
 
 if __name__ == "__main__":
     from .Label import Label
-    from . import PythonTk
-    from . import StatusBar
-    root = PythonTk.PythonTk()
+    from .PythonTk import PythonTk
+    from .StatusBar import StatusBar
+    root = PythonTk()
     
     def callFunc(wdg):
         label.set(wdg.getString())
@@ -609,7 +611,7 @@ if __name__ == "__main__":
     label = Label(root, width=20, anchor="w", helpText="most recently selected value")
     label.grid(row=2, column=0, columnspan=4, sticky="w")
     
-    statusBar = StatusBar.StatusBar(root, width=20)
+    statusBar = StatusBar(root, width=20)
     statusBar.grid(row=3, column=0, columnspan=4, sticky="ew")
 
     root.mainloop()

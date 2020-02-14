@@ -9,8 +9,9 @@ History:
 __all__ = ["icrsFromFixedFK4"]
 
 import numpy
-import RO.PhysConst
+
 import RO.MathUtil
+import RO.PhysConst
 from RO.Astro import llv, Tm
 
 # Constants

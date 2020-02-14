@@ -16,6 +16,7 @@ History:
 __all__ = ['enableBalloonHelp']
 
 import tkinter
+
 from RO.TkUtil import Timer
 
 _HelpObj = None
@@ -126,9 +127,9 @@ def enableBalloonHelp(delayMS = 1000):
 
 if __name__ == '__main__':
     from .OptionMenu import OptionMenu
-    root = Tkinter.Tk()
+    root = tkinter.Tk()
     
-    l0 = Tkinter.Label(text="Data")
+    l0 = tkinter.Label(text="Data")
     l0.grid(row=0, column=0, sticky="e")
     l0.helpText = "Help for the Data label"
     e0 = tkinter.Entry(width=10)
@@ -148,6 +149,6 @@ if __name__ == '__main__':
     )
     m2.grid(row=2, column=1)
 
-    ph = enableBalloonHelp()
+    enableBalloonHelp()
 
     root.mainloop()

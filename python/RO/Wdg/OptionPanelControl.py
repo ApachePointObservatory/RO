@@ -28,8 +28,10 @@ History:
 __all__ = ['OptionPanelControl']
 
 import tkinter
+
 from .Checkbutton import Checkbutton
 from .CtxMenu import CtxMenuMixin
+
 
 class _WdgButton(Checkbutton):
     """A checkbutton that shows or hides a gridded widget.

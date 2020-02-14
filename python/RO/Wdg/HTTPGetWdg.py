@@ -31,15 +31,16 @@ History:
 __all__ = ['HTTPGetWdg']
 
 import sys
+import tkinter
 import traceback
 import weakref
-from . import Bindings
-import tkinter
+
 import RO.AddCallback
+import RO.Comm.HTTPGet as HTTPGet
 import RO.Constants
 import RO.MathUtil
-import RO.Comm.HTTPGet as HTTPGet
 import RO.Wdg
+from . import Bindings
 from .CtxMenu import addCtxMenu
 
 _StatusInterval = 200 # ms between status checks

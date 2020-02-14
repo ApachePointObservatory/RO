@@ -22,11 +22,13 @@ History:
 __all__ = ['Button', 'Radiobutton']
 
 import tkinter
+
 import RO.AddCallback
 import RO.Constants
 import RO.TkUtil
-from .CtxMenu import CtxMenu, CtxMenuMixin
+from .CtxMenu import CtxMenuMixin
 from .SeverityMixin import SeverityActiveMixin
+
 
 class Button(tkinter.Button, RO.AddCallback.TkButtonMixin, CtxMenuMixin, SeverityActiveMixin):
     def __init__(self,

@@ -44,12 +44,14 @@ History:
 __all__ = ["DropletApp"]
 
 import sys
-import traceback
 import tkinter
-import RO.OS
+import traceback
+
 import RO.Constants
+import RO.OS
 from RO.TkUtil import Timer
-from . import LogWdg
+from .LogWdg import LogWdg
+
 
 class DropletApp(tkinter.Frame):
     """Run an application as a droplet (an application onto which you drop files)
@@ -110,7 +112,7 @@ class DropletApp(tkinter.Frame):
         self.processDirs = bool(processDirs)
         self.doneMsg = doneMsg + "\n"
         
-        self.logWdg = LogWdg.LogWdg(
+        self.logWdg = LogWdg(
             master = self,
             width = width,
             height = height,

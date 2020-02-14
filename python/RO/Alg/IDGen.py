@@ -38,7 +38,10 @@ class IDGen(object):
 
     def __iter__(self):
         return self
-    
+
+    def next(self):
+        return self.__next__()
+
     def __next__(self):
         """Return the next ID number."""
         newID = self.startVal + (self.ind * self.incr)
