@@ -52,14 +52,13 @@ History:
 2015-11-05 ROwen    Stop using dangerous bare "except:".
 """
 import re
-
 import numpy
 
 AngstromStr = u"\N{ANGSTROM SIGN}"
 DegStr = u"\N{DEGREE SIGN}"
 DMSStr = DegStr + "'\""
 LambdaStr = "\u00c5" # for some reason this fails: u"\N{GREEK SMALL LETTER LAMBDA}"
-MuStr = u"\N{GREEK SMALL LETTER MU}"
+MuStr = u"\N{MICRO SIGN}"
 
 def dmsStrFromDeg (decDeg, nFields=3, precision=1, omitExtraFields = False):
     """Convert a number to a sexagesimal string with 1-3 fields.

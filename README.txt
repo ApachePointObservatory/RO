@@ -4,3 +4,5 @@ Tkinter-compatible networking.
 
 The docs directory contains installation instructions, an overview,
 version history and the license.
+
+> **WARNING:** this version is Python 3 only in preparation for SDSS-V. For SDSS-IV, use the ``python2`` branch.
