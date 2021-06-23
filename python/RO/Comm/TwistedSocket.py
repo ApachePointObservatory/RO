@@ -102,7 +102,7 @@ class _SocketProtocol(Protocol):
         Translates bytes into lines, and calls lineReceived (or
         rawDataReceived, depending on mode.)
         """
-        self.__buffer = self.__buffer + data
+        self.__buffer = self.__buffer + data.decode()
         self._readCallback(self)
 
     def connectionMade(self):
@@ -308,13 +308,13 @@ class Socket(BaseSocket):
         #print "%s.write(%r)" % (self, data)
         if not self.isReady:
             raise RuntimeError("%s.write(%r) failed: not connected" % (self, data))
-        self._protocol.transport.write(str(data))
+        self._protocol.transport.write(data)
 
     def writeLine(self, data):
         """Write a line of data terminated by standard newline
         """
         #print "%s.writeLine(data=%r)" % (self, data)
-        self.write(data + self.lineTerminator)
+        self.write((data + self.lineTerminator).encode())
 
     def _connectTimeout(self):
         """Call if connection times out
