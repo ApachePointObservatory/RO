@@ -70,9 +70,10 @@ History:
 """
 __all__ = ['LogWdg']
 
-from six.moves import tkinter
+import tkinter
+
 import RO.Alg
-from . import Text
+from .Text import Text
 
 _AllTextTag = "__alltext"
 
@@ -107,15 +108,15 @@ class LogWdg(tkinter.Frame):
         - **kargs: additional keyword arguments for Frame
         """
         tkinter.Frame.__init__(self, master=master, **kargs)
-
+        
         self.maxLineIndex = maxLines + 1
         self.doAutoScroll = bool(doAutoScroll)
-
+        
         self.yscroll = tkinter.Scrollbar (
             master = self,
             orient = "vertical",
         )
-        self.text = Text.Text (
+        self.text = Text(
             master = self,
             yscrollcommand = self.yscroll.set,
             wrap = "word",
@@ -129,7 +130,7 @@ class LogWdg(tkinter.Frame):
         self.yscroll.configure(command=self.text.yview)
         self.text.grid(row=1, column=0, sticky="nsew")
         self.yscroll.grid(row=1, column=1, sticky="ns")
-
+        
         self.text.tag_configure(_AllTextTag)
 
         # set up severity tags and tie them to color preferences
@@ -142,12 +143,12 @@ class LogWdg(tkinter.Frame):
                 self.text.tag_configure(sevTag)
                 continue
             pref.addCallback(RO.Alg.GenericCallback(self._updSevTagColor, sevTag), callNow=True)
-
+        
         self.findCountVar = tkinter.IntVar()
 
         self.rowconfigure(1, weight=1)
         self.columnconfigure(0, weight=1)
-
+        
         # disable editing actions
         def killEvent(evt):
             return "break"
@@ -156,12 +157,12 @@ class LogWdg(tkinter.Frame):
         self.text.bind("<<Paste>>", killEvent)
         self.text.bind("<<Clear>>", killEvent)
         self.text.bind("<Key>", killEvent)
-
+    
     def addMsg(self, astr, tags=(), severity=RO.Constants.sevNormal):
         """Append a line of data to the log, adding a trailing \n
-
+        
         If you do not want a trailing \n added for you then call addOutput instead.
-
+        
         Inputs:
         - astr: data to append (a trailing \n IS added for you)
         - tags: tags for the text. Warning: tags whose names begin with __ (two underscores)
@@ -169,12 +170,12 @@ class LogWdg(tkinter.Frame):
         - severity: one of the RO.Constants.sevX constants
         """
         self.addOutput(astr + "\n", tags=tags, severity=severity)
-
+    
     def addOutput(self, astr, tags=(), severity=RO.Constants.sevNormal):
         """Append data to the log without adding a trailing \n.
-
+        
         If you want a trailing \n then you must supply it or call addMsg instead.
-
+        
         Inputs:
         - astr: text to append (a trailing \n is NOT added for you)
         - tags: tags for the text
@@ -183,25 +184,25 @@ class LogWdg(tkinter.Frame):
         #print "addOutput(astr=%r; tags=%r)" % (astr, tags)
         # set auto-scroll flag true if scrollbar is at end
         doScrollToEnd = self.doAutoScroll and self.isScrolledToEnd()
-
+        
         # insert tagged text at end
         tags = (_AllTextTag, _SevTagDict[severity]) + tuple(tags)
         tagStr = " ".join(tags)
         self.text.insert("end", astr, tagStr)
-
+        
         # truncate extra lines, if any
         extraLines = int(float(str(self.text.index("end"))) - self.maxLineIndex)
         if extraLines > 0:
             self.text.delete("1.0", str(extraLines) + ".0")
-
+        
         if doScrollToEnd:
             self.text.see("end")
-
+    
     def addOutputList(self, strTagSevList):
         """Append a list of (text, tags, severity) data to the log.
-
+        
         You are responsible for supplying \n at the end of each line.
-
+        
         Each element of the list must contain exactly three entries:
         - astr: the text to append; you must supply \n for the end of each line
         - tags: a collection of tags
@@ -234,10 +235,10 @@ class LogWdg(tkinter.Frame):
         # flatten strTagList to str0, tag0, str1, tag1,...
         flatStrTagList = [item for strOrTag in strTagList for item in strOrTag]
         self.text.insert("end", *flatStrTagList)
-
+        
         if doScrollToEnd:
             self.text.see("end")
-
+        
     def clearOutput(self):
         self.text.delete("1.0", "end")
 
@@ -251,7 +252,7 @@ class LogWdg(tkinter.Frame):
         (e.g. an Entry callback). If you do this, the count variable
         may not be updated, in which case RuntimeError is raised.
         Call using "after" to avoid the problem.
-
+        
         Inputs:
         - tag: tag for which to search
         - backwards: True to search backwards
@@ -279,12 +280,12 @@ class LogWdg(tkinter.Frame):
 
         if doWrap:
             stopIndex = None
-
+        
         foundRange = findFunc(tag, startIndex, stopIndex)
         if not foundRange:
             self.bell()
             return
-
+        
         foundStart, foundEnd = foundRange
 
         # text found; change selection to it
@@ -294,12 +295,12 @@ class LogWdg(tkinter.Frame):
 
     def getSeverityTags(self, minSeverity):
         """Return all severity tags that have severity >= minSeverity
-
+        
         Inputs:
         - minSeverity: minimum severity for returned tags; an RO.Constants.sev constant
         """
         return _SevTagListDict[minSeverity]
-
+    
     def isScrolledToEnd(self):
         """Return True if scrollbar is at the end or if not sure (window not yet painted)
         """
@@ -308,7 +309,7 @@ class LogWdg(tkinter.Frame):
         # scrollPos[1] = scrollPos[0]: window has not yet been painted
         scrollPos = self.yscroll.get()
         return scrollPos[1] == 1.0 or scrollPos[0] == scrollPos[1]
-
+    
     def search(self, searchStr, backwards=False, doWrap=False, elide=True, noCase=False, regExp=False):
         """Find and select the next instance of a specified string.
         The search starts from the current selection, if any,
@@ -319,7 +320,7 @@ class LogWdg(tkinter.Frame):
         (e.g. an Entry callback). If you do this, the count variable
         may not be updated, in which case RuntimeError is raised.
         Call using "after" to avoid the problem.
-
+        
         Inputs:
         - searchStr: string for which to search
         - backwards: True to search backwards
@@ -368,22 +369,22 @@ class LogWdg(tkinter.Frame):
             if foundCount == 0:
                 return
             raise RuntimeError("Found string but count not set; try calling from \"after\"")
-
+        
         # text found; change selection to it
         self.text.tag_remove("sel", "1.0", "end")
         endIndex = "%s + %s chars" % (startIndex, foundCount)
         self.text.tag_add("sel", startIndex, endIndex)
         self.text.see(startIndex)
-
+    
     def findAll(self, searchStr, tag, lineTag=None, removeTags=True, elide=True, noCase=False, regExp=False, startInd="1.0"):
         """Find and tag all instances of a specified string.
-
+        
         Warning: due to a bug in tk or Tkinter, you must not call this directly
         from a callback function that modifies the text being searched for
         (e.g. an Entry callback). If you do this, the count variable
         may not be updated, in which case RuntimeError is raised.
         Call using "after" to avoid the problem.
-
+        
         Inputs:
         - searchStr: string for which to search
         - tag: tag for the found data; if None then only lineTag is applied.
@@ -395,9 +396,9 @@ class LogWdg(tkinter.Frame):
         - noCase: True to ignore case
         - regExp: True for regular expression search
         - startInd: starting index (defaults to "1.0" = the beginning)
-
+        
         Returns the number of matches.
-
+        
         Notes:
         - Make sure tag is "above" lineTag if you want its characteristics to dominate.
           You can tag_configure tag later, or use tag_raise.
@@ -416,11 +417,11 @@ class LogWdg(tkinter.Frame):
                 self.text.tag_remove(tag, "1.0", "end")
             if lineTag:
                 self.text.tag_remove(lineTag, "1.0", "end")
-
+        
         if not searchStr:
             #print "no search string"
             return nFound
-
+        
         searchStartInd = startInd
         self.findCountVar.set(-1)
         while True:
@@ -441,7 +442,7 @@ class LogWdg(tkinter.Frame):
                 if foundCount == 0:
                     return nFound
                 raise RuntimeError("Found string but count not set; try calling from \"after\"")
-
+            
             nFound += 1
             foundEndInd = self.text.index("%s + %s chars" % (foundStartInd, foundCount))
             #print "foundStartInd=%r; foundEndInd=%r" % (foundStartInd, foundEndInd)
@@ -455,7 +456,7 @@ class LogWdg(tkinter.Frame):
             searchStartInd = foundEndInd
             #print "searchStartind=%r" % (searchStartInd,)
         return nFound
-
+    
     def setEnable(self, doEnable):
         """Set enabled state.
         """
@@ -468,7 +469,7 @@ class LogWdg(tkinter.Frame):
                 self.text.tag_configure(tag, elide=False)
             else:
                 self.text.tag_configure(_AllTextTag, elide="")
-
+    
     def showTagsOr(self, tags):
         """Only show text that is tagged with one or more of the specified tags.
         """
@@ -481,7 +482,7 @@ class LogWdg(tkinter.Frame):
                 self.text.tag_configure(tag, elide=False)
             else:
                 self.text.tag_configure(tag, elide="")
-
+    
     def showTagsAnd(self, tags):
         """Only show text that is tagged with all of the specified tags.
         """
@@ -497,7 +498,7 @@ class LogWdg(tkinter.Frame):
 
     def _updSevTagColor(self, sevTag, color, colorPref):
         """Apply the current color appropriate for the current severity.
-
+        
         Called automatically. Do NOT call manually.
         """
         #print "_updSevTagColor(sevTag=%r, color=%r, colorPref=%r)" % (sevTag, color, colorPref)
@@ -507,9 +508,9 @@ class LogWdg(tkinter.Frame):
 if __name__ == '__main__':
     import random
     import sys
-    from . import PythonTk
-    root = PythonTk.PythonTk()
-
+    from .PythonTk import PythonTk
+    root = PythonTk()
+    
     testFrame = LogWdg (
         master=root,
         maxLines=50,
@@ -517,19 +518,19 @@ if __name__ == '__main__':
     testFrame.grid(row=0, column=0, sticky="nsew")
 
     severityList = list(RO.Constants.SevNameDict.keys())
-
+    
     entry = tkinter.Entry(root)
     entry.grid(row=1, column=0, sticky="nsew")
-
+    
     def addMsg(msgStr):
         """Add a message with random severity"""
         testFrame.addMsg(msgStr, severity=random.choice(severityList))
-
+        
     def addTolog(evt=None):
         try:
             msgStr = entry.get()
             entry.delete(0,"end")
-
+            
             addMsg(msgStr)
         except Exception as e:
             sys.stderr.write("Could not extract or send: %r\n" % (msgStr,))

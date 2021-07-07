@@ -32,14 +32,16 @@ History:
 2005-06-03 ROwen    Fixed one indentation quirk (space tab -> tab).
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 2015-11-05 ROwen    Changed ==/!= True/False to is/is not True/False to modernize the code.
+2020-02-10 DGatlin  Modified imports for Python 3
 """
 __all__ = ['OptionButtons']
 
 import RO.InputCont
-from . import Button
-from . import Checkbutton
-from . import InputContFrame
+from .Button import Button
+from .Checkbutton import Checkbutton
+from .InputContFrame import InputContFrame
 from .Label import Label
+
 
 class OptionButtons(InputContFrame):
     def __init__ (self,
@@ -102,7 +104,7 @@ class OptionButtons(InputContFrame):
                 text = headerText,
                 helpURL = helpURL,
             ).pack(side="top", anchor="w")
-
+        
         if formatFunc is None:
             formatFunc = RO.InputCont.BasicFmt()
 
@@ -115,7 +117,7 @@ class OptionButtons(InputContFrame):
             # name, label, default value, helpURL, helpText
             # and the last two items are optional
             nameStr, labelStr, defVal = optionData[0:3]
-
+            
             def listGet(aList, ind, defVal=None):
                 try:
                     return aList[ind]
@@ -135,7 +137,7 @@ class OptionButtons(InputContFrame):
             wdg.pack(side="top", anchor="w")
             wdgList.append(wdg)
             wdgNames.append(nameStr)
-
+        
         # create input container
         self.inputCont = (
             RO.InputCont.BoolNegCont (
@@ -147,7 +149,7 @@ class OptionButtons(InputContFrame):
                 formatFunc = formatFunc,
             )
         )
-
+    
         # optional extra buttons
         self.optWdgList = []
 
@@ -161,7 +163,7 @@ class OptionButtons(InputContFrame):
                 helpText = "Restore defaults",
             )
             self.optWdgList.append(defButtonWdg)
-
+        
         # optional "clear" button
         if clearButton is True:
             clearButton = "Clear"
@@ -176,18 +178,18 @@ class OptionButtons(InputContFrame):
         # pack optional buttons, if any
         for wdg in self.optWdgList:
             wdg.pack(side="top", anchor="nw")
-
+    
 if __name__ == "__main__":
-    from . import PythonTk
-    root = PythonTk.PythonTk()
+    from .PythonTk import PythonTk
+    root = PythonTk()
 
     def doPrint():
         print("getString() = %r" % (optFrame.getString(),))
-
+    
     def setEnable(wdg=None):
         optFrame.setEnable(enableButton.getBool())
 
-    enableButton = Checkbutton (
+    enableButton = Checkbutton.Checkbutton (
         master = root,
         defValue = True,
         callFunc = setEnable,

@@ -5,7 +5,7 @@ Type and press <return> in the entry field along the bottom to send data
 """
 import sys
 import os
-from six.moves import tkinter
+import tkinter
 RORoot = os.path.join(os.path.dirname(os.path.abspath(os.path.dirname(__file__))), "python")
 sys.path.append(RORoot)
 import RO.CnvUtil
@@ -16,23 +16,23 @@ class SerialTerminal(tkinter.Frame):
     def __init__(self, master, portName, localEcho=False, **serialOptions):
         tkinter.Frame.__init__(self, master)
         self.localEcho = RO.CnvUtil.asBool(localEcho)
-
+        
         self.conn = RO.Comm.TkSerial.TkSerial(portName, readCallback=self.doRead, **serialOptions)
         self.logWdg = RO.Wdg.LogWdg(master)
         self.logWdg.grid(row=0, column=0, sticky="nsew")
 
         self.cmdWdg = RO.Wdg.CmdWdg(master, self.doWrite)
         self.cmdWdg.grid(row=1, column=0, sticky="ew")
-
+        
         self.rowconfigure(1, weight=1)
         self.columnconfigure(0, weight=1)
-
+    
     def doRead(self, conn):
         newData = self.conn.readLine()
         if not newData:
             return
         self.logWdg.addOutput(newData + "\n")
-
+    
     def doWrite(self, strToSend):
         if self.localEcho:
             self.logWdg.addOutput(strToSend + "\n")
@@ -55,7 +55,7 @@ localEcho: True or False (default: False)
     portName = sys.argv[1]
     for argInd in range(2, nArgs, 2):
         serialOptions[sys.argv[argInd]] = sys.argv[argInd+1]
-
+    
     root = tkinter.Tk()
     serTerm = SerialTerminal(root, portName, **serialOptions)
     root.mainloop()

@@ -14,10 +14,10 @@ WARNING: before using any of these objects you must do two things:
 
 Here are some examples:
 
-1) Using Tkinter with the Tcl event loop (no Twisted)
+1) Using tkinter with the Tcl event loop (no Twisted)
 
-from six.moves import tkinter
-root = Tkinter.Tk()
+import tkinter
+root = tkinter.Tk()
 
 import RO.Comm.Generic
 RO.Comm.Generic.setFramework("tk")
@@ -39,11 +39,11 @@ RO.Comm.Generic.setFramework("twisted")
 #...
 reactor.run()
 
-3) Using Twisted framework with Tkinter
+3) Using Twisted framework with tkinter
 
-from six.moves import tkinter
+import tkinter
 import twisted.internet.tksupport
-root = Tkinter.Tk()
+root = tkinter.Tk()
 twisted.internet.tksupport.install(root)
 from twisted.internet import reactor
 
@@ -60,9 +60,11 @@ History:
 __all__ = ["setFramework", "getFramework", "getFrameworkSet", "TCPSocket", "TCPSocket", "Timer", "WaitForTCPServer"]
 
 import time
+
 from RO.AddCallback import safeCall2
 
 _Framework = None
+
 
 def setFramework(framework):
     """Set which framework you wish to use.
@@ -77,7 +79,8 @@ def setFramework(framework):
     global _Framework, TCPSocket, TCPServer, Timer
     if framework not in getFrameworkSet():
         frameworkList = sorted(list(getFrameworkSet()))
-        raise ValueError("framework=%r; must be one of %s" % (frameworkList,))
+        raise ValueError("framework=%r; must be one of %s".fomrat(
+            *frameworkList))
 
     if framework == "tk":
         from RO.Comm.TkSocket import TCPSocket, TCPServer
@@ -166,7 +169,7 @@ class WaitForTCPServer(object):
 
 
 if __name__ == "__main__":
-    from six.moves import tkinter
+    import tkinter
     root = tkinter.Tk()
     root.withdraw()
     setFramework("tk") # since it is almost always installed

@@ -15,7 +15,8 @@ History:
 """
 __all__ = ['enableBalloonHelp']
 
-from six.moves import tkinter
+import tkinter
+
 from RO.TkUtil import Timer
 
 _HelpObj = None
@@ -125,9 +126,9 @@ def enableBalloonHelp(delayMS = 1000):
 
 
 if __name__ == '__main__':
-    from . import OptionMenu
+    from .OptionMenu import OptionMenu
     root = tkinter.Tk()
-
+    
     l0 = tkinter.Label(text="Data")
     l0.grid(row=0, column=0, sticky="e")
     l0.helpText = "Help for the Data label"
@@ -141,13 +142,13 @@ if __name__ == '__main__':
     l2 = tkinter.Label(text="Option Menu")
     l2.helpText = "Help for the option menu label"
     l2.grid(row=2, column=0)
-    m2 = OptionMenu.OptionMenu(root,
+    m2 = OptionMenu(root,
         items = ("Item 1", "Item 2", "Etc"),
         defValue = "Item 1",
         helpText = "Help for the menu button",
     )
     m2.grid(row=2, column=1)
 
-    ph = enableBalloonHelp()
+    enableBalloonHelp()
 
     root.mainloop()

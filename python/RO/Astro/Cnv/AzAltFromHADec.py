@@ -8,7 +8,9 @@ History:
 __all__ = ["azAltFromHADec"]
 
 import numpy
+
 import RO.MathUtil
+
 
 def azAltFromHADec (haDec, lat):
     """Converts cartesian HA/Dec position to alt/az.

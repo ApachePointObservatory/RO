@@ -1,3 +1,7 @@
 dist/
 RO.egg-info/
 *.pyc
+
+# Pycharm settings
+.idea
+

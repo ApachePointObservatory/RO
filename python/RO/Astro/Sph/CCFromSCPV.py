@@ -3,8 +3,8 @@
 
 __all__ = ["ccFromSCPV"]
 
-import RO.PhysConst
 import RO.MathUtil
+import RO.PhysConst
 from .CCFromSC import ccFromSC
 
 # Magic Numbers

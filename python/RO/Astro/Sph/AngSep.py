@@ -9,9 +9,12 @@ History:
 __all__ = ["angSep"]
 
 import math
+
 import numpy
+
 import RO.MathUtil
 from .DCFromSC import dcFromSC
+
 
 def angSep(posA, posB):
     """Computes the angular separation between two points on a sphere.

@@ -40,17 +40,14 @@ History:
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
-
-from __future__ import print_function
-
-
 __all__ = ['HTTPGet']
 
 import atexit
 import os
 import sys
 import time
-from six.moves import tkinter
+import tkinter
+
 import RO.AddCallback
 import RO.StringUtil
 import RO.TkUtil
@@ -69,18 +66,18 @@ class _ExitClass:
         self.timeLim = timeLim
         self.dtime = max(dtime, 0.01)
         self.didRegisterExit = False
-
+    
     def addTransfer(self, httpGetter):
         """Add one httpGetter.
         """
         if _DebugExit:
             print("HTTPGet._Exit.addTransfer(%s)" % (httpGetter,))
-        httpGetter.addDoneCallback(self.removeTransfer)
+        httpGetter.addDoneCallback(self.removeTransfer) 
         self.transferDict[httpGetter] = None
         if not self.didRegisterExit:
             atexit.register(self.abortAll)
             self.didRegisterExit = True
-
+    
     def removeTransfer(self, httpGetter):
         """Remove one httpGetter.
         Does not verify that the getter is finished.
@@ -88,7 +85,7 @@ class _ExitClass:
         if _DebugExit:
             print("HTTPGet._Exit.removeTransfer(%s)" % (httpGetter,))
         self.transferDict.pop(httpGetter)
-
+    
     def abortAll(self):
         """Abort all outsanding transfers.
         Meant to be registered with atexit.
@@ -122,7 +119,7 @@ _ExitObj = _ExitClass()
 
 class HTTPGet(RO.AddCallback.BaseMixin):
     """Downloads the specified url to a file.
-
+    
     Inputs:
     - fromURL   url of file to download
     - toPath    full path of destination file
@@ -140,7 +137,7 @@ class HTTPGet(RO.AddCallback.BaseMixin):
     - dispStr   a string to display while downloading the file;
                 if omitted, fromURL is displayed
     - timeLim   time limit (sec) for the total transfer; if None then no limit
-
+    
     Callbacks receive one argument: this object.
     """
     # state constants
@@ -164,13 +161,13 @@ class HTTPGet(RO.AddCallback.BaseMixin):
     _AbortableStates = set((Queued, Connecting, Running))
     _DoneStates = set((Done, Aborted, Failed))
     _FailedStates = set((Aborted, Failed))
-
+    
     StateStrMaxLen = 0
     for stateStr in _AllStates:
         StateStrMaxLen = max(StateStrMaxLen, len(stateStr))
     del(stateStr)
     _tkApp = None
-
+    
     def __init__(self,
         fromURL,
         toPath,
@@ -213,9 +210,9 @@ class HTTPGet(RO.AddCallback.BaseMixin):
         self._totBytes = None
         self._state = self.Queued
         self._errMsg = None
-
+        
         self._createdFile = False
-
+        
         self._tkApp.eval('package require http')
 
         RO.AddCallback.BaseMixin.__init__(self, stateFunc, callNow=False)
@@ -229,19 +226,19 @@ class HTTPGet(RO.AddCallback.BaseMixin):
 
         if startNow:
             self.start()
-
+    
     def addDoneCallback(self, func):
         """Add a function that will be called when the transfer completes"""
         self._doneCallbacks.append(func)
-
+    
     def removeDoneCallback(self, func):
         """Remove a done callback.
         """
         self._doneCallbacks.remove(func)
-
+    
     def start(self):
         """Start the download.
-
+        
         If state is not Queued, raises RuntimeError
         """
         if _Debug:
@@ -254,7 +251,7 @@ class HTTPGet(RO.AddCallback.BaseMixin):
         try:
             # verify output file and verify/create output directory, as appropriate
             self._toPrep()
-
+    
             # open output file
             if _Debug:
                 print("HTTPGet: opening output file %r" % (self.toPath,))
@@ -265,7 +262,7 @@ class HTTPGet(RO.AddCallback.BaseMixin):
                     self._tkApp.call('fconfigure', self._tclFile, "-encoding", "binary", "-translation", "binary")
             except tkinter.TclError as e:
                 raise RuntimeError("Could not open %r: %s" % (self.toPath, e))
-
+            
             # start http transfer
             doneCallback = RO.TkUtil.TclFunc(self._httpDoneCallback, debug=_Debug)
             progressCallback = RO.TkUtil.TclFunc(self._httpProgressCallback, debug=_Debug)
@@ -312,13 +309,13 @@ class HTTPGet(RO.AddCallback.BaseMixin):
         """If the transfer failed, an explanation as a string, else None
         """
         return self._errMsg
-
+    
     @property
     def state(self):
         """Returns the current state as a string.
         """
         return self._state
-
+    
     @property
     def isAbortable(self):
         """True if the transaction can be aborted
@@ -330,13 +327,13 @@ class HTTPGet(RO.AddCallback.BaseMixin):
         """Return True if the transaction is finished (succeeded, aborted or failed), False otherwise.
         """
         return self._state in self._DoneStates
-
+    
     @property
     def didFail(self):
         """Return True if the transaction failed or was aborted
         """
         return self._state in self._FailedStates
-
+    
     @property
     def readBytes(self):
         """Bytes read so far
@@ -346,7 +343,7 @@ class HTTPGet(RO.AddCallback.BaseMixin):
     @property
     def totBytes(self):
         """Total bytes in file, if known, None otherwise.
-
+        
         The value is certain to be unknown until the transfer starts;
         after that it depends on whether the server sends the info.
         """
@@ -364,14 +361,14 @@ class HTTPGet(RO.AddCallback.BaseMixin):
         # if state is not valid, reject
         if self.isDone:
             return
-
+    
         if newState not in self._AllStates:
             raise RuntimeError("Unknown state %r" % (newState,))
-
+        
         self._state = newState
         if newState == self.Failed:
             self._errMsg = errMsg
-
+        
         isDone = self.isDone
         if isDone:
             self._cleanup()
@@ -381,8 +378,8 @@ class HTTPGet(RO.AddCallback.BaseMixin):
             # call done callbacks
             # use a copy in case a callback deregisters itself
             for func in self._doneCallbacks[:]:
-                RO.AddCallback.safeCall2(str(self), func, self)
-
+                RO.AddCallback.safeCall2(str(self), func, self) 
+        
             # remove all callbacks
             self._removeAllCallbacks()
             self._doneCallbacks = []
@@ -390,9 +387,9 @@ class HTTPGet(RO.AddCallback.BaseMixin):
 
     def _cleanup(self):
         """Clean up everything except references to callbacks.
-
+        
         Warning: this is a private method: call only from _setState!
-
+        
         Close the input and output files and deregister the tcl callbacks.
         If state in (Aborted, Failed), delete the output file.
         """
@@ -412,7 +409,7 @@ class HTTPGet(RO.AddCallback.BaseMixin):
             self._tclFile = None
             if _Debug:
                 print("output file closed")
-
+        
         if self._createdFile and self._state in (self.Aborted, self.Failed):
             try:
                 os.remove(self.toPath)
@@ -428,14 +425,14 @@ class HTTPGet(RO.AddCallback.BaseMixin):
         if self._tclHTTPConn is None:
             sys.stderr.write("HTTPGet warning: _httpDoneCallback called but no http connection\n")
             return
-
+        
         if _Debug:
             print("%s.httpDoneCallback()" % (self,))
             print("status=%r" % (self._tkApp.call('::http::status', self._tclHTTPConn),))
             print("code=%r" % (self._tkApp.call('::http::code', self._tclHTTPConn),))
             print("ncode=%r" % (self._tkApp.call('::http::ncode', self._tclHTTPConn),))
             print("error=%r" % (self._tkApp.call('::http::error', self._tclHTTPConn),))
-
+        
         httpState = self._tkApp.call('::http::status', self._tclHTTPConn)
         errMsg = None
         if httpState == "ok":
@@ -462,9 +459,9 @@ class HTTPGet(RO.AddCallback.BaseMixin):
             errMsg = self._tkApp.call('::http::error', self._tclHTTPConn)
             if not errMsg:
                 errMsg = httpState
-
+        
         self._setState(newState, errMsg)
-
+    
     def _httpProgressCallback(self, token, totBytes, readBytes):
         """http callback function.
         """
@@ -482,14 +479,14 @@ class HTTPGet(RO.AddCallback.BaseMixin):
         if (newTime - self._lastProgReportTime) > _ProgressInterval:
             self._doCallbacks()
             self._lastProgReportTime = newTime
-
+        
     def __str__(self):
         return "%s(%s)" % (self.__class__.__name__, self.fromURL)
 
     def _toPrep(self):
         """Create or verify the existence of the output directory
         and check if output file already exists.
-
+        
         Raise RuntimeError or IOError if anything is wrong.
         """
         if _Debug:
@@ -497,7 +494,7 @@ class HTTPGet(RO.AddCallback.BaseMixin):
         # if output file exists and not overwrite, complain
         if not self.overwrite and os.path.exists(self.toPath):
             raise RuntimeError("toPath %r already exists" % (self.toPath,))
-
+        
         # if directory does not exist, create it or fail, depending on createDir;
         # else if "directory" exists but is a file, fail
         toDir = os.path.dirname(self.toPath)
@@ -518,10 +515,10 @@ if __name__ == "__main__":
 
     testURL = "http://www.astro.washington.edu/"
     outFile = "httpget_test.html"
-
+    
     _Debug = False
     _DebugExit = True
-
+    
     def stateCallback(httpObj):
         print("state =", httpObj.state, end=' ')
         print("read %s of %s bytes" % (httpObj.readBytes, httpObj.totBytes))
@@ -529,7 +526,7 @@ if __name__ == "__main__":
             if httpObj.errMsg:
                 print("error message =", httpObj.errMsg)
             root.quit()
-
+            
     httpObj = HTTPGet(
         fromURL = testURL,
         toPath = outFile,

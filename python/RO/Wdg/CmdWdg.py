@@ -28,12 +28,14 @@ History:
 """
 __all__ = ['CmdWdg']
 
-from six.moves import tkinter
+import tkinter
+
 from . import Entry
+
 
 class CmdWdg (Entry.StrEntry):
     """Entry field for one-line text commands, with history.
-
+    
     Special keys:
     - <return>: execute current text (one or more \n-separated commands)
     - <up-arrow> or <control-p>: go backwards in history
@@ -56,9 +58,9 @@ class CmdWdg (Entry.StrEntry):
             master = master,
             helpURL = helpURL,
         **kargs)
-
+        
         self.cmdHistory = []
-
+        
         self.cmdFunc = cmdFunc
 
         self.histIndex = -1
@@ -73,12 +75,12 @@ class CmdWdg (Entry.StrEntry):
         self.bind('<Control-p>', self._doHistUp)
         self.bind('<KeyPress-Down>', self._doHistDown)
         self.bind('<Control-n>', self._doHistDown)
-
+    
     def clear(self):
         """Clear display"""
         Entry.StrEntry.clear(self)
         self.currText = ""
-
+    
     def _doCmd(self, evt=None):
         """Start executing the current command or \n-separated commands.
         """
@@ -94,12 +96,12 @@ class CmdWdg (Entry.StrEntry):
 
         # purge excess commands, if any
         del(self.cmdHistory[self.maxCmds:])
-
+        
         # execute command callback
         # (do this last in case it fails)
         if self.cmdFunc:
             self.cmdFunc(cmdStr)
-
+    
     def _doHistDown(self, *args, **kargs):
         """Go down one place in the history index;
         if at the bottom, then:
@@ -114,8 +116,8 @@ class CmdWdg (Entry.StrEntry):
             self.set(self.currText)
             self.histIndex = -1
             self.icursor(tkinter.END)
-        return "break" # prevent event from being propogated
-
+        return "break" # prevent event from being propogated            
+    
     def _doHistUp(self, *args, **kargs):
         """Go up one place in the history index.
         If at the top, display a blank line.
@@ -134,19 +136,19 @@ class CmdWdg (Entry.StrEntry):
         else:
             self.histIndex = len(self.cmdHistory)
             self.set("")
-        return "break" # prevent event from being propogated
+        return "break" # prevent event from being propogated            
 
     def _showKeyEvent(self, evt):
         """Show the details of a keystroke; for debugging and development.
         """
         print("Key event=%r" % (evt.__dict__, ))
-
-
+    
+    
 
 if __name__ == "__main__":
     from RO.Wdg.PythonTk import PythonTk
     root = PythonTk()
-
+    
     FailCmd = 'fail'
 
     def doCmd(cmdStr):

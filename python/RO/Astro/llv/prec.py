@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python 
 
 """
 History:
@@ -15,15 +15,15 @@ def prec(begEpoch, endEpoch):
     """
     Return the matrix of precession between two epochs
     (IAU 1976, FK5)
-
+    
     Inputs:
     - begEpoch  beginning Julian epoch (e.g. 2000 for J2000)
     - endEpoch  ending Julian epoch
-
+    
     Returns:
     - pMat      the precession matrix as a 3x3 numpy.array,
                 where pos(endEpoch) = rotMat * pos(begEpoch)
-
+    
     Based on Pat Wallace's PREC. His notes follow:
     - The epochs are TDB (loosely ET) Julian epochs.
     - Though the matrix method itself is rigorous, the precession
@@ -38,7 +38,7 @@ def prec(begEpoch, endEpoch):
     5600AD and exceed 1000 arcsec outside 6800BC to 8200AD.
     The routine PRECL implements a more elaborate model
     which is suitable for problems spanning several thousand years.
-
+    
     References:
     Lieske,J.H., 1979. Astron.Astrophys.,73,282.
     equations (6) & (7), p283.

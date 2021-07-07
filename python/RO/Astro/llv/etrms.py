@@ -9,8 +9,11 @@ P.T.Wallace Starlink    10 April 1990
 __all__ = ["etrms"]
 
 import math
+
 import numpy
+
 import RO.PhysConst
+
 
 def etrms(bep):
     """

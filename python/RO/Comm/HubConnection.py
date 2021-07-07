@@ -40,9 +40,10 @@ except ImportError:
     shaClass = sha.sha
 import sys
 
-from .TCPConnection import TCPConnection
 import RO.ParseMsg
 import RO.StringUtil
+from .TCPConnection import TCPConnection
+
 
 class HubConnection(TCPConnection):
     """Connection to Apache Point Observatory hub
@@ -80,7 +81,7 @@ class HubConnection(TCPConnection):
         )
         self._initData()
         self._loginExtra = loginExtra
-
+    
     def _initData(self):
         self.desProgID = None
         self.desUsername = None
@@ -88,7 +89,7 @@ class HubConnection(TCPConnection):
         self._authState = 0
         self.__password = None
         self._didStartAuth = False
-
+    
     def connect (self,
         progID,
         password,
@@ -112,7 +113,7 @@ class HubConnection(TCPConnection):
         self.__password = password
         self.desUsername = username
         TCPConnection.connect(self, host, port)
-
+            
     def getCmdr(self):
         """Returns the commander (in the form progID.username)
         last assigned by the Hub.
@@ -138,7 +139,7 @@ class HubConnection(TCPConnection):
         """
         cmdr = self.getCmdr()
         return cmdr and cmdr.split(".")[1]
-
+    
     def _authRead(self, sock, hubMsg):
         """Read callback for authorization.
         """
@@ -158,13 +159,13 @@ class HubConnection(TCPConnection):
                     raise RuntimeError("knockKnock failed: %s" % (errMsg,))
                 elif (nonce is None):
                     raise RuntimeError("nonce missing; got: %r" % (hubMsg,))
-
+                
                 # generate the combined password
                 combPassword = shaClass(nonce+password).hexdigest()
 
                 self._setState(self.Authorizing, "nonce received")
                 self._authState = 1
-
+                
                 # send the command auth login program=<user> password=<combPassword>
                 loginCmd = '1 auth login program="%s" password="%s" username="%s"' \
                     % (self.desProgID, combPassword, self.desUsername)
@@ -183,16 +184,16 @@ class HubConnection(TCPConnection):
                     raise RuntimeError("login failed: %s" % (errMsg,))
                 elif cmdr is None:
                     raise RuntimeError("cmdr missing; got: %r" % (hubMsg,))
-
+                
                 self.cmdr = cmdr
-
+                    
                 # authorization succeeded; start normal reads
                 self._authState = 2
                 self._authDone("you are %r" % (self.cmdr,))
             elif self._authState == 2:
                 sys.stderr.write("warning: lost message: %r", hubMsg)
             else:
-                raise RuntimeError("bug: unknown auth state %r" % (self._authState,))
+                raise RuntimeError("bug: unknown auth state %r" % (self._authState,))        
         except Exception as e:
             self._authState = -1
             self.disconnect(False, RO.StringUtil.strFromException(e))
@@ -209,19 +210,19 @@ class NullConnection(HubConnection):
     Always acts as if it is connected (so one can write data),
     but prohibits explicit connection (maybe not necessary,
     but done to make it clear to users that it is a fake).
-
+    
     cmdr = "TU01.me"
     """
     def __init__ (self, *args, **kargs):
         HubConnection.__init__(self, *args, **kargs)
-
+    
         self.desUsername = "me"
         self.cmdr = "TU01.me"
         self._state = self.Connected
 
     def connect(self, *args, **kargs):
         raise RuntimeError("NullConnection is always connected")
-
+    
     def disconnect(self):
         raise RuntimeError("NullConnection cannot disconnect")
 
@@ -230,7 +231,7 @@ class NullConnection(HubConnection):
 
 
 if __name__ == "__main__":
-    from six.moves import tkinter
+    import tkinter
     import RO.Wdg
     root = tkinter.Tk()
 
@@ -256,16 +257,16 @@ if __name__ == "__main__":
     def doConnect(host, port):
         class PasswordDialog(RO.Wdg.ModalDialogBase):
             def body(self, master):
-
+        
                 tkinter.Label(master, text="Program ID:").grid(row=0, column=0)
                 tkinter.Label(master, text="Password  :").grid(row=1, column=0)
-
+        
                 self.nameEntry = tkinter.Entry(master)
                 self.nameEntry.grid(row=0, column=1)
                 self.pwdEntry = tkinter.Entry(master, show="*")
                 self.pwdEntry.grid(row=1, column=1)
                 return self.nameEntry # return the item that gets initial focus
-
+        
             def setResult(self):
                 self.result = (self.nameEntry.get(), self.pwdEntry.get())
 

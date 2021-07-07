@@ -42,9 +42,9 @@ Here are manual workarounds for some common problems:
     Some useful programmatic settings:
 
     # by default the background color of the outside of the plot is gray; set using figure.facecolor:
-    matplotlib.rc("figure", facecolor="white")
+    matplotlib.rc("figure", facecolor="white") 
     # by default legends have large text; set using legend.fontsize:
-    matplotlib.rc("legend", fontsize="medium")
+    matplotlib.rc("legend", fontsize="medium") 
 
 Requirements:
 - Requires matplotlib built with TkAgg support
@@ -79,36 +79,38 @@ __all__ = ["StripChartWdg"]
 import bisect
 import datetime
 import time
+import tkinter
 
-import numpy
-from six.moves import tkinter
 import matplotlib
 import matplotlib.dates
+import numpy
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
 from RO.TkUtil import Timer
+
 
 class StripChartWdg(tkinter.Frame):
     """A widget to changing values in real time as a strip chart
-
+    
     Usage Hints:
     - For each variable quantity to display:
       - Call addLine once to specify the quantity
       - Call addPoint for each new data point you wish to display
 
     - For each constant line (e.g. limit) to display call addConstantLine
-
+    
     - To make sure a plot includes one or two y values (e.g. 0 or a range of values) call showY
 
     - To manually scale a Y axis call setYLimits (by default all y axes are autoscaled).
-
+    
     - All supplied times are POSIX timestamps (e.g. as supplied by time.time()).
         You may choose the kind of time displayed on the time axis (e.g. UTC or local time) using cnvTimeFunc
         and the format of that time using dateFormat.
-
+    
     Known Issues:
     matplotlib's defaults present a number of challenges for making a nice strip chart display.
     Some issues and manual solutions are discussed in the main file's document string.
-
+        
     Potentially Useful Attributes:
     - canvas: the matplotlib FigureCanvas
     - figure: the matplotlib Figure
@@ -128,7 +130,7 @@ class StripChartWdg(tkinter.Frame):
         cnvTimeFunc = None,
     ):
         """Construct a StripChartWdg with the specified time range
-
+        
         Inputs:
         - master: Tk parent widget
         - timeRange: range of time displayed (seconds)
@@ -142,7 +144,7 @@ class StripChartWdg(tkinter.Frame):
             typically an instance of TimeConverter; defaults to TimeConverter(useUTC=False)
         """
         tkinter.Frame.__init__(self, master)
-
+        
         self._timeRange = timeRange
         self._isVisible = self.winfo_ismapped()
         self._isFirst = True
@@ -187,7 +189,7 @@ class StripChartWdg(tkinter.Frame):
             subplot._scwBackground = None # background for animation
             subplot.label_outer() # disable axis labels on all but the bottom subplot
             subplot.set_ylim(auto=True) # set auto scaling for the y axis
-
+        
         self.bind("<Map>", self._handleMap)
         self.bind("<Unmap>", self._handleUnmap)
         self._timeAxisTimer = Timer()
@@ -195,7 +197,7 @@ class StripChartWdg(tkinter.Frame):
 
     def addConstantLine(self, y, subplotInd=0, **kargs):
         """Add a new constant to plot
-
+        
         Inputs:
         - y: value of constant line
         - subplotInd: index of subplot
@@ -212,7 +214,7 @@ class StripChartWdg(tkinter.Frame):
 
     def addLine(self, subplotInd=0, **kargs):
         """Add a new quantity to plot
-
+        
         Inputs:
         - subplotInd: index of subplot
         - All other keyword arguments are sent to the matplotlib Line2D constructor
@@ -230,7 +232,7 @@ class StripChartWdg(tkinter.Frame):
             cnvTimeFunc = self._cnvTimeFunc,
             wdg = self,
         **kargs)
-
+    
     def clear(self):
         """Clear data in all non-constant lines
         """
@@ -240,10 +242,10 @@ class StripChartWdg(tkinter.Frame):
 
     def getDoAutoscale(self, subplotInd=0):
         return self.subplotArr[subplotInd].get_autoscaley_on()
-
+    
     def removeLine(self, line):
         """Remove an existing line added by addLine or addConstantLine
-
+        
         Raise an exception if the line is not found
         """
         if isinstance(line, _Line):
@@ -264,7 +266,7 @@ class StripChartWdg(tkinter.Frame):
 
     def setDoAutoscale(self, doAutoscale, subplotInd=0):
         """Turn autoscaling on or off for the specified subplot
-
+        
         You can also turn off autoscaling by calling setYLimits.
         """
         doAutoscale = bool(doAutoscale)
@@ -273,17 +275,17 @@ class StripChartWdg(tkinter.Frame):
         if doAutoscale:
             subplot.relim()
             subplot.autoscale_view(scalex=False, scaley=True)
-
+    
     def setYLimits(self, minY, maxY, subplotInd=0):
         """Set y limits for the specified subplot and disable autoscaling.
-
+        
         Note: if you want to autoscale with a minimum range, use showY.
         """
         self.subplotArr[subplotInd].set_ylim(minY, maxY, auto=False)
-
+    
     def showY(self, y0, y1=None, subplotInd=0):
         """Specify one or two values to always show in the y range.
-
+        
         Inputs:
         - subplotInd: index of subplot
         - y0: first y value to show
@@ -294,7 +296,7 @@ class StripChartWdg(tkinter.Frame):
         """
         subplot = self.subplotArr[subplotInd]
         yMin, yMax = subplot.get_ylim()
-
+        
         if y1 is not None:
             yList = [y0, y1]
         else:
@@ -317,19 +319,19 @@ class StripChartWdg(tkinter.Frame):
             for line in subplot._scwLines:
                 subplot.draw_artist(line.line2d)
             self.canvas.blit(subplot.bbox)
-
+    
     def _handleMap(self, evt):
         """Handle map event (widget made visible)
         """
         self._isVisible = True
         self._handleDrawEvent()
         self._updateTimeAxis()
-
+    
     def _handleUnmap(self, evt):
         """Handle unmap event (widget made not visible)
         """
         self._isVisible = False
-
+    
     def _updateTimeAxis(self):
         """Update the time axis; calls itself
         """
@@ -337,7 +339,7 @@ class StripChartWdg(tkinter.Frame):
         tMin = tMax - self._timeRange
         minMplDays = self._cnvTimeFunc(tMin)
         maxMplDays = self._cnvTimeFunc(tMax)
-
+        
         self._purgeCounter = (self._purgeCounter + 1) % self._maxPurgeCounter
         doPurge = self._purgeCounter == 0
 
@@ -345,7 +347,7 @@ class StripChartWdg(tkinter.Frame):
             for subplot in self.subplotArr:
                 for line in subplot._scwLines:
                     line._purgeOldData(minMplDays)
-
+        
         if self._isVisible or self._isFirst:
             for subplot in self.subplotArr:
                 subplot.set_xlim(minMplDays, maxMplDays)
@@ -361,7 +363,7 @@ class StripChartWdg(tkinter.Frame):
 
 class _Line(object):
     """A line (trace) on a strip chart representing some varying quantity
-
+    
     Attributes that might be useful:
     - line2d: the matplotlib.lines.Line2D associated with this line
     - subplot: the matplotlib Subplot instance displaying this line
@@ -370,7 +372,7 @@ class _Line(object):
     """
     def __init__(self, subplot, cnvTimeFunc, wdg, **kargs):
         """Create a line
-
+        
         Inputs:
         - subplot: the matplotlib Subplot instance displaying this line
         - cnvTimeFunc: a function that takes a POSIX timestamp (e.g. time.time()) and returns matplotlib days;
@@ -388,10 +390,10 @@ class _Line(object):
         self.line2d = matplotlib.lines.Line2D([], [], animated=True, **kargs)
         self.subplot.add_line(self.line2d)
         self.subplot._scwLines.append(self)
-
+        
     def addPoint(self, y, t=None):
         """Append a new data point
-
+        
         Inputs:
         - y: y value; if None the point is silently ignored
         - t: time as a POSIX timestamp (e.g. time.time()); if None then "now"
@@ -405,7 +407,7 @@ class _Line(object):
         self._tList.append(mplDays)
         self._yList.append(y)
         self._redraw()
-
+    
     def _redraw(self):
         """Redraw the graph
         """
@@ -443,7 +445,7 @@ class _Line(object):
 
         Inputs:
         - minMplDays: time before which to delete data (matpotlib days)
-
+        
         Warning: does not update the display (the caller must do that)
         """
         if not self._tList:
@@ -461,7 +463,7 @@ class TimeConverter(object):
     _DaysPerSecond = 1.0 / (24.0 * 60.0 * 60.0)
     def __init__(self, useUTC, offset=0.0):
         """Create a TimeConverter
-
+        
         Inputs:
         - useUTC: use UTC instead of the local time zone?
         - offset: time offset: returned time - supplied time (sec)
@@ -475,14 +477,14 @@ class TimeConverter(object):
             d = datetime.datetime.fromtimestamp(unixSec)
         matplotlibDays = matplotlib.dates.date2num(d)
         self.mplSecMinusUnixSec = (matplotlibDays / self._DaysPerSecond) - unixSec
-
+            
     def __call__(self, unixSec):
         """Given a a POSIX timestamp (e.g. from time.time()) return matplotlib days
         """
         return (unixSec + self._offset + self.mplSecMinusUnixSec) * self._DaysPerSecond
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":   
     import RO.Alg
     root = tkinter.Tk()
     stripChart = StripChartWdg(
@@ -508,7 +510,7 @@ if __name__ == "__main__":
 
     # stop major time ticks from jumping around as time advances:
     stripChart.xaxis.set_major_locator(matplotlib.dates.SecondLocator(bysecond=list(range(0,60,10))))
-
+    
     varDict = {
         countsLine: RO.Alg.ConstrainedGaussianRandomWalk(1, 0.2, 0, 2.8),
         walk1Line:  RO.Alg.RandomWalk.GaussianRandomWalk(0, 2),
@@ -527,7 +529,7 @@ if __name__ == "__main__":
     addRandomValues(countsLine, interval=0.5)
     addRandomValues(walk1Line, 1.6)
     addRandomValues(walk2Line, 1.9)
-
+    
     def deleteSatConstLine():
         stripChart.removeLine(satConstLine)
     tkinter.Button(root, text="Delete Saturated Counts", command=deleteSatConstLine).pack()

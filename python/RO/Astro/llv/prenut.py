@@ -9,9 +9,11 @@ P.T.Wallace Starlink    April 1987
 __all__ = ["prenut"]
 
 import numpy
-from .prec import prec
-from .nut import nut
+
 from .epj import epj
+from .nut import nut
+from .prec import prec
+
 
 def prenut(epoch, mjd):
     """

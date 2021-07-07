@@ -4,8 +4,10 @@
 __all__ = ["gmstFromUT1"]
 
 import math
-import RO.PhysConst
+
 import RO.MathUtil
+import RO.PhysConst
+
 
 def gmstFromUT1(ut1):
     """Convert from universal time (MJD)

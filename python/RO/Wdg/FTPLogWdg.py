@@ -49,22 +49,24 @@ History:
 2012-08-01 ROwen    Updated for changes to FTPGet.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
+2020-02-10 DGatlin  Modified imports for Python 3
 """
 __all__ = ['FTPLogWdg']
 
 import atexit
 import sys
+import tkinter
 import traceback
 import weakref
-from . import Bindings
-from six.moves import tkinter
+
 import RO.AddCallback
 import RO.Constants
 import RO.MathUtil
-from RO.TkUtil import Timer
-from RO.Comm.FTPGet import FTPGet
 import RO.Wdg
-
+from RO.Comm.FTPGet import FTPGet
+from RO.TkUtil import Timer
+from . import Bindings
+from .CtxMenu import addCtxMenu
 
 _StatusInterval = 0.200 # time between status checks (sec)
 
@@ -75,11 +77,11 @@ class FTPCallback(object):
         object.__init__(self)
         self.callFunc = callFunc
         self.ftpGet = ftpGet
-
+    
     def __call__(self):
         if self.ftpGet is None:
             return
-
+        
         if self.callFunc:
             try:
                 self.callFunc(self.ftpGet)
@@ -87,7 +89,7 @@ class FTPCallback(object):
                 errMsg = "ftpGet callback %r failed: %s" % (self.callFunc, e)
                 sys.stderr.write(errMsg + "\n")
                 traceback.print_exc(file=sys.stderr)
-
+        
         if self.ftpGet.isDone:
             self.clear()
 
@@ -97,12 +99,12 @@ class FTPCallback(object):
             print("FTPCallback(%s) clear" % (self.ftpGet,))
         self.ftpGet = None
         self.callFunc = None
-
+    
 
 class FTPLogWdg(tkinter.Frame):
     """A widget to initiate file get via ftp, to display the status
     of the transfer and to allow users to abort the transfer.
-
+    
     Inputs:
     - master: master widget
     - maxTransfers: maximum number of simultaneous transfers; additional transfers are queued
@@ -122,16 +124,16 @@ class FTPLogWdg(tkinter.Frame):
     **kargs):
         tkinter.Frame.__init__(self, master = master, **kargs)
         self._memDebugDict = {}
-
+        
         self.maxLines = maxLines
         self.maxTransfers = maxTransfers
         self.selFTPGet = None # selected getter, for displaying details; None if none
-
+        
         self.dispList = []  # list of displayed ftpGets
         self.getQueue = []  # list of unfinished (ftpGet, stateLabel, ftpCallback) triples
 
         self._timer = Timer()
-
+        
         self.yscroll = tkinter.Scrollbar (
             master = self,
             orient = "vertical",
@@ -149,18 +151,18 @@ class FTPLogWdg(tkinter.Frame):
         self.yscroll.grid(row=0, column=1, sticky="ns")
         Bindings.makeReadOnly(self.text)
         if helpURL:
-            CtxMenu.addCtxMenu(
+            addCtxMenu(
                 wdg = self.text,
                 helpURL = helpURL + "#LogDisplay",
             )
-
+        
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
-
+        
         detFrame = tkinter.Frame(self)
-
+            
         gr = RO.Wdg.Gridder(detFrame, sticky="ew")
-
+        
         self.fromWdg = RO.Wdg.StrEntry(
             master = detFrame,
             readOnly = True,
@@ -176,7 +178,7 @@ class FTPLogWdg(tkinter.Frame):
             borderwidth = 0,
         )
         gr.gridWdg("To", self.toWdg, colSpan=2)
-
+        
         self.stateWdg = RO.Wdg.StrEntry(
             master = detFrame,
             readOnly = True,
@@ -190,18 +192,18 @@ class FTPLogWdg(tkinter.Frame):
             helpURL = helpURL and helpURL + "#Abort",
         )
         gr.gridWdg("State", self.stateWdg, colSpan=2)
-
+        
         self.abortWdg.grid(row=1, column=2, rowspan=2, sticky="s")
-
+        
         detFrame.columnconfigure(1, weight=1)
-
+        
         detFrame.grid(row=1, column=0, columnspan=2, sticky="ew")
-
+        
         self.text.bind("<ButtonPress-1>", self._selectEvt)
         self.text.bind("<B1-Motion>", self._selectEvt)
-
+        
         self._updAllStatus()
-
+        
         atexit.register(self._abortAll)
 
     def getFile(self,
@@ -217,7 +219,7 @@ class FTPLogWdg(tkinter.Frame):
         password = None,
     ):
         """Get a file
-
+    
         Inputs:
         - host  IP address of ftp host
         - fromPath  full path of file on host to retrieve
@@ -236,7 +238,7 @@ class FTPLogWdg(tkinter.Frame):
         """
 #       print "getFile(%r, %r, %r)" % (host, fromPath, toPath)
         stateLabel = RO.Wdg.StrLabel(self, anchor="w", width=FTPGet.StateStrMaxLen)
-
+        
         ftpGet = FTPGet(
             host = host,
             fromPath = fromPath,
@@ -262,13 +264,13 @@ class FTPLogWdg(tkinter.Frame):
         self.text.window_create("end", window=stateLabel)
         self.text.insert("end", ftpGet.dispStr)
         self.dispList.append(ftpGet)
-
+        
         self._timer.cancel()
 
         # append ftpGet to the queue
         ftpCallback = FTPCallback(ftpGet, callFunc)
         self.getQueue.append((ftpGet, stateLabel, ftpCallback))
-
+        
         # purge old display items if necessary
         ind = 0
         selInd = None
@@ -281,7 +283,7 @@ class FTPLogWdg(tkinter.Frame):
                 ind += 1
                 continue
             #print "FTPLogWdg.getFile: purging entry at ind=%s" % (ind,)
-
+            
             if (not doAutoSelect) and (self.selFTPGet == self.dispList[ind]):
                 selInd = ind
                 #print "FTPLogWdg.getFile: purging currently selected file; saving index"
@@ -297,17 +299,17 @@ class FTPLogWdg(tkinter.Frame):
             self.text.see("end")
         elif selInd is not None:
             self._selectInd(selInd)
-
+        
         #print "dispList=", self.dispList
         #print "getQueue=", self.getQueue
 
-
+    
     def _abort(self):
         """Abort the currently selected transaction (if any).
         """
         if self.selFTPGet:
             self.selFTPGet.abort()
-
+    
     def _abortAll(self):
         """Abort all transactions (for use at exit).
         """
@@ -327,7 +329,7 @@ class FTPLogWdg(tkinter.Frame):
         ind = int(indStr.split(".")[0]) - 1
         self._selectInd(ind)
         return "break"
-
+    
     def _selectInd(self, ind):
         """Display details for the ftpGet at self.dispList[ind]
         and selects the associated line in the displayed list.
@@ -357,7 +359,7 @@ class FTPLogWdg(tkinter.Frame):
 
         self._memDebugDict[objID] = weakref.ref(obj, refGone)
         del(obj)
-
+    
     def _updAllStatus(self):
         """Update status for running transfers
         and start new transfers if there is room
@@ -379,11 +381,11 @@ class FTPLogWdg(tkinter.Frame):
                     nRunning += 1
             self._updOneStatus(ftpGet, stateLabel)
         self.getQueue = newGetQueue
-
+    
         self._updDetailStatus()
-
+         
         self._timer.start(_StatusInterval, self._updAllStatus)
-
+        
     def _updOneStatus(self, ftpGet, stateLabel):
         """Update the status of one transfer"""
         state = ftpGet.state
@@ -401,7 +403,7 @@ class FTPLogWdg(tkinter.Frame):
             else:
                 severity = RO.Constants.sevNormal
             stateLabel.set(state, severity=severity)
-
+    
     def _updDetailStatus(self):
         """Update the detail status for self.selFTPGet"""
         if not self.selFTPGet:
@@ -414,7 +416,7 @@ class FTPLogWdg(tkinter.Frame):
 
         ftpGet = self.selFTPGet
         currState = ftpGet.state
-
+        
         # show or hide abort button, appropriately
         if ftpGet.isAbortable:
             if not self.abortWdg.winfo_ismapped():
@@ -447,7 +449,7 @@ if __name__ == "__main__":
     root = PythonTk()
 
     row = 0
-
+    
     testFrame = FTPLogWdg (
         master=root,
     )
@@ -469,21 +471,21 @@ if __name__ == "__main__":
     toPathWdg.insert(0, "tempfile")
     toPathWdg.grid(row=row, column=1, sticky="ew")
     row += 1
-
+    
     tkinter.Label(root, text="FromURL:").grid(row=row, column=0, sticky="e")
     fromURLWdg = tkinter.Entry(root)
     fromURLWdg.grid(row=row, column=1, sticky="ew")
     row += 1
 
-
+    
     def getFile(evt):
         overwrite = overwriteVar.get()
         toPath = toPathWdg.get()
         fromURL = fromURLWdg.get()
         testFrame.getFile(fromURL=fromURL, toPath=toPath, overwrite=overwrite)
-
+        
     fromURLWdg.bind("<Return>", getFile)
-
+    
     root.rowconfigure(0, weight=1)
     root.columnconfigure(1, weight=1)
 

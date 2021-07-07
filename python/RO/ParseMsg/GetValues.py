@@ -21,7 +21,8 @@ from __future__ import print_function
 __all__ = ["getValues"]
 
 import re
-from . import GetString
+
+from .GetString import getString
 
 _StartRE = re.compile(r"\s*(?P<first>[=;])\s*(?:(?P<next>\S)|$)")
 
@@ -69,7 +70,7 @@ Exceptions:
         if astr[nextInd] in "\'\"":
             # value is a delimited string
 #           print "looking for a delimited string"
-            (value, nextInd) = GetString.getString(astr, nextInd)
+            (value, nextInd) = getString(astr, nextInd)
             valueList.append(value)
 
         elif astr[nextInd] != ';':

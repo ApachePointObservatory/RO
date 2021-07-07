@@ -72,7 +72,8 @@ History:
 """
 __all__ = ['Checkbutton']
 
-from six.moves import tkinter
+import tkinter
+
 import RO.AddCallback
 import RO.CnvUtil
 import RO.MathUtil
@@ -81,10 +82,11 @@ from .CtxMenu import CtxMenuMixin
 from .IsCurrentMixin import AutoIsCurrentMixin, IsCurrentCheckbuttonMixin
 from .SeverityMixin import SeverityActiveMixin
 
+
 class Checkbutton (tkinter.Checkbutton, RO.AddCallback.TkVarMixin,
     AutoIsCurrentMixin, IsCurrentCheckbuttonMixin, SeverityActiveMixin, CtxMenuMixin):
     """A Checkbutton with callback, help, isCurrent and severity support.
-
+    
     Inputs:
     - var       a Tkinter variable; this is updated when Checkbutton state changes
                 (and also during initialization if defValue is not None)
@@ -125,7 +127,7 @@ class Checkbutton (tkinter.Checkbutton, RO.AddCallback.TkVarMixin,
       - text and textvariable are forbidden if showValue is true
       - selectcolor is ignored and forced equal to background if indicatoron false
         (i.e. if no checkbox is shown)
-
+        
     Warning: as of Tcl/Tk 8.5 the indicatoron option is ignored on MacOS X (Aqua);
     the checkbox is always displayed.
 
@@ -172,7 +174,7 @@ class Checkbutton (tkinter.Checkbutton, RO.AddCallback.TkVarMixin,
                 raise ValueError("Do not specify textvariable if showValue True (specify var instead)")
             kargs.setdefault("indicatoron", False)
             kargs["textvariable"] = self._var
-
+        
         tkinter.Checkbutton.__init__(self,
             master = master,
             variable = self._var,
@@ -180,7 +182,7 @@ class Checkbutton (tkinter.Checkbutton, RO.AddCallback.TkVarMixin,
         self.configure(kargs) # call overridden configure to fix width, if necessary
 
         RO.AddCallback.TkVarMixin.__init__(self, self._var)
-
+        
         CtxMenuMixin.__init__(self,
             helpURL = helpURL,
         )
@@ -195,21 +197,21 @@ class Checkbutton (tkinter.Checkbutton, RO.AddCallback.TkVarMixin,
             self.select()
         else:
             self.deselect()
-
+        
         # add the callbacks last, so the autoIsCurrent callback
         # is called first and to avoid calling them while setting default
         self.addCallback(callFunc, False)
         if cmd:
             self["command"] = cmd
-
+        
     def asBool(self, val):
         """Returns a value as a bool.
-
+        
         The input value can be any of:
         - a string: returns True if matches onvalue (case sensitive), else False*
         - True, False: returns val
         - anything else: returns bool(val)
-
+        
         *This matches the behavior of checkbuttons (based on observation on one platform,
         so this may not always be true): they are checked if the value matches onvalue,
         else unchecked.
@@ -221,17 +223,17 @@ class Checkbutton (tkinter.Checkbutton, RO.AddCallback.TkVarMixin,
                 return False
 
         return bool(val)
-
+    
     def clear(self):
         """Convenience function, makes it work more like an RO.Wdg.Entry widget.
         """
         self.deselect()
-
+    
     def getBool(self):
         """Returns True if the checkbox is selected (checked), False otherwise.
         """
         return self.asBool(self._var.get())
-
+    
     def getDefBool(self):
         """Returns True if the checkbox is selected (checked) by default, False otherwise.
         """
@@ -248,21 +250,21 @@ class Checkbutton (tkinter.Checkbutton, RO.AddCallback.TkVarMixin,
 
     def getEnable(self):
         """Returns True if the button is enabled, False otherwise.
-
+        
         Enabled is defined as the state is not "disabled" (thus "enabled" or "active").
         """
         return self["state"] != tkinter.DISABLED
-
+    
     def getVar(self):
         return self._var
-
+    
     def getString(self):
         return str(self._var.get())
-
+    
     def isDefault(self):
         """Return True if current value matches default"""
         return self.getBool() == self.getDefBool()
-
+    
     def restoreDefault(self):
         """Restores the default value. Calls callbacks (if any).
         """
@@ -277,7 +279,7 @@ class Checkbutton (tkinter.Checkbutton, RO.AddCallback.TkVarMixin,
         severity = None,
     **kargs):
         """Set value (checking or unchecking the box) and trigger the callback functions.
-
+        
         Inputs:
         - value: the new value.
             - If a string, then the box is checked if value matches
@@ -286,23 +288,23 @@ class Checkbutton (tkinter.Checkbutton, RO.AddCallback.TkVarMixin,
             and the box is checked if true, unchecked if false.
         - isCurrent: is value current? (if not, display with bad background color)
         - severity: the new severity, one of: RO.Constants.sevNormal, sevWarning or sevError;
-          if omitted, the severity is left unchanged
+          if omitted, the severity is left unchanged          
         kargs is ignored; it is only present for compatibility with KeyVariable callbacks.
         """
         self.setBool(self.asBool(newValue), isCurrent=isCurrent, severity=severity)
-
+    
     def setBool(self,
         boolState,
         isCurrent = True,
         severity = None,
     ):
         """Checks or unchecks the checkbox.
-
+        
         Inputs:
         - boolState: new boolean state; check/uncheck box if true/false
         - isCurrent: is value current (if not, display with bad background color)
         - severity: the new severity, one of: RO.Constants.sevNormal, sevWarning or sevError;
-          if omitted, the severity is left unchanged
+          if omitted, the severity is left unchanged          
         """
         if boolState:
             self.select()
@@ -318,7 +320,7 @@ class Checkbutton (tkinter.Checkbutton, RO.AddCallback.TkVarMixin,
     **kargs):
         """Changes the default value, triggers the callback functions
         and (if widget disabled and defIfDisabled true) updates the displayed value.
-
+        
         Inputs:
         - value: the new default value.
             - If a string, then the default is checked if value matches
@@ -333,7 +335,7 @@ class Checkbutton (tkinter.Checkbutton, RO.AddCallback.TkVarMixin,
         self._defBool = self.asBool(newDefValue)
         if isCurrent is not None:
             self._isCurrent = isCurrent
-
+        
         # if disabled and defIfDisabled, update display (which also triggers a callback)
         # otherwise leave the display alone and explicitly trigger a callback
         if restoreDef or (self._defIfDisabled and self["state"] == tkinter.DISABLED):
@@ -352,7 +354,7 @@ class Checkbutton (tkinter.Checkbutton, RO.AddCallback.TkVarMixin,
             self.configure(state="disabled")
             if self._defIfDisabled:
                 self.restoreDefault()
-
+    
     def configure(self, argDict=None, **kargs):
         """Overridden version of configure that applies a width correction, if necessary
 
@@ -372,7 +374,7 @@ class Checkbutton (tkinter.Checkbutton, RO.AddCallback.TkVarMixin,
                 showIndicator = kargs.get("indicatoron", self["indicatoron"]),
             )
         tkinter.Checkbutton.configure(self, **kargs)
-
+    
     def _computeCorrectedWidth(self, width, hasBitmap, showIndicator):
         """Compute corrected width to overcome Tcl/Tk bugs
         """
@@ -389,10 +391,10 @@ class Checkbutton (tkinter.Checkbutton, RO.AddCallback.TkVarMixin,
 
 
 if __name__ == "__main__":
-    from . import PythonTk
+    from .PythonTk import PythonTk
     from .StatusBar import StatusBar
-    root = PythonTk.PythonTk()
-
+    root = PythonTk()
+    
     def btnCallback(btn):
         print("%s state=%s" % (btn["text"], btn.getBool()))
 

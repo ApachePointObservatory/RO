@@ -13,14 +13,13 @@ History
                     and added SetDict.
 2010-05-18 ROwen    Modified SetDict to use sets
 2015-09-24 ROwen    Replace "== None" with "is None" to future-proof array tests and modernize the code.
+2020-01-13 DGatlin  Changed set([val]) to set(val) for Python 3
 """
 __all__ = ["ListDict", "SetDict"]
-
 try:
-    from UserDict import UserDict
-except ImportError:
     from collections import UserDict
-
+except ImportError:
+    from UserDict import UserDict
 
 class ListDict(UserDict):
     """A dictionary whose values are a list of items.
@@ -34,10 +33,10 @@ class ListDict(UserDict):
             self.data[key].append(val)
         else:
             self.data[key] = [val]
-
+    
     def addList(self, key, valList):
         """Append values to the list of values for a given key, creating a new entry if necessary.
-
+        
         Inputs:
         - valList: an iterable collection (preferably ordered) of values
         """
@@ -59,25 +58,25 @@ class SetDict(ListDict):
     """A dictionary whose values are a set of items, meaning
     a list of unique items. Duplicate items are silently not added.
     """
-
+    
     def __setitem__(self, key, val):
         """Add a value to the set of values for a given key, creating a new entry if necessary.
-
+        
         Duplicate values are silently ignored.
-
+        
         Supports the notation: aListDict[key] = val
         """
         valSet = self.data.get(key)
         if valSet is None:
-            self.data[key] = set([val])
+            self.data[key] = set(val)
         else:
             valSet.add(val)
-
+    
     def addList(self, key, valList):
         """Add values to the set of values for a given key, creating a new entry if necessary.
-
+        
         Duplicate values are silently ignored.
-
+        
         Inputs:
         - valList: an iterable collection of values
         """
@@ -107,7 +106,7 @@ if __name__ == "__main__":
     print((RO.StringUtil.prettyDict(ad)))
     print("listdict copy (modified):")
     print((RO.StringUtil.prettyDict(ad2)))
-
+    
 
     ad = SetDict()
     ad["a"] = "foo a"

@@ -17,8 +17,10 @@ History:
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 """
-import Carbon.Folder, Carbon.Folders
+import Carbon.Folder
+import Carbon.Folders
 import MacOS
+
 
 def getStandardDir(domain, dirType, doCreate=False):
     """Return a path to the specified standard directory or None if not found.

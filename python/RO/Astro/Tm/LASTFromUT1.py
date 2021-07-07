@@ -2,10 +2,11 @@
 
 __all__ = ["lastFromUT1"]
 
-import RO.PhysConst
 import RO.MathUtil
+import RO.PhysConst
 from RO.Astro import llv
 from .LMSTFromUT1 import lmstFromUT1
+
 
 def lastFromUT1(ut1, longitude):
     """Convert from universal time (MJD)

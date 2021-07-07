@@ -16,17 +16,19 @@ History:
 2004-08-11 ROwen    Define __all__ to restrict import.
 2004-09-14 ROwen    Test code no longer imports RO.Wdg to avoid circular import.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
+2020-02-10 DGatlin  Modified imports for Python 3
 """
 __all__ = ['HistoryMenu']
 
-from six.moves import tkinter
+import tkinter
+
 import RO.Alg
 from .CtxMenu import CtxMenuMixin
 
 
 class HistoryMenu (tkinter.Menubutton, CtxMenuMixin):
     """A menu showing a history of recent events.
-
+    
     Inputs:
     - callFunc  function to call when a menu item is selected;
                     takes two inputs:
@@ -36,7 +38,7 @@ class HistoryMenu (tkinter.Menubutton, CtxMenuMixin):
     - removeAllDup  removes all older duplicate entries?
     - maxEntries    the maximum number of entries;
                     older entries are purged
-
+    
     Note: detection of duplicate entries is based on the entry name.
     The assumption is items that have different behaviors
     should also have different names.
@@ -68,16 +70,16 @@ class HistoryMenu (tkinter.Menubutton, CtxMenuMixin):
         # basic menu
         self.__menu = tkinter.Menu(self, tearoff=0)
         self["menu"] = self.__menu
-
+    
         self.dataDict = {}
-
+    
     def addItem(self, name, data):
         """Adds a new entry at the top of the history menu.
-
+        
         Inputs:
         - name  label for the new menu item
         - data  data associated with this menu item
-
+        
         If this menu item is selected, the callback function
         is called with arguments: name, data.
         """
@@ -105,7 +107,7 @@ class HistoryMenu (tkinter.Menubutton, CtxMenuMixin):
             label = name,
             command = RO.Alg.GenericCallback(self.__callFunc, name, data),
         )
-
+    
     def nItems(self):
         """Returns the number of items in the history menu.
         """
@@ -113,20 +115,20 @@ class HistoryMenu (tkinter.Menubutton, CtxMenuMixin):
         if lastIndex is None:
             return 0
         return lastIndex + 1
-
+        
 
 if __name__ == "__main__":
-    from . import PythonTk
-    root = PythonTk.PythonTk()
-
+    from .PythonTk import PythonTk
+    root = PythonTk()
+    
     def doAdd(*args):
         name = nameVar.get()
         testFrame.addItem(name, "data for %s" % name)
         nameVar.set("")
-
+        
     def doPrint(name, data):
         print("name=%r, data=%r" % (name, data))
-
+    
     tkinter.Label(root, text="Name of new entry (type <CR> to accept it):").pack()
     nameVar = tkinter.StringVar()
     nameWdg = tkinter.Entry(root, textvariable=nameVar)
@@ -139,8 +141,8 @@ if __name__ == "__main__":
         helpText = "sample history menu; enter data above and type return to enter it in the history menu",
     )
     testFrame.pack()
-
+    
     testFrame.addItem("first item", {1:1, 2:3})
     testFrame.addItem("second item", "hello")
-
+    
     root.mainloop()

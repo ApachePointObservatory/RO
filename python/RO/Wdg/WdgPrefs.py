@@ -2,7 +2,7 @@
 
 """Preferences for the RO.Wdg package.
 
-Note: call
+Note: call 
 History:
 2004-08-11 ROwen    Split out from RO.Wdg.Label to make it more readily available.
 2004-09-03 ROwen    Bug fix; getWdgPrefDict was calling a nonexistent function if self.prefDict not set..
@@ -22,10 +22,11 @@ History:
 """
 __all__ = []
 
-from six.moves import tkinter
+import tkinter
+
 import RO.Constants
-import RO.TkUtil
 import RO.Prefs.PrefVar
+import RO.TkUtil
 
 # use lazy evaluation to avoid accessing tk root until there is one
 _wdgPrefs = None
@@ -47,20 +48,20 @@ def getWdgPrefDict():
     - Active Bad Background
     """
     global _wdgPrefs
-
+    
     if not _wdgPrefs:
         _wdgPrefs = WdgPrefs()
     return _wdgPrefs.prefDict
-
+    
 def getSevPrefDict():
     """Return a dictionary of state preferences:
     - RO.State.Normal: Foreground Color preference variable
     - RO.State.Warning: Warning Color preference variable
     - RO.State.Error: Error Color preference variable
-
+    
     """
     global _wdgPrefs
-
+    
     if not _wdgPrefs:
         _wdgPrefs = WdgPrefs()
     return _wdgPrefs.sevPrefDict
@@ -68,7 +69,7 @@ def getSevPrefDict():
 def setWdgPrefs(wdgPrefs = None):
     """Call if you want to specify widget preferences explicitly
     instead of using defaults.
-
+    
     Warning: ignored once _wdgPrefs is created,
     so be sure to call setWdgPrefs before calling getWdgPrefDict
     or getSevPrefDict.
@@ -81,7 +82,7 @@ def setWdgPrefs(wdgPrefs = None):
 class WdgPrefs(object):
     """Copies or creates preferences used to display
     and automatically update preferences.
-
+    
     Uses the following preferences from prefSet, if supplied,
     else creates them with reasonable default values:
     - Bad Background,
@@ -91,21 +92,21 @@ class WdgPrefs(object):
     - Critical Color (used as a foreground color)
     - Background Color
     - Foreground Color
-
+    
     Creates two more preferences:
     - Active Background Color
     - Active Bad Background
     These are automatically updated as the non-active version changes.
-
+    
     Note: activeforeground is normally the same as foreground
     (at least on MacOS X or unix) so we don't bother with
     active versions of warning and error.
-
+    
     Two attributes of interest are:
-
+    
     - prefDict: a dictionary containing the above-listed preferences
     as preference name: preference variable.
-
+    
     - sevPrefDict: a dictionary containing:
       - RO.State.Normal: Foreground Color preference variable
       - RO.State.Warning: Warning Color preference variable
@@ -123,14 +124,14 @@ class WdgPrefs(object):
         self._activeBackScale = 1.0
 
     #   print "WdgPrefs(prefSet=%r)" % (prefSet,)
-
+    
         def getColorPref(prefName, defColor):
             if prefSet:
                 prefVar = prefSet.getPrefVar(prefName)
                 if prefVar:
                     return prefVar
             return RO.Prefs.PrefVar.ColorPrefVar(name = prefName, defValue = defColor)
-
+        
         backColor = self._tkWdg.cget("background")
         foreColor = self._tkWdg.cget("foreground")
         setupList = (
@@ -142,11 +143,11 @@ class WdgPrefs(object):
             ("Error Color", "red"),
             ("Critical Color", "orange"),
         )
-
+    
         for prefName, defColor in setupList:
             # record old prefVar, in case we want to transfer callbacks
             self.prefDict[prefName] = getColorPref (prefName, defColor)
-
+        
         # set severity: color preference dictionary
         sevNamePrefNameDict = {"normal": "foreground"}
         self.sevPrefDict = RO.Alg.OrderedDict(
@@ -154,7 +155,7 @@ class WdgPrefs(object):
             for sev, sevName in RO.Constants.SevNameDict.items())
 
         # add activebackground color (could do the same for activeforeground,
-        # but it doesn't seem to be used).
+        # but it doesn't seem to be used).  
         activeBackColor = self._tkWdg.cget("activebackground")
         backColorVals = self._tkWdg.winfo_rgb(backColor)
         activeBackColorVals = self._tkWdg.winfo_rgb(activeBackColor)
@@ -170,9 +171,9 @@ class WdgPrefs(object):
             else:
                 # no sensible scaling; just use identical pref
                 self._activeBackScale = 1.0
-
+        
     #   print "self._activeBackScale =", self._activeBackScale
-
+    
         activeBackName = "Active Background Color"
         activeBadBackName = "Active Bad Background"
         backPref = self.prefDict["Background Color"]
@@ -183,32 +184,32 @@ class WdgPrefs(object):
             self.prefDict[activeBadBackName] = badBackPref
         else:
             # create separate prefs and callbacks from the normal prefs to update them
-
+    
             # add prefs
             self.prefDict[activeBackName] = RO.Prefs.PrefVar.ColorPrefVar(name = activeBackName)
             self.prefDict[activeBadBackName] = RO.Prefs.PrefVar.ColorPrefVar(name = activeBadBackName)
-
+            
             # add callbacks to update active prefs; add to beginning of list
             # so active pref is fully updated when the remaining non-active pref's
             # callbacks are called
             backPref._callbackList.insert(0, self._updActBackPref)
             badBackPref._callbackList.insert(0, self._updActBadBackPref)
-
+            
             # call callbacks to set values
             self._updActBackPref(backColor)
             self._updActBadBackPref(badBackPref.getValue())
-
+            
     def _updActBackPref(self, color, *args):
         """Background preference has been updated;
         Update the active background color preference accordingly.
-
+        
         This color is automatically updated in widgets
         when the background color changes, so read it
         rather than computing it.
         """
         activeBackColor = self._tkWdg.cget("activebackground")
         self.prefDict["Active Background Color"].setValue(activeBackColor)
-
+    
     def _updActBadBackPref(self, badBackColor, *args):
         """Bad Background preference has changed;
         update Active Bad Background accordingly.
@@ -219,7 +220,7 @@ class WdgPrefs(object):
 
 if __name__ == "__main__":
     setWdgPrefs()
-
+    
     wdgPrefDict = getWdgPrefDict()
     print("wdgDict:")
     prefNames = list(wdgPrefDict.keys())

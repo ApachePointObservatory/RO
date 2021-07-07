@@ -37,11 +37,13 @@ History:
 """
 __all__ = ["PrefWin", "PrefWdg"]
 
-from six.moves import tkinter
-from . import PrefVar
-from . import PrefEditor
+import tkinter
+
 import RO.Constants
 import RO.Wdg
+from . import PrefEditor
+from . import PrefVar
+
 
 class PrefWin(RO.Wdg.Toplevel):
     def __init__(self,
@@ -54,7 +56,7 @@ class PrefWin(RO.Wdg.Toplevel):
         RO.Wdg.Toplevel.__init__(self, master, title=title, *args, **kwargs)
         self.prefWdg = PrefWdg(self, prefSet)
         self.prefWdg.pack(fill=tkinter.BOTH, expand=tkinter.YES)
-
+        
 
 class PrefWdg(tkinter.Frame):
     """Frame for editing preferences."""
@@ -66,10 +68,10 @@ class PrefWdg(tkinter.Frame):
     ):
         self.prefSet = prefSet
         tkinter.Frame.__init__(self, master)
-
+        
         self.prefsByCat = self.prefSet.getCategoryDict()
         catList = self.getCategories()
-
+    
         # create the list of categories
         catListFrame = tkinter.Frame(self)
         catListScroll = tkinter.Scrollbar(catListFrame, orient="vertical")
@@ -84,14 +86,14 @@ class PrefWdg(tkinter.Frame):
         catListScroll.grid(row=0, column=1, sticky="ns")
         catListFrame.grid(row=0, column=0, sticky="nsew")
         catListFrame.grid_rowconfigure(0, weight=1)
-
+        
         # create the status widget
         self.statusBar = RO.Wdg.StatusBar(
             master = self,
             helpURL = helpURL,
         )
         self.statusBar.grid(row=1, column=0, columnspan=2, sticky="ew")
-
+        
         # create the button panel
         self.buttonWdg = tkinter.Frame(self)
         buttonList = (
@@ -106,8 +108,8 @@ class PrefWdg(tkinter.Frame):
         buttonList[0].helpText = "Restore all displayed values to the specified state"
         buttonList[2].helpText = "Apply changes (making them current) but do not save"
         buttonList[3].helpText = "Apply changes and save them to a file"
-
-
+        
+        
         # create a frame for displaying the preferences for a given category
         self.editFrame = tkinter.Frame(self, relief="ridge", border=1)
         self.editFrame.grid(row=0, column=1, sticky="nsew")
@@ -139,7 +141,7 @@ class PrefWdg(tkinter.Frame):
         self.catListWdg.bind("<ButtonRelease>", self._showSelectedCategory)
         if catList:
             self.showCategory(catList[0])
-
+        
     def _showSelectedCategory(self, evt=None):
         """Queries the prefs category list for the currently chosen category
         and displays the proper prefs panel. Called automatically when the user
@@ -150,16 +152,16 @@ class PrefWdg(tkinter.Frame):
             # nothing selected, so nothing done
             return
         cat = self.catListWdg.get(indexList[0])
-
+        
         if cat == self.currCat:
             # no change in selected; nothing done
             return
-
+        
         if self.currCat is not None:
             self.paneDict[self.currCat].pack_forget()
         self.paneDict[cat].pack(fill="both")
         self.currCat = cat
-
+    
     def applyPrefs(self, evt=None):
         """Apply all unapplied changes"""
         self.statusBar.setMsg(
@@ -171,7 +173,7 @@ class PrefWdg(tkinter.Frame):
         self.statusBar.setMsg(
             msgStr = "Prefs applied",
         )
-
+    
     def getCategories(self):
         """Return a list of preference categories"""
         return list(self.prefsByCat.keys())
@@ -185,17 +187,17 @@ class PrefWdg(tkinter.Frame):
         self.catListWdg.selection_clear(0)
         self.catListWdg.selection_set(catInd)
         self._showSelectedCategory()
-
+    
     def showCurrentValue(self, evt=None):
         """Resets all preference editors to the current value of the preference"""
         for prefEditor in self.prefEditorList:
             prefEditor.showCurrentValue()
-
+    
     def showInitialValue(self, evt=None):
         """Resets all preference editors to the initial value of the preference"""
         for prefEditor in self.prefEditorList:
             prefEditor.showInitialValue()
-
+    
     def showDefaultValue(self, evt=None):
         """Sets all preference editors to their default value"""
         for prefEditor in self.prefEditorList:
@@ -216,7 +218,7 @@ class PrefWdg(tkinter.Frame):
                 msgStr = "Prefs saved to %s" % (self.prefSet.defFileName,),
                 severity = RO.Constants.sevNormal,
             )
-
+    
     def unappliedChanges(self):
         """Returns true if the user has made changes that have not been applied"""
         result = 0
@@ -247,11 +249,11 @@ class PrefWdg(tkinter.Frame):
 if __name__ == "__main__":
     from RO.Wdg.PythonTk import PythonTk
     root = PythonTk()
-
+    
     defMainWdg = tkinter.Label()
     entryWdg = tkinter.Entry()
     menuWdg = tkinter.Menu()
-
+    
     pvList = (
         PrefVar.FontPrefVar(
             name = "Main Font",
@@ -380,7 +382,7 @@ if __name__ == "__main__":
         PrefVar.FloatPrefVar(
             name = "Float3",
             category = "floats",
-            defValue = 0,
+            defValue = 0, 
             minValue = -75.50,
             helpText = "float with lower limit of -75.50",
         ),
@@ -429,7 +431,7 @@ if __name__ == "__main__":
 
     testFrame = PrefWdg (root, prefSet = prefSet)
     testFrame.pack(fill=tkinter.BOTH, expand=tkinter.YES)
-
+    
     testFrame.showCategory("colors")
 
     root.mainloop()

@@ -5,9 +5,10 @@ __all__ = ["haDecFromAzAlt"]
 
 import RO.MathUtil
 import RO.SysConst
+from RO.Astro import Cnv
 from .DCFromSC import dcFromSC
 from .SCFromDC import scFromDC
-from RO.Astro import Cnv
+
 
 def haDecFromAzAlt (azAlt, lat):
     """Converts alt/az position to ha/dec position.

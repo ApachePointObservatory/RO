@@ -9,8 +9,10 @@ P.T.Wallace Starlink    November 1984
 __all__ = ["vn"]
 
 import numpy
+
 import RO.MathUtil
 import RO.SysConst
+
 
 def vn(vec):
     """

@@ -18,8 +18,10 @@ __all__ = ['bell', 'BellPlay', 'SoundPlayer', 'NoPlay']
 
 import os
 import sys
-from six.moves import tkinter
+import tkinter
+
 import RO.StringUtil
+
 try:
     import pygame.mixer
     _PyGameAvail = True
@@ -34,11 +36,11 @@ _TkWdg = None
 
 def bell(num=1, delay=100):
     """Rings the bell num times using tk's bell command.
-
+    
     Inputs:
     - num   number of times to ring the bell
     - delay delay (ms) between each ring
-
+    
     Note: always rings at least once, even if num < 1
     """
     global _TkWdg
@@ -50,11 +52,11 @@ def bell(num=1, delay=100):
 
 class BellPlay(object):
     """An object that rings the bell num times.
-
+    
     Inputs:
     - num   number of times to ring the bell
     - delay delay (ms) between each ring
-
+    
     Note: always rings at least once, even if num < 1
     """
     def __init__(self,
@@ -71,22 +73,22 @@ class BellPlay(object):
             assert int(delay) >= 0
         except (ValueError, TypeError, AssertionError):
             raise ValueError("delay=%r must be a nonnegative integer" % (delay,))
-
+        
         self._num = num
         self._delay = delay
-
+        
     def play(self):
         """Play the sound"""
         bell(self._num, self._delay)
 
 class SoundPlayer(object):
     """An object that plays a sound file using pygame (if available), else rings the bell.
-
+    
     Inputs:
     - fileName  name of sound file
     - bellNum   number of times to ring the bell (<1 is treated as 1)
     - bellDelay delay (ms) between each ring
-
+    
     The bell data is used if pygame is not available or of pygame
     recognizes that the file is not a valid sound file.
     """
@@ -104,7 +106,7 @@ class SoundPlayer(object):
                 sys.stderr.write("Could not initialize pygame for sound: %s\n" % \
                     (RO.StringUtil.strFromException(e),))
                 _PyGameAvail = False
-
+            
         self._snd = None
         self._bell = BellPlay(bellNum, bellDelay)
         self._fileName = fileName
@@ -118,10 +120,10 @@ class SoundPlayer(object):
                 except Exception as e:
                     sys.stderr.write("Could not load sound file %r; using beep instead: %s\n" % \
                         (fileName, RO.StringUtil.strFromException(e),))
-
+        
         if not self._snd:
             self._snd = BellPlay(num=bellNum, delay=bellDelay)
-
+    
     def play(self):
         """Play the sound.
         """
@@ -132,7 +134,7 @@ class SoundPlayer(object):
 
     def getFile(self):
         """Returns a tuple: file name, file loaded.
-
+        
         "File loaded" is True if the file was successfully loaded.
         This does not quite guarantee that the file can be played;
         if pygame is mis-installed then it is possible to laod sounds
@@ -140,7 +142,7 @@ class SoundPlayer(object):
         """
         fileLoaded = (self._snd is not None)
         return (self._fileName, fileLoaded)
-
+        
 class NoPlay(object):
     def play(self):
         pass

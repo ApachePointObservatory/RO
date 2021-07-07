@@ -12,12 +12,15 @@ History:
 2004-08-11 ROwen    Define __all__ to restrict import.
 2004-09-14 ROwen    Tweaked the imports.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
+2020-02-10 DGatlin  Modified imports for Python 3
 """
 __all__ = ['ChangedIndicator']
 
-from six.moves import tkinter
+import tkinter
+
 import RO.SeqUtil
 from .CtxMenu import CtxMenuMixin
+
 
 class ChangedIndicator (tkinter.Label, CtxMenuMixin):
     def __init__(self,

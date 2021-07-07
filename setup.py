@@ -8,7 +8,7 @@ python setup.py install
 Alternatively you can copy python/RO to site-packages
 """
 
-long_description = """\
+long_description = """
 Includes:
 
 * Alg: various useful algorithms including OrderedDict (a dictionary that remembers the order in which items are added) and MultiDict (a dictionary whose values are lists).
@@ -56,8 +56,10 @@ setup(
     classifiers = [c for c in classifiers.split("\n") if c],
     platforms = ["MacOS X", "unix", "Windows"],
     package_dir = {PkgName: PkgDir},
+    package_data = {'':'python/RO/Bitmaps/*.xbm'},
     packages = find_packages(PkgRoot),
     include_package_data = True,
     scripts = [],
-    zip_safe = False, # icons (e.g. as used by RO.Wdg.GrayImageDispWdg) are not retrieved in a zip-safe way
+    zip_safe = False, install_requires=['twisted', 'numpy']
+    # icons (e.g. as used by RO.Wdg.GrayImageDispWdg) are not retrieved in a zip-safe way
 )

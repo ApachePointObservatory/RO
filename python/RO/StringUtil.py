@@ -53,13 +53,12 @@ History:
 """
 import re
 import numpy
-from six import u
 
-AngstromStr = u("\N{ANGSTROM SIGN}")
-DegStr = u("\N{DEGREE SIGN}")
+AngstromStr = u"\N{ANGSTROM SIGN}"
+DegStr = u"\N{DEGREE SIGN}"
 DMSStr = DegStr + "'\""
 LambdaStr = "\u00c5" # for some reason this fails: u"\N{GREEK SMALL LETTER LAMBDA}"
-MuStr = u("\N{GREEK SMALL LETTER MU}")
+MuStr = u"\N{MICRO SIGN}"
 
 def dmsStrFromDeg (decDeg, nFields=3, precision=1, omitExtraFields = False):
     """Convert a number to a sexagesimal string with 1-3 fields.
@@ -70,7 +69,7 @@ def dmsStrFromDeg (decDeg, nFields=3, precision=1, omitExtraFields = False):
     - precision: number of digits after the decimal point in the last field;
         if 0, no decimal point is printed; must be >= 0
     - omitExtraFields: omit fields that are zero, starting from the right
-
+    
     Error conditions:
     - Raises ValueError if precision < 0
     - Returns "" if decDeg is not finite
@@ -79,11 +78,11 @@ def dmsStrFromDeg (decDeg, nFields=3, precision=1, omitExtraFields = False):
         return ""
     nFields = min(3, nFields)
     signStr, fieldStrs = _getDMSFields(decDeg, nFields, precision)
-
+    
     if omitExtraFields:
         while fieldStrs and float(fieldStrs[-1]) == 0.0:
             fieldStrs.pop(-1)
-
+            
     return signStr + ":".join(fieldStrs)
 
 def dmsStrFromSec (decSec, nFields=3, precision=1, omitExtraFields = True):
@@ -97,7 +96,7 @@ def dmsStrFromSec (decSec, nFields=3, precision=1, omitExtraFields = True):
     - precision: number of digits after the decimal point in the seconds field;
         if 0, no decimal point is printed; must be >= 0
     - omitExtraFields: omit fields that are zero, starting from the left.
-
+    
     Error conditions:
     - Raises ValueError if precision < 0
     - Returns "" if decDeg is not finite
@@ -109,17 +108,17 @@ def dmsStrFromSec (decSec, nFields=3, precision=1, omitExtraFields = True):
         raise ValueError("nFields=%r; must be >= 1" % (nFields,))
     adjNum = decSec / (60.0**(nFields-1))
     signStr, fieldStrs = _getDMSFields(adjNum, nFields, precision)
-
+    
     if omitExtraFields:
         while fieldStrs and float(fieldStrs[0]) == 0.0:
             fieldStrs.pop(0)
-
+            
     return signStr + ":".join(fieldStrs)
 
 def degFromDMSStr (dmsStr):
     """Convert a string of the basic form dd[:mm[:ss]] to decimal degrees.
     See splitDMSStr for details of the format.
-
+    
     Error conditions:
     - Raises ValueError if the string cannot be parsed
     """
@@ -138,7 +137,7 @@ def degFromDMSStr (dmsStr):
     # convert all but last item to float
     for ind in range(len(dmsItems) - 1):
         dmsItems[ind] = intFromStr(dmsItems[ind])
-
+    
     dmsItems.reverse()
     decDeg = 0.0
     for dmsField in dmsItems:
@@ -149,7 +148,7 @@ def secFromDMSStr (dmsStr):
     """Convert a string of the basic form [[dd:]mm:]ss to decimal degrees.
     Note that missing fields are handled differently than degFromDMSStr!
     See splitDMSStr for details of the format.
-
+    
     error conditions:
         raises ValueError if the string cannot be parsed
     """
@@ -168,7 +167,7 @@ def secFromDMSStr (dmsStr):
     # convert all but last item to float
     for ind in range(len(dmsItems) - 1):
         dmsItems[ind] = intFromStr(dmsItems[ind])
-
+    
     decSec = 0.0
     for dmsField in dmsItems:
         decSec = abs(dmsField) + (decSec * 60.0)
@@ -179,7 +178,7 @@ def secStrFromDMSStr(dmsStr):
     preserving the original accuracy of seconds
     Note that missing fields are handled differently than degFromDMSStr!
     See splitDMSStr for details of the format.
-
+    
     error conditions:
         raises ValueError if the string cannot be parsed
     """
@@ -192,7 +191,7 @@ def secStrFromDMSStr(dmsStr):
     # compute integer seconds
     # convert all but first and last items to integers
     intList = [intFromStr(item) for item in dmsItems[1:-1]]
-
+    
     intSec = 0
     for intVal in intList:
         intSec = abs(intVal) + (intSec * 60)
@@ -224,7 +223,7 @@ def dmsStrFieldsPrec(dmsStr):
         precision = 0
     nFields = dmsStr.count(":") + 1
     return (nFields, precision)
-
+    
 def findLeftNumber(astr, ind):
     """Find the starting and ending index of the number
     enclosing or to the left of index "ind".
@@ -299,7 +298,7 @@ def _findRightOfRightNumber(astr, ind):
 
 def neatenDMSStr (dmsStr):
     """Convert a sexagesimal string to a neater version.
-
+    
     error conditions:
         raises ValueError if the string cannot be parsed
     """
@@ -313,7 +312,7 @@ def neatenDMSStr (dmsStr):
         precision = 0
     fieldArry = dmsStr.split(":")
     nFields = len(fieldArry)
-
+    
     floatValue = degFromDMSStr(dmsStr)
     return dmsStrFromDeg(floatValue, nFields=nFields, precision=precision)
 
@@ -327,16 +326,27 @@ def plural(num, singStr, plStr):
 
 def prettyDict(aDict, entrySepStr = "\n", keyValSepStr = ": "):
     """Format a dictionary in a nice way
-
+    
     Inputs:
     aDict: the dictionary to pretty-print
     entrySepStr: string separating each dictionary entry
     keyValSepStr: string separating key and value for each entry
-
+    
     Returns a string containing the pretty-printed dictionary
     """
     sortedKeys = list(aDict.keys())
-    sortedKeys.sort()
+    # Python 3 doesn't support sort for lists, so this needs to be done by hand
+    ints = []
+    strs = []
+    for key in sortedKeys:
+        if isinstance(key, (int, float)):
+            ints.append(key)
+    ints.sort()
+    for key in sortedKeys:
+        if isinstance(key, str):
+            strs.append(key)
+    strs.sort()
+    sortedKeys = ints + strs
     eltList = []
     for aKey in sortedKeys:
         eltList.append(repr(aKey) + keyValSepStr + repr(aDict[aKey]))
@@ -358,7 +368,7 @@ def splitDMSStr (dmsStr):
         all values are strings
         sign is one of ('', '+' or '-')
         frac <whatever> includes a leading decimal point
-
+    
     error conditions:
         raises ValueError if the string cannot be parsed
     """
@@ -385,11 +395,11 @@ def floatFromStr(astr, allowExp=1):
         match = _FloatRE.match(astr)
     else:
         match = _FloatNoExpRE.match(astr)
-
-
+    
+    
     if match is None:
         raise ValueError("cannot convert :%s: to a float" % (astr))
-
+        
     try:
         return float(astr)
     except Exception:
@@ -416,7 +426,7 @@ def intFromStr(astr):
 def quoteStr(astr, escChar='\\', quoteChar='"'):
     """Escape all instances of quoteChar and escChar in astr
     with a preceding escChar and surrounds the result with quoteChar.
-
+    
     Examples:
     astr = 'foo" \bar'
     quoteStr(astr) = '"foo\" \\bar"'
@@ -432,7 +442,7 @@ def quoteStr(astr, escChar='\\', quoteChar='"'):
 
 def unquoteStr(astr, escChar='\\', quoteChars='"\''):
     """Remove quotes from a string and unescapes contained escaped quotes.
-
+    
     Based on email.unquote.
     """
     if len(astr) > 1:
@@ -451,7 +461,7 @@ def strFromException(exc):
         except Exception:
             # in case exc is some unexpected type
             return repr(exc)
-
+      
 def _getDMSFields (decDeg, nFields=3, precision=1):
     """Return a string representation of dms fields for decDeg.
 
@@ -460,15 +470,15 @@ def _getDMSFields (decDeg, nFields=3, precision=1):
     - nFields: number of fields; must be >= 1 (and >3 is probably never used)
     - precision: number of digits after the decimal point in the last field;
         if 0, no decimal point is printed; must be >= 0
-
+     
     Returns:
     - signStr: "" or "-"
     - fieldStrs: string value of each field (all positive)
-
+    
     To compute dms a a string, use: signStr + ":".join(fieldStrs)
     This routine doesn't take that step to allow omitting fields
     whose value is zero (e.g. see dmsStrFromDeg and dmsStrFromSec).
-
+    
     Error conditions:
     - Raises ValueError if precision < 0
     """
@@ -486,7 +496,7 @@ def _getDMSFields (decDeg, nFields=3, precision=1):
         retNum = round(abs(decDeg), precision)
         retStr = "%.*f" % (precision, retNum)
         return signStr, [retStr]
-
+    
     # compute a list of output fields; all but the last one are integer
     remVal = abs(decDeg)
     fieldNums = []
@@ -496,7 +506,7 @@ def _getDMSFields (decDeg, nFields=3, precision=1):
         fieldNums.append(intVal)
         remVal *= 60.0
     fieldNums.append(round(remVal, precision))
-
+    
     # handle overflow
     incrPrevField = False
     for ind in range(nFields-1, -1, -1):
@@ -517,12 +527,12 @@ def _getDMSFields (decDeg, nFields=3, precision=1):
     for numVal in fieldNums[1:-1]:
         fieldStrs.append("%02d" % (numVal,))
     fieldStrs.append("%0*.*f" % (minFloatWidth, precision, fieldNums[-1]))
-
+            
     return signStr, fieldStrs
 
 def _assertTest():
     """Run a test by comparing results to those expected and only failing if something is wrong.
-
+    
     Use _printTest to generate data for this test.
     """
     # format is a set of lists of:
@@ -566,7 +576,7 @@ def _assertTest():
     )
     def locAssert(fmt, res, func, *args, **kargs):
         assert fmt % (res,) == fmt % (func(*args, **kargs),), "%r != %r = %s(*%r, **%r)" % (res, func(*args, **kargs), func.__name__, args, kargs)
-
+    
     nErrors = 0
     for testStr, commentStr, isOK, splitStr, degVal, secVal, neatStr, dmsStr02 in testSet:
         try:
@@ -585,18 +595,18 @@ def _assertTest():
                 raise
                 print("unexpected failure on %r\n\t%s\nskipping other tests on this value" % (testStr, e))
                 nErrors += 1
-
+    
     if nErrors == 0:
         print("RO.StringUtil passed")
     else:
         print("RO.StringUtil failed with %d errors" % nErrors)
-
+            
 
 def _printTest(dmsSet = None):
     """Print the results of running each routine on a set of test data.
     Data format is a list of tuples, each containing two elements:
         dmsStr to test, a comment
-
+        
     The output is in the format used by _assertTest, but please use this with great caution.
     You must examine the output very carefully to confirm it is correct before updating _assertTest!
     """

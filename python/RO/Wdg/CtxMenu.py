@@ -47,10 +47,12 @@ History:
 """
 __all__ = ['CtxMenu', 'CtxMenuMixin', 'addCtxMenu']
 
-from six.moves import tkinter
+import tkinter
+
 import RO.Comm.BrowseURL
 import RO.Constants
 import RO.OS
+
 
 class CtxMenu(object):
     def __init__(self,
@@ -60,7 +62,7 @@ class CtxMenu(object):
         doTest = True,
     ):
         """Add a contextual menu to a Tkinter widget.
-
+        
         Inputs:
         - wdg:  the widget to which to bind the means of bringing up the menu.
             - To add a contextual menu to a specific Tkinter widget, set wdg = the widget
@@ -72,17 +74,17 @@ class CtxMenu(object):
             the function takes one argument: the menu;
             if omitted then self.ctxConfigMenu is used
         - doTest: while initializing, create a menu to make sure it works
-
+        
         Help:
         There are multiple ways to support help for a widget. Any of these
         will cause a Help item to be added as the last item of the contextual menu
         that "does the right thing":
         - specify helpURL
         - override getHelpURL to return the desired info
-
+            
         Error conditions:
         - Raises TypeError if wdg is already a CtxMenu object
-
+        
         Subtleties:
         - To avoid a circular reference to self (e.g. self.__wdg = self),
           I use __getWdg to return wdg or self as appropriate.
@@ -91,15 +93,15 @@ class CtxMenu(object):
           to put in the menu.
         """
         self.__wdg = wdg
-
+            
         self.helpURL = helpURL
         self.ctxSetConfigFunc(configFunc)
 
         self.__getWdg().bind("<<CtxMenu>>", self.__postMenu)
-
+        
         if doTest:
             self.ctxGetMenu()
-
+        
     def __getWdg(self):
         """Returns the widget, if specified, else self.
         """
@@ -112,7 +114,7 @@ class CtxMenu(object):
             if evt.widget is not None:
                 evt.widget.focus_set()
             menu.tk_popup(evt.x_root, evt.y_root)
-
+    
     def ctxConfigMenu(self, menu):
         """Adds all items to the contextual menu.
         Override to add your own items.
@@ -120,7 +122,7 @@ class CtxMenu(object):
         (if getHelpURL returns anything).
         """
         return True
-
+    
     def ctxGetMenu(self):
         """Creates the contextual menu and adds items.
         Override to build your own menu from scratch.
@@ -132,12 +134,12 @@ class CtxMenu(object):
             if helpURL:
                 menu.add_command(label = "Help", command = self.ctxShowHelp)
         return menu
-
+    
     def ctxSetConfigFunc(self, configFunc=None):
         """Sets the function that configures the contextual menu
         (i.e. adds items to it).
         If None, then self.ctxConfigMenu is used.
-
+        
         The function must take one argument: the menu.
 
         Raise ValueError if configFunc not callable.
@@ -145,7 +147,7 @@ class CtxMenu(object):
         if configFunc and not callable(configFunc):
             raise ValueError("configFunc %r is not callable" % (configFunc,))
         self.__configMenuFunc = configFunc or self.ctxConfigMenu
-
+    
     def ctxShowHelp(self):
         """Displays the help.
         """
@@ -194,7 +196,7 @@ def addCtxMenu(
     """Creates a CtxMenu object for your widget and adds a reference to it
     as wdg.__ctxMenu, thus saving you from having to explicitly save a reference.
     Also returns the CtxMenu item in case you want to add other menu items.
-
+    
     Caution: do not call this on objects that already inherit from CtxMenuMixin!
     """
     wdg.__ctxMenu = CtxMenu(
@@ -208,10 +210,10 @@ def addCtxMenu(
 
 if __name__ == "__main__":
     from . import Bindings
-    from . import PythonTk
-    root = PythonTk.PythonTk()
+    from .PythonTk import PythonTk
+    root = PythonTk()
 
-    # set up standard binding for <<CtxMenu>>
+    # set up standard binding for <<CtxMenu>>   
     Bindings.stdBindings(root)
 
     # add help to a standard Tkinter widget
@@ -221,7 +223,7 @@ if __name__ == "__main__":
         helpURL = "http://brokenURL.html",
     )
     stdLabel.pack()
-
+    
     # create a new label class that automatically has help:
     class HelpLabel(tkinter.Label, CtxMenuMixin):
         def __init__(self, master, helpURL=None, **kargs):
@@ -233,5 +235,5 @@ if __name__ == "__main__":
         helpURL = "http://brokenURL.html",
     )
     hLabel.pack()
-
+    
     root.mainloop()

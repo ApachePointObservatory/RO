@@ -9,10 +9,12 @@ History:
 __all__ = ["obsFromTopo"]
 
 from math import sqrt
+
 import numpy
-import RO.SysConst
-import RO.PhysConst
+
 import RO.MathUtil
+import RO.PhysConst
+import RO.SysConst
 
 # Constants
 _MaxZDU = 85.0

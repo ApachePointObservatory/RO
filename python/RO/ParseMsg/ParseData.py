@@ -13,9 +13,10 @@ History:
 """
 __all__ = ["parseKeyValueData"]
 
+import RO.Alg
 from .GetKeyword import getKeyword
 from .GetValues import getValues
-import RO.Alg
+
 
 def parseKeyValueData(astr):
     """Parses a string of the form:

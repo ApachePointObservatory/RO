@@ -22,16 +22,19 @@ History:
 2012-07-09 ROwen    Modified to treat path="" as path=None. This fixes a problem with file and path prefs.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
+2020-02-10 DGatlin  Modified imports for Python 3
 """
 __all__ = ["DirWdg", "FileWdg"]
 
 import os
-from six.moves import tkinter
+import tkinter
+import tkinter.filedialog
+
 import RO.AddCallback
 import RO.Constants
 from .CtxMenu import CtxMenuMixin
 from .SeverityMixin import SeverityActiveMixin
-from six import u
+
 
 class BasePathWdg (tkinter.Button, RO.AddCallback.BaseMixin, CtxMenuMixin,
     SeverityActiveMixin):
@@ -46,7 +49,7 @@ class BasePathWdg (tkinter.Button, RO.AddCallback.BaseMixin, CtxMenuMixin,
         helpURL = None,
     **kargs):
         """Creates a new Button.
-
+        
         Inputs:
         - defPath: initial path; silently ignored if invalid or nonexistent
         - fileTypes: sequence of (label, pattern) tuples;
@@ -67,7 +70,7 @@ class BasePathWdg (tkinter.Button, RO.AddCallback.BaseMixin, CtxMenuMixin,
         self.helpText = helpText
         self.path = None
         self.defPath = None
-
+        
         self.leftChar = 0
         self.rightChar = (self.maxChar - self.leftChar) - 1
 
@@ -75,16 +78,16 @@ class BasePathWdg (tkinter.Button, RO.AddCallback.BaseMixin, CtxMenuMixin,
             master = master,
             command = self._doChoose,
         **kargs)
-
+        
         RO.AddCallback.BaseMixin.__init__(self)
-
+        
         CtxMenuMixin.__init__(self,
             helpURL = helpURL,
         )
         SeverityActiveMixin.__init__(self, severity)
 
         self._initPath(defPath)
-
+        
         if callFunc:
             self.addCallback(callFunc, False)
 
@@ -106,14 +109,14 @@ class BasePathWdg (tkinter.Button, RO.AddCallback.BaseMixin, CtxMenuMixin,
                 defPath = None
         self.defPath = defPath
         self.setPath(defPath)
-
+    
     def checkPath(self, path):
         """Raise ValueError if path not None and does not exist.
         Override from base class to make more specific.
         """
         if path and not os.path.exists(path):
             raise ValueError("Path %r does not exist" % (path,))
-
+    
     def setEnable(self, doEnable):
         """Enable or disable widget
 
@@ -126,20 +129,20 @@ class BasePathWdg (tkinter.Button, RO.AddCallback.BaseMixin, CtxMenuMixin,
             self["state"] = tkinter.NORMAL
         else:
             self["state"] = tkinter.DISABLED
-
+    
     def getEnable(self):
         """Return True if widget is enabled, False otherwise
 
         Enabled is defined as the state is not "disabled" (thus "enabled" or "active").
         """
         return self["state"] != tkinter.DISABLED
-
+        
     def setPath(self, path):
         """Set self.path to normalized version of path.
-
+        
         Inputs:
         - path: path; if None or "" then no path
-
+        
         Raise ValueError if path invalid or nonexistent.
         """
         #print "%s.setPath(%r)" % (self.__class__.__name__, path)
@@ -151,7 +154,7 @@ class BasePathWdg (tkinter.Button, RO.AddCallback.BaseMixin, CtxMenuMixin,
             if len(path) > self.maxChar:
                 dispStr = "".join((
                     path[0:self.leftChar],
-                    u("\N{HORIZONTAL ELLIPSIS}"),
+                    "\N{HORIZONTAL ELLIPSIS}",
                     path[-self.rightChar:],
                 ))
             else:
@@ -159,7 +162,7 @@ class BasePathWdg (tkinter.Button, RO.AddCallback.BaseMixin, CtxMenuMixin,
         self.path = path
         self["text"] = dispStr
         self._doCallbacks()
-
+    
     def getPath(self):
         """Return the current path (or None if no path).
         """
@@ -172,12 +175,12 @@ class BasePathWdg (tkinter.Button, RO.AddCallback.BaseMixin, CtxMenuMixin,
         """
         if not self.getEnable():
             return True
-
+        
         if self.path is None:
             state = "disabled"
         else:
             state = "normal"
-
+        
         if self.path:
             copyLabel = " ".join(("Copy", self.path))
         else:
@@ -188,7 +191,7 @@ class BasePathWdg (tkinter.Button, RO.AddCallback.BaseMixin, CtxMenuMixin,
             state = state,
         )
         return True
-
+    
     def _copyToClip(self):
         """Copy the current path to the clipboard
         """
@@ -198,7 +201,7 @@ class BasePathWdg (tkinter.Button, RO.AddCallback.BaseMixin, CtxMenuMixin,
 
 class DirWdg(BasePathWdg):
     """A widget showing a directory; push to pick another directory.
-
+    
     Inputs: same as BasePathWdg. defPath must be a an existing directory,
     else it is silently ignored.
     """
@@ -218,7 +221,7 @@ class DirWdg(BasePathWdg):
                 startDir = parDir
             else:
                 startDir = None
-
+            
         kargs = {}
         if self.fileTypes:
             kargs["filetypes"] = self.fileTypes
@@ -231,17 +234,17 @@ class DirWdg(BasePathWdg):
             # handle case of newPath being a weird Tcl object
             newPath = RO.CnvUtil.asStr(newPath)
             self.setPath(newPath)
-
+    
     def checkPath(self, path):
         """Raise ValueError if path not None and not an existing directory"""
         if path and not os.path.isdir(path):
             raise ValueError("Path %r is not an existing directory" % (path,))
-
-
-
+        
+    
+            
 class FileWdg(BasePathWdg):
     """A widget showing a file; push to pick another file.
-
+    
     Inputs: same as BasePathWdg. defPath may be an existing file or a directory;
     if a directory, it is only used as the initial directory of the chooser dialog.
     """
@@ -252,7 +255,7 @@ class FileWdg(BasePathWdg):
             startPath = self.path
         else:
             startPath = self.defPath
-
+        
         if startPath is not None:
             startDir, startFile = os.path.split(self.path)
             if not os.path.isfile(startPath):
@@ -276,7 +279,7 @@ class FileWdg(BasePathWdg):
             # handle case of newPath being a weird Tcl object
             newPath = RO.CnvUtil.asStr(newPath)
             self.setPath(newPath)
-
+    
     def _initPath(self, defPath):
         """During initialization set self.defDir, self.defPath and self.path.
         """
@@ -306,26 +309,26 @@ class FileWdg(BasePathWdg):
 if __name__ == "__main__":
     from RO.Wdg.PythonTk import PythonTk
     root = PythonTk()
-
+    
     modFile = __file__
     modDir = os.path.split(__file__)[0]
-
+    
     def wdgFunc(wdg):
         print("%s set to %s" % (wdg.__class__.__name__, wdg.getPath()))
 
     f1 = FileWdg(root, callFunc=wdgFunc)
     f1.pack()
-
+    
     f2 = FileWdg(root, callFunc=wdgFunc, defPath=modDir)
     f2.pack()
-
+    
     f3 = FileWdg(root, callFunc=wdgFunc, defPath=modFile)
     f3.pack()
 
     d1 = DirWdg(root, callFunc=wdgFunc)
     d1.pack()
-
+    
     d2 = DirWdg(root, callFunc=wdgFunc, defPath=modDir)
     d2.pack()
-
+    
     root.mainloop()

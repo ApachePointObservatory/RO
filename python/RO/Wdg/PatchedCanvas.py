@@ -14,13 +14,14 @@ History:
 """
 __all__ = ['PatchedCanvas']
 
+import tkinter
 import warnings
-from six.moves import tkinter
+
 
 class PatchedCanvas(tkinter.Canvas):
     def __init__(self, *args, **kargs):
         tkinter.Canvas.__init__(self, *args, **kargs)
-
+        
         warnings.warn("RO.Wdg.PatchedCanvas is obsolete; please use Tkinter.Canvas instead.",
             category = DeprecationWarning,
             stacklevel = 2,
@@ -31,7 +32,7 @@ if __name__ == "__main__":
     root = tkinter.Tk()
     c = PatchedCanvas(root, width=200, height=200)
     c.pack()
-
+    
     objWidth = 30
     yPos = 10
     for yPos, lineWidth in ((10, 1), (50, 2), (90, 3), (130, 4)):
@@ -42,5 +43,5 @@ if __name__ == "__main__":
             c.create_line(xPos, yPos+objWidth, xPos+objWidth, yPos, width=lineWidth)
             c.create_line(xPos, yPos+(objWidth/2), xPos+objWidth, yPos+(objWidth/2), width=lineWidth)
             c.create_line(xPos+(objWidth/2), yPos, xPos+(objWidth/2), yPos+objWidth, width=lineWidth)
-
+    
     root.mainloop()

@@ -25,10 +25,12 @@ History:
 """
 __all__ = ["delDir", "expandPath", "findFiles", "getResourceDir", "removeDupPaths", "splitPath", "openUniv"]
 
+import fnmatch
 import os.path
 import sys
-import fnmatch
+
 import RO.SeqUtil
+
 
 def delDir(dirPath):
     """Delete dirPath and all contents

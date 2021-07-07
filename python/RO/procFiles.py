@@ -148,8 +148,10 @@ __all__ = ["procFiles"]
 import os.path
 import sys
 import traceback
+
 import RO.OS
 import RO.SeqUtil
+
 
 def procFiles (
     func,

@@ -8,6 +8,7 @@ History:
 __all__ = ["setClockError", "getClockError", "getCurrPySec", "utcFromPySec", "pySecFromUTC"]
 
 import time
+
 import RO.PhysConst
 
 # Python time tuple for J2000: 2000-01-01 12:00:00 (a Saturday)

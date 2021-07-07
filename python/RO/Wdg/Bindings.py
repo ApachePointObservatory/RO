@@ -43,8 +43,10 @@ in a Mac-like way is difficult.
 """
 __all__ = ['makeReadOnly', 'stdBindings', 'stopEvent']
 
-from six.moves import tkinter
+import tkinter
+
 import RO.TkUtil
+
 
 def doQuit(evt):
     evt.widget.quit()
@@ -196,7 +198,7 @@ def _entryGoToRightEdge(evt):
 if __name__ == "__main__":
     root = tkinter.Tk()
     stdBindings(root, debug=1)
-
+    
     t = tkinter.Text(root, width=20, height=5)
     tr = tkinter.Text(root, width=20, height=5)
     tr.insert("end", "here is some test text for the read only text widget")

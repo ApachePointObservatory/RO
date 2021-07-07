@@ -21,7 +21,7 @@ Implementation note:
 - I would have used width=1 for the region rectangles, making the
   location of the boundaries more obvious. But if outline=None
   you see a black outline, which is unacceptable.
-
+  
 History:
 2006-09-13 ROwen
 2012-07-10 ROwen    Removed use of update_idletasks in test code.
@@ -29,16 +29,17 @@ History:
 """
 __all__ = ["ResizableRect"]
 
-from six.moves import tkinter
-import RO.SeqUtil
+import tkinter
+
 import RO.AddCallback
+import RO.SeqUtil
 from RO.Alg import GenericCallback
 
 Debug = False
 
 class ResizableRect(RO.AddCallback.BaseMixin):
     """Resizable box
-
+    
     Inputs:
     - cnv: canvas onto which to put box
     - x0, y0, x1, y1: initial box coords
@@ -50,7 +51,7 @@ class ResizableRect(RO.AddCallback.BaseMixin):
     - fill: fill color of rectangle. Warning: None may prevent dragging the rectangle.
     all other keyword arguments are used for the rectangle
     (see Tkinter.Canvas's create_rectangle method for more info).
-
+    
     Notes:
     - Make sure the canvas has the normal cursor you want when you call this
       (or else change attribute defaultCursor)
@@ -65,10 +66,10 @@ class ResizableRect(RO.AddCallback.BaseMixin):
         callFunc = None,
     **kargs):
         RO.AddCallback.BaseMixin.__init__(self)
-
+        
         self.cnv = cnv
         self.grabSize = RO.SeqUtil.oneOrNAsList(grabSize, 2, "grab (inner, outer) size")
-
+        
         self.mousePos = [] # x, y coords of button-down
         self.rectCoords = [] # x0, y0, x1, y1 coords of rectangle
         if minSize is None:
@@ -76,9 +77,9 @@ class ResizableRect(RO.AddCallback.BaseMixin):
             minSize = 3 + (3 * self.grabSize[0]) + self.grabSize[1]
         self.minSizeLess1 = minSize - 1
         self.btnDown = False # button down flag
-
+        
         self.defaultCursor = cnv["cursor"]
-
+        
         # dict of region name: cursor
         self.cursorDict = {
             "L": "sb_h_double_arrow",
@@ -90,10 +91,10 @@ class ResizableRect(RO.AddCallback.BaseMixin):
             "TR": "top_right_corner",
             "BL": "bottom_left_corner",
         }
-
+        
         # dict of region name: region ID
         self.idDict = {}
-
+        
         # Create stubs items that ::ResizableRect::Resize will size correctly
         self.rectID = self.cnv.create_rectangle(
             0, 0, 1, 1,
@@ -101,11 +102,11 @@ class ResizableRect(RO.AddCallback.BaseMixin):
             width = width,
             fill = fill,
         **kargs)
-
+        
         self.cnv.tag_bind(self.rectID, "<Enter>", GenericCallback(self._setCursor, "hand2"))
         self.cnv.tag_bind(self.rectID, "<ButtonPress-1>", self._doDown)
         self.cnv.tag_bind(self.rectID, "<B1-Motion>", self._doMove)
-
+        
         # Hidden rectangles that we bind to for resizing
         # (and they can be shown for debugging)
         if Debug:
@@ -138,16 +139,16 @@ class ResizableRect(RO.AddCallback.BaseMixin):
             self.cnv.tag_bind(regionID, "<ButtonPress-1>", self._doDown)
 
         self.setCoords(x0, y0, x1, y1)
-
+        
         if callFunc:
             self.addCallback(callFunc)
-
+    
     def __del__(self):
         self.delete()
-
+    
     def delete(self):
         """Delete rectangle from canvas, remove all callbacks and restore default cursor.
-
+        
         Once deleted, do not attempt to manipulate any further.
         """
         self._removeAllCallbacks()
@@ -159,15 +160,15 @@ class ResizableRect(RO.AddCallback.BaseMixin):
     def getCoords(self):
         """Return a copy of the current coordinates."""
         return tuple(self.rectCoords)
-
+    
     def getMaxCoords(self):
         """Return maximum coordinates of canvas."""
         return (self.cnv.winfo_width() - 1, self.cnv.winfo_height() - 1)
-
+        
     def redraw(self, evt=None):
         """Redraw self at current position (self.rectCoords)."""
         self.cnv.coords(self.rectID, *self.rectCoords)
-
+                
         ix0, iy0, ix1, iy1 = self._expandRect(self.rectCoords, -self.grabSize[0])
         ox0, oy0, ox1, oy1 = self._expandRect(self.rectCoords, self.grabSize[1])
         self._setRegionCoords("L",  ox0, iy0, ix0, iy1)
@@ -178,7 +179,7 @@ class ResizableRect(RO.AddCallback.BaseMixin):
         self._setRegionCoords("TR", ix1, oy0, ox1, iy0)
         self._setRegionCoords("BL", ox0, iy1, ix0, oy1)
         self._setRegionCoords("BR", ix1, iy1, ox1, oy1)
-
+    
     def setCoords(self, x0, y0, x1, y1, doRaise=False):
         """Set rectangle coordinates.
         Inputs:
@@ -192,9 +193,9 @@ class ResizableRect(RO.AddCallback.BaseMixin):
             max(x0, x1),
             max(y0, y1),
         ]
-
+        
         maxCoords = self.getMaxCoords()
-
+        
         # constrain the outer limits
         for ii in range(4):
             if newRectCoords[ii] < 0:
@@ -224,10 +225,10 @@ class ResizableRect(RO.AddCallback.BaseMixin):
                     newRectCoords[ii+2] += nudgeAmt
 
         self._basicSetCoords(newRectCoords)
-
+    
     def _basicSetCoords(self, newCoords):
         """Internal function to set self.rectCoords.
-
+        
         If the coords have changed, redraws the rectangle
         and calls the callback functions (if any).
 
@@ -236,28 +237,28 @@ class ResizableRect(RO.AddCallback.BaseMixin):
         newCoords = list(newCoords)
         if self.rectCoords == newCoords:
             return
-
+        
         self.rectCoords = newCoords
         self.redraw()
-        self._doCallbacks()
-
+        self._doCallbacks()     
+    
     def _doDown(self, evt):
         """Handle mouse button down"""
         self.mousePos = [evt.x, evt.y]
         self.btnDown = True
-
+    
     def _doUp(self, evt=None):
         """Handle mouse button up"""
         self.btnDown = False
-
+    
     def _doMove(self, evt):
         """Handle <Motion> event to move the box"""
         newMousePos = [evt.x, evt.y]
         dPos = [newMousePos[ii] - self.mousePos[ii] for ii in range(2)]
         newRectCoords = [self.rectCoords[ii] + dPos[ii%2] for ii in range(4)]
-
+        
         maxCoords = self.getMaxCoords()
-
+        
         # constrain the move
         for ii in range(2):
             if newRectCoords[ii] < 0:
@@ -270,7 +271,7 @@ class ResizableRect(RO.AddCallback.BaseMixin):
                 newRectCoords[ii] -= overshoot
                 newRectCoords[ii+2] -= overshoot
                 newMousePos[ii] -= overshoot
-
+            
         self.mousePos = newMousePos
         self._basicSetCoords(newRectCoords)
 
@@ -279,9 +280,9 @@ class ResizableRect(RO.AddCallback.BaseMixin):
         newMousePos = [evt.x, evt.y]
         dPos = [newMousePos[ii] - self.mousePos[ii] for ii in range(2)]
         newRectCoords = list(self.rectCoords)
-
+        
         maxCoords = self.getMaxCoords()
-
+        
         # compute the resize
         for (ii, charLT, charRB) in [(0, "L", "R"), (1, "T", "B")]:
             if charLT in regionName:
@@ -304,10 +305,10 @@ class ResizableRect(RO.AddCallback.BaseMixin):
                     adj = (newRectCoords[ii] + self.minSizeLess1) - newRectCoords[ii+2]
                 newRectCoords[ii+2] += adj
                 newMousePos[ii] += adj
-
+        
         self.mousePos = newMousePos
         self._basicSetCoords(newRectCoords)
-
+    
     def _expandRect(self, rectCoords, d):
         """Return a new rect that is d bigger than rectCoords
         on all sides (or smaller if d < 0).
@@ -318,7 +319,7 @@ class ResizableRect(RO.AddCallback.BaseMixin):
     def _restoreDefaultCursor(self, evt=None):
         """Restore default cursor"""
         self.cnv["cursor"] = self.defaultCursor
-
+                    
     def _setCursor(self, cursor, evt=None):
         """Handle <Enter> event by displaying the appropriate cursor."""
         self.cnv["cursor"] = cursor
@@ -329,8 +330,8 @@ class ResizableRect(RO.AddCallback.BaseMixin):
 
 
 if __name__ == "__main__":
-    from . import PythonTk
-    root = PythonTk.PythonTk()
+    from .PythonTk import PythonTk
+    root = PythonTk()
     cnvFrame = tkinter.Frame(root, borderwidth=2, relief="solid")
     cnv = tkinter.Canvas(
         cnvFrame,
@@ -341,7 +342,7 @@ if __name__ == "__main__":
         width = 200,
     )
     cnv.pack()
-
+        
     def printCoords(rr):
         print(rr.getCoords())
 
@@ -351,5 +352,5 @@ if __name__ == "__main__":
         callFunc = printCoords,
     )
     cnvFrame.pack()
-
+    
     root.mainloop()

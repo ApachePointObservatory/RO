@@ -26,26 +26,29 @@ History:
 2012-07-10 ROwen    Modified to use RO.TkUtil.Timer.
                     Removed use of update_idletasks.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
+2020-02-10 DGatlin  Modified imports for Python 3
 """
 __all__ = ['ProgressBar', 'TimeBar']
 
 import time
+import tkinter
+
 import RO.SeqUtil
 from RO.TkUtil import Timer
-from six.moves import tkinter
-from . import Button
+from .Button import Button
 from . import Entry
-from . import Gridder
+from .Gridder import Gridder
 from .Label import StrLabel
+
 
 class ProgressBar (tkinter.Frame):
     """A bar graph showing a value or fraction of a task performed.
-
+    
     Contains three widgets:
     - labelWdg: an optional label (None if absent)
     - cnv: the bar graph
     - numWdg: an optional numerical value display
-
+    
     Inputs:
     - minValue: value for zero-length bar
     - maxValue: value for full-length bar
@@ -56,7 +59,7 @@ class ProgressBar (tkinter.Frame):
     - valueFormat: numeric value is displayed as valueFormat % value;
         set to None if not wanted.
         If two values, the 2nd is the string displayed for unknown value.
-
+    
     The following control the appearance of the progress bar
     and the background field against which it is displayed
     - barLength: length of full bar (pixels) within the background border;
@@ -71,7 +74,7 @@ class ProgressBar (tkinter.Frame):
       - borderwidth: thickness of border around bar's background field
       - relief: type of border around bar's background field
       - background: color of bar's background field
-
+    
     Warnings:
     - barStipple may only work on unix (due to known bugs in Tk).
     """
@@ -97,7 +100,7 @@ class ProgressBar (tkinter.Frame):
         e = tkinter.Entry()
         for item in ("background", "borderwidth", "relief"):
             kargs.setdefault(item, e[item])
-
+        
         # handle default=0 for other borders
         for item in ("selectborderwidth", "highlightthickness"):
             kargs.setdefault(item, 0)
@@ -146,14 +149,14 @@ class ProgressBar (tkinter.Frame):
         self.labelWdg = self._makeWdg(label, anchor = labelAnchor)
         if self.labelWdg is not None:
             self.labelWdg.pack(side = packSide)
-
+        
         # create canvas for bar graph
         self.cnv = tkinter.Canvas(self,
             width = cnvWidth,
             height = cnvHeight,
         **kargs)
         self.cnv.pack(side = packSide, expand = True, fill = packFill, pady = cnvPadY)
-
+        
         # thickness of canvas border; initialize to 0 and compute later
         # drawable width/height = winfo_width/height - (2 * border)
         self.cnvBorderWidth = 0
@@ -165,7 +168,7 @@ class ProgressBar (tkinter.Frame):
             width = self.barBorder,
             *self.hideBarCoords
         )
-
+        
         # handle numeric value display
         if self.valueFormat[0]:
             self.numWdg = StrLabel(self,
@@ -183,7 +186,7 @@ class ProgressBar (tkinter.Frame):
             self.numWdg = None
         if self.numWdg is not None:
             self.numWdg.pack(side = packSide, anchor = numAnchor)
-
+        
         # set values and update display
         self.value = value
         self.minValue = minValue
@@ -204,7 +207,7 @@ class ProgressBar (tkinter.Frame):
         newMax = None,
     ):
         """Set the current value and optionally one or both limits.
-
+        
         Note: always computes bar scale, numWdg width and calls update.
         """
         self.knownInd = 0
@@ -212,19 +215,19 @@ class ProgressBar (tkinter.Frame):
             newValue = max(min(newValue, self.maxValue), self.minValue)
         self.value = newValue
         self.setLimits(newMin, newMax)
-
+    
     def setUnknown(self):
         """Display an unknown value"""
         self.knownInd = 1
         self.value = self.maxValue
         self.fullUpdate()
-
+    
     def setLimits(self,
         newMin = None,
         newMax = None,
     ):
         """Set one or both limits.
-
+        
         Note: always computes bar scale, numWdg width and calls update.
         """
         if newMin is not None:
@@ -232,7 +235,7 @@ class ProgressBar (tkinter.Frame):
         if newMax is not None:
             self.maxValue = newMax
         self.fullUpdate()
-
+    
     def fullUpdate(self):
         """Redisplay assuming settings have changed
         (e.g. current value, limits or isKnown).
@@ -269,7 +272,7 @@ class ProgressBar (tkinter.Frame):
         # the smallest starting position required is 1 - self.cnvBorderWidth
         # but -1 is simpler and works for all cases
         value=self.value
-
+        
         barLength = self._valueToLength(value)
         if barLength <= 0:
             # works around some a Tk bug or misfeature
@@ -311,7 +314,7 @@ class ProgressBar (tkinter.Frame):
         - a string: returns a Label with text=wdgInfo
         - a Tkinter Variable: returns a Label with textvariable=wdgInfo
         - a Tkinter Widget: returns wdgInfo unaltered
-
+        
         kargs is ignored if wdgInfo is a widget
         """
         if wdgInfo is None:
@@ -319,7 +322,7 @@ class ProgressBar (tkinter.Frame):
         elif isinstance(wdgInfo, tkinter.Widget):
             # a widget; assume it's a Label widget of some kind
             return wdgInfo
-
+        
         # at this point we know we are going to create our own widget
         # set up the keyword arguments
         kargs.setdefault("helpText", self.helpText)
@@ -337,17 +340,17 @@ class ProgressBar (tkinter.Frame):
         self.cnvBorderWidth = int(self.cnv["borderwidth"]) + int(self.cnv["selectborderwidth"]) + int(self.cnv["highlightthickness"])
         self.cnvSize = [size for size in (self.cnv.winfo_width(), self.cnv.winfo_height())]
         barSize = [size - (2 * self.cnvBorderWidth) for size in self.cnvSize]
-
+        
         # compute bar length
         if self.isHorizontal:
             self.fullBarLength = barSize[0]
         else:
             self.fullBarLength = barSize[1]
         # print "_setSize; self.fullBarLength =", self.fullBarLength
-
+                
         # recompute scale and update bar display
         self.fullUpdate()
-
+    
     def _valueToLength(self, value):
         """Compute the length of the bar, in pixels, for a given value.
         This is the desired length, in pixels, of the colored portion of the bar.
@@ -393,20 +396,20 @@ class TimeBar(ProgressBar):
 
         if "value" in kargs:
             self.start(kargs["value"])
-
+    
     def clear(self):
         """Set the bar length to zero, clear the numeric time display and stop the timer.
         """
         self._updateTimer.cancel()
         ProgressBar.clear(self)
         self._startTime = None
-
+    
     def pause(self, value = None):
         """Pause the timer.
-
+        
         Inputs:
         - value: the value at which to pause; if omitted then the current value is used
-
+        
         Error conditions: does nothing if not running.
         """
         if self._updateTimer.cancel():
@@ -415,7 +418,7 @@ class TimeBar(ProgressBar):
                 self.setValue(value)
             else:
                 self._updateTime(reschedule = False)
-
+    
     def resume(self):
         """Resume the timer from the current value.
 
@@ -424,7 +427,7 @@ class TimeBar(ProgressBar):
         if self._startTime is None:
             return
         self._startUpdate()
-
+    
     def start(self, value = None, newMin = None, newMax = None, countUp = None):
         """Start the timer.
 
@@ -433,7 +436,7 @@ class TimeBar(ProgressBar):
         - newMin: minimum value; if None then the existing value is used
         - newMax: maximum value: if None then the existing value is used
         - countUp: if True/False then count up/down; if None then the existing value is used
-
+        
         Typically you will only specify newMax or nothing.
         """
         if newMin is not None:
@@ -450,9 +453,9 @@ class TimeBar(ProgressBar):
         else:
             value = self.maxValue
         self.setValue(value)
-
+        
         self._startUpdate()
-
+    
     def _startUpdate(self):
         """Starts updating from the current value.
         """
@@ -469,10 +472,10 @@ class TimeBar(ProgressBar):
         # print "_updateTime called"
         # cancel pending update, if any
         self._updateTimer.cancel()
-
+        
         if self._startTime is None:
             raise RuntimeError("bug! nothing to update")
-
+        
         # update displayed value
         if self._countUp:
             value = time.time() - self._startTime
@@ -484,18 +487,18 @@ class TimeBar(ProgressBar):
             if (self._autoStop and value <= 0.0):
                 self.setValue(0)
                 return
-
+        
         self.setValue(value)
 
         # if requested, schedule next update
         if reschedule:
             self._updateTimer.start(self._updateInterval, self._updateTime)
-
+        
 
 if __name__ == "__main__":
-    from . import PythonTk
-    root = PythonTk.PythonTk()
-
+    from .PythonTk import PythonTk
+    root = PythonTk()
+    
     # horizontal and vertical progress bars
 
     hProg = [ProgressBar(
@@ -522,15 +525,15 @@ if __name__ == "__main__":
                 newMin = minEntry.getNum(),
                 newMax = maxEntry.getNum(),
             )
-
+    
     valEntry = Entry.IntEntry(root, defValue = 50, width=5, callFunc = setProg)
     minEntry = Entry.IntEntry(root, defValue =  0, width=5, callFunc = setProg)
     maxEntry = Entry.IntEntry(root, defValue = 99, width=5, callFunc = setProg)
-
+    
     setProg()
 
     gr = Gridder.Gridder(root)
-
+    
     gr.gridWdg ("Val", valEntry)
     gr.gridWdg ("Minimum", minEntry)
     gr.gridWdg ("Maximum", maxEntry)
@@ -543,40 +546,40 @@ if __name__ == "__main__":
         vpb.grid(row=0, column = col, rowspan = vbarRowSpan)
         col += 1
     root.grid_rowconfigure(vbarRowSpan-1, weight=1)
-
+    
     hbarColSpan = col + 1
     for hpb in hProg:
         gr.gridWdg(False, hpb, colSpan=hbarColSpan, sticky="")
-
+    
     root.grid_columnconfigure(hbarColSpan-1, weight=1)
-
+    
     # time bars
 
     def startRemTime():
         time = timeEntry.getNum()
         for bar in timeBars:
             bar.start(time)
-
+            
     def pauseRemTime():
         for bar in timeBars:
             bar.pause()
-
+    
     def resumeRemTime():
         for bar in timeBars:
             bar.resume()
-
+    
     def clearRemTime():
         for bar in timeBars:
             bar.clear()
-
+            
 
     timeEntry = Entry.IntEntry(root, defValue = 9, width=5)
     gr.gridWdg ("Rem Time", timeEntry)
     gr.gridWdg (False, (
-            Button.Button(root, text="Start", command=startRemTime),
-            Button.Button(root, text="Pause", command=pauseRemTime),
-            Button.Button(root, text="Resume", command=resumeRemTime),
-            Button.Button(root, text="Clear", command=clearRemTime),
+            Button(root, text="Start", command=startRemTime),
+            Button(root, text="Pause", command=pauseRemTime),
+            Button(root, text="Resume", command=resumeRemTime),
+            Button(root, text="Clear", command=clearRemTime),
         ),
     )
 

@@ -14,49 +14,49 @@ History:
 """
 __all__ = ['InputContFrame']
 
-from six.moves import tkinter
+import tkinter
 
 class InputContFrame(tkinter.Frame):
     """A convenience class for widgets containing an RO.InputCont container class.
     You must store the container list in instance variable self.inputCont and all the
     important calls automatically work.
-
+    
     This is a substitute for inheritance; it is less robust with regards to
     changes in InputCont, but avoids cluttering up your class with attributes.
     """
     def __init__(self, master, stateTracker=None, **kargs):
         tkinter.Frame.__init__(self, master, **kargs)
         self._stateTracker = stateTracker
-
+    
     def addCallback(self, callFunc, callNow=False):
         return self.inputCont.addCallback(callFunc, callNow = callNow)
-
+    
     def allEnabled(self):
         return self.inputCont.allEnabled()
 
     def clear(self):
         return self.inputCont.clear()
-
+    
     def getDefValueDict(self):
         return self.inputCont.getDefValueDict()
-
+    
     def getValueDict(self):
         return self.inputCont.getValueDict()
-
+    
     def getString(self):
         return self.inputCont.getString()
 
     def getStringList(self):
         return self.inputCont.getStringList()
-
+    
     def removeCallback(self, callFunc, doRaise=True):
         return self.inputCont.removeCallback(callFunc, doRaise = doRaise)
 
     def restoreDefault(self):
         return self.inputCont.restoreDefault()
-
+    
     def setEnable(self, doEnable):
         return self.inputCont.setEnable(doEnable)
-
+    
     def setValueDict(self, valDict):
         return self.inputCont.setValueDict(valDict)

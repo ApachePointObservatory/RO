@@ -42,10 +42,12 @@ History:
                     Moved fix for Aqua Tk 8.5 width bug to RO.Wdg.Radiobutton.
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
+2020-02-10 DGatlin  Updated imports for Python 3
 """
 __all__ = ['RadiobuttonSet']
 
-from six.moves import tkinter
+import tkinter
+
 import RO.AddCallback
 import RO.Alg
 import RO.SeqUtil
@@ -54,10 +56,11 @@ import RO.TkUtil
 from .Button import Radiobutton
 from .IsCurrentMixin import AutoIsCurrentMixin, IsCurrentActiveMixin
 
+
 class RadiobuttonSet (RO.AddCallback.TkVarMixin,
     AutoIsCurrentMixin, IsCurrentActiveMixin):
     """A set of Tkinter Radiobuttons with extra features.
-
+    
     Inputs:
     - textList: a list of text labels, one per button;
                 if omitted, bitmapList and valueList both must be specified
@@ -133,7 +136,7 @@ class RadiobuttonSet (RO.AddCallback.TkVarMixin,
             # textList specified; use as default for valueList
             if valueList is None:
                 valueList = textList
-
+            
             if bitmapList is None:
                 bitmapList = [None]*len(textList)
             else:
@@ -177,7 +180,7 @@ class RadiobuttonSet (RO.AddCallback.TkVarMixin,
         IsCurrentActiveMixin.__init__(self)
 
         self.setDefault(defValue, isCurrent = isCurrent)
-
+        
         if side:
             for wdg in self.wdgSet:
                 wdg.pack(side=side)
@@ -186,7 +189,7 @@ class RadiobuttonSet (RO.AddCallback.TkVarMixin,
         # to avoid having the callback called right away
         if callFunc:
             self.addCallback(callFunc, False)
-
+    
     def configure(self, **kargs):
         for wdg in self.wdgSet:
             wdg.configure(**kargs)
@@ -194,16 +197,16 @@ class RadiobuttonSet (RO.AddCallback.TkVarMixin,
     def expandValue(self, value, doCheck=True, descr = "value"):
         """Return the value expanded (unabbreviated and with case corrected)
         and checked, as appropriate.
-
+        
         Expansion of abbreviations and correction of case are controlled by
         ignoreCase and abbrevOK, flags supplied to __init__.
-
+        
         Inputs:
         - value: the value to expand and check
         - doCheck: if True, raises ValueError if no match found;
             otherwise silently returns value
         - descr: description of value; typically "value" or "default".
-
+        
         If value is None then None is always returned.
         """
         if value is None:
@@ -215,10 +218,10 @@ class RadiobuttonSet (RO.AddCallback.TkVarMixin,
             if doCheck:
                 raise ValueError("invalid %s: %s" % (descr, RO.StringUtil.strFromException(e)))
         return value
-
+    
     def getDefault(self):
         return self._defValue
-
+    
     def getEnable(self):
         """Returns True if any enabled, False otherwise"""
         for wdg in self.wdgSet:
@@ -228,12 +231,12 @@ class RadiobuttonSet (RO.AddCallback.TkVarMixin,
 
     def getVar(self):
         return self._var
-
+    
     def getWdgSet(self):
         """Return a copy of the set of widgets.
         """
         return self.wdgSet[:]
-
+    
     def getString(self):
         return str(self._var.get())
 
@@ -241,24 +244,24 @@ class RadiobuttonSet (RO.AddCallback.TkVarMixin,
         """Return True if current value matches the default value.
         """
         return str(self._var.get()) == (self._defValue or "")
-
+    
     def isValid(self):
         """Return True if the current value is valid"""
         return self._var.get() in self._valueList
-
+        
     def restoreDefault(self):
         """Restore default value.
         """
         if self._defValue is None:
             return
-
+    
         if self._defValue not in self._valueList:
             raise ValueError("invalid default %r not in %r" % (self._defValue, self._valueList))
         self._var.set(self._defValue)
 
     def set(self, newValue, isCurrent=True, doCheck=True, *args, **kargs):
         """Changes the currently selected radiobutton.
-
+        
         Inputs:
         - newValue: value (not name) of button to set
         - doCheck: if True, raise an exception if value invalid,
@@ -266,9 +269,9 @@ class RadiobuttonSet (RO.AddCallback.TkVarMixin,
         """
         if newValue is None:
             return
-
+        
         newValue = self.expandValue(newValue, doCheck=doCheck, descr="button")
-
+    
         self.setIsCurrent(isCurrent)
         self._var.set(newValue)
 
@@ -304,16 +307,16 @@ class RadiobuttonSet (RO.AddCallback.TkVarMixin,
         else:
             for wdg in self.wdgSet:
                 wdg.configure(state="disabled")
-
+    
     def winfo_ismapped(self):
         """Needed by RO.InputCont
         """
         return self.wdgSet[0].winfo_ismapped()
 
 if __name__ == "__main__":
-    from . import PythonTk
+    from .PythonTk import PythonTk
     from .StatusBar import StatusBar
-    root = PythonTk.PythonTk()
+    root = PythonTk()
 
     rbFrame1 = tkinter.Frame()
     rbs1 = RadiobuttonSet(
@@ -358,12 +361,12 @@ if __name__ == "__main__":
     for wdg in rbs3.wdgSet:
         wdg.pack(side="left")
     rbFrame3.pack(side="top")
-
+    
     def doPrint():
         print("1 value = %r; default = %r" % (rbs1.getString(), rbs1.getDefault()))
         print("2 value = %r; default = %r" % (rbs2.getString(), rbs2.getDefault()))
         print("3 value = %r; default = %r" % (rbs3.getString(), rbs3.getDefault()))
-
+    
     enableVar = tkinter.IntVar()
     enableVar.set(True)
     def setEnable():
@@ -372,7 +375,7 @@ if __name__ == "__main__":
         rbs3.setEnable(enableVar.get())
 
     StatusBar(root).pack(side="top", fill="x", expand=True)
-
+    
     cmdFrame = tkinter.Frame()
     tkinter.Button(cmdFrame, text="Print Value", command=doPrint).pack(side="left")
     tkinter.Checkbutton(cmdFrame, text="Enable", command=setEnable, variable=enableVar).pack(side="left")

@@ -4,7 +4,7 @@
 - read-only support (can still copy data)
 - contextual menu with cut/copy/paste and URL-based help
 - help text (in conjunction with StatusBar)
-
+  
 History:
 2004-08-11 ROwen
 2004-09-14 ROwen    Added support for isCurrent and auto-colored state tags.
@@ -12,16 +12,19 @@ History:
 2005-01-05 ROwen    Changed _statePrefDict to _sevPrefDict.
 2006-10-24 ROwen    Added search method with elide argument
                     because Tkinter's Text.search doesn't yet support elide.
+2020-02-10 DGatlin  Modified imports for Python 3
 """
 __all__ = ['Text']
 
-from six.moves import tkinter
+import tkinter
+
 import RO.CnvUtil
-import RO.StringUtil
 import RO.MathUtil
+import RO.StringUtil
 from . import Bindings
-from .CtxMenu import CtxMenuMixin
 from . import WdgPrefs
+from .CtxMenu import CtxMenuMixin
+
 
 class Text (tkinter.Text, CtxMenuMixin):
     """Text widget
@@ -51,24 +54,24 @@ class Text (tkinter.Text, CtxMenuMixin):
         self.helpText = helpText
         self._readOnly = readOnly
         self._isCurrent = bool(isCurrent)
-
+        
         tkinter.Text.__init__(self, master, **kargs)
 
         CtxMenuMixin.__init__(self, helpURL = helpURL)
 
         self._prefDict = WdgPrefs.getWdgPrefDict()
         self._sevPrefDict = WdgPrefs.getSevPrefDict()
-
+        
         if self._readOnly:
             Bindings.makeReadOnly(self)
             self["takefocus"] = False
 
         # set up automatic update for bad background color pref
         self._prefDict["Bad Background"].addCallback(self._updateBGColor, callNow=False)
-
+        
         if not self._isCurrent:
             self._updateBGColor()
-
+        
         if useStateTags:
             for severity, pref in self._sevPrefDict.items():
                 if severity == RO.Constants.sevNormal:
@@ -132,33 +135,33 @@ class Text (tkinter.Text, CtxMenuMixin):
             command = self.selectAll,
             state = stateDict[dataPresent],
         )
-
+                
         return True
-
+    
     def cut(self):
         """Cut the selection to the clipboard.
         """
         if not self._readOnly:
             self.event_generate("<<Cut>>")
-
+    
     def copy(self):
         """Copy the selection to the clipboard.
         """
         self.event_generate("<<Copy>>")
-
+    
     def paste(self):
         """Replace the selection with the contents of the clipboard.
         Works better than the default paste IMHO.
         """
         if not self._readOnly:
             self.event_generate("<<Paste>>")
-
+    
     def getEnable(self):
         """Returns False if the state is disabled,
         True otherwise (state is normal or active)
         """
         return self["state"] != tkinter.DISABLED
-
+    
     def getIsCurrent(self):
         """Return True if value is current, False otherwise.
         """
@@ -169,7 +172,7 @@ class Text (tkinter.Text, CtxMenuMixin):
         regexp=None, nocase=None, count=None, elide=None):
         """Search PATTERN beginning from INDEX until STOPINDEX.
         Return the index of the first character of a match or an empty string.
-
+        
         Copied from Tkinter with elide argument added.
         """
         args = [self._w, 'search']
@@ -199,7 +202,7 @@ class Text (tkinter.Text, CtxMenuMixin):
             self.configure(state="normal")
         else:
             self.configure(state="disabled")
-
+    
     def setIsCurrent(self, isCurrent):
         """Set isCurrent and thus the background color.
         """
@@ -227,19 +230,19 @@ class Text (tkinter.Text, CtxMenuMixin):
 
 if __name__ == "__main__":
     from RO.Wdg.PythonTk import PythonTk
-    from . import StatusBar
+    from .StatusBar import StatusBar
     root = PythonTk()
 
     text1 = Text(root, "text widget", height=5, width=20)
-    text2 = Text(root, readOnly=True, helpText = "read only text widget",  height=5, width=20)
-    statusBar = StatusBar.StatusBar(root)
+    text2 = Text(root, readOnly=True, helpText = "read only text widget",  height=5, width=20)  
+    statusBar = StatusBar(root)
     text1.grid(row=0, column=0, sticky="nsew")
     text2.grid(row=1, column=0, sticky="nsew")
     statusBar.grid(row=2, column=0, sticky="ew")
     root.grid_rowconfigure(0, weight=1)
     root.grid_rowconfigure(1, weight=1)
     root.grid_columnconfigure(0, weight=1)
-
+    
     text1.insert("end", "this is an editable text widget\n")
     text2.insert("end", "this is a read-only text widget\n")
 

@@ -26,7 +26,7 @@ History:
 """
 __all__ = ['sevDebug', 'sevNormal', 'sevWarning', 'sevError', 'sevCritical', 'SevNameDict', 'NameSevDict']
 
-import six.moves.urllib.parse as parse
+import urllib.parse
 from collections import OrderedDict
 
 # severity constants; numeric value increases with severity
@@ -59,7 +59,7 @@ def _joinHelpURL(urlSuffix=""):
 #   print "_joinHelpURL(urlSuffix=%r)" % (urlSuffix,)
     global _HelpURLBase, _gotHelpURLBase
     _gotHelpURLBase = True
-    return parse.urljoin(_HelpURLBase, urlSuffix)
+    return urllib.parse.urljoin(_HelpURLBase, urlSuffix)
 
 def _setHelpURLBase(urlBase):
     """Set the base url for help urls.

@@ -7,9 +7,12 @@ History:
 __all__ = ["ObserverData"]
 
 import math
+
 import numpy
+
 import RO.PhysConst
 from RO.Astro import llv
+
 
 class ObserverData(object):
     """Observatory-specific (or observer-specific) data.

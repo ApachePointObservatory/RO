@@ -30,13 +30,7 @@ History:
 2007-04-24 ROwen    Changed Numeric to numpy in a doc string.
 2010-06-28 ROwen    Modified to require Python 2.4 by assuming set is a builtin type.
 """
-
-try:
-    from UserString import UserString
-except ImportError:
-    from collections import UserString
-
-from six import string_types
+import collections
 
 import RO.MathUtil
 
@@ -126,10 +120,10 @@ def isSequence(item):
 def isString(item):
     """Return True if the input is a string-like sequence.
     Strings include str, unicode and UserString objects.
-
+    
     From Python Cookbook, 2nd ed.
     """
-    return isinstance(item, string_types) or isinstance(item, UserString)
+    return isinstance(item, (str, collections.UserString))
 
 def oneOrNAsList (
     oneOrNVal,
@@ -141,7 +135,7 @@ def oneOrNAsList (
     returning a copy.
 
     Raises ValueError if the input is a sequence of the wrong length.
-
+    
     Inputs:
     - oneOrNVal one value or sequence of values
     - n desired number of values
@@ -167,14 +161,14 @@ def removeDups(aSeq):
             return False
         tempDict[val] = None
         return True
-
+    
     return [val  for val in aSeq if isUnique(val)]
 
 def matchSequences(a, b, rtol=1.0e-5, atol=RO.SysConst.FAccuracy):
     """Compares sequences a and b element by element,
     returning a list of indices for non-matching value pairs.
     The test for matching is compareFloats
-
+    
     This is essentially the same as numpy.allclose,
     but returns a bit more information.
     """
@@ -189,7 +183,7 @@ if __name__ == '__main__':
     class OldStyleClass:
         pass
     osc = OldStyleClass()
-
+    
     dataDict = {
         isSequence: (
             (nsc, False),
@@ -199,7 +193,7 @@ if __name__ == '__main__':
             (7.5, False),
             ('unicode string', False),
             ('regular string', False),
-            (UserString("user string"), False),
+            (collections.UserString("user string"), False),
             (dict(), False),
             (set(), False),
             (list(), True),
@@ -213,7 +207,7 @@ if __name__ == '__main__':
             (7.5, False),
             ('unicode string', False),
             ('regular string', False),
-            (UserString("user string"), False),
+            (collections.UserString("user string"), False),
             (dict(), True),
             (set(), True),
             (list(), True),
@@ -227,7 +221,7 @@ if __name__ == '__main__':
             (7.5, False),
             ('unicode string', True),
             ('regular string', True),
-            (UserString("user string"), True),
+            (collections.UserString("user string"), True),
             (dict(), False),
             (set(), False),
             (list(), False),

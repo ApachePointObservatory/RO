@@ -10,8 +10,10 @@ History:
 __all__ = ["StateTracker"]
 
 import sys
+
 import RO.Alg.GenericCallback
 import RO.Constants
+
 
 class _ItemState(object):
     """Functions for getting and setting item state

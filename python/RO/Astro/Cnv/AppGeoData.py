@@ -8,8 +8,9 @@ History:
 """
 __all__ = ["AppGeoData"]
 
-from RO.Astro import llv
 from RO.Astro import Tm
+from RO.Astro import llv
+
 
 class AppGeoData(object):
     """Position-independent data for conversion

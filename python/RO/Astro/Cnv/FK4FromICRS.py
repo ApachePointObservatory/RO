@@ -8,8 +8,9 @@ History:
 __all__ = ["fk4FromICRS"]
 
 import numpy
-import RO.PhysConst
+
 import RO.MathUtil
+import RO.PhysConst
 from RO.Astro import llv
 
 # Constants

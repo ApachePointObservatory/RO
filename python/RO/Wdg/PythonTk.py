@@ -22,13 +22,15 @@ History:
                     Modified to use renamed ScriptWindow->PythonWdg module.
 2004-08-11 ROwen    Define __all__ to restrict import.
 2004-09-14 ROwen    Modified import of Bindings to not import RO.Wdg.
-2014-09-17 ROwen    Modified to test for Exception instead of StandardError
+2014-09-17 ROwen    Modified to test for Exception instead of StandardError 
 """
 __all__ = ['PythonTk']
 
-from six.moves import tkinter
+import tkinter
+
 from . import Bindings
-from . import PythonWdg
+from .PythonWdg import PythonWdg
+
 
 class PythonTk (tkinter.Tk):
     """Creates a Tkinter application with standard menus and such"""
@@ -55,21 +57,21 @@ class PythonTk (tkinter.Tk):
 
         # basic initialization
         tkinter.Tk.__init__(self, **kargs)
-
+        
         # if the user supplied an option file, load it
         if optionfile:
             try:
                 self.option_readfile(optionfile)
             except Exception as e:
                 print("cannot read option file; error:", e)
-
+        
         # create and display a Python script window
         self.pyToplevel = tkinter.Toplevel()
         self.pyToplevel.geometry("+0+450")
         self.pyToplevel.title("Python")
-        pyFrame = PythonWdg.PythonWdg(self.pyToplevel)
+        pyFrame = PythonWdg(self.pyToplevel)
         pyFrame.pack(expand=tkinter.YES, fill=tkinter.BOTH)
-
+        
         # set up standard bindings
         Bindings.stdBindings(self)
 

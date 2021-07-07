@@ -88,7 +88,7 @@ History:
                     Changed StrEntry: renamed validPattern to finalPattern and made
                     finalPattern = partialPattern by default (instead of visa versa);
                     this matches StrPrefVar and seemed more logical to me.
-
+                
 2003-12-05 ROwen    Changed setDefValue to setDefault for consistency.
 2003-12-12 ROwen    Added isOK and renamed _setEntryError to setEntryError
                     to make it a public method.
@@ -163,24 +163,31 @@ History:
 """
 __all__ = ['StrEntry', 'ASCIIEntry', 'FloatEntry', 'IntEntry', 'DMSEntry']
 
-#import os
+# import os
 import re
-from six.moves import tkinter
+import tkinter
+
+# import os
+import RO.AddCallback
 import RO.AddCallback
 import RO.CnvUtil
+import RO.CnvUtil
+import RO.MathUtil
+import RO.MathUtil
+import RO.SeqUtil
 import RO.SeqUtil
 import RO.StringUtil
-import RO.MathUtil
+import RO.StringUtil
 from . import Bindings
 from .CtxMenu import CtxMenuMixin
 from .IsCurrentMixin import AutoIsCurrentMixin, IsCurrentMixin
 from .SeverityMixin import SeveritySelectMixin
-from six import u
+
 
 class _BaseEntry (tkinter.Entry, RO.AddCallback.BaseMixin,
     AutoIsCurrentMixin, IsCurrentMixin, SeveritySelectMixin, CtxMenuMixin):
     """Base class for RO.Wdg entry widgets.
-
+    
     Subclasses may wish to override:
     - asStr
     - checkValue
@@ -230,9 +237,9 @@ class _BaseEntry (tkinter.Entry, RO.AddCallback.BaseMixin,
         The entry's displayed value will continue to track the actual value unless the user
         enters some new value (at which point it is assumed they will soon issue a command
         to change the value of the object).
-
+        
         trackDefault and autoSetDefault cannot both be true.
-
+        
     - defIfBlank    setDefault also sets the current value if the current value is blank.
         Forbidden if autoSetDefault is True.
     - isCurrent: is the default value (used as the initial value) current?
@@ -240,7 +247,7 @@ class _BaseEntry (tkinter.Entry, RO.AddCallback.BaseMixin,
     - any additional keyword arguments are used to configure the widget; note:
         - the default width is 8
         - text and textvariable are silently ignored (use var instead of textvariable)
-
+    
     If readOnly is true then the following defaults are used (you may override these if you insist,
     but they are appropriate for a read-only widget):
     - highlightthickness = 0
@@ -270,7 +277,7 @@ class _BaseEntry (tkinter.Entry, RO.AddCallback.BaseMixin,
     **kargs):
         self.defValueStr = "" # just create the field for now
         if var is None:
-            var = tkinter.StringVar()
+            var = tkinter.StringVar()   
         self.var = var
         self.label = label
         self.helpText = helpText
@@ -288,27 +295,27 @@ class _BaseEntry (tkinter.Entry, RO.AddCallback.BaseMixin,
         self._doneFunc = None # set it to doneFunc after setting the default and initial value
             # to avoid calling doneFunc during construction
         self._doneVal = None # value doneFunc was called with; avoids repeats
-
+        
         if readOnly:
-            # adjust default Tkinter.Entry args
+            # adjust default Tkinter.Entry args 
             kargs.setdefault("highlightthickness", 0) # hide focus highlight
             kargs.setdefault("insertontime", 0) # hide insertion cursor
             kargs.setdefault("takefocus", False) # ignore me during tab traversal
 
         self._entryError = None
-
+        
         # status widget stuff
         self.errMsgID = None    # ID for validation error messages
         self.helpMsgID = None   # ID for help messages
-
+        
         # set default widget configuration
         kargs.setdefault("width", self.getDefaultWidth())
         if "text" in kargs:
             del(kargs["text"])
         kargs["textvariable"] = self.var  # overrides user attempt to set
-
+        
         tkinter.Entry.__init__(self, master, **kargs)
-
+        
         self.currStrVal = ""
         self.var.trace_variable("w", self._checkVar)
 
@@ -322,7 +329,7 @@ class _BaseEntry (tkinter.Entry, RO.AddCallback.BaseMixin,
         AutoIsCurrentMixin.__init__(self, autoIsCurrent)
         IsCurrentMixin.__init__(self)
         SeveritySelectMixin.__init__(self, severity)
-
+        
         # set default -- do after binding check function
         # and setting range and etc, so we are sure the default value
         # can be represented in the default format
@@ -336,7 +343,7 @@ class _BaseEntry (tkinter.Entry, RO.AddCallback.BaseMixin,
         # The following prevents a new widget from getting focus
         # until the current value is tested, but only if using Tab to navigate.
         self.bind("<Tab>", self._entryDone)
-
+        
         if readOnly:
             Bindings.makeReadOnly(self)
 
@@ -347,7 +354,7 @@ class _BaseEntry (tkinter.Entry, RO.AddCallback.BaseMixin,
         # to avoid having the callback called right away
         if callFunc:
             self.addCallback(callFunc, False)
-
+    
     def asStr(self,
         val,
     ):
@@ -371,7 +378,7 @@ class _BaseEntry (tkinter.Entry, RO.AddCallback.BaseMixin,
             def setValue():
                 self.set(value)
             menu.add_command(label = menuText, command = setValue)
-
+    
     def ctxConfigMenu(self, menu):
         """Configure the contextual menu.
         Called just before the menu is posted.
@@ -430,21 +437,21 @@ class _BaseEntry (tkinter.Entry, RO.AddCallback.BaseMixin,
             command = self.selectAll,
             state = stateDict[dataPresent],
         )
-
+                
         self._ctxAddSetItem(menu, self._defMenuName, self.defValueStr)
         return True
-
+    
     def cut(self):
         """Cut the selection to the clipboard.
         """
         if not self._readOnly:
             self.event_generate("<<Cut>>")
-
+    
     def copy(self):
         """Copy the selection to the clipboard.
         """
         self.event_generate("<<Copy>>")
-
+    
     def copyAll(self):
         """Copy the entire field to the clipbard.
         """
@@ -452,14 +459,14 @@ class _BaseEntry (tkinter.Entry, RO.AddCallback.BaseMixin,
         if data:
             self.clipboard_clear()
             self.clipboard_append(data)
-
+    
     def paste(self):
         """Replace the selection with the contents of the clipboard.
         Works better than the default paste IMHO.
         """
         if not self._readOnly:
             self.event_generate("<<Paste>>")
-
+    
     def getDefault(self):
         """Returns the default value as a string"""
         return self.defValueStr
@@ -467,7 +474,7 @@ class _BaseEntry (tkinter.Entry, RO.AddCallback.BaseMixin,
     def getDefaultWidth(self):
         """Return the default width"""
         return 8
-
+    
     def getEnable(self):
         """Returns False if the state is disabled,
         True otherwise (state is normal or active)
@@ -479,40 +486,40 @@ class _BaseEntry (tkinter.Entry, RO.AddCallback.BaseMixin,
         For use by <<EntryError>> handlers.
         """
         return self._entryError
-
+    
     def getString(self):
         """Return the text of the field; returns "" if empty.
-
+        
         Raise ValueError or TypeError if value is invalid.
         """
         strVal = self.var.get()
         self.checkValue(strVal)
         return strVal
-
+        
     def getStringOrDefault(self):
         """Return the current value of the field, or the default if blank
-
+        
         Raise ValueError or TypeError is current value is invalid.
         """
         strVal = self.getString()
         return strVal or self.defValueStr
-
+    
     def getVar(self):
         return self.var
-
+    
     def inMethodCall(self):
         """Return True if executing callback functions due to a method call such as set
-
+        
         Return a boolean:
         - True  if running callbacks due to calling a method, e.g. clear, set, setDefault or restoreDefault,
         - False if running callbacks due to user interaction, e.g. typing or selecting a contextual menu item,
           or if not executing callback functions
         """
         return self._inMethodCall
-
+    
     def isDefault(self):
         """Return True if current value matches default.
-
+        
         If field is empty, return True only if default is None or "".
         """
         return self.var.get() == self.defValueStr
@@ -520,7 +527,7 @@ class _BaseEntry (tkinter.Entry, RO.AddCallback.BaseMixin,
     def isOK(self):
         """Checks the value and neatens it.
         Returns True if value OK, False otherwise.
-
+        
         Call before using the value.
         """
         try:
@@ -537,16 +544,16 @@ class _BaseEntry (tkinter.Entry, RO.AddCallback.BaseMixin,
 
     def neatenDisplay(self):
         """Neatens the display.
-
+        
         Does nothing in the base class.
         """
         pass
-
+    
     def restoreDefault(self):
         """Set the current value to the default value, after checking it
         """
         self.set(self.defValueStr)
-
+    
     def selectAll(self):
         """Select all text in the Entry.
         Has no effect if there is no text.
@@ -559,7 +566,7 @@ class _BaseEntry (tkinter.Entry, RO.AddCallback.BaseMixin,
         severity = None,
     **kargs):
         """Set the field from a native value or formatted string.
-
+        
         Inputs:
         - value: native value or formatted string.
             If None, sets the field blank.
@@ -577,7 +584,7 @@ class _BaseEntry (tkinter.Entry, RO.AddCallback.BaseMixin,
         self.setIsCurrent(isCurrent)
         if severity is not None:
             self.setSeverity(severity)
-
+        
         if self._inMethodCall:
             return
         self._inMethodCall = True
@@ -621,7 +628,7 @@ class _BaseEntry (tkinter.Entry, RO.AddCallback.BaseMixin,
                 self._doCallbacks()
             finally:
                 self._inMethodCall = False
-
+        
     def setEnable(self, doEnable):
         """Changes the enable state.
 
@@ -634,44 +641,44 @@ class _BaseEntry (tkinter.Entry, RO.AddCallback.BaseMixin,
             if self.focus_get() == self:
                 self.winfo_toplevel().focus()
             self.neatenDisplay()
-
+    
     def setEntryError(self, errMsg):
         """Call to report or clear the entry error.
-
+        
         Inputs:
         - errMsg    a string or None (to clear the error)
         """
         self._entryError = errMsg
         self.event_generate("<<EntryError>>")
-
+    
     def checkValue(self, val, descr=None):
         """Raise an exception if the final value "val" is invalid.
         The exception should include the string "descr".
-
+        
         Warning: checkValue must catch all the errors caught by
         checkPartialValue, else values given to set will not be
         properly verified.
-
+        
         Does nothing in the base class.
-
+        
         The exception raised should be one of ValueError or TypeError.
         """
         return
-
-    def checkPartialValue(self, val, descr=None):
+        
+    def checkPartialValue(self, val, descr=None):   
         """Raise an exception if partial value "val" is invalid.
         The exception should include the string "descr".
 
         Example: for a number one should check that the value
         contains valid characters, but one should not check the range
         since the number has not yet been fully entered.
-
+        
         Does nothing in the base class.
-
+        
         The exception raised should be one of ValueError or TypeError.
         """
         return
-
+    
     def _checkVar(self, *args, **kargs):
         """This method is called whenever the variable changes.
         It checks the value using checkPartialValue
@@ -679,7 +686,7 @@ class _BaseEntry (tkinter.Entry, RO.AddCallback.BaseMixin,
         In the unlikely event that the restored value is also invalid --
         e.g. if the validity criteria change while the user is typing --
         then the field is blanked.
-
+        
         In any case it calls the callback functions.
         """
         self._doneVal = None
@@ -698,12 +705,12 @@ class _BaseEntry (tkinter.Entry, RO.AddCallback.BaseMixin,
                 self.var.set(self.currStrVal)
             except (ValueError, TypeError) as e:
                 self.var.set("")
-
+    
         self._doCallbacks()
 
     def _entryDone(self, evt=None, doCheck=True):
         """User is finished entering data.
-
+        
         Perform the following tasks:
         - Check the entry (if doCheck True)
         - Copy the current value to the default (if widget parameter autoSetDefault is True)
@@ -733,7 +740,7 @@ class _BaseEntry (tkinter.Entry, RO.AddCallback.BaseMixin,
                 self._doneFunc(self)
         self._doneVal = currVal
         return None # make pychecker happy
-
+    
     def _getErrorPrefix(self, descr=None):
         """Return a prefix string for error messages"""
         if descr:
@@ -754,7 +761,7 @@ class StrEntry (_BaseEntry):
     - finalPattern  a regular expression string that the final value must match;
         if omitted, defaults to partialPattern
     - all other inputs for _BaseEntry.__init__
-
+    
     Note for regular expression patterns:
     - your pattern must end with $ to match the entire string;
       otherwise an entry will be accepted if any initial part matches
@@ -784,7 +791,7 @@ class StrEntry (_BaseEntry):
             self.partialPatternCompiled = re.compile(self.partialPatternStr)
         else:
             self.partialPatternCompiled = NullRE()
-
+        
         _BaseEntry.__init__(self, master=master, **kargs)
 
     def checkValue(self, val, descr=None):
@@ -795,7 +802,7 @@ class StrEntry (_BaseEntry):
             return
         if not self.finalPatternCompiled.match(val):
             raise ValueError("%sinvalid: %r" % (self._getErrorPrefix(descr), val))
-
+    
     def checkPartialValue(self, val, descr=None):
         """Raise ValueError if val is invalid.
         """
@@ -814,7 +821,7 @@ class ASCIIEntry (StrEntry):
     - finalPattern  a regular expression string that the final value must match;
         if omitted, defaults to partialPattern
     - all other inputs for _BaseEntry.__init__
-
+    
     Note for regular expression patterns:
     - your pattern must end with $ to match the entire string;
       otherwise an entry will be accepted if any initial part matches
@@ -835,10 +842,10 @@ class ASCIIEntry (StrEntry):
         # print "ASCIIEntry checkValue(%r, %r)" % (val, descr)
         if val in (None, ""):
             return
-
+        
         # verify data is ASCII
         RO.CnvUtil.asASCII(val)
-
+        
         # standard Str checks
         StrEntry.checkValue(self, val, descr)
 
@@ -848,7 +855,7 @@ class ASCIIEntry (StrEntry):
         # print "ASCIIEntry checkPartialValue(%r, %r)" % (val, descr)
         if val in (None, ""):
             return
-
+        
         # verify data is ASCII
         RO.CnvUtil.asASCII(val)
 
@@ -859,7 +866,7 @@ class ASCIIEntry (StrEntry):
 class _NumEntry (_BaseEntry):
     """Base class for numerical entry widgets.
     Simply adds range checking.
-
+    
     Subclasses must define numFromStr and may wish to redefine strFromNum
 
     Inputs:
@@ -889,13 +896,13 @@ class _NumEntry (_BaseEntry):
         self.defFormat = defFormat
         self.minMenu = minMenu
         self.maxMenu = maxMenu
-
+        
         minNum = self.asNum(minValue)
         maxNum = self.asNum(maxValue)
         self._basicSetRange(minNum, maxNum)
-
+    
         kargs.setdefault("justify", "right")
-
+        
         # initialize the base class last, so the default value is properly checked
         _BaseEntry.__init__(self,
             master = master,
@@ -908,7 +915,7 @@ class _NumEntry (_BaseEntry):
         If field is empty, return True only if default is None or "".
         """
         currValueStr = self.var.get()
-
+        
         # compare string values first
         if currValueStr == self.defValueStr:
             return True
@@ -921,7 +928,7 @@ class _NumEntry (_BaseEntry):
         except ValueError:
             # current value or default value is invalid
             return False
-
+    
     def getDefaultWidth(self):
         """Return the default width"""
         if self.minNum is not None:
@@ -938,7 +945,7 @@ class _NumEntry (_BaseEntry):
         """Converts a formatted string to a number.
         Raises ValueError if the string is invalid.
         Does no range checking or default handling!
-
+        
         Subclasses must override
         """
         raise RuntimeError("subclass must define numFromStr")
@@ -971,7 +978,7 @@ class _NumEntry (_BaseEntry):
         if isinstance(val, str):
             return self.numFromStr(val)
         return val
-
+    
     def asStr(self,
         val,
         format=None,
@@ -1001,7 +1008,7 @@ class _NumEntry (_BaseEntry):
         """
         strVal = self.getStringOrDefault()
         return self.numFromStr(strVal)
-
+    
     def getNumOrNone(self):
         """Return the numerical value of the field if non-empty and valid;
         otherwise return None.
@@ -1012,7 +1019,7 @@ class _NumEntry (_BaseEntry):
         try:
             return self.numFromStr(strVal)
         except ValueError:
-            return None
+            return None     
 
     def ctxConfigMenu(self, menu):
         """Add contextual menu items after cut/copy/paste and before help.
@@ -1040,7 +1047,7 @@ class _NumEntry (_BaseEntry):
     def setRange(self, minValue, maxValue, adjustWidth=False):
         """Changes the allowed range of values.
         If the current value is out of range, the default value is restored.
-
+        
         Raises ValueError if the new range does not include the default value
         """
         # check new range to be sure it includes the default value
@@ -1057,7 +1064,7 @@ class _NumEntry (_BaseEntry):
             # ignore the default but sanity-check the range
             raise ValueError("%srange [%r, %r] has min>max" % \
                 (self._getErrorPrefix(), minValue, maxValue))
-
+        
         self._basicSetRange(minNum, maxNum)
 
         if adjustWidth:
@@ -1091,16 +1098,16 @@ class _NumEntry (_BaseEntry):
         (else it would be difficult to start typing a value)
         """
         return self._basicCheck(val, self.minPartialNum, self.maxPartialNum, descr)
-
+        
     def _basicCheck(self, val, minNum, maxNum, descr=""):
         """Check that a value (number or string) is well formed and in range;
         raise ValueError if not.
         """
         if val in (None, ""):
             return
-
+        
         errPrefix = self._getErrorPrefix(descr)
-
+            
         # handle minus sign, if present
         # this catches a minus sign when first typed in
         # whereas the range check below needs a digit before it can act
@@ -1111,7 +1118,7 @@ class _NumEntry (_BaseEntry):
             if self.maxNum is not None and self.maxNum < 0 and "-" not in val:
                 raise ValueError("%s- required; max val = %s" % \
                     (errPrefix, self.maxNum))
-
+        
         # check range
         RO.MathUtil.checkRange(self.asNum(val), minNum, maxNum, errPrefix)
 
@@ -1143,12 +1150,12 @@ class FloatEntry (_NumEntry):
         allowExp = 0,
     **kargs):
         self.allowExp = allowExp
-
+        
         kargs.setdefault("justify", "right")
-
+        
         # initialize the base class
         _NumEntry.__init__(self,
-            master = master,
+            master = master, 
             minValue = minValue,
             maxValue = maxValue,
             defValue = defValue,
@@ -1193,7 +1200,7 @@ class IntEntry(_NumEntry):
             maxValue = maxValue,
             defValue = defValue,
         **kargs)
-
+    
     def numFromStr(self, strVal):
         """Converts a string to a number.
         Raises ValueError if the string is invalid.
@@ -1234,7 +1241,7 @@ class DMSEntry (_NumEntry):
         the default justify is "left";
         text and textvariable are silently ignored (use var instead of textvariable).
     """
-
+    
     def __init__ (self,
         master,
         minValue = None,
@@ -1253,7 +1260,7 @@ class DMSEntry (_NumEntry):
         self.unitsSuffix = unitsSuffix
         self.isHours = bool(isHours)
         self.omitExtraFields = omitExtraFields
-
+        
         _NumEntry.__init__(self,
             master = master,
             minValue = minValue,
@@ -1265,18 +1272,18 @@ class DMSEntry (_NumEntry):
 
         # set units variable
         self._setUnitsVar()
-
+    
         self.bind("<KeyPress>", self._keyPress)
         self.bind("<Option-KeyPress>", self._optionKeyPress)
-
+    
     def _constrainFormat(self, format):
         """Return format contrained to nFields and precision >= 0.
-
+        
         Inputs:
         - format: a sequence: (nFields, precision)
-
+        
         Returns the format with values cast to ints and constrained to be >= 0.
-
+        
         Raise ValueError if format is not a 2-tuple of values that can be cast to ints.
         """
         try:
@@ -1290,7 +1297,7 @@ class DMSEntry (_NumEntry):
     def getDefaultWidth(self):
         """Return the default width"""
         return 13
-
+        
     def getIsHours(self):
         return self.isHours
 
@@ -1311,16 +1318,16 @@ class DMSEntry (_NumEntry):
 #           raises ValueError if the string cannot be parsed
 #       """
 #       self.var.set(neatenDMSStr(stringValue))
-
+    
     def setIsHours(self, isHours, resetCurrent=0):
         """Specifies whether or not the units are hours.
-
+        
         Inputs:
         - isHours       is the representation in hours? (else in degrees)
         - resetCurrent  how to handle the current value *if* the representation changes:
                         - if true: reset the field to the default
                         - if false: rescale the current value
-
+        
         If the representation changes (e.g. was in hours but now is not) then:
         - The default format's precision is increased by 1 if going from degrees to hours
           and decreased by 1 if going the other way
@@ -1339,13 +1346,13 @@ class DMSEntry (_NumEntry):
         else:
             # the representation does not change, do nothing
             return
-
+        
         # adjust the precision
         nFields, precision = self.defFormat
         precision += deltaPrec
         self.defFormat = (nFields, precision)
 
-        # scale the limits
+        # scale the limits      
         if self.minNum:
             self.minNum *= scale
         if self.maxNum:
@@ -1354,14 +1361,14 @@ class DMSEntry (_NumEntry):
             self.minPartialNum *= scale
         if self.maxPartialNum:
             self.maxPartialNum *= scale
-
+        
         # scale the default value; preserve the number of fields and adjust the precision
         if self.defValueStr:
             nFields, precision = RO.StringUtil.dmsStrFieldsPrec(self.defValueStr)
             precision += deltaPrec
             newNumVal = self.numFromStr(self.defValueStr) * scale
             self.set(self.strFromNum(newNumVal, (nFields, precision)))
-
+        
         # handle current value
         if resetCurrent:
             # reset the current value to the default
@@ -1374,7 +1381,7 @@ class DMSEntry (_NumEntry):
                 precision += deltaPrec
                 newNumVal = self.numFromStr(oldValueStr) * scale
                 self.set(self.strFromNum(newNumVal, (nFields, precision)))
-
+        
         # final cleanup
         self.isHours = isHours
         self._setUnitsVar()
@@ -1384,12 +1391,12 @@ class DMSEntry (_NumEntry):
         format=None,
     ):
         """Returns the value appropriately formatted.
-
+        
         Inputs:
         - numVal: numeric value; if None then "" is returned
         - format: a tuple: (# of fields, precision of right-most field);
             if omitted then the default format is used.
-
+        
         If precison < 0, silently truncates to 0.
 
         Performs no range checking.
@@ -1420,7 +1427,7 @@ class DMSEntry (_NumEntry):
         except ValueError as e:
             raise ValueError("%s cannot format data %r with format=(nFields=%r, precision=%r): error=%s" % \
                 (self._getErrorPrefix(), numVal, nFields, precision, e))
-
+    
     def neatenDisplay(self):
         """Neaten up the display -- preserve the final field as is
         (rather than trying to guess the # of digits to display),
@@ -1434,24 +1441,24 @@ class DMSEntry (_NumEntry):
     def _checkVar(self, *args, **kargs):
         _NumEntry._checkVar(self, *args, **kargs)
         self._setUnitsVar()
-
+    
     def _setUnitsVar(self):
         """Sets the units variable appropriately.
         """
         if not self.unitsVar:
             return
-
+            
         nFields, precision = RO.StringUtil.dmsStrFieldsPrec(self.var.get())
         if nFields not in (1,2,3):
             # if data is blank or wierd, show for 1 field
             nFields = 1
-
+        
         # keys are (isRelative, nFields)
         unitsSepDict = {
             (False, 1):("",  "(", ":", ")"),
             (False, 2):("",  ":", "(", ")"),
             (False, 3):("",  ":", ":", ""),
-
+            
             (True, 1):("(", ":", ")", ""),
             (True, 2):("(", ")", ":", ""),
             (True, 3):("",  ":", ":", ""),
@@ -1460,7 +1467,7 @@ class DMSEntry (_NumEntry):
         if self.isHours:
             unitsStr = "%sh%sm%ss%s%s" % unitsSepTuple
         else:
-            unitsStr = u("%s\N{DEGREE SIGN}%s\'%s\"%s%s" % unitsSepTuple)
+            unitsStr = "%s\N{DEGREE SIGN}%s\'%s\"%s%s" % unitsSepTuple
         self.unitsVar.set(unitsStr)
 
         # index = nFields*2-1  # use if there is a separator between characters, e.g. h:m:s
@@ -1475,7 +1482,7 @@ class DMSEntry (_NumEntry):
 #               self.unitsVar.set(RO.StringUtil.DMSStr[-index:])
 #           else:
 #               self.unitsVar.set(RO.StringUtil.DMSStr[:index])
-
+    
     def _keyPress(self, evt):
         keysym = evt.keysym
         if keysym in ("space", "semicolon", "equal", "slash", "KP_Equal", "KP_Divide"):
@@ -1520,9 +1527,9 @@ class DMSEntry (_NumEntry):
 
 if __name__ == "__main__":
     from RO.Wdg.PythonTk import PythonTk
-    from . import StatusBar
+    from .StatusBar import StatusBar
     root = PythonTk()
-
+    
     entryList = []
 
     def fmtEntry(entry):
@@ -1530,7 +1537,7 @@ if __name__ == "__main__":
             return "%r" % (entry.getNum(),)
         except AttributeError:
             return "%r" % (entry.getString(),)
-
+    
     def addEntry(descr, entry, unitsLabel=None):
         newFrame = tkinter.Frame(root)
         newFrame.lower()
@@ -1541,23 +1548,23 @@ if __name__ == "__main__":
             unitsLabel.pack(in_=newFrame, side="left")
         newFrame.pack(side="top", anchor="w")
         entryList.append((descr, entry))
-
+        
         def callFunc(wdg, descr=descr):
             print("%s callFunc; value=%s; inMethodCall=%s" % (descr, fmtEntry(entry), entry.inMethodCall()))
-
+            
         def doneFunc(wdg, descr=descr):
             print("%s doneFunc; value=%s; inMethodCall=%s" % (descr, fmtEntry(entry), entry.inMethodCall()))
-
+            
         entry.addCallback(callFunc)
         if not entry._doneFunc:
             entry._doneFunc=doneFunc
-
+        
         return entry
-
+    
     def doPrint(*args):
         for (descr, entry) in entryList:
             print("%s value=%s" % (descr, fmtEntry(entry)))
-
+    
     def doDefault(*args):
         for (descr, entry) in entryList:
             entry.restoreDefault()
@@ -1566,7 +1573,7 @@ if __name__ == "__main__":
         for (descr, entry) in entryList:
             if isinstance(entry, DMSEntry):
                 entry.setIsHours(True)
-
+        
     def setDeg(*args):
         for (descr, entry) in entryList:
             if isinstance(entry, DMSEntry):
@@ -1574,18 +1581,18 @@ if __name__ == "__main__":
 
     getButton = tkinter.Button (root, command=doPrint, text="Print Values")
     getButton.pack()
-
+    
     defButton = tkinter.Button (root, command=doDefault, text="Default")
     defButton.pack()
-
+    
     hrsButton = tkinter.Button (root, command=setHours, text="DMS in hrs")
     hrsButton.pack()
-
+    
     degButton = tkinter.Button (root, command=setDeg, text="DMS in deg")
     degButton.pack()
-
-    statusBar = StatusBar.StatusBar(root)
-
+    
+    statusBar = StatusBar(root)
+        
     addEntry (
         "StrEntry AutoIsCurr",
         StrEntry(root,
@@ -1593,7 +1600,7 @@ if __name__ == "__main__":
             autoIsCurrent = True,
         ),
     )
-
+    
     addEntry (
         "StrEntry alphabetic",
         StrEntry(root,
@@ -1601,7 +1608,7 @@ if __name__ == "__main__":
             helpText = "Letters only",
         ),
     )
-
+    
     addEntry (
         "IntEntry 0-90",
         IntEntry(root,
@@ -1610,7 +1617,7 @@ if __name__ == "__main__":
             helpText = "An integer in the range 0-90",
         ),
     )
-
+    
     addEntry (
         "FloatEntry, no exp 0-90",
         FloatEntry(root,
@@ -1619,7 +1626,7 @@ if __name__ == "__main__":
             helpText = "A float in the range 0-90",
         ),
     )
-
+    
     def doneFunc(wdg):
         print("doneFunc(%r)" % (wdg,))
 
@@ -1634,7 +1641,7 @@ if __name__ == "__main__":
             doneFunc = doneFunc,
         ),
     )
-
+    
     addEntry (
         "FloatEntry, exp OK -100 to -10",
         FloatEntry(root,
@@ -1645,8 +1652,8 @@ if __name__ == "__main__":
             helpText = "A float in the range -100 to -10; exponent OK",
         ),
     )
-
-
+    
+    
     absUnitsVar = tkinter.StringVar()
     addEntry (
         "Abs DMSEntry -90-90 deg",
@@ -1658,7 +1665,7 @@ if __name__ == "__main__":
         ),
         tkinter.Label(root, textvar=absUnitsVar, width=5),
     )
-
+    
     abs2UnitsVar = tkinter.StringVar()
     addEntry (
         "Abs DMSEntry 25-180 deg",
@@ -1671,7 +1678,7 @@ if __name__ == "__main__":
         ),
         tkinter.Label(root, textvar=abs2UnitsVar, width=5),
     )
-
+    
     relUnitsVar = tkinter.StringVar()
     addEntry (
         "Rel DMSEntry -90-90 sec",
@@ -1687,7 +1694,7 @@ if __name__ == "__main__":
         ),
         tkinter.Label(root, textvar=relUnitsVar, width=5),
     )
-
+    
     rel2UnitsVar = tkinter.StringVar()
     addEntry (
         "Rel DMSEntry 0-180 sec",
@@ -1703,7 +1710,7 @@ if __name__ == "__main__":
         ),
         tkinter.Label(root, textvar=rel2UnitsVar, width=5),
     )
-
+    
     statusBar.pack(side="top", expand="yes", fill="x")
 
     root.mainloop()

@@ -8,7 +8,7 @@ Based on code in John Grayson's "Python and Tkinter Programming"
 """
 import sys
 import os
-from six.moves import tkinter
+import tkinter
 RORoot = os.path.join(os.path.dirname(os.path.abspath(os.path.dirname(__file__))), "python")
 sys.path.append(RORoot)
 import RO.Wdg
@@ -42,25 +42,25 @@ class EventLogger(tkinter.Frame):
     def __init__(self, master):
         tkinter.Frame.__init__(self, master)
         # dict of event type: event name
-
+        
         self.eventInd = 0
-
+        
         self.userLabel = tkinter.Label(self, text="Type here:")
         self.userEntry  = tkinter.Entry(self, highlightthickness=2)
         self.logWdg = RO.Wdg.LogWdg(self)
-
+        
         for eventName in list(self.EventDict.values()):
             self.userLabel.bind('<%s>' % eventName, self.reportEvent)
             self.userEntry.bind('<%s>' % eventName, self.reportEvent)
-
+        
         self.userLabel.grid(row=0, column=0)
         self.userEntry.grid(row=0, column=1, sticky="ew")
         self.logWdg.grid(row=1, column=0, columnspan=2, sticky="ewns")
         self.rowconfigure(1, weight=1)
         self.columnconfigure(1, weight=1)
-
+        
         self.userEntry.focus_set()
-
+        
     def reportEvent(self, evt):
         eventName = self.EventDict.get(evt.type, 'Unknown')
         rptList = [
@@ -81,8 +81,8 @@ class EventLogger(tkinter.Frame):
             'width=%r' % (evt.width,),
         ]
         self.eventInd += 1
-
-        #### some event types don't have these attributes
+    
+        #### some event types don't have these attributes 
         try:
             rptList.append(
                 'focus=%s' % (evt.focus)
@@ -95,11 +95,11 @@ class EventLogger(tkinter.Frame):
             )
         except AttributeError:
             pass
-
+        
 #        print '; '.join(rptList)
         self.logWdg.addOutput('; '.join(rptList))
         self.logWdg.text.see("end")
-
+            
 
 if __name__ == "__main__":
     root = tkinter.Tk()

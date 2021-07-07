@@ -2,7 +2,7 @@
 
 import argparse
 import numpy
-import pyfits
+from astropy.io import fits
 
 def fitsInfo(filePath, hduList=None, showHeader=True, showStats=True):
     """Print information about a FITS file
@@ -12,7 +12,7 @@ def fitsInfo(filePath, hduList=None, showHeader=True, showStats=True):
     @param[in] showHeader: if True then show the header contents
     @param[in] showStats: if True then show basic image statistics
     """
-    fitsFile = pyfits.open(filePath)
+    fitsFile = fits.open(filePath)
     print("*** FITS file %r:" % (filePath,))
     if hduList is None:
         hduList = list(range(len(fitsFile)))

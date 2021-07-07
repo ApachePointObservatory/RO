@@ -14,10 +14,10 @@ __all__ = ["MultiListIter"]
 class MultiListIter(object):
     def __init__(self, *lists):
         self.iters = list(map(iter, lists))
-
+    
     def __iter__(self):
         return self
-
+    
     def __next__(self):
         return [next(elem) for elem in self.iters]
 

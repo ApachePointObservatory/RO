@@ -8,20 +8,22 @@ History:
 2014-03-13 ROwen    Bug fix: was not recording default values. The fix required an update to InputCont.
 2014-03-14 ROwen    Added helpText and helpURL arguments.
 2014-05-07 ROwen    Added autoUpdate argument and modified to use RO.Wdg.Menubutton
+2020-02-10 DGatlin  Modified imports for Python 3
 """
 __all__ = ["InputContPresetsWdg"]
 
 import functools
-from six.moves import tkinter
+import tkinter
 
 import RO.TkUtil
 from . import Entry
-from . import Label
 from . import InputDialog
-from . import OptionMenu
-from . import Menubutton
+from .Menubutton import Menubutton
+from .OptionMenu import OptionMenu
+from .Label import StrLabel
 
-class InputContPresetsWdg(Menubutton.Menubutton):
+
+class InputContPresetsWdg(Menubutton):
     """Widget to manage named presets for an input container list
 
     Manages a list of named presets, with two categories:
@@ -54,7 +56,7 @@ class InputContPresetsWdg(Menubutton.Menubutton):
         - helpURL: URL for on-line help
         - autoUpdate: automatically set text to name of preset that matches inputCont, if there is a match.
             if None then set False if "text" is in kwargs and True otherwise
-        - **kwargs: additional config arguments for Menubutton.Menubutton.
+        - **kwargs: additional config arguments for Menubutton.
 
         Warning: for auto update to work correctly, every value dict in stdPresets must have an entry
         for each input container, and the values must be strings.
@@ -82,7 +84,7 @@ class InputContPresetsWdg(Menubutton.Menubutton):
             "highlightthickness": 2,
         }
         wdgKArgs.update(kwargs)
-        Menubutton.Menubutton.__init__(self, master, helpText=helpText, helpURL=helpURL, **wdgKArgs)
+        Menubutton.__init__(self, master, helpText=helpText, helpURL=helpURL, **wdgKArgs)
         self._menu = tkinter.Menu(self, tearoff=False)
 
         editMenu = tkinter.Menu(
@@ -291,10 +293,10 @@ class SaveDialog(InputDialog.ModalDialogBase):
         InputDialog.ModalDialogBase.__init__(self, master=master, title="Save")
 
     def body(self, master):
-        Label.StrLabel(master=master, text="Save This Preset As:").grid(row=0, column=0, columnspan=5)
+        StrLabel(master=master, text="Save This Preset As:").grid(row=0, column=0, columnspan=5)
         # Tkinter.Label(master, text="Name:").grid(row=1, column=0)
         self.nameEntry = Entry.StrEntry(master)
-        self.currNameWdg = OptionMenu.OptionMenu(
+        self.currNameWdg = OptionMenu(
             master = master,
             items = self._currNameList,
             label = "",
@@ -324,9 +326,9 @@ class RenameDialog(InputDialog.ModalDialogBase):
         InputDialog.ModalDialogBase.__init__(self, master=master, title="Save")
 
     def body(self, master):
-        Label.StrLabel(master=master, text="Rename Preset:").grid(row=0, column=0, columnspan=5)
+        StrLabel(master=master, text="Rename Preset:").grid(row=0, column=0, columnspan=5)
         # Tkinter.Label(master, text="Name:").grid(row=1, column=0)
-        self.oldNameWdg = OptionMenu.OptionMenu(
+        self.oldNameWdg = OptionMenu(
             master = master,
             items = self._currNameList,
         )
@@ -354,8 +356,8 @@ class DeleteDialog(InputDialog.ModalDialogBase):
         InputDialog.ModalDialogBase.__init__(self, master=master, title="Delete")
 
     def body(self, master):
-        Label.StrLabel(master=master, text="Delete Preseturation:").grid(row=0, column=0, columnspan=5)
-        self.currNameWdg = OptionMenu.OptionMenu(
+        StrLabel(master=master, text="Delete Preseturation:").grid(row=0, column=0, columnspan=5)
+        self.currNameWdg = OptionMenu(
             master = master,
             items = self._currNameList,
         )
@@ -370,7 +372,7 @@ class RestoreDefaultsDialog(InputDialog.ModalDialogBase):
     """Dialog box to confirm restoring defaults; result is True if restore wanted
     """
     def body(self, master):
-        Label.StrLabel(master=master, text="Restore Default Presets?").grid(row=0, column=0)
+        StrLabel(master=master, text="Restore Default Presets?").grid(row=0, column=0)
 
     def setResult(self):
         self.result = True
@@ -379,22 +381,22 @@ class RestoreDefaultsDialog(InputDialog.ModalDialogBase):
 if __name__ == '__main__':
     from RO.Alg import SavedDict
     import RO.InputCont
-    from . import Gridder
-    from . import InputContFrame
+    from .Gridder import Gridder
+    from .InputContFrame import InputContFrame
 
     root = tkinter.Tk()
     root.geometry("200x200")
     userPresetsDict = SavedDict("testPreset.json")
 
-    class TestFrame(InputContFrame.InputContFrame):
+    class TestFrame(InputContFrame):
         def __init__(self, master):
-            InputContFrame.InputContFrame.__init__(self, master, stateTracker=None)
+            InputContFrame.__init__(self, master, stateTracker=None)
 
-            gr = Gridder.Gridder(master=self)
+            gr = Gridder(master=self)
 
             self.wdg1 = Entry.StrEntry(self)
             gr.gridWdg("Widget 1", self.wdg1)
-
+            
             self.wdg2 = Entry.FloatEntry(self)
             gr.gridWdg("Widget 2", self.wdg2)
 

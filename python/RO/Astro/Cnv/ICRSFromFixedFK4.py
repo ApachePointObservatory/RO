@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python    
 
 """
 History:
@@ -9,8 +9,9 @@ History:
 __all__ = ["icrsFromFixedFK4"]
 
 import numpy
-import RO.PhysConst
+
 import RO.MathUtil
+import RO.PhysConst
 from RO.Astro import llv, Tm
 
 # Constants
@@ -29,29 +30,29 @@ def icrsFromFixedFK4(fk4P, fk4Date):
     """
     Converts mean catalog fk4 coordinates to ICRS for a fixed star.
     Uses the approximation that ICRS = FK5 J2000.
-
+    
     Inputs:
     - fk4Date   TDB date of fk4 coordinates (Besselian epoch)
                 note: TDT will always do and UTC is usually adequate
     - fk4P(3)   mean catalog fk4 cartesian position (au)
-
+    
     Returns:
     - icrsP(3)  ICRS cartesian position (au), a numpy.array
-
+    
     Error Conditions:
     none
-
+    
     Warnings:
     The FK4 date is in Besselian years.
-
+    
     The star is assumed fixed on the celestial sphere. That is a bit
     different than assuming it has zero proper motion because
     FK4 system has slight ficticious proper motion.
-
+    
     The FK4 system refers to a specific set of precession constants;
     not all Besselian-epoch data was precessed using these constants
     (especially data for epochs before B1950).
-
+    
     References:
     P.T. Wallace's routine FK45Z
     """

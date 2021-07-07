@@ -17,15 +17,18 @@ History:
                     Button: removed special width handling for Aqua Tk as it is neither needed nor wanted
                     for Aqua Tk 8.5.18.
 2015-04-02 ROwen    Added a simple workaround for cramped button text in Aqua Tk 8.5.18.
+2020-02-10 DGatlin  Modified imports for Python 3
 """
 __all__ = ['Button', 'Radiobutton']
 
-from six.moves import tkinter
+import tkinter
+
 import RO.AddCallback
 import RO.Constants
 import RO.TkUtil
 from .CtxMenu import CtxMenuMixin
 from .SeverityMixin import SeverityActiveMixin
+
 
 class Button(tkinter.Button, RO.AddCallback.TkButtonMixin, CtxMenuMixin, SeverityActiveMixin):
     def __init__(self,
@@ -58,13 +61,13 @@ class Button(tkinter.Button, RO.AddCallback.TkButtonMixin, CtxMenuMixin, Severit
                 kwArgs.setdefault("pady", 3)
 
         tkinter.Button.__init__(self, master = master, **kwArgs)
-
+        
         RO.AddCallback.TkButtonMixin.__init__(self,
             callFunc = callFunc,
             callNow = False,
             command = command,
         )
-
+        
         CtxMenuMixin.__init__(self, helpURL = helpURL)
         SeverityActiveMixin.__init__(self, severity)
 
@@ -80,7 +83,7 @@ class Button(tkinter.Button, RO.AddCallback.TkButtonMixin, CtxMenuMixin, Severit
             self["state"] = tkinter.NORMAL
         else:
             self["state"] = tkinter.DISABLED
-
+    
     def getEnable(self):
         """Return True if widget is enabled, False otherwise
 

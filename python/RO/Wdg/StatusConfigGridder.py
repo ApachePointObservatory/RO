@@ -23,10 +23,11 @@ History:
 2015-09-24 ROwen    Replace "== None" with "is None" to modernize the code.
 2015-11-03 ROwen    Replace "!= None" with "is not None" to modernize the code.
 2015-11-05 ROwen    Changed ==/!= True/False to is/is not True/False to modernize the code.
+2020-02-10 DGatlin  Modified imports for Python 3
 """
 __all__ = ['StatusConfigGridder']
 
-from RO.Wdg.Gridder import Gridder, _BaseGridSet
+from .Gridder import Gridder, _BaseGridSet
 
 ConfigCat = "config"
 
@@ -40,7 +41,7 @@ class StatusConfigGridder(Gridder):
         numStatusCols = None,
     ):
         """Create an object that grids a set of status and configuration widgets.
-
+        
         Inputs:
         - master        Master widget into which to grid
         - row           Starting row
@@ -51,7 +52,7 @@ class StatusConfigGridder(Gridder):
                         the last status widget.
                         You may wish to specify more columns than required; it is almost always harmless
                         and your code will still work if you add status widgets that use more columns.
-
+                        
         """
         Gridder.__init__(self,
             master = master,
@@ -62,7 +63,7 @@ class StatusConfigGridder(Gridder):
         if numStatusCols is not None:
             numStatusCols = int(numStatusCols)
         self._numStatusCols = numStatusCols
-
+    
     def gridWdg(self,
         label = None,
         dataWdg = None,
@@ -77,11 +78,11 @@ class StatusConfigGridder(Gridder):
         (the following are all None if cfgWdg not specified):
         - cfgWdg: one or more config widgets
         - cfgUnitsWdg: a config units label
-
+        
         Configuration widgets are automatically added
         to the show/hide set ConfigCat and so are hidded by default.
         To display them you must call showHideWdg(config=True)
-
+        
         Warning: a widget cannot be gridded twice, so:
         - Units cannot be an actual widget; it must be a string
           or variable (or None)
@@ -114,7 +115,7 @@ class StatusConfigGridder(Gridder):
 
         if cat is not None:
             self.addShowHideWdg(cat, gs.wdgSet)
-
+        
         # set show/hide category ConfigCat for configuration widgets
         if cfgWdg:
             self.addShowHideWdg(ConfigCat, gs.cfgWdg)
@@ -148,7 +149,7 @@ class _StatusConfigGridSet(_BaseGridSet):
         (the following are all None if cfgWdg not specified):
         - cfgWdg: one or more config widgets
         - cfgUnitsWdg: a config units label
-
+        
         Inputs:
         - label         label text, variable, widget, None, False or "" (see Notes)
         - dataWdg       the status widgets: a widget or sequence of widgets,
@@ -198,16 +199,16 @@ class _StatusConfigGridSet(_BaseGridSet):
         self._numStatusCols = numStatusCols
 
         self._setHelpFromDataWdg(dataWdg)
-
+        
         self.labelWdg = self._makeWdg(label)
         self._gridWdg(self.labelWdg, sticky="e", colSpan=1)
 
         self.dataWdg = dataWdg
         self._gridWdg(self.dataWdg, sticky=sticky, colSpan=colSpan)
-
+        
         self.unitsWdg = self._makeWdg(units)
         self._gridWdg(self.unitsWdg, sticky="w", colSpan=1)
-
+        
         if self._numStatusCols is not None:
             cfgStartCol = self.begCol + 1 + self._numStatusCols # 1 for label
             overflowCols = self.nextCol - cfgStartCol
@@ -215,11 +216,11 @@ class _StatusConfigGridSet(_BaseGridSet):
                 raise RuntimeError("Too many status widgets; numStatusCols=%s; num used=%s" %
                     (self._numStatusCols, self._numStatusCols + overflowCols))
             self.nextCol = cfgStartCol
-
+        
         if cfgWdg:
             self.cfgWdg = cfgWdg
             self._gridWdg(self.cfgWdg, sticky=cfgSticky, colSpan=cfgColSpan)
-
+            
             self.cfgUnitsWdg = self._makeWdg(cfgUnits)
             if self.cfgUnitsWdg and self.cfgUnitsWdg == self.unitsWdg:
                 raise ValueError("units is a widget, so cfgUnits must be specified and must be a different widget")
@@ -227,7 +228,7 @@ class _StatusConfigGridSet(_BaseGridSet):
         else:
             self.cfgWdg = None
             self.cfgUnitsWdg = None
-            if cfgWdg is not False:
+            if cfgWdg is not False:     
                 self.nextCol += cfgColSpan
             if cfgUnits is not False:
                 self.nextCol += 1

@@ -4,10 +4,12 @@
 History:
 2014-05-08 ROwen
 2015-03-18 ROwen    Removed Aqua 8.5 width bug workarounds because they are not wanted for Tcl/Tk 8.5.18
+2020-02-10 DGatlin  Modified imports for Python 3
 """
 __all__ = ['Menubutton']
 
-from six.moves import tkinter
+import tkinter
+
 import RO.Constants
 from .CtxMenu import CtxMenuMixin
 
@@ -21,7 +23,7 @@ class Menubutton(tkinter.Menubutton, CtxMenuMixin):
         severity = RO.Constants.sevNormal,
     **kwArgs):
         """Creates a new Menubutton.
-
+        
         Inputs:
         - helpText  text for hot help
         - helpURL   URL for longer help
@@ -37,7 +39,7 @@ class Menubutton(tkinter.Menubutton, CtxMenuMixin):
         tkinter.Menubutton.__init__(self, master = master, **kwArgs)
 
         CtxMenuMixin.__init__(self, helpURL = helpURL)
-
+    
     def setEnable(self, doEnable):
         """Enable or disable widget
 
@@ -50,7 +52,7 @@ class Menubutton(tkinter.Menubutton, CtxMenuMixin):
             self["state"] = tkinter.NORMAL
         else:
             self["state"] = tkinter.DISABLED
-
+    
     def getEnable(self):
         """Return True if widget is enabled, False otherwise
 

@@ -65,14 +65,16 @@ History:
 __all__ = ['StatusBar']
 
 import sys
-from six.moves import tkinter
+import tkinter
+
 import RO.Alg
 import RO.Constants
 import RO.KeyVariable
 import RO.Prefs.PrefVar
 from RO.TkUtil import Timer
-from . import Sound
 from . import Entry
+from . import Sound
+
 
 def _getSound(playCmdSounds, prefs, prefName):
     noPlay = Sound.NoPlay()
@@ -85,7 +87,7 @@ def _getSound(playCmdSounds, prefs, prefName):
     elif not hasattr(soundPref, "play"):
         sys.stderr.write("StatusBar cannot play %r; preference exists but is not a sound" % prefName)
         return noPlay
-    return soundPref
+    return soundPref        
 
 
 class StatusBar(tkinter.Frame):
@@ -123,7 +125,7 @@ class StatusBar(tkinter.Frame):
         self.cmdDoneSound = _getSound(playCmdSounds, prefs, "Command Done")
         self.cmdFailedSound = _getSound(playCmdSounds, prefs, "Command Failed")
         self.tempIDGen = RO.Alg.IDGen(1, sys.maxsize)
-
+        
         tkinter.Frame.__init__(self, master, **kargs)
         self.displayWdg = Entry.StrEntry(
             master = self,
@@ -134,7 +136,7 @@ class StatusBar(tkinter.Frame):
         self.displayWdg.pack(expand="yes", fill="x")
 
         self.clear()
-
+        
         # bind to catch events
         self.helpText = helpText
         if not helpText:
@@ -142,7 +144,7 @@ class StatusBar(tkinter.Frame):
             tl.bind("<<EntryError>>", self.handleEntryError)
             tl.bind("<Enter>", self.handleEnter)
             tl.bind("<Leave>", self.handleLeave)
-
+    
     def clear(self):
         """Clear the display and cancels all messages.
         """
@@ -152,13 +154,13 @@ class StatusBar(tkinter.Frame):
         self.currID = None # None if perm msg, tempID if temporary msg
         self.entryErrorID = None
         self.helpID = None
-
+    
     def clearTempMsg(self, msgID=0):
         """Clear a temporary message, if any.
 
         Returns None, so a common paradigm to avoid saving a stale ID is:
         savedID = statusBar.clearTempMsg(savedID)
-
+        
         Input:
         - msgID:    ID of message to clear;
                 0 will clear any temporary message,
@@ -171,10 +173,10 @@ class StatusBar(tkinter.Frame):
             self.setMsg(self.permMsg, self.permSeverity)
             self.currID = None
         return None
-
+    
     def ctxSetConfigFunc(self, configFunc=None):
         self.displayWdg.ctxSetConfigFunc(configFunc)
-
+    
     def doCmd(self, cmdVar, cmdSummary=None):
         """Execute the given command and display progress reports
         for command start warnings and command completion or failure.
@@ -190,7 +192,7 @@ class StatusBar(tkinter.Frame):
             else:
                 cmdSummary = self.cmdVar.cmdStr
         self.cmdSummary = cmdSummary
-
+    
         if self.dispatcher:
             cmdVar.addCallback(self._cmdCallback, ":wf!")
             self.setMsg("%s started" % self.cmdSummary)
@@ -201,7 +203,7 @@ class StatusBar(tkinter.Frame):
                 "msgStr":"No dispatcher",
                 "dataStart":0,
             })
-
+    
     def handleEntryError(self, evt):
         """Handle the <<EntryError>> event to report a data entry error.
         To do anything useful, the sender must have a getEntryError method.
@@ -215,8 +217,8 @@ class StatusBar(tkinter.Frame):
             )
             self.bell()
         else:
-            self.entryErrorID = self.clearTempMsg(self.entryErrorID)
-
+            self.entryErrorID = self.clearTempMsg(self.entryErrorID)            
+    
     def handleEnter(self, evt):
         """Handle the <Enter> event to show help.
         To do anything useful, the sender must have a helpText attribute.
@@ -227,18 +229,18 @@ class StatusBar(tkinter.Frame):
             return
         if msgStr:
             self.helpID = self.setMsg(msgStr, severity=RO.Constants.sevNormal, isTemp=True)
-
+    
     def handleLeave(self, evt):
         """Handle the <Leave> event to erase help.
         """
         if self.helpID:
             self.helpID = self.clearTempMsg(self.helpID)
-
+    
     def playCmdDone(self):
         """Play "command done" sound.
         """
         self.cmdDoneSound.play()
-
+    
     def playCmdFailed(self):
         """Play "command failed" sound.
         """
@@ -246,7 +248,7 @@ class StatusBar(tkinter.Frame):
 
     def setMsg(self, msgStr, severity=RO.Constants.sevNormal, isTemp=False, duration=None):
         """Display a new message.
-
+        
         Inputs:
         - msgStr    the new string to display
         - severity  one of RO.Constants.sevNormal (default), sevWarning or sevError
@@ -255,7 +257,7 @@ class StatusBar(tkinter.Frame):
         - duration  the amount of time (msec) to leave a temporary message;
                     if omitted, there is no time limit;
                     ignored if isTemp false
-
+        
         Returns None if a permanent message, else a unique positive message ID.
         """
         self.displayWdg.set(msgStr, severity=severity)
@@ -295,7 +297,7 @@ class StatusBar(tkinter.Frame):
             self.playCmdDone()
             self.setMsg(infoText, severity=self.cmdMaxSeverity)
             return
-
+        
         try:
             dataStr = msgDict["data"]["text"][0]
         except LookupError:
