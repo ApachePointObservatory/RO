@@ -306,8 +306,11 @@ class LogWdg(Tkinter.Frame):
         # test two cases:
         # scrollPos[1] = 1.0: scrolled to end
         # scrollPos[1] = scrollPos[0]: window has not yet been painted
-        scrollPos = self.yscroll.get()
-        return scrollPos[1] == 1.0 or scrollPos[0] == scrollPos[1]
+        try:
+            scrollPos = self.yscroll.get()
+            return scrollPos[1] == 1.0 or scrollPos[0] == scrollPos[1]
+        except Tkinter.TclError:
+            return True
     
     def search(self, searchStr, backwards=False, doWrap=False, elide=True, noCase=False, regExp=False):
         """Find and select the next instance of a specified string.
