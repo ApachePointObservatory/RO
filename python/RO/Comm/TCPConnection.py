@@ -212,6 +212,12 @@ class TCPConnection(object):
         if not self._sock.isDone:
             self._sock.close()
 
+        # JSG (2026-02-25): It seems that in the latest Python 2 versions this fails
+        # because on init TCPSocket calls self._sockStateCallback, which calls
+        # self._setState, which refers to self._sock, but self._sock is the null
+        # socket because the variable has not yet been set to TCPSocket.
+        # Instead, we omit the parts of the initialisation that would make this fail
+        # with connectOnInit=False and the call connect() immediately after.
         self._sock = TCPSocket(
             host = self.host,
             port = self.port,
@@ -219,7 +225,9 @@ class TCPConnection(object):
             timeLim = timeLim,
             name = self._name,
             lineTerminator = self.lineTerminator,
+            connectOnInit = False,
         )
+        self._sock.connect()
 
         if self._authReadCallback:
             self._localSocketStateDict[TCPSocket.Connected] = self.Authorizing

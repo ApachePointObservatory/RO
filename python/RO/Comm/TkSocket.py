@@ -268,6 +268,7 @@ class TCPSocket(BaseSocket):
         timeLim = None,
         name = "",
         lineTerminator = "\r\n",
+        connectOnInit = True,
     ):
         """Construct a TCPSocket
 
@@ -279,11 +280,14 @@ class TCPSocket(BaseSocket):
         - tkSock    existing tk socket (if missing, one is created and connected)
         - timeLim   time limit to make connection (sec); no limit if None or 0
         - name      a string to identify this socket; strictly optional
+        - connectOnInit     if True, connect immediately; otherwise wait for an explicit call to connect()
         """
         self._host = host
         self._port = port
         self._connectTimer = RO.TkUtil.Timer()
         self.__buffer = ""
+        self.__timeLim = timeLim
+
         BaseSocket.__init__(self,
             readCallback = readCallback,
             stateCallback = stateCallback,
@@ -304,9 +308,15 @@ class TCPSocket(BaseSocket):
         except Tkinter.TclError as e:
             raise RuntimeError(e)
 
+        if connectOnInit:
+            self.connect()
+
+    def connect(self):
+        """Check socket for errors."""
+
         self._setState(self.Connecting)
-        if timeLim:
-            self._connectTimer.start(timeLim, self._connectTimeout)
+        if self.__timeLim:
+            self._connectTimer.start(self.__timeLim, self._connectTimeout)
 
         self._checkSocket()
 
