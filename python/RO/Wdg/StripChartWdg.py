@@ -410,7 +410,11 @@ class _Line(object):
         """Redraw the graph
         """
         self.line2d.set_data(self._tList, self._yList)
-        if not self._wdg.winfo_ismapped():
+        try:
+            if not self._wdg.winfo_ismapped():
+                return
+        except Tkinter.TclError as e:
+            # This means the window was probably closed
             return
         if len(self._yList) > 0:
             # see if limits need updating to include last point
